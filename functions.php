@@ -130,64 +130,7 @@ function bluu_preconnect_fonts() {
 }
 add_action( 'wp_head', 'bluu_preconnect_fonts', 1 );
 
-// ── Contact Form AJAX Handler ──────────────────────────────────────────────────
-function bluu_handle_contact_form() {
-    // Verify nonce
-    if ( ! check_ajax_referer( 'bluu_contact_nonce', 'nonce', false ) ) {
-        wp_send_json_error( array( 'message' => esc_html__( 'Security check failed.', 'bluu-interactive' ) ), 403 );
-        return;
-    }
-
-    // Honeypot check
-    if ( ! empty( $_POST['website'] ) ) {
-        wp_send_json_success( array( 'message' => esc_html__( 'Message sent!', 'bluu-interactive' ) ) );
-        return;
-    }
-
-    // Sanitize inputs
-    $name      = sanitize_text_field( wp_unslash( $_POST['contact_name'] ?? '' ) );
-    $company   = sanitize_text_field( wp_unslash( $_POST['contact_company'] ?? '' ) );
-    $email     = sanitize_email( wp_unslash( $_POST['contact_email'] ?? '' ) );
-    $phone     = sanitize_text_field( wp_unslash( $_POST['contact_phone'] ?? '' ) );
-    $situation = sanitize_textarea_field( wp_unslash( $_POST['contact_situation'] ?? '' ) );
-
-    // Validate required fields
-    if ( empty( $name ) || empty( $email ) || empty( $situation ) ) {
-        wp_send_json_error( array( 'message' => esc_html__( 'Please fill in all required fields.', 'bluu-interactive' ) ), 400 );
-        return;
-    }
-
-    if ( ! is_email( $email ) ) {
-        wp_send_json_error( array( 'message' => esc_html__( 'Please enter a valid email address.', 'bluu-interactive' ) ), 400 );
-        return;
-    }
-
-    // Build email
-    $to      = get_field( 'contact_email', 'option' ) ?: 'hello@bluuhq.com';
-    $subject = sprintf( '[Bluu Interactive] New inquiry from %s at %s', $name, $company );
-
-    $body  = "New contact form submission from bluuhq.com\n\n";
-    $body .= "Name:    {$name}\n";
-    $body .= "Company: {$company}\n";
-    $body .= "Email:   {$email}\n";
-    $body .= "Phone:   {$phone}\n\n";
-    $body .= "Situation:\n{$situation}\n";
-
-    $headers = array(
-        'Content-Type: text/plain; charset=UTF-8',
-        "Reply-To: {$name} <{$email}>",
-    );
-
-    $sent = wp_mail( $to, $subject, $body, $headers );
-
-    if ( $sent ) {
-        wp_send_json_success( array( 'message' => esc_html__( 'Message sent! We\'ll be in touch within 1 business day.', 'bluu-interactive' ) ) );
-    } else {
-        wp_send_json_error( array( 'message' => esc_html__( 'Could not send email. Please contact us directly at hello@bluuhq.com', 'bluu-interactive' ) ), 500 );
-    }
-}
-add_action( 'wp_ajax_bluu_contact',        'bluu_handle_contact_form' );
-add_action( 'wp_ajax_nopriv_bluu_contact', 'bluu_handle_contact_form' );
+// Contact form AJAX handler is registered in inc/contact-submissions.php
 
 // ── Custom Excerpt Length ──────────────────────────────────────────────────────
 function bluu_excerpt_length( $length ) {
@@ -387,3 +330,4 @@ function bluu_faq_category_icon( $icon ) {
 // ── Include Files ──────────────────────────────────────────────────────────────
 require_once get_template_directory() . '/inc/acf-fields.php';
 require_once get_template_directory() . '/inc/customizer.php';
+require_once get_template_directory() . '/inc/contact-submissions.php';

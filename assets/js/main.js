@@ -326,61 +326,74 @@
         var form = qs( '#contact-form' );
         if ( ! form ) { return; }
 
-        var statusEl = qs( '#contact-form-status' );
-        var submitBtn = qs( '[type="submit"]', form );
+        var feedbackEl  = qs( '#contact-form-feedback' );
+        var submitBtn   = qs( '#contact-submit', form );
+        var submitText  = submitBtn ? qs( '.contact-form__submit-text',    submitBtn ) : null;
+        var submitLoad  = submitBtn ? qs( '.contact-form__submit-loading', submitBtn ) : null;
+        var tokenField  = qs( '#recaptcha_token', form );
 
-        form.addEventListener( 'submit', function ( e ) {
-            e.preventDefault();
+        function showFeedback( message, isSuccess ) {
+            if ( ! feedbackEl ) { return; }
+            feedbackEl.textContent = message;
+            feedbackEl.className   = 'contact-form__feedback ' + ( isSuccess ? 'contact-form__feedback--success' : 'contact-form__feedback--error' );
+            feedbackEl.removeAttribute( 'hidden' );
+            feedbackEl.scrollIntoView( { behavior: 'smooth', block: 'nearest' } );
+        }
 
-            if ( ! window.bluuData ) { return; }
+        function setLoading( loading ) {
+            if ( submitBtn  ) { submitBtn.disabled = loading; }
+            if ( submitText ) { submitText.hidden  = loading; }
+            if ( submitLoad ) { submitLoad.hidden  = ! loading; }
+        }
 
-            var originalText = submitBtn ? submitBtn.textContent : '';
-            if ( submitBtn ) {
-                submitBtn.disabled = true;
-                submitBtn.textContent = window.bluuData.strings.sending || 'Sending…';
-            }
-
-            if ( statusEl ) {
-                statusEl.className = 'form-status';
-                statusEl.textContent = '';
-            }
-
+        function doSubmit() {
             var formData = new FormData( form );
             formData.append( 'action', 'bluu_contact' );
-            formData.append( 'nonce', window.bluuData.nonce );
+            formData.append( 'nonce',  window.bluuData ? window.bluuData.nonce : '' );
 
-            fetch( window.bluuData.ajaxUrl, {
-                method: 'POST',
-                body: formData,
+            fetch( window.bluuData ? window.bluuData.ajaxUrl : '/wp-admin/admin-ajax.php', {
+                method:      'POST',
+                body:        formData,
                 credentials: 'same-origin',
             } )
                 .then( function ( res ) { return res.json(); } )
                 .then( function ( data ) {
                     if ( data.success ) {
-                        if ( statusEl ) {
-                            statusEl.className = 'form-status form-status--success';
-                            statusEl.textContent = data.data.message || window.bluuData.strings.success;
-                        }
+                        showFeedback( data.data.message || ( window.bluuData && window.bluuData.strings.success ) || 'Message sent!', true );
                         form.reset();
+                        if ( tokenField ) { tokenField.value = ''; }
                     } else {
-                        if ( statusEl ) {
-                            statusEl.className = 'form-status form-status--error';
-                            statusEl.textContent = ( data.data && data.data.message ) || window.bluuData.strings.error;
-                        }
+                        showFeedback( ( data.data && data.data.message ) || ( window.bluuData && window.bluuData.strings.error ) || 'Something went wrong.', false );
                     }
                 } )
                 .catch( function () {
-                    if ( statusEl ) {
-                        statusEl.className = 'form-status form-status--error';
-                        statusEl.textContent = window.bluuData.strings.error;
-                    }
+                    showFeedback( ( window.bluuData && window.bluuData.strings.error ) || 'Something went wrong. Please email us directly.', false );
                 } )
                 .finally( function () {
-                    if ( submitBtn ) {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = originalText;
-                    }
+                    setLoading( false );
                 } );
+        }
+
+        form.addEventListener( 'submit', function ( e ) {
+            e.preventDefault();
+            if ( feedbackEl ) { feedbackEl.setAttribute( 'hidden', '' ); }
+            setLoading( true );
+
+            /* Execute reCAPTCHA v3 if available, then submit */
+            if ( window.grecaptcha && window.bluuRecaptcha && window.bluuRecaptcha.siteKey ) {
+                window.grecaptcha.ready( function () {
+                    window.grecaptcha.execute( window.bluuRecaptcha.siteKey, { action: window.bluuRecaptcha.action || 'contact_form' } )
+                        .then( function ( token ) {
+                            if ( tokenField ) { tokenField.value = token; }
+                            doSubmit();
+                        } )
+                        .catch( function () {
+                            doSubmit(); // submit anyway if reCAPTCHA fails
+                        } );
+                } );
+            } else {
+                doSubmit();
+            }
         } );
     }
 

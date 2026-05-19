@@ -158,6 +158,7 @@ get_header();
                         aria-label="<?php esc_attr_e( 'Contact inquiry form', 'bluu-interactive' ); ?>"
                     >
                         <?php wp_nonce_field( 'bluu_contact_nonce', 'nonce' ); ?>
+                        <input type="hidden" name="recaptcha_token" id="recaptcha_token" value="">
 
                         <!-- Honeypot (hidden from real users) -->
                         <div class="contact-form__honeypot" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;opacity:0;pointer-events:none;">
