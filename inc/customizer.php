@@ -540,29 +540,26 @@ function bluu_customizer_fonts() {
     $heading_font = sanitize_text_field( get_theme_mod( 'bluu_font_heading', 'Plus Jakarta Sans' ) );
     $body_font    = sanitize_text_field( get_theme_mod( 'bluu_font_body',    'Plus Jakarta Sans' ) );
 
-    $fonts = array_unique( array_filter( [ $heading_font, $body_font ] ) );
-    if ( empty( $fonts ) ) {
-        return;
+    // Only load additional Google Fonts if the selection differs from the theme default.
+    // Plus Jakarta Sans is already loaded by bluu_enqueue_assets() — no duplicate needed.
+    $custom_fonts = array_unique( array_filter( array_diff( [ $heading_font, $body_font ], [ 'Plus Jakarta Sans' ] ) ) );
+    if ( ! empty( $custom_fonts ) ) {
+        $families = array_map( function( $font ) {
+            return urlencode( $font ) . ':wght@300;400;500;600;700;800';
+        }, $custom_fonts );
+        $url = 'https://fonts.googleapis.com/css2?family=' . implode( '&family=', $families ) . '&display=swap';
+        wp_enqueue_style( 'bluu-custom-fonts', $url, [], null );
     }
 
-    $families = array_map( function( $font ) {
-        return urlencode( $font ) . ':wght@300;400;500;600;700';
-    }, $fonts );
-
-    $url = 'https://fonts.googleapis.com/css2?family=' . implode( '&family=', $families ) . '&display=swap';
-
-    wp_enqueue_style( 'bluu-custom-fonts', $url, [], null );
-
-    // Output CSS variables for font families
+    // Output CSS custom properties only — do NOT apply font-family directly to elements.
+    // main.css handles element-level font assignments via var(--font-family-base/heading).
     $heading_stack = '"' . esc_attr( $heading_font ) . '", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     $body_stack    = '"' . esc_attr( $body_font )    . '", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 
-    $css = '<style id="bluu-font-vars">:root{';
+    $css  = '<style id="bluu-font-vars">:root{';
     $css .= '--font-family-heading:' . esc_attr( $heading_stack ) . ';';
     $css .= '--font-family-base:'    . esc_attr( $body_stack )    . ';';
-    $css .= '}h1,h2,h3,h4,h5,h6{font-family:var(--font-family-heading);}';
-    $css .= 'body,p,ul,ol,li,button,input,textarea,select{font-family:var(--font-family-base);}';
-    $css .= '</style>';
+    $css .= '}</style>';
 
     echo $css . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
