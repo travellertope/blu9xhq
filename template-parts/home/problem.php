@@ -47,12 +47,12 @@ function bluu_get_problem_icon( $icon_name ) {
 }
 ?>
 
-<section class="section section--dark problem-section" id="problem" aria-label="<?php esc_attr_e( 'The Problem', 'bluu-interactive' ); ?>">
+<section class="section section--variant problem-section" id="problem" aria-label="<?php esc_attr_e( 'The Problem', 'bluu-interactive' ); ?>">
     <div class="container">
 
         <!-- Section Header -->
         <div class="section__header section__header--center">
-            <div class="md-chip md-chip--light animate-on-scroll">
+            <div class="md-chip animate-on-scroll">
                 <?php echo esc_html( $problem_badge ); ?>
             </div>
             <h2 class="section__headline animate-on-scroll"><?php echo esc_html( $problem_headline ); ?></h2>

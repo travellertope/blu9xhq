@@ -13,7 +13,7 @@ get_header();
     <?php while ( have_posts() ) : the_post(); ?>
 
         <!-- Page Hero -->
-        <section class="page-hero page-hero--navy">
+        <section class="page-hero">
             <div class="container">
                 <h1 class="page-hero__title"><?php the_title(); ?></h1>
                 <?php if ( has_excerpt() ) : ?>

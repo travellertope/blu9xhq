@@ -54,9 +54,9 @@ endif;
 <main id="main-content" class="site-main">
 
     <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
-    <section class="page-hero page-hero--navy">
+    <section class="page-hero">
         <div class="container">
-            <span class="md-chip md-chip--light" style="margin-bottom: var(--space-4); display: inline-block;">
+            <span class="md-chip" style="margin-bottom: var(--space-4); display: inline-block;">
                 <?php esc_html_e( 'FAQ', 'bluu-interactive' ); ?>
             </span>
             <h1 class="page-hero__title"><?php echo esc_html( $faq_headline ); ?></h1>
@@ -187,13 +187,13 @@ endif;
     </section>
 
     <!-- ── Bottom CTA ────────────────────────────────────────────────────────── -->
-    <section class="section section--blue text-center animate-on-scroll">
+    <section class="section cta-section text-center animate-on-scroll">
         <div class="container container--narrow">
-            <h2 class="section__headline" style="color:#fff;"><?php echo esc_html( $faq_cta_headline ); ?></h2>
-            <p class="section__subheadline" style="color:rgba(255,255,255,.8); margin-bottom: var(--space-7);">
+            <h2 class="cta-section__headline"><?php echo esc_html( $faq_cta_headline ); ?></h2>
+            <p class="cta-section__body" style="margin-bottom: var(--space-7);">
                 <?php echo esc_html( $faq_cta_body ); ?>
             </p>
-            <a href="<?php echo esc_url( $faq_cta_url ); ?>" class="btn-primary btn-primary--white">
+            <a href="<?php echo esc_url( $faq_cta_url ); ?>" class="btn-primary">
                 <?php echo esc_html( $faq_cta_button ); ?>
             </a>
         </div>

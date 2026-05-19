@@ -401,11 +401,8 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     padding-block: var(--space-8);
 }
 
-.section--dark {
-    background: var(--md-surface-subtle);
-    color: var(--md-on-surface);
-}
-
+/* Legacy class aliases — all map to light neutral backgrounds */
+.section--dark,
 .section--navy {
     background: var(--md-surface-variant);
     color: var(--md-on-surface);
@@ -1506,7 +1503,11 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     line-height: 1.7;
 }
 
-/* Page hero variants */
+/* page-hero--navy kept as alias for plain page-hero (no dark bg) */
+.page-hero--navy {
+    background: var(--md-surface-variant);
+}
+
 .page-hero__title {
     color: var(--md-on-surface);
     font-size: var(--font-size-5xl);
@@ -1933,11 +1934,35 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     border-color: var(--md-accent-container);
 }
 
-/* section--blue used inline on FAQ CTA */
+/* section--blue = light accent tint, not a blue background */
 .section--blue {
     background: var(--md-accent-container);
     border-top: 1px solid var(--md-outline-variant);
     border-bottom: 1px solid var(--md-outline-variant);
+}
+
+/* btn-white kept as alias for btn-primary for backward compatibility */
+.btn-white {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 12px var(--space-6);
+    background: var(--md-accent);
+    color: #FFFFFF;
+    border: 2px solid var(--md-accent);
+    border-radius: var(--radius-full);
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.btn-white:hover {
+    background: var(--md-accent-dark);
+    border-color: var(--md-accent-dark);
+    color: #FFFFFF;
 }
 
 /* ── Utilities ──────────────────────────────────────────────────────────────── */

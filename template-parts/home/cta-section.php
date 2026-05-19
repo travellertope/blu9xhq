@@ -17,7 +17,7 @@ $cta_button_text = $cta_button_text ?: 'Book a Discovery Call';
 $cta_button_url  = $cta_button_url  ?: home_url( '/contact' );
 ?>
 
-<section class="section section--blue cta-section" id="cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">
+<section class="section cta-section" id="cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">
     <div class="container">
         <div class="cta-section__inner animate-on-scroll">
 
@@ -29,7 +29,7 @@ $cta_button_url  = $cta_button_url  ?: home_url( '/contact' );
             <div class="cta-section__action">
                 <a
                     href="<?php echo esc_url( $cta_button_url ); ?>"
-                    class="btn-white"
+                    class="btn-primary"
                     aria-label="<?php echo esc_attr( $cta_button_text ); ?>"
                 >
                     <?php echo esc_html( $cta_button_text ); ?>

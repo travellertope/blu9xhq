@@ -11,7 +11,7 @@ get_header();
 <main id="main-content" class="site-main">
 
     <!-- Page Hero -->
-    <section class="page-hero page-hero--navy">
+    <section class="page-hero">
         <div class="container">
             <h1 class="page-hero__title"><?php
                 if ( is_home() && ! is_front_page() ) {

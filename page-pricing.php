@@ -257,7 +257,7 @@ get_header();
 <?php endif; ?>
 
 <!-- Bottom CTA -->
-<section class="section section--blue cta-section" aria-label="<?php esc_attr_e( 'Pricing call to action', 'bluu-interactive' ); ?>">
+<section class="section cta-section" aria-label="<?php esc_attr_e( 'Pricing call to action', 'bluu-interactive' ); ?>">
     <div class="container">
         <div class="cta-section__inner animate-on-scroll">
             <div class="cta-section__content">
@@ -265,7 +265,7 @@ get_header();
                 <p class="cta-section__body"><?php echo esc_html( $bottom_cta_body ); ?></p>
             </div>
             <div class="cta-section__action">
-                <a href="<?php echo esc_url( $bottom_cta_button_url ); ?>" class="btn-white" aria-label="<?php echo esc_attr( $bottom_cta_button_text ); ?>">
+                <a href="<?php echo esc_url( $bottom_cta_button_url ); ?>" class="btn-primary" aria-label="<?php echo esc_attr( $bottom_cta_button_text ); ?>">
                     <?php echo esc_html( $bottom_cta_button_text ); ?>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12"/>

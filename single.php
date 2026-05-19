@@ -13,7 +13,7 @@ get_header();
     <?php while ( have_posts() ) : the_post(); ?>
 
         <!-- Article Hero -->
-        <section class="page-hero page-hero--navy">
+        <section class="page-hero">
             <div class="container">
                 <?php
                 $categories = get_the_category();
