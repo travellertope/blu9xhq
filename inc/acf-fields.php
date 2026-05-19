@@ -750,3 +750,137 @@ acf_add_local_field_group( array(
     'menu_order' => 10,
     'active'     => true,
 ) );
+
+// ── FAQ PAGE ───────────────────────────────────────────────────────────────────
+acf_add_local_field_group( array(
+    'key'    => 'group_faq_page',
+    'title'  => 'FAQ Page',
+    'fields' => array(
+
+        // Hero
+        array(
+            'key'           => 'field_faq_headline',
+            'label'         => 'Page Headline',
+            'name'          => 'faq_headline',
+            'type'          => 'text',
+            'default_value' => 'Everything You Need to Know',
+        ),
+        array(
+            'key'           => 'field_faq_subheadline',
+            'label'         => 'Page Subheadline',
+            'name'          => 'faq_subheadline',
+            'type'          => 'textarea',
+            'rows'          => 2,
+            'default_value' => 'Straight answers about how Bluu Interactive works, what we cost, and what you can expect.',
+        ),
+
+        // FAQ Categories (repeater → sub-repeater)
+        array(
+            'key'        => 'field_faq_categories',
+            'label'      => 'FAQ Categories',
+            'name'       => 'faq_categories',
+            'type'       => 'repeater',
+            'min'        => 1,
+            'layout'     => 'block',
+            'button_label' => 'Add Category',
+            'sub_fields' => array(
+
+                array(
+                    'key'           => 'field_faq_cat_name',
+                    'label'         => 'Category Name',
+                    'name'          => 'category_name',
+                    'type'          => 'text',
+                    'default_value' => '',
+                ),
+                array(
+                    'key'           => 'field_faq_cat_desc',
+                    'label'         => 'Category Description (optional)',
+                    'name'          => 'category_description',
+                    'type'          => 'text',
+                    'default_value' => '',
+                ),
+                array(
+                    'key'           => 'field_faq_cat_icon',
+                    'label'         => 'Category Icon',
+                    'name'          => 'category_icon',
+                    'type'          => 'select',
+                    'choices'       => array(
+                        'info'    => 'General / Info',
+                        'pricing' => 'Pricing',
+                        'content' => 'Content',
+                        'tech'    => 'Technology',
+                        'start'   => 'Getting Started',
+                        'default' => 'Default (Question mark)',
+                    ),
+                    'default_value' => 'default',
+                ),
+
+                // Nested repeater: FAQ items within each category
+                array(
+                    'key'          => 'field_faq_items',
+                    'label'        => 'Questions & Answers',
+                    'name'         => 'faq_items',
+                    'type'         => 'repeater',
+                    'min'          => 1,
+                    'layout'       => 'row',
+                    'button_label' => 'Add Question',
+                    'sub_fields'   => array(
+                        array(
+                            'key'           => 'field_faq_question',
+                            'label'         => 'Question',
+                            'name'          => 'question',
+                            'type'          => 'text',
+                            'default_value' => '',
+                        ),
+                        array(
+                            'key'           => 'field_faq_answer',
+                            'label'         => 'Answer',
+                            'name'          => 'answer',
+                            'type'          => 'textarea',
+                            'rows'          => 5,
+                            'default_value' => '',
+                            'instructions'  => 'Supports line breaks. Use **bold** notation — it will be rendered as bold text.',
+                        ),
+                    ),
+                ),
+            ),
+        ),
+
+        // Bottom CTA
+        array(
+            'key'           => 'field_faq_cta_headline',
+            'label'         => 'CTA Headline',
+            'name'          => 'faq_cta_headline',
+            'type'          => 'text',
+            'default_value' => 'Still Have Questions?',
+        ),
+        array(
+            'key'           => 'field_faq_cta_body',
+            'label'         => 'CTA Body',
+            'name'          => 'faq_cta_body',
+            'type'          => 'textarea',
+            'rows'          => 2,
+            'default_value' => "We'd rather talk than leave you guessing. Book a no-pressure, 30-minute discovery call and we'll answer everything specific to your situation.",
+        ),
+        array(
+            'key'           => 'field_faq_cta_button_text',
+            'label'         => 'CTA Button Text',
+            'name'          => 'faq_cta_button_text',
+            'type'          => 'text',
+            'default_value' => 'Book a Discovery Call',
+        ),
+        array(
+            'key'  => 'field_faq_cta_button_url',
+            'label' => 'CTA Button URL',
+            'name'  => 'faq_cta_button_url',
+            'type'  => 'url',
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-faq.php',
+    ) ) ),
+    'menu_order' => 10,
+    'active'     => true,
+) );
