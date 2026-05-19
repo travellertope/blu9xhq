@@ -23,7 +23,7 @@
                 <?php the_custom_logo(); ?>
             <?php else : ?>
                 <span class="site-header__logo-text">
-                    <span class="site-header__logo-name">bluu</span><span class="site-header__logo-dot" aria-hidden="true">.</span><span class="site-header__logo-name">interactive</span>
+                    <span class="site-header__logo-name">Bluu</span> <span class="site-header__logo-name site-header__logo-name--accent">Interactive</span>
                 </span>
             <?php endif; ?>
         </a>

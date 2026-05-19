@@ -1,129 +1,109 @@
 <?php
 /**
- * Home Pillars Section
+ * Home Solution Section — "One Team, Total Growth" unified card
  *
  * @package bluu-interactive
  */
 
-$solution_badge    = function_exists( 'get_field' ) ? get_field( 'solution_badge' )    : '';
-$solution_headline = function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '';
-$solution_body     = function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '';
-$pillars           = function_exists( 'get_field' ) ? get_field( 'pillars' )            : array();
+$solution_badge    = ( function_exists( 'get_field' ) ? get_field( 'solution_badge' )    : '' ) ?: 'The Solution';
+$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One Team, Total Growth.';
+$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We have eliminated the friction of fragmented marketing. Experience a single, cohesive service built specifically for B2B scale.';
 
-// Defaults
-$solution_badge    = $solution_badge    ?: 'The Solution';
-$solution_headline = $solution_headline ?: 'One Team. Three Engines. Total Growth.';
-$solution_body     = $solution_body     ?: 'Bluu Interactive unifies web infrastructure, authority content, and sales assets under one synchronized strategy — so every touchpoint works together.';
+$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The Complete Ecosystem';
+$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of juggling separate vendors, our unified approach seamlessly connects your digital presence, your market authority, and your sales enablement into one unstoppable force.';
+$solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: 'Explore the Framework';
+$solution_sidebar_url   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_url' )  : '' ) ?: home_url( '/pricing' );
 
-if ( empty( $pillars ) ) {
-    $pillars = array(
-        array(
-            'pillar_icon'        => 'server',
-            'pillar_label'       => 'Pillar 1 — The Hub',
-            'pillar_title'       => 'Managed Digital Infrastructure',
-            'pillar_description' => 'Your website is the hub of all growth activity. We own it end-to-end: architecture, performance, CRO, and technical SEO — so it\'s always working for your pipeline, not against it.',
-            'pillar_feature_1'   => 'Conversion-optimized web architecture',
-            'pillar_feature_2'   => 'Technical SEO & Core Web Vitals ownership',
-            'pillar_feature_3'   => 'Continuous performance & uptime monitoring',
-        ),
-        array(
-            'pillar_icon'        => 'trending-up',
-            'pillar_label'       => 'Pillar 2 — The Traffic',
-            'pillar_title'       => 'SME-Driven Authority Content',
-            'pillar_description' => 'Generic content doesn\'t win in regulated industries. We produce SME-verified, compliance-aware articles and assets that rank for real buying-intent keywords and build genuine authority.',
-            'pillar_feature_1'   => 'Subject-matter expert interviews & verification',
-            'pillar_feature_2'   => 'Long-form authority articles (2,000–5,000 words)',
-            'pillar_feature_3'   => 'Topic clusters that dominate SERP real estate',
-        ),
-        array(
-            'pillar_icon'        => 'briefcase',
-            'pillar_label'       => 'Pillar 3 — The Conversion',
-            'pillar_title'       => 'Strategic Sales Assets',
-            'pillar_description' => 'Your sales team needs more than slide decks. We produce case studies, battle cards, and proof assets that address real objections at every deal stage — delivered fast.',
-            'pillar_feature_1'   => 'Premium case studies in 48 hours',
-            'pillar_feature_2'   => 'Objection-mapped battle cards & one-pagers',
-            'pillar_feature_3'   => 'Deal-stage aligned sales content library',
-        ),
-    );
-}
+$solution_features = [
+    [
+        'icon'   => 'monitor',
+        'title'  => 'Digital Infrastructure',
+        'items'  => [
+            'Fast, technical SEO-optimized builds.',
+            'Seamless CRM & tracking integration.',
+        ],
+    ],
+    [
+        'icon'   => 'trending-up',
+        'title'  => 'Authority Content',
+        'items'  => [
+            'Deeply researched, expert-level IP.',
+            'Long-form assets driving B2B demand.',
+        ],
+    ],
+    [
+        'icon'   => 'briefcase',
+        'title'  => 'Strategic Sales Assets',
+        'items'  => [
+            'High-fidelity pitch decks & one-pagers.',
+            'Closing materials aligned to client pain.',
+        ],
+    ],
+    [
+        'icon'   => 'users',
+        'title'  => 'Dedicated Partnership',
+        'items'  => [
+            'One point of contact, total alignment.',
+            'Proactive strategy, zero finger-pointing.',
+        ],
+    ],
+];
 
-// Accent colors per pillar
-$pillar_colors = array( '#1A73E8', '#137333', '#0D47A1' );
-
-/**
- * Returns inline SVG for a pillar icon name.
- */
-function bluu_get_pillar_icon( $icon_name ) {
-    switch ( $icon_name ) {
-        case 'server':
-            return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>';
-        case 'trending-up':
-            return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
-        case 'briefcase':
-        default:
-            return '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>';
-    }
+function bluu_solution_feature_icon( $name ) {
+    $icons = [
+        'monitor'     => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+        'trending-up' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
+        'briefcase'   => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+        'users'       => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>',
+    ];
+    return isset( $icons[ $name ] ) ? $icons[ $name ] : $icons['briefcase'];
 }
 ?>
 
-<section class="section pillars-section" id="pillars" aria-label="<?php esc_attr_e( 'Our Three Pillars', 'bluu-interactive' ); ?>">
+<section class="solution-section" id="solution" aria-label="<?php esc_attr_e( 'Our unified solution', 'bluu-interactive' ); ?>">
     <div class="container">
 
         <!-- Section Header -->
-        <div class="section__header section__header--center">
-            <div class="md-chip animate-on-scroll">
-                <?php echo esc_html( $solution_badge ); ?>
-            </div>
-            <h2 class="section__headline animate-on-scroll"><?php echo esc_html( $solution_headline ); ?></h2>
-            <p class="section__body animate-on-scroll"><?php echo esc_html( $solution_body ); ?></p>
+        <div class="solution-section__header animate-on-scroll">
+            <div class="solution-section__badge"><?php echo esc_html( $solution_badge ); ?></div>
+            <h2 class="solution-section__headline"><?php echo esc_html( $solution_headline ); ?></h2>
+            <p class="solution-section__body"><?php echo esc_html( $solution_body ); ?></p>
         </div>
 
-        <!-- Pillar Cards -->
-        <div class="pillars-section__grid grid-3">
-            <?php foreach ( $pillars as $index => $pillar ) :
-                $accent_color = $pillar_colors[ $index % count( $pillar_colors ) ];
-                $features = array(
-                    $pillar['pillar_feature_1'] ?? '',
-                    $pillar['pillar_feature_2'] ?? '',
-                    $pillar['pillar_feature_3'] ?? '',
-                );
-                $features = array_filter( $features );
-            ?>
-                <article
-                    class="pillar-card md-card animate-on-scroll"
-                    style="--pillar-accent: <?php echo esc_attr( $accent_color ); ?>;"
-                    aria-label="<?php echo esc_attr( $pillar['pillar_title'] ); ?>"
-                >
-                    <div class="pillar-card__accent-bar" aria-hidden="true" style="background-color: <?php echo esc_attr( $accent_color ); ?>;"></div>
+        <!-- Unified Solution Card -->
+        <div class="solution-card animate-on-scroll">
+            <div class="solution-card__inner">
 
-                    <div class="pillar-card__body">
-                        <div class="pillar-card__icon" style="color: <?php echo esc_attr( $accent_color ); ?>;" aria-hidden="true">
-                            <?php echo bluu_get_pillar_icon( $pillar['pillar_icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                        </div>
+                <!-- Left sidebar: narrative -->
+                <div class="solution-card__sidebar">
+                    <h3 class="solution-card__sidebar-title"><?php echo esc_html( $solution_sidebar_title ); ?></h3>
+                    <p class="solution-card__sidebar-body"><?php echo esc_html( $solution_sidebar_body ); ?></p>
+                    <a href="<?php echo esc_url( $solution_sidebar_url ); ?>" class="solution-card__sidebar-cta">
+                        <?php echo esc_html( $solution_sidebar_cta ); ?>
+                    </a>
+                </div>
 
-                        <div class="md-chip md-chip--colored pillar-card__label" style="background-color: <?php echo esc_attr( $accent_color ); ?>20; color: <?php echo esc_attr( $accent_color ); ?>;">
-                            <?php echo esc_html( $pillar['pillar_label'] ); ?>
-                        </div>
-
-                        <h3 class="pillar-card__title"><?php echo esc_html( $pillar['pillar_title'] ); ?></h3>
-                        <p class="pillar-card__description"><?php echo esc_html( $pillar['pillar_description'] ); ?></p>
-
-                        <?php if ( ! empty( $features ) ) : ?>
-                            <ul class="pillar-card__features" aria-label="<?php esc_attr_e( 'Features', 'bluu-interactive' ); ?>">
-                                <?php foreach ( $features as $feature ) : ?>
-                                    <li class="pillar-card__feature">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="<?php echo esc_attr( $accent_color ); ?>" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                            <polyline points="20 6 9 17 4 12"/>
-                                        </svg>
-                                        <?php echo esc_html( $feature ); ?>
-                                    </li>
+                <!-- Right features grid -->
+                <div class="solution-card__features">
+                    <?php foreach ( $solution_features as $feature ) : ?>
+                        <div class="solution-feature">
+                            <div class="solution-feature__header">
+                                <div class="solution-feature__icon">
+                                    <?php echo bluu_solution_feature_icon( $feature['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                                </div>
+                                <h4 class="solution-feature__title"><?php echo esc_html( $feature['title'] ); ?></h4>
+                            </div>
+                            <ul class="solution-feature__list">
+                                <?php foreach ( $feature['items'] as $item ) : ?>
+                                    <li class="solution-feature__item"><?php echo esc_html( $item ); ?></li>
                                 <?php endforeach; ?>
                             </ul>
-                        <?php endif; ?>
-                    </div><!-- /.pillar-card__body -->
-                </article>
-            <?php endforeach; ?>
-        </div><!-- /.pillars-section__grid -->
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+            </div><!-- /.solution-card__inner -->
+        </div><!-- /.solution-card -->
 
     </div><!-- /.container -->
 </section>

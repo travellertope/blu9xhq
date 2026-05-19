@@ -1,100 +1,85 @@
 <?php
 /**
- * Home ICP / Who We Serve Section
+ * Home Industries Section — Redesigned 2×2 grid
  *
  * @package bluu-interactive
  */
 
-$icp_badge      = function_exists( 'get_field' ) ? get_field( 'icp_badge' )      : '';
-$icp_headline   = function_exists( 'get_field' ) ? get_field( 'icp_headline' )   : '';
-$icp_body       = function_exists( 'get_field' ) ? get_field( 'icp_body' )       : '';
-$icp_verticals  = function_exists( 'get_field' ) ? get_field( 'icp_verticals' )  : array();
+$icp_badge    = ( function_exists( 'get_field' ) ? get_field( 'icp_badge' )    : '' ) ?: 'Who We Serve';
+$icp_headline = ( function_exists( 'get_field' ) ? get_field( 'icp_headline' ) : '' ) ?: 'Built for High-Growth B2B Companies';
+$icp_body     = ( function_exists( 'get_field' ) ? get_field( 'icp_body' )     : '' ) ?: '';
 
-// Defaults
-$icp_badge     = $icp_badge     ?: 'Who We Serve';
-$icp_headline  = $icp_headline  ?: 'Built for $2M–$50M B2B Companies';
-$icp_body      = $icp_body      ?: 'We focus exclusively on industries where expertise, trust, and precision are non-negotiable. If your buyers demand authority, we\'re built for you.';
+$icp_verticals = ( function_exists( 'get_field' ) ? get_field( 'icp_verticals' ) : [] );
 
 if ( empty( $icp_verticals ) ) {
-    $icp_verticals = array(
-        array(
-            'icon'        => 'zap',
+    $icp_verticals = [
+        [
+            'icon'        => 'saas',
             'title'       => 'B2B SaaS',
-            'description' => 'Category leaders know that content compounds. We help SaaS companies dominate their niche with authority content that attracts decision-makers and converts on intent.',
-        ),
-        array(
-            'icon'        => 'heart',
-            'title'       => 'Healthcare & Healthtech',
-            'description' => 'HIPAA awareness and clinical accuracy aren\'t optional. Our SME-verified content builds trust with healthcare buyers while navigating compliance guardrails.',
-        ),
-        array(
-            'icon'        => 'scale',
+            'description' => 'Complex platform positioning, ARPU-focused campaigns, and sophisticated GTM plays to outmaneuver legacy competitors.',
+            'link'        => home_url( '/industries' ),
+        ],
+        [
+            'icon'        => 'health',
+            'title'       => 'Healthcare & BioTech',
+            'description' => 'HIPAA-compliant platforms, institutional trust building, and highly technical value translation for clinical audiences.',
+            'link'        => home_url( '/industries' ),
+        ],
+        [
+            'icon'        => 'legal',
             'title'       => 'Legal & Finance',
-            'description' => 'Your buyers do extensive due diligence. We position your firm as the definitive expert through deep-research content that answers their hardest questions before they ask.',
-        ),
-        array(
-            'icon'        => 'truck',
+            'description' => 'Institutional authority generation, partner-led growth infrastructure, and secure conversion funnels for high-ticket clients.',
+            'link'        => home_url( '/industries' ),
+        ],
+        [
+            'icon'        => 'logistics',
             'title'       => 'Logistics & Supply Chain',
-            'description' => 'Buyers in logistics need proof, not promises. We produce case studies, data-driven content, and sales assets that demonstrate operational expertise at every deal stage.',
-        ),
-    );
+            'description' => 'Enterprise integration showcases, global capability narratives, and digital transformation positioning for legacy operators.',
+            'link'        => home_url( '/industries' ),
+        ],
+    ];
 }
 
-/**
- * Returns inline SVG for an ICP icon.
- */
-function bluu_get_icp_icon( $icon_name ) {
-    switch ( $icon_name ) {
-        case 'zap':
-            return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
-        case 'heart':
-            return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-        case 'scale':
-            return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 10l0 2a4 4 0 0 0 8 0l0-2"/><path d="M13 10l0 2a4 4 0 0 0 8 0l0-2"/></svg>';
-        case 'truck':
-        default:
-            return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
-    }
+function bluu_icp_icon_hp( $name ) {
+    $icons = [
+        'saas'      => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>',
+        'health'    => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>',
+        'legal'     => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>',
+        'logistics' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"/><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1"/></svg>',
+    ];
+    return isset( $icons[ $name ] ) ? $icons[ $name ] : $icons['saas'];
 }
 ?>
 
-<section class="section icp-section" id="who-we-serve" aria-label="<?php esc_attr_e( 'Who We Serve', 'bluu-interactive' ); ?>">
+<section class="industries-hp" id="who-we-serve" aria-label="<?php esc_attr_e( 'Who we serve', 'bluu-interactive' ); ?>">
     <div class="container">
 
-        <!-- Section Header -->
-        <div class="section__header section__header--center">
-            <div class="md-chip animate-on-scroll">
-                <?php echo esc_html( $icp_badge ); ?>
-            </div>
-            <h2 class="section__headline animate-on-scroll"><?php echo esc_html( $icp_headline ); ?></h2>
-            <p class="section__body animate-on-scroll"><?php echo esc_html( $icp_body ); ?></p>
+        <div class="industries-hp__header animate-on-scroll">
+            <div class="industries-hp__badge"><?php echo esc_html( $icp_badge ); ?></div>
+            <h2 class="industries-hp__headline"><?php echo esc_html( $icp_headline ); ?></h2>
+            <?php if ( $icp_body ) : ?>
+                <p class="industries-hp__body"><?php echo esc_html( $icp_body ); ?></p>
+            <?php endif; ?>
         </div>
 
-        <!-- Vertical Cards: 2×2 grid -->
-        <div class="icp-section__grid grid-2 grid-2--icp">
+        <div class="industries-hp__grid">
             <?php foreach ( $icp_verticals as $vertical ) : ?>
-                <article class="icp-card md-card animate-on-scroll" aria-label="<?php echo esc_attr( $vertical['title'] ); ?>">
-                    <div class="icp-card__icon" aria-hidden="true">
-                        <?php echo bluu_get_icp_icon( $vertical['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+                <article class="industry-hp-card animate-on-scroll" aria-label="<?php echo esc_attr( $vertical['title'] ); ?>">
+                    <div class="industry-hp-card__icon" aria-hidden="true">
+                        <?php echo bluu_icp_icon_hp( $vertical['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
-                    <div class="icp-card__content">
-                        <h3 class="icp-card__title"><?php echo esc_html( $vertical['title'] ); ?></h3>
-                        <p class="icp-card__description"><?php echo esc_html( $vertical['description'] ); ?></p>
-                    </div>
+                    <h3 class="industry-hp-card__title"><?php echo esc_html( $vertical['title'] ); ?></h3>
+                    <p class="industry-hp-card__description"><?php echo esc_html( $vertical['description'] ); ?></p>
                     <a
-                        href="<?php echo esc_url( home_url( '/industries' ) ); ?>"
-                        class="icp-card__link btn-text"
+                        href="<?php echo esc_url( $vertical['link'] ?? home_url( '/industries' ) ); ?>"
+                        class="industry-hp-card__link"
                         aria-label="<?php echo esc_attr( sprintf( __( 'Learn more about %s', 'bluu-interactive' ), $vertical['title'] ) ); ?>"
                     >
-                        <?php esc_html_e( 'Learn more', 'bluu-interactive' ); ?>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                            <polyline points="12 5 19 12 12 19"/>
-                        </svg>
+                        <?php esc_html_e( 'Learn More', 'bluu-interactive' ); ?> &rarr;
                     </a>
                 </article>
             <?php endforeach; ?>
-        </div><!-- /.icp-section__grid -->
+        </div>
 
-    </div><!-- /.container -->
+    </div>
 </section>

@@ -1,97 +1,65 @@
 <?php
 /**
- * Home Problem Section
+ * Home Problem Section — Redesigned
  *
  * @package bluu-interactive
  */
 
-$problem_badge    = function_exists( 'get_field' ) ? get_field( 'problem_badge' )    : '';
-$problem_headline = function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '';
-$problem_body     = function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '';
-$problem_items    = function_exists( 'get_field' ) ? get_field( 'problem_items' )    : array();
-
-// Defaults
-$problem_badge    = $problem_badge    ?: 'The Problem';
-$problem_headline = $problem_headline ?: 'Fragmentation Is Costing You Revenue';
-$problem_body     = $problem_body     ?: 'Most B2B companies are paying 3–5 vendors who never talk to each other. The result: misaligned messaging, stalled pipeline, and a digital presence that doesn\'t convert.';
+$problem_badge    = ( function_exists( 'get_field' ) ? get_field( 'problem_badge' )    : '' ) ?: 'The Problem';
+$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Fragmentation Is Costing You Revenue';
+$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most B2B companies are paying full-service rates for multi-vendor chaos. The result is an agency-managed digital ship where code, copy, and sales never connect.';
+$problem_items    = ( function_exists( 'get_field' ) ? get_field( 'problem_items' )    : [] );
 
 if ( empty( $problem_items ) ) {
-    $problem_items = array(
-        array(
-            'icon'        => 'x-circle',
-            'title'       => 'Your Web Team Works in a Vacuum',
-            'description' => 'Your developer optimizes for uptime, not conversion. They don\'t know your sales objections or your top-converting keywords.',
-        ),
-        array(
-            'icon'        => 'x-circle',
-            'title'       => 'Your Content Doesn\'t Drive Revenue',
-            'description' => 'Your SEO agency publishes generic articles that rank for nothing and convert no one — especially dangerous in regulated industries.',
-        ),
-        array(
-            'icon'        => 'x-circle',
-            'title'       => 'Your Sales Team Lacks Ammunition',
-            'description' => 'Your reps ask for case studies that take months to produce, arrive in the wrong format, and don\'t address the objections they actually hear.',
-        ),
-    );
+    $problem_items = [
+        [
+            'icon'        => 'alert',
+            'title'       => 'Time-Sinking Maintenance',
+            'description' => 'You scheduled updates for a quarter, not a week. Your lead channels hit problems as vendors pass you like a hot potato.',
+        ],
+        [
+            'icon'        => 'trend-down',
+            'title'       => 'Low-Intent Content',
+            'description' => 'Your SEO agency publishes generic articles that rank but drive zero qualified leads because you lack expert authority.',
+        ],
+        [
+            'icon'        => 'lock',
+            'title'       => 'Non-Existent Enablement',
+            'description' => 'You step out for calls with static documents that lack strong visual and direct narrative value for enterprise prospects.',
+        ],
+    ];
 }
 
-/**
- * Returns inline SVG for an icon name.
- */
-function bluu_get_problem_icon( $icon_name ) {
-    switch ( $icon_name ) {
-        case 'x-circle':
-        default:
-            return '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
-    }
-}
+$icons = [
+    'alert'      => '<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+    'trend-down' => '<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg>',
+    'lock'       => '<svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
+];
 ?>
 
-<section class="section section--variant problem-section" id="problem" aria-label="<?php esc_attr_e( 'The Problem', 'bluu-interactive' ); ?>">
+<section class="problem-section" id="problem" aria-label="<?php esc_attr_e( 'The problem we solve', 'bluu-interactive' ); ?>">
     <div class="container">
 
-        <!-- Section Header -->
-        <div class="section__header section__header--center">
-            <div class="md-chip animate-on-scroll">
-                <?php echo esc_html( $problem_badge ); ?>
-            </div>
-            <h2 class="section__headline animate-on-scroll"><?php echo esc_html( $problem_headline ); ?></h2>
-            <p class="section__body animate-on-scroll"><?php echo esc_html( $problem_body ); ?></p>
+        <div class="problem-section__header animate-on-scroll">
+            <div class="problem-section__badge"><?php echo esc_html( $problem_badge ); ?></div>
+            <h2 class="problem-section__headline"><?php echo esc_html( $problem_headline ); ?></h2>
+            <p class="problem-section__body"><?php echo esc_html( $problem_body ); ?></p>
         </div>
 
-        <!-- Problem Cards -->
-        <div class="problem-section__grid grid-3">
-            <?php foreach ( $problem_items as $index => $item ) : ?>
-                <article class="problem-card animate-on-scroll" aria-label="<?php echo esc_attr( $item['title'] ); ?>">
-                    <div class="problem-card__icon-wrap" aria-hidden="true">
-                        <?php echo bluu_get_problem_icon( $item['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+        <div class="problem-section__grid">
+            <?php foreach ( $problem_items as $item ) :
+                $icon_key = $item['icon'] ?? 'alert';
+                $icon_svg = $icons[ $icon_key ] ?? $icons['alert'];
+            ?>
+                <div class="problem-card animate-on-scroll">
+                    <div class="problem-card__icon" aria-hidden="true">
+                        <?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                     <h3 class="problem-card__title"><?php echo esc_html( $item['title'] ); ?></h3>
                     <p class="problem-card__description"><?php echo esc_html( $item['description'] ); ?></p>
-
-                    <!-- Visual indicator of isolation -->
-                    <div class="problem-card__isolation-badge" aria-hidden="true">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                        </svg>
-                        <?php esc_html_e( 'Siloed', 'bluu-interactive' ); ?>
-                    </div>
-                </article>
+                </div>
             <?php endforeach; ?>
         </div>
 
-        <!-- Transition Arrow / Bridge to Solution -->
-        <div class="problem-section__bridge animate-on-scroll" aria-hidden="true">
-            <div class="problem-section__bridge-line"></div>
-            <div class="problem-section__bridge-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <polyline points="19 12 12 19 5 12"/>
-                </svg>
-            </div>
-            <p class="problem-section__bridge-text"><?php esc_html_e( 'There is a better way', 'bluu-interactive' ); ?></p>
-        </div>
-
-    </div><!-- /.container -->
+    </div>
 </section>

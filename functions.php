@@ -80,10 +80,10 @@ add_action( 'after_setup_theme', 'bluu_add_image_sizes' );
 function bluu_enqueue_assets() {
     $version = wp_get_theme()->get( 'Version' );
 
-    // Google Fonts – Roboto
+    // Google Fonts – Plus Jakarta Sans
     wp_enqueue_style(
         'bluu-google-fonts',
-        'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap',
+        'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap',
         array(),
         null
     );
@@ -127,6 +127,8 @@ add_action( 'wp_enqueue_scripts', 'bluu_enqueue_assets' );
 function bluu_preconnect_fonts() {
     echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
     echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
+    // Update font-family CSS var to Plus Jakarta Sans
+    echo '<style>:root{--font-family-base:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}</style>' . "\n";
 }
 add_action( 'wp_head', 'bluu_preconnect_fonts', 1 );
 

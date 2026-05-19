@@ -21,7 +21,7 @@ $contact_location = function_exists( 'get_field' ) ? ( get_field( 'contact_locat
                             <?php the_custom_logo(); ?>
                         <?php else : ?>
                             <span class="site-footer__logo-text">
-                                <span class="site-footer__logo-name">bluu</span><span class="site-footer__logo-dot" aria-hidden="true">.</span><span class="site-footer__logo-name">interactive</span>
+                                <span class="site-footer__logo-name">Bluu</span> <span class="site-footer__logo-name site-footer__logo-name--accent">Interactive</span>
                             </span>
                         <?php endif; ?>
                     </a>
