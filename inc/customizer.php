@@ -91,7 +91,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent / brand blue
     $wp_customize->add_setting( 'bluu_color_accent', array(
-        'default'           => '#1A73E8',
+        'default'           => '#0d6efd',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -103,7 +103,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent dark (hover)
     $wp_customize->add_setting( 'bluu_color_accent_dark', array(
-        'default'           => '#1557B0',
+        'default'           => '#0b5ed7',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -115,7 +115,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Heading / body text color
     $wp_customize->add_setting( 'bluu_color_text', array(
-        'default'           => '#1C1B1F',
+        'default'           => '#0a192f',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -127,7 +127,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Secondary text color
     $wp_customize->add_setting( 'bluu_color_text_secondary', array(
-        'default'           => '#5F6368',
+        'default'           => '#6c757d',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -151,7 +151,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Outline / border color
     $wp_customize->add_setting( 'bluu_color_outline', array(
-        'default'           => '#E0E3E7',
+        'default'           => '#e9ecef',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -173,7 +173,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Heading font
     $wp_customize->add_setting( 'bluu_font_heading', array(
-        'default'           => 'Roboto',
+        'default'           => 'Plus Jakarta Sans',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'refresh',
     ) );
@@ -183,8 +183,9 @@ function bluu_customizer_register( $wp_customize ) {
         'section'     => 'bluu_typography',
         'type'        => 'select',
         'choices'     => array(
-            'Roboto'       => 'Roboto (Default)',
+            'Plus Jakarta Sans' => 'Plus Jakarta Sans (Default)',
             'Inter'        => 'Inter',
+            'Roboto'       => 'Roboto',
             'Raleway'      => 'Raleway',
             'Poppins'      => 'Poppins',
             'Montserrat'   => 'Montserrat',
@@ -192,13 +193,12 @@ function bluu_customizer_register( $wp_customize ) {
             'Lora'         => 'Lora (Serif)',
             'Nunito'       => 'Nunito',
             'DM Sans'      => 'DM Sans',
-            'Sora'         => 'Sora',
         ),
     ) );
 
     // Body font
     $wp_customize->add_setting( 'bluu_font_body', array(
-        'default'           => 'Roboto',
+        'default'           => 'Plus Jakarta Sans',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'refresh',
     ) );
@@ -208,8 +208,9 @@ function bluu_customizer_register( $wp_customize ) {
         'section'     => 'bluu_typography',
         'type'        => 'select',
         'choices'     => array(
-            'Roboto'     => 'Roboto (Default)',
+            'Plus Jakarta Sans' => 'Plus Jakarta Sans (Default)',
             'Inter'      => 'Inter',
+            'Roboto'     => 'Roboto',
             'Open Sans'  => 'Open Sans',
             'Lato'       => 'Lato',
             'Source Sans 3' => 'Source Sans 3',
@@ -217,7 +218,6 @@ function bluu_customizer_register( $wp_customize ) {
             'DM Sans'    => 'DM Sans',
             'Nunito'     => 'Nunito',
             'Poppins'    => 'Poppins',
-            'Mulish'     => 'Mulish',
         ),
     ) );
 
@@ -285,7 +285,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Border radius (card roundness)
     $wp_customize->add_setting( 'bluu_border_radius', array(
-        'default'           => '12',
+        'default'           => '2',
         'sanitize_callback' => 'absint',
         'transport'         => 'postMessage',
     ) );
@@ -460,12 +460,12 @@ function bluu_sanitize_decimal( $value ) {
  */
 function bluu_customizer_css() {
     // Colors
-    $accent          = sanitize_hex_color( get_theme_mod( 'bluu_color_accent',          '#1A73E8' ) );
-    $accent_dark     = sanitize_hex_color( get_theme_mod( 'bluu_color_accent_dark',      '#1557B0' ) );
-    $text            = sanitize_hex_color( get_theme_mod( 'bluu_color_text',             '#1C1B1F' ) );
-    $text_secondary  = sanitize_hex_color( get_theme_mod( 'bluu_color_text_secondary',   '#5F6368' ) );
-    $surface_variant = sanitize_hex_color( get_theme_mod( 'bluu_color_surface_variant',  '#F8F9FA' ) );
-    $outline         = sanitize_hex_color( get_theme_mod( 'bluu_color_outline',          '#E0E3E7' ) );
+    $accent          = sanitize_hex_color( get_theme_mod( 'bluu_color_accent',          '#0d6efd' ) );
+    $accent_dark     = sanitize_hex_color( get_theme_mod( 'bluu_color_accent_dark',      '#0b5ed7' ) );
+    $text            = sanitize_hex_color( get_theme_mod( 'bluu_color_text',             '#0a192f' ) );
+    $text_secondary  = sanitize_hex_color( get_theme_mod( 'bluu_color_text_secondary',   '#6c757d' ) );
+    $surface_variant = sanitize_hex_color( get_theme_mod( 'bluu_color_surface_variant',  '#f8f9fa' ) );
+    $outline         = sanitize_hex_color( get_theme_mod( 'bluu_color_outline',          '#e9ecef' ) );
 
     // Logo sizes
     $logo_w        = absint( get_theme_mod( 'bluu_logo_width',        160 ) );
@@ -477,7 +477,7 @@ function bluu_customizer_css() {
     $heading_weight    = sanitize_text_field( get_theme_mod( 'bluu_heading_weight', '700' ) );
     $heading_ls        = bluu_sanitize_decimal( get_theme_mod( 'bluu_heading_letter_spacing', '-0.025' ) );
     $body_lh           = bluu_sanitize_decimal( get_theme_mod( 'bluu_body_line_height', '1.65' ) );
-    $border_radius     = absint( get_theme_mod( 'bluu_border_radius', 12 ) );
+    $border_radius     = absint( get_theme_mod( 'bluu_border_radius', 2 ) );
 
     // Build accent container (light tint) from accent hex
     $accent_container = bluu_lighten_hex( $accent, 0.90 );
@@ -537,8 +537,8 @@ add_action( 'wp_head', 'bluu_customizer_css', 99 );
  * Loads Google Fonts for the selected heading and body fonts.
  */
 function bluu_customizer_fonts() {
-    $heading_font = sanitize_text_field( get_theme_mod( 'bluu_font_heading', 'Roboto' ) );
-    $body_font    = sanitize_text_field( get_theme_mod( 'bluu_font_body',    'Roboto' ) );
+    $heading_font = sanitize_text_field( get_theme_mod( 'bluu_font_heading', 'Plus Jakarta Sans' ) );
+    $body_font    = sanitize_text_field( get_theme_mod( 'bluu_font_body',    'Plus Jakarta Sans' ) );
 
     $fonts = array_unique( array_filter( [ $heading_font, $body_font ] ) );
     if ( empty( $fonts ) ) {
