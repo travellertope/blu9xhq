@@ -285,7 +285,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Border radius (card roundness)
     $wp_customize->add_setting( 'bluu_border_radius', array(
-        'default'           => '2',
+        'default'           => '0',
         'sanitize_callback' => 'absint',
         'transport'         => 'postMessage',
     ) );
@@ -477,7 +477,7 @@ function bluu_customizer_css() {
     $heading_weight    = sanitize_text_field( get_theme_mod( 'bluu_heading_weight', '700' ) );
     $heading_ls        = bluu_sanitize_decimal( get_theme_mod( 'bluu_heading_letter_spacing', '-0.025' ) );
     $body_lh           = bluu_sanitize_decimal( get_theme_mod( 'bluu_body_line_height', '1.65' ) );
-    $border_radius     = absint( get_theme_mod( 'bluu_border_radius', 2 ) );
+    $border_radius     = absint( get_theme_mod( 'bluu_border_radius', 0 ) );
 
     // Build accent container (light tint) from accent hex
     $accent_container = bluu_lighten_hex( $accent, 0.90 );
