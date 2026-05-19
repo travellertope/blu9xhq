@@ -1,6 +1,10 @@
 <?php
 /**
- * Front Page Template
+ * Template Name: Home Page
+ * Template Post Type: page
+ *
+ * Front Page Template — assign this template to your homepage, then set it as
+ * the Static Front Page under Settings > Reading.
  *
  * @package bluu-interactive
  */

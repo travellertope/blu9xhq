@@ -95,11 +95,10 @@ acf_add_local_field_group( array(
             ),
         ),
     ),
-    'location' => array( array( array(
-        'param'    => 'page_type',
-        'operator' => '==',
-        'value'    => 'front_page',
-    ) ) ),
+    'location' => array(
+        array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
+        array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'front-page.php' ) ),
+    ),
     'menu_order'            => 10,
     'position'              => 'normal',
     'style'                 => 'default',
@@ -168,11 +167,10 @@ acf_add_local_field_group( array(
             ),
         ),
     ),
-    'location'   => array( array( array(
-        'param'    => 'page_type',
-        'operator' => '==',
-        'value'    => 'front_page',
-    ) ) ),
+    'location'   => array(
+        array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
+        array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'front-page.php' ) ),
+    ),
     'menu_order' => 20,
     'active'     => true,
 ) );
@@ -265,11 +263,10 @@ acf_add_local_field_group( array(
             ),
         ),
     ),
-    'location'   => array( array( array(
-        'param'    => 'page_type',
-        'operator' => '==',
-        'value'    => 'front_page',
-    ) ) ),
+    'location'   => array(
+        array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
+        array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'front-page.php' ) ),
+    ),
     'menu_order' => 30,
     'active'     => true,
 ) );
@@ -363,11 +360,10 @@ acf_add_local_field_group( array(
             'default_value' => '/contact',
         ),
     ),
-    'location'   => array( array( array(
-        'param'    => 'page_type',
-        'operator' => '==',
-        'value'    => 'front_page',
-    ) ) ),
+    'location'   => array(
+        array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
+        array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'front-page.php' ) ),
+    ),
     'menu_order' => 40,
     'active'     => true,
 ) );

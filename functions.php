@@ -200,25 +200,7 @@ function bluu_excerpt_more( $more ) {
 }
 add_filter( 'excerpt_more', 'bluu_excerpt_more' );
 
-// ── Google Analytics ───────────────────────────────────────────────────────────
-function bluu_google_analytics() {
-    $ga_id = get_theme_mod( 'bluu_ga_id', '' );
-    if ( empty( $ga_id ) ) {
-        return;
-    }
-    $ga_id = esc_attr( $ga_id );
-    ?>
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo $ga_id; ?>"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '<?php echo $ga_id; ?>');
-    </script>
-    <?php
-}
-add_action( 'wp_head', 'bluu_google_analytics', 99 );
+// Google Analytics and font loading are handled in inc/customizer.php
 
 // ── Widget Areas ───────────────────────────────────────────────────────────────
 function bluu_register_widgets() {
