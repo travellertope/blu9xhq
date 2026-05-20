@@ -182,7 +182,7 @@ ol {
     background: var(--md-accent);
     color: var(--md-on-primary);
     font-weight: 500;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     z-index: 9999;
     box-shadow: var(--shadow-3);
 }
@@ -386,7 +386,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     cursor: pointer;
     text-decoration: none;
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -519,7 +519,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     font-size: var(--font-size-sm);
     font-weight: 500;
     text-decoration: none;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: color var(--transition-fast), background var(--transition-fast);
 }
 
@@ -543,7 +543,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     color: var(--md-on-surface);
     cursor: pointer;
     padding: var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: background var(--transition-fast);
     flex-shrink: 0;
 }
@@ -757,7 +757,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
     background: rgba(255, 255, 255, 0.96);
-    border-radius: var(--radius-md);
+    border-radius: 0;
     box-shadow: var(--shadow-3);
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -839,7 +839,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
 
 .pillar-card {
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-xl);
+    border-radius: 0;
     padding: var(--space-7);
     display: flex;
     flex-direction: column;
@@ -857,7 +857,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
 .pillar-card__icon-wrap {
     width: 64px;
     height: 64px;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -935,7 +935,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
 .icp-card {
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     padding: var(--space-6) var(--space-5);
     display: flex;
     flex-direction: column;
@@ -951,7 +951,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
 .icp-card__icon-wrap {
     width: 48px;
     height: 48px;
-    border-radius: var(--radius-md);
+    border-radius: 0;
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -1353,7 +1353,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     color: var(--md-on-surface);
     background: var(--md-surface);
     border: 1px solid var(--md-outline);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     appearance: none;
 }
@@ -1384,7 +1384,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
 
 .form-status {
     padding: var(--space-4);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     font-size: var(--font-size-sm);
     font-weight: 500;
 }
@@ -1533,7 +1533,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     width: 100%;
     max-height: 480px;
     object-fit: cover;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     box-shadow: var(--shadow-3);
 }
 
@@ -2220,7 +2220,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     width: 100%;
     max-width: 420px;
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-xl);
+    border-radius: 0;
     padding: var(--space-8) var(--space-7);
     display: flex;
     flex-direction: column;
@@ -2244,7 +2244,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     width: 80px;
     height: 80px;
     background: var(--md-accent-container);
-    border-radius: var(--radius-xl);
+    border-radius: 0;
     color: var(--md-accent);
 }
 
@@ -2373,7 +2373,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     width: 40px;
     height: 40px;
     background: var(--md-accent-container);
-    border-radius: var(--radius-md);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2474,7 +2474,7 @@ a.contact-info__value:hover {
 /* Form card (right column) */
 .contact-form-card {
     padding: var(--space-7) var(--space-7);
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-2);
@@ -2542,7 +2542,7 @@ a.contact-info__value:hover {
     color: var(--md-on-surface);
     background: var(--md-surface-variant);
     border: 1.5px solid var(--md-outline);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
     outline: none;
     appearance: none;
@@ -2615,7 +2615,7 @@ a.contact-info__value:hover {
 
 .contact-form__feedback {
     padding: var(--space-4);
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     font-size: var(--font-size-sm);
     font-weight: 500;
     margin-bottom: var(--space-4);
@@ -2875,7 +2875,7 @@ a.contact-info__value:hover {
     width: 44px;
     height: 44px;
     background: var(--md-accent-container);
-    border-radius: var(--radius-md);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2903,7 +2903,7 @@ a.contact-info__value:hover {
     flex-direction: column;
     gap: 0;
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     overflow: hidden;
 }
 
@@ -3103,7 +3103,7 @@ a.contact-info__value:hover {
     text-transform: uppercase;
     border: 1px solid rgba(13, 110, 253, 0.15);
     margin-bottom: var(--space-5);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .home-hero__headline {
@@ -3335,7 +3335,7 @@ a.contact-info__value:hover {
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-1);
     margin-bottom: var(--space-4);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .problem-section__headline {
@@ -3366,7 +3366,7 @@ a.contact-info__value:hover {
     border-top: 3px solid #ef4444;
     box-shadow: var(--shadow-1);
     transition: box-shadow var(--transition-medium), transform var(--transition-medium);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .problem-card:hover {
@@ -3383,7 +3383,7 @@ a.contact-info__value:hover {
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-5);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .problem-card__title {
@@ -3424,7 +3424,7 @@ a.contact-info__value:hover {
     text-transform: uppercase;
     border: 1px solid rgba(13, 110, 253, 0.15);
     margin-bottom: var(--space-4);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .solution-section__headline {
@@ -3450,7 +3450,7 @@ a.contact-info__value:hover {
     box-shadow: var(--shadow-3);
     overflow: hidden;
     position: relative;
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .solution-card::before {
@@ -3501,7 +3501,7 @@ a.contact-info__value:hover {
     font-weight: 700;
     font-size: var(--font-size-sm);
     text-decoration: none;
-    border-radius: var(--radius-xs);
+    border-radius: 0;
     max-width: max-content;
     transition: background var(--transition-fast);
 }
@@ -3602,7 +3602,7 @@ a.contact-info__value:hover {
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-1);
     margin-bottom: var(--space-4);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .industries-hp__headline {
@@ -3633,7 +3633,7 @@ a.contact-info__value:hover {
     border-left: 4px solid var(--md-accent);
     box-shadow: var(--shadow-1);
     transition: box-shadow var(--transition-medium), transform var(--transition-medium);
-    border-radius: var(--radius-xs);
+    border-radius: 0;
 }
 
 .industry-hp-card:hover {
@@ -3725,7 +3725,7 @@ a.contact-info__value:hover {
 .md-card {
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-xl);
+    border-radius: 0;
     box-shadow: var(--shadow-1);
     overflow: hidden;
 }
@@ -3753,7 +3753,7 @@ a.contact-info__value:hover {
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     background: var(--md-surface-variant);
     flex-shrink: 0;
 }
@@ -3798,7 +3798,7 @@ a.contact-info__value:hover {
 .pillar-card__icon {
     width: 56px;
     height: 56px;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -3842,7 +3842,7 @@ a.contact-info__value:hover {
 .icp-card__icon {
     width: 52px;
     height: 52px;
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -3946,7 +3946,7 @@ a.contact-info__value:hover {
     flex-direction: column;
     gap: 0;
     border: 1px solid var(--md-outline-variant);
-    border-radius: var(--radius-lg);
+    border-radius: 0;
     overflow: hidden;
     margin-top: var(--space-8);
 }
