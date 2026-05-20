@@ -35,10 +35,6 @@ $headline_2 = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
             <!-- Left Content -->
             <div class="home-hero__content animate-on-scroll">
 
-                <div class="home-hero__badge" aria-label="<?php esc_attr_e( 'Agency type', 'bluu-interactive' ); ?>">
-                    <?php echo esc_html( $hero_badge ); ?>
-                </div>
-
                 <h1 class="home-hero__headline">
                     <?php echo esc_html( $headline_1 ); ?>
                     <?php if ( $headline_2 ) : ?>
@@ -57,19 +53,6 @@ $headline_2 = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
                     </a>
                 </div>
 
-                <!-- Stats row -->
-                <?php if ( ! empty( $hero_stats ) ) : ?>
-                <div class="home-hero__stats" aria-label="<?php esc_attr_e( 'Key statistics', 'bluu-interactive' ); ?>">
-                    <?php foreach ( $hero_stats as $stat ) : ?>
-                        <div class="home-hero__stat">
-                            <div class="home-hero__stat-number<?php echo ! empty( $stat['accent'] ) ? ' home-hero__stat-number--accent' : ''; ?>">
-                                <?php echo esc_html( $stat['stat_number'] ); ?>
-                            </div>
-                            <div class="home-hero__stat-label"><?php echo esc_html( $stat['stat_label'] ); ?></div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <?php endif; ?>
 
             </div><!-- /.home-hero__content -->
 

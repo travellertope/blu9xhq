@@ -3056,21 +3056,22 @@ a.contact-info__value:hover {
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    background: #fff;
-    color: var(--md-accent);
-    border: 2px solid var(--md-accent);
+    background: transparent;
+    color: var(--md-on-surface);
+    border: 2px solid var(--md-on-surface);
     padding: var(--space-3) var(--space-6);
     font-size: var(--font-size-base);
     font-weight: 600;
     text-decoration: none;
-    border-radius: var(--radius-sm);
+    border-radius: 0;
     cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
     white-space: nowrap;
 }
 
 .btn-outline:hover {
-    background: var(--md-accent-container);
+    background: var(--md-on-surface);
+    color: #fff;
 }
 
 .btn-outline--large {
@@ -3080,8 +3081,8 @@ a.contact-info__value:hover {
 
 /* ── Hero — new design ────────────────────────────────────────────────────── */
 .home-hero {
-    padding-top: calc(var(--header-height) + var(--space-9));
-    padding-bottom: var(--space-9);
+    padding-top: calc(var(--header-height) + var(--space-6));
+    padding-bottom: var(--space-7);
 }
 
 .home-hero__inner {
@@ -3305,7 +3306,7 @@ a.contact-info__value:hover {
 }
 
 @media (max-width: 600px) {
-    .home-hero { padding-top: calc(var(--header-height) + var(--space-7)); }
+    .home-hero { padding-top: calc(var(--header-height) + var(--space-4)); }
     .home-hero__cta-group { flex-direction: column; }
     .home-hero__stats { gap: var(--space-4); }
     .home-hero__stat-number { font-size: var(--font-size-xl); }
