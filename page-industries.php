@@ -5,198 +5,169 @@
  * @package bluu-interactive
  */
 
-$industries_hero_headline    = function_exists( 'get_field' ) ? get_field( 'industries_hero_headline' )    : '';
-$industries_hero_subheadline = function_exists( 'get_field' ) ? get_field( 'industries_hero_subheadline' ) : '';
-$industries                  = function_exists( 'get_field' ) ? get_field( 'industries' )                  : array();
-$bottom_cta_headline         = function_exists( 'get_field' ) ? get_field( 'industries_bottom_cta_headline' ) : '';
-$bottom_cta_body             = function_exists( 'get_field' ) ? get_field( 'industries_bottom_cta_body' )     : '';
-$bottom_cta_button_text      = function_exists( 'get_field' ) ? get_field( 'industries_bottom_cta_button_text' ) : '';
-$bottom_cta_button_url       = function_exists( 'get_field' ) ? get_field( 'industries_bottom_cta_button_url' )  : '';
+// ── ACF fields with defaults — Hero ──────────────────────────────────────────
+$hero_badge    = ( function_exists( 'get_field' ) ? get_field( 'industries_hero_badge' )    : '' ) ?: 'Our Industries';
+$hero_headline = ( function_exists( 'get_field' ) ? get_field( 'industries_hero_headline' ) : '' ) ?: 'Built for Industries Where Trust Is Non-Negotiable';
+$hero_body     = ( function_exists( 'get_field' ) ? get_field( 'industries_hero_body' )     : '' ) ?: 'We don\'t work in every industry. We go deep in four — where our expertise creates an unfair competitive advantage for our clients.';
 
-// Defaults
-$industries_hero_headline    = $industries_hero_headline    ?: 'Built for Industries Where Trust Is Non-Negotiable';
-$industries_hero_subheadline = $industries_hero_subheadline ?: 'We don\'t work in every industry. We go deep in four — where our expertise creates an unfair competitive advantage for our clients.';
-$bottom_cta_headline         = $bottom_cta_headline         ?: 'Your Industry. Your Rules. Our Engine.';
-$bottom_cta_body             = $bottom_cta_body             ?: 'We only take on clients we know we can win for. Let\'s find out if we\'re the right fit.';
-$bottom_cta_button_text      = $bottom_cta_button_text      ?: 'Book a Discovery Call';
-$bottom_cta_button_url       = $bottom_cta_button_url       ?: home_url( '/contact' );
+// ── ACF fields with defaults — Bottom CTA ────────────────────────────────────
+$cta_headline = ( function_exists( 'get_field' ) ? get_field( 'industries_cta_headline' ) : '' ) ?: 'Your Industry. Your Rules. Our Engine.';
+$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'industries_cta_body' )     : '' ) ?: 'We only take on clients we know we can win for. Let\'s find out if we\'re the right fit.';
+$cta_url      = ( function_exists( 'get_field' ) ? get_field( 'industries_cta_url' )      : '' ) ?: home_url( '/contact' );
 
-if ( empty( $industries ) ) {
-    $industries = array(
-        array(
-            'industry_icon'        => 'zap',
-            'industry_name'        => 'B2B SaaS',
-            'industry_tagline'     => 'Dominate your category with content that compounds.',
-            'industry_challenge'   => 'SaaS companies face a brutal paradox: buyers demand thought leadership and proven ROI, yet most content teams publish generic how-to articles that never rank and never convert. Meanwhile, the sales team is winging it on outdated decks.',
-            'industry_solution'    => 'We build the content infrastructure that turns your product expertise into category authority. SME-verified long-form articles capture high-intent traffic. A continuously optimized site converts it. Premium case studies close the deals.',
-            'industry_stat_number' => '3×',
-            'industry_stat_label'  => 'avg. pipeline increase in 12 months',
-        ),
-        array(
-            'industry_icon'        => 'heart',
-            'industry_name'        => 'Healthcare & Healthtech',
-            'industry_tagline'     => 'Clinical accuracy meets demand generation.',
-            'industry_challenge'   => 'Healthcare buyers are sophisticated and skeptical. Compliance constraints limit what you can say and how you can say it. A single inaccurate claim destroys years of trust. Generic content agencies don\'t understand this world.',
-            'industry_solution'    => 'Every piece of content we produce for healthcare clients goes through SME and clinical review. We understand HIPAA guardrails, FDA communication standards, and what hospital procurement teams and CMOs actually read before signing.',
-            'industry_stat_number' => '100%',
-            'industry_stat_label'  => 'SME-verified content, always',
-        ),
-        array(
-            'industry_icon'        => 'scale',
-            'industry_name'        => 'Legal & Finance',
-            'industry_tagline'     => 'Turn compliance constraints into competitive advantages.',
-            'industry_challenge'   => 'Legal and financial buyers are the most discerning in B2B. They research deeply, question everything, and dismiss mediocre content instantly. Regulatory compliance isn\'t optional — it\'s the baseline.',
-            'industry_solution'    => 'We produce deep-research content that demonstrates genuine expertise: regulatory analysis, decision-framework guides, and authoritative whitepapers that GCs and CFOs actually read. Then we build sales assets that reflect what your prospects actually ask in late-stage deals.',
-            'industry_stat_number' => '48h',
-            'industry_stat_label'  => 'premium case study turnaround',
-        ),
-        array(
-            'industry_icon'        => 'truck',
-            'industry_name'        => 'Logistics & Supply Chain',
-            'industry_tagline'     => 'Prove operational expertise at every touchpoint.',
-            'industry_challenge'   => 'Logistics buyers evaluate vendors on operational credibility and proven results. They\'re not reading thought leadership fluff — they\'re looking for proof you\'ve solved the specific problem they\'re facing today.',
-            'industry_solution'    => 'We build proof-first content strategies: case studies that showcase real operational wins, technical content that demonstrates system knowledge, and sales assets that speak directly to the objections logistics buyers raise in procurement conversations.',
-            'industry_stat_number' => '$2M–$50M',
-            'industry_stat_label'  => 'ARR sweet spot for our clients',
-        ),
-    );
-}
-
-/**
- * Returns inline SVG for an industry icon.
- */
-function bluu_get_industry_icon( $icon_name, $size = 40 ) {
-    switch ( $icon_name ) {
-        case 'zap':
-            return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>';
-        case 'heart':
-            return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
-        case 'scale':
-            return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="3" x2="12" y2="21"/><path d="M3 6l9-3 9 3"/><path d="M3 10l0 2a4 4 0 0 0 8 0l0-2"/><path d="M13 10l0 2a4 4 0 0 0 8 0l0-2"/></svg>';
-        case 'truck':
-        default:
-            return '<svg width="' . $size . '" height="' . $size . '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
-    }
-}
-
-// Accent colors for alternating rows
-$industry_colors = array( '#1A73E8', '#137333', '#0D47A1', '#1557B0' );
+// ── Hardcoded industries array (content is curated — no ACF loop needed) ─────
+$industries = array(
+	array(
+		'sector'      => 'B2B SaaS',
+		'headline'    => 'Dominate your category with content that compounds.',
+		'challenge'   => 'SaaS companies face a brutal paradox: buyers demand thought leadership and proven ROI, yet most content teams publish generic how-to articles that never rank and never convert. Meanwhile, the sales team is winging it on outdated decks.',
+		'approach'    => 'We build the content infrastructure that turns your product expertise into category authority. SME-verified long-form articles capture high-intent traffic. A continuously optimized site converts it. Premium case studies close the deals.',
+		'stat'        => '3x',
+		'stat_label'  => 'Est. pipeline increase in 12 months',
+		'icon_color'  => 'blue',
+		'icon_path'   => 'M13 10V3L4 14h7v7l9-11h-7z',
+		'reversed'    => false,
+	),
+	array(
+		'sector'      => 'Healthcare & Biotech',
+		'headline'    => 'Clinical accuracy meets demand generation.',
+		'challenge'   => 'Healthcare buyers are sophisticated and skeptical. Compliance constraints limit what you can say and how you can say it. A single inaccurate claim destroys years of trust. Generic content agencies don\'t understand this world.',
+		'approach'    => 'Every piece of content we produce for healthcare clients goes through SME and clinical review. We understand HIPAA standards, FDA communication standards, and what hospital procurement teams and CNOs actually need before signing.',
+		'stat'        => '100%',
+		'stat_label'  => 'SME-verified content, always',
+		'icon_color'  => 'emerald',
+		'icon_path'   => 'M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z',
+		'reversed'    => true,
+	),
+	array(
+		'sector'      => 'Legal & Finance',
+		'headline'    => 'Turn compliance constraints into competitive advantages.',
+		'challenge'   => 'Legal and financial buyers are the most discerning in B2B. They research deeply, question everything, and discard unproven vendors instantly. Regulatory compliance isn\'t optional — it\'s the baseline.',
+		'approach'    => 'We produce deep-research content that demonstrates genuine expertise: regulatory analysis, decision-framework guides, and authoritative whitepapers that GCs and CFOs actually read. Then we build sales assets that reflect what your prospects actually ask in late-stage deals.',
+		'stat'        => '48h',
+		'stat_label'  => 'Premium case study turnaround',
+		'icon_color'  => 'navy',
+		'icon_path'   => 'M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3',
+		'reversed'    => false,
+	),
+	array(
+		'sector'      => 'Logistics & Supply Chain',
+		'headline'    => 'Prove operational expertise at every touchpoint.',
+		'challenge'   => 'Logistics buyers evaluate vendors on operational credibility and proven results. They\'re not seeking thought leadership fluff — they\'re looking for proof you\'ve solved the specific problem they\'re facing today.',
+		'approach'    => 'We build proof-first content strategies: case studies that showcase real operational wins, technical content that communicates system knowledge, and sales assets that speak directly to the objections logistics buyers raise in procurement conversations.',
+		'stat'        => '$2M–$50M',
+		'stat_label'  => 'ARR sweet spot for our clients',
+		'icon_color'  => 'blue',
+		'icon_path'   => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z',
+		'reversed'    => true,
+	),
+);
 
 get_header();
 ?>
 
-<!-- Industries Hero -->
-<section class="page-hero" aria-label="<?php esc_attr_e( 'Industries hero', 'bluu-interactive' ); ?>">
-    <div class="container">
-        <div class="page-hero__inner page-hero__inner--center">
-            <div class="md-chip animate-on-scroll"><?php esc_html_e( 'Our Industries', 'bluu-interactive' ); ?></div>
-            <h1 class="page-hero__headline animate-on-scroll"><?php echo esc_html( $industries_hero_headline ); ?></h1>
-            <p class="page-hero__subheadline animate-on-scroll"><?php echo esc_html( $industries_hero_subheadline ); ?></p>
-        </div>
-    </div>
+<!-- ── Industries Hero ──────────────────────────────────────────────────────── -->
+<section class="industries-hero" aria-label="<?php esc_attr_e( 'Industries overview', 'bluu-interactive' ); ?>">
+	<div class="container">
+		<div class="industries-hero__inner animate-on-scroll">
+			<div class="industries-hero__badge pricing-hero__badge"><?php echo esc_html( $hero_badge ); ?></div>
+			<h1 class="industries-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+			<p class="industries-hero__body"><?php echo esc_html( $hero_body ); ?></p>
+		</div>
+	</div>
 </section>
 
-<!-- Industries Sections (alternating layout) -->
-<?php foreach ( $industries as $index => $industry ) :
-    $is_even      = ( $index % 2 === 0 );
-    $accent_color = $industry_colors[ $index % count( $industry_colors ) ];
-    $section_id   = 'industry-' . sanitize_title( $industry['industry_name'] );
-?>
-<section
-    class="section industry-section<?php echo $is_even ? '' : ' industry-section--reversed'; ?>"
-    id="<?php echo esc_attr( $section_id ); ?>"
-    aria-label="<?php echo esc_attr( $industry['industry_name'] ); ?>"
-    style="--industry-accent: <?php echo esc_attr( $accent_color ); ?>;"
->
-    <div class="container">
-        <div class="industry-section__inner">
+<!-- ── Industry Sections ────────────────────────────────────────────────────── -->
+<div class="industry-sections">
 
-            <!-- Visual Column -->
-            <div class="industry-section__visual animate-on-scroll">
-                <div class="industry-section__visual-card" style="border-color: <?php echo esc_attr( $accent_color ); ?>20; background: linear-gradient(135deg, <?php echo esc_attr( $accent_color ); ?>08 0%, <?php echo esc_attr( $accent_color ); ?>02 100%);">
-                    <div class="industry-section__icon" style="color: <?php echo esc_attr( $accent_color ); ?>;" aria-hidden="true">
-                        <?php echo bluu_get_industry_icon( $industry['industry_icon'], 64 ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-                    </div>
-                    <?php if ( ! empty( $industry['industry_stat_number'] ) ) : ?>
-                        <div class="industry-section__stat">
-                            <span class="industry-section__stat-number" style="color: <?php echo esc_attr( $accent_color ); ?>;">
-                                <?php echo esc_html( $industry['industry_stat_number'] ); ?>
-                            </span>
-                            <span class="industry-section__stat-label">
-                                <?php echo esc_html( $industry['industry_stat_label'] ); ?>
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div><!-- /.industry-section__visual -->
+	<?php foreach ( $industries as $industry ) :
+		$block_class = 'industry-block' . ( $industry['reversed'] ? ' industry-block--reversed' : '' );
+		$icon_class  = 'industry-visual__icon industry-visual__icon--' . esc_attr( $industry['icon_color'] );
+	?>
+	<section class="<?php echo esc_attr( $block_class ); ?>" aria-label="<?php echo esc_attr( $industry['sector'] ); ?>">
 
-            <!-- Content Column -->
-            <div class="industry-section__content animate-on-scroll">
-                <div class="md-chip md-chip--colored" style="background-color: <?php echo esc_attr( $accent_color ); ?>15; color: <?php echo esc_attr( $accent_color ); ?>;">
-                    <?php echo esc_html( $industry['industry_name'] ); ?>
-                </div>
-                <h2 class="industry-section__tagline"><?php echo esc_html( $industry['industry_tagline'] ); ?></h2>
+		<!-- Visual panel -->
+		<div class="industry-block__visual">
+			<div class="industry-visual">
+				<span class="<?php echo esc_attr( $icon_class ); ?>" aria-hidden="true">
+					<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+						<path d="<?php echo esc_attr( $industry['icon_path'] ); ?>"/>
+					</svg>
+				</span>
+				<div class="industry-visual__stat"><?php echo esc_html( $industry['stat'] ); ?></div>
+				<div class="industry-visual__label"><?php echo esc_html( $industry['stat_label'] ); ?></div>
+			</div>
+		</div><!-- /.industry-block__visual -->
 
-                <?php if ( ! empty( $industry['industry_challenge'] ) ) : ?>
-                    <div class="industry-section__block">
-                        <h3 class="industry-section__block-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D93025" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10"/>
-                                <line x1="12" y1="8" x2="12" y2="12"/>
-                                <line x1="12" y1="16" x2="12.01" y2="16"/>
-                            </svg>
-                            <?php esc_html_e( 'The Challenge', 'bluu-interactive' ); ?>
-                        </h3>
-                        <p class="industry-section__block-body"><?php echo esc_html( $industry['industry_challenge'] ); ?></p>
-                    </div>
-                <?php endif; ?>
+		<!-- Content panel -->
+		<div class="industry-block__content">
+			<div class="industry-content__sector"><?php echo esc_html( $industry['sector'] ); ?></div>
 
-                <?php if ( ! empty( $industry['industry_solution'] ) ) : ?>
-                    <div class="industry-section__block">
-                        <h3 class="industry-section__block-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="<?php echo esc_attr( $accent_color ); ?>" stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                            </svg>
-                            <?php esc_html_e( 'The Bluu Approach', 'bluu-interactive' ); ?>
-                        </h3>
-                        <p class="industry-section__block-body"><?php echo esc_html( $industry['industry_solution'] ); ?></p>
-                    </div>
-                <?php endif; ?>
+			<h2 class="industry-content__headline"><?php echo esc_html( $industry['headline'] ); ?></h2>
 
-                <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary" aria-label="<?php echo esc_attr( sprintf( __( 'Discuss your %s project', 'bluu-interactive' ), $industry['industry_name'] ) ); ?>">
-                    <?php esc_html_e( 'Discuss Your Situation', 'bluu-interactive' ); ?>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
-            </div><!-- /.industry-section__content -->
+			<div class="industry-content__points">
 
-        </div><!-- /.industry-section__inner -->
-    </div><!-- /.container -->
-</section>
-<?php endforeach; ?>
+				<!-- Challenge -->
+				<div class="industry-content__point industry-content__point--challenge">
+					<div class="industry-content__point-header">
+						<span aria-hidden="true">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+								<path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+							</svg>
+						</span>
+						<span class="industry-content__point-title"><?php esc_html_e( 'The Challenge', 'bluu-interactive' ); ?></span>
+					</div>
+					<p class="industry-content__point-body"><?php echo esc_html( $industry['challenge'] ); ?></p>
+				</div><!-- /.industry-content__point--challenge -->
 
-<!-- Bottom CTA -->
-<section class="section cta-section" aria-label="<?php esc_attr_e( 'Industries call to action', 'bluu-interactive' ); ?>">
-    <div class="container">
-        <div class="cta-section__inner animate-on-scroll">
-            <div class="cta-section__content">
-                <h2 class="cta-section__headline"><?php echo esc_html( $bottom_cta_headline ); ?></h2>
-                <p class="cta-section__body"><?php echo esc_html( $bottom_cta_body ); ?></p>
-            </div>
-            <div class="cta-section__action">
-                <a href="<?php echo esc_url( $bottom_cta_button_url ); ?>" class="btn-primary" aria-label="<?php echo esc_attr( $bottom_cta_button_text ); ?>">
-                    <?php echo esc_html( $bottom_cta_button_text ); ?>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                        <polyline points="12 5 19 12 12 19"/>
-                    </svg>
-                </a>
-                <p class="cta-section__disclaimer"><?php esc_html_e( 'Free 30-minute call. No commitment required.', 'bluu-interactive' ); ?></p>
-            </div>
-        </div>
-    </div>
+				<!-- Approach -->
+				<div class="industry-content__point industry-content__point--approach">
+					<div class="industry-content__point-header">
+						<span aria-hidden="true">
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+								<path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+							</svg>
+						</span>
+						<span class="industry-content__point-title"><?php esc_html_e( 'Our Approach', 'bluu-interactive' ); ?></span>
+					</div>
+					<p class="industry-content__point-body"><?php echo esc_html( $industry['approach'] ); ?></p>
+				</div><!-- /.industry-content__point--approach -->
+
+			</div><!-- /.industry-content__points -->
+
+			<a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary">
+				<?php esc_html_e( 'Discuss Your Situation', 'bluu-interactive' ); ?>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+					<path d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+				</svg>
+			</a>
+
+		</div><!-- /.industry-block__content -->
+
+	</section>
+	<?php endforeach; ?>
+
+</div><!-- /.industry-sections -->
+
+<!-- ── Bottom CTA ───────────────────────────────────────────────────────────── -->
+<section class="industries-cta" aria-label="<?php esc_attr_e( 'Industries call to action', 'bluu-interactive' ); ?>">
+	<div class="container">
+		<div class="industries-cta__inner animate-on-scroll">
+
+			<h2 class="industries-cta__headline"><?php echo esc_html( $cta_headline ); ?></h2>
+			<p class="industries-cta__body"><?php echo esc_html( $cta_body ); ?></p>
+
+			<a href="<?php echo esc_url( $cta_url ); ?>" class="btn-primary btn-primary--large">
+				<?php esc_html_e( 'Book a Discovery Call', 'bluu-interactive' ); ?>
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
+					<path d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+				</svg>
+			</a>
+
+			<p class="industries-cta__note"><?php esc_html_e( 'Free 15-minute call. No commitment required.', 'bluu-interactive' ); ?></p>
+
+		</div>
+	</div>
 </section>
 
 <?php get_footer(); ?>

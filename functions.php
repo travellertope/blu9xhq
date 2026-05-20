@@ -329,6 +329,20 @@ function bluu_faq_category_icon( $icon ) {
     return isset( $icons[ $icon ] ) ? $icons[ $icon ] : $icons['default'];
 }
 
+// ── Theme Mods Reset on Version Change ────────────────────────────────────────
+// Clears stored customizer values whenever the theme version changes so stale
+// DB overrides (old fonts, colors, radius) don't persist across redesigns.
+function bluu_maybe_reset_theme_mods() {
+    $current_version = wp_get_theme()->get( 'Version' );
+    $stored_version  = get_option( 'bluu_theme_mods_version', '' );
+    if ( $stored_version !== $current_version ) {
+        remove_theme_mods();
+        update_option( 'bluu_theme_mods_version', $current_version );
+    }
+}
+add_action( 'after_switch_theme', 'bluu_maybe_reset_theme_mods' );
+add_action( 'init', 'bluu_maybe_reset_theme_mods' );
+
 // ── Include Files ──────────────────────────────────────────────────────────────
 require_once get_template_directory() . '/inc/acf-fields.php';
 require_once get_template_directory() . '/inc/customizer.php';

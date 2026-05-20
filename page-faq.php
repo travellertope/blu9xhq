@@ -51,16 +51,14 @@ if ( ! empty( $all_faqs ) ) :
 endif;
 ?>
 
-<main id="main-content" class="site-main">
-
     <!-- ── Hero ──────────────────────────────────────────────────────────────── -->
-    <section class="page-hero">
+    <section class="faq-hero" aria-label="<?php esc_attr_e( 'FAQ overview', 'bluu-interactive' ); ?>">
         <div class="container">
-            <span class="md-chip" style="margin-bottom: var(--space-4); display: inline-block;">
-                <?php esc_html_e( 'FAQ', 'bluu-interactive' ); ?>
-            </span>
-            <h1 class="page-hero__title"><?php echo esc_html( $faq_headline ); ?></h1>
-            <p class="page-hero__subtitle"><?php echo esc_html( $faq_subheadline ); ?></p>
+            <div class="faq-hero__inner animate-on-scroll">
+                <div class="pricing-hero__badge"><?php esc_html_e( 'FAQ', 'bluu-interactive' ); ?></div>
+                <h1 class="faq-hero__headline"><?php echo esc_html( $faq_headline ); ?></h1>
+                <p class="faq-hero__body"><?php echo esc_html( $faq_subheadline ); ?></p>
+            </div>
         </div>
     </section>
 
