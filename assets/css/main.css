@@ -250,7 +250,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     border: 1px solid rgba(26, 115, 232, 0.2);
 }
 
@@ -281,7 +281,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     font-weight: 600;
     letter-spacing: 0.01em;
     border: none;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     cursor: pointer;
     text-decoration: none;
     transition:
@@ -330,7 +330,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     font-weight: 600;
     letter-spacing: 0.01em;
     border: 2px solid var(--md-accent);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     cursor: pointer;
     text-decoration: none;
     transition:
@@ -905,7 +905,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     display: block;
     width: 6px;
     height: 6px;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     background: var(--md-accent);
     flex-shrink: 0;
     margin-top: 6px;
@@ -1140,7 +1140,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     justify-content: center;
     width: 40px;
     height: 40px;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     background: var(--md-outline-variant);
     color: var(--md-on-surface-variant);
     text-decoration: none;
@@ -1654,7 +1654,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     min-width: 40px;
     height: 40px;
     padding: 0 var(--space-3);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--md-on-surface);
@@ -2137,7 +2137,7 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     background: var(--md-accent);
     color: #FFFFFF;
     border: 2px solid var(--md-accent);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     font-family: var(--font-family-base);
     font-size: var(--font-size-sm);
     font-weight: 600;
@@ -2429,7 +2429,7 @@ a.contact-info__value:hover {
     height: 44px;
     background: var(--md-accent);
     color: #FFFFFF;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2582,7 +2582,7 @@ a.contact-info__value:hover {
     background: var(--md-accent);
     color: #FFFFFF;
     border: none;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     font-family: var(--font-family-base);
     font-size: var(--font-size-base);
     font-weight: 600;
@@ -2606,7 +2606,7 @@ a.contact-info__value:hover {
     height: 18px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top-color: #FFFFFF;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     animation: spin 0.7s linear infinite;
 }
 
@@ -2744,7 +2744,7 @@ a.contact-info__value:hover {
     height: 52px;
     padding: 0 var(--space-9) 0 var(--space-9);
     border: 1.5px solid var(--md-outline);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     font-family: var(--font-family-base);
     font-size: var(--font-size-base);
     color: var(--md-on-surface);
@@ -2778,7 +2778,7 @@ a.contact-info__value:hover {
     cursor: pointer;
     color: var(--md-on-surface-variant);
     padding: var(--space-2);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2800,7 +2800,7 @@ a.contact-info__value:hover {
 
 .faq-tab {
     padding: var(--space-2) var(--space-5);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     border: 1.5px solid var(--md-outline);
     background: transparent;
     font-family: var(--font-family-base);
@@ -3739,7 +3739,7 @@ a.contact-info__value:hover {
 .md-chip--colored {
     font-size: var(--font-size-xs);
     font-weight: 600;
-    border-radius: var(--radius-full);
+    border-radius: 0;
     padding: var(--space-1) var(--space-3);
     display: inline-flex;
     align-items: center;
@@ -3780,7 +3780,7 @@ a.contact-info__value:hover {
 /* Pillar card structural elements */
 .pillar-card__accent-bar {
     height: 4px;
-    border-radius: var(--radius-full) var(--radius-full) 0 0;
+    border-radius: 0;
     /* break out of the card's padding to span full width */
     margin: calc(-1 * var(--space-7)) calc(-1 * var(--space-7)) var(--space-5);
     display: block;
@@ -3890,7 +3890,7 @@ a.contact-info__value:hover {
     font-size: var(--font-size-xs);
     font-weight: 700;
     padding: var(--space-1) var(--space-4);
-    border-radius: var(--radius-full);
+    border-radius: 0;
     white-space: nowrap;
     letter-spacing: 0.06em;
     text-transform: uppercase;
