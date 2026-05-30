@@ -3690,6 +3690,17 @@ a.contact-info__value:hover {
     text-decoration: underline;
 }
 
+.industries-hp__cta {
+    text-align: center;
+    margin-top: var(--space-8);
+}
+
+.industries-hp__cta-text {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--space-4);
+}
+
 @media (max-width: 768px) {
     .industries-hp__grid { grid-template-columns: 1fr; }
 }

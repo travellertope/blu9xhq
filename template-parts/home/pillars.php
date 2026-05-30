@@ -6,46 +6,46 @@
  */
 
 $solution_badge    = ( function_exists( 'get_field' ) ? get_field( 'solution_badge' )    : '' ) ?: 'The Solution';
-$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One Retainer. Everything Running.';
-$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: "We've eliminated the gap between research, content, and publishing. One retainer covers your entire content operation — built for SMEs, startups, and agencies who need it done right.";
+$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One retainer. Everything running.';
+$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We handle research, content creation, publishing, and reporting in one connected monthly retainer — so your brand shows up consistently, across every channel, without you having to manage it.';
 
-$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The Full Content Engine';
-$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different vendors and chasing deliverables, Bluu runs your research, content, publishing, and reporting in one connected motion — every month, without the management overhead.';
-$solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: 'Explore the Framework';
+$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The complete content operation';
+$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different suppliers and chasing deliverables across four different tools, Bluu runs your entire content operation in one seamless monthly engagement. Research informs content. Content gets published. Results get reported. Every month, without fail.';
+$solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: "See what's included";
 $solution_sidebar_url   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_url' )  : '' ) ?: home_url( '/pricing' );
 
 $solution_features = [
     [
         'icon'   => 'monitor',
-        'title'  => 'Research & Intelligence',
+        'title'  => 'Research & intelligence',
         'items'  => [
             'Weekly competitor monitoring.',
-            'Audience & sentiment insights.',
-            'Trend radar for your niche.',
+            'Audience insight reports.',
+            'Trend analysis for your niche.',
         ],
     ],
     [
         'icon'   => 'trending-up',
-        'title'  => 'Content That Actually Works',
+        'title'  => 'Content that earns attention',
         'items'  => [
-            'AI-assisted, strategist-reviewed.',
-            'Blog, LinkedIn, newsletter, social — all formats.',
+            'Long-form pieces, social content, newsletters, and case studies.',
+            'Written for your audience, reviewed for quality before anything goes out.',
         ],
     ],
     [
         'icon'   => 'briefcase',
-        'title'  => 'Full-Service Publishing',
+        'title'  => 'Published across every channel',
         'items'  => [
-            'We publish to your website, socials & newsletter.',
-            'One content piece repurposed across every channel.',
+            'We schedule and publish to your website, social platforms, and newsletter.',
+            'One piece of content repurposed intelligently across every format.',
         ],
     ],
     [
         'icon'   => 'users',
-        'title'  => 'Measurable Monthly Outcomes',
+        'title'  => 'Accountable monthly outcomes',
         'items'  => [
-            'Monthly performance reports.',
-            'Quarterly case studies & use cases (Growth & Premium).',
+            'A performance report every month — what worked, what did not, what changes.',
+            'No vanity metrics. A clear picture of what your content is doing.',
         ],
     ],
 ];

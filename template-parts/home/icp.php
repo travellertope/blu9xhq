@@ -6,7 +6,7 @@
  */
 
 $icp_badge    = ( function_exists( 'get_field' ) ? get_field( 'icp_badge' )    : '' ) ?: 'Who We Serve';
-$icp_headline = ( function_exists( 'get_field' ) ? get_field( 'icp_headline' ) : '' ) ?: 'Built for SMEs, Startups & Agencies';
+$icp_headline = ( function_exists( 'get_field' ) ? get_field( 'icp_headline' ) : '' ) ?: 'Built for teams who have outgrown doing content themselves.';
 $icp_body     = ( function_exists( 'get_field' ) ? get_field( 'icp_body' )     : '' ) ?: '';
 
 $icp_verticals = ( function_exists( 'get_field' ) ? get_field( 'icp_verticals' ) : [] );
@@ -15,26 +15,26 @@ if ( empty( $icp_verticals ) ) {
     $icp_verticals = [
         [
             'icon'        => 'saas',
-            'title'       => 'Startups & Scale-ups',
-            'description' => 'Fast-moving teams that need a full content operation without hiring in-house — research, publishing, and reporting all handled.',
+            'title'       => 'Tech & SaaS startups',
+            'description' => 'You are building the product, managing the team, and closing deals. Content keeps getting pushed to next week. We become your content team — research, writing, publishing, and reporting — so your brand keeps moving even when you cannot give it attention.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'health',
-            'title'       => 'Professional Services',
-            'description' => 'Law firms, consultancies, and financial advisors who need authoritative content that builds trust and fills the top of the funnel.',
+            'title'       => 'Agencies & consultants',
+            'description' => 'You know content drives inbound. You tell your clients that every week. But your own publishing is inconsistent and your pipeline reflects it. We run your content operation so you can focus on client work — and stop being the professional who neglects their own brand.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'legal',
-            'title'       => 'E-commerce & DTC Brands',
-            'description' => 'Brands that need consistent content across channels to drive discovery, build loyalty, and turn browsers into buyers.',
+            'title'       => 'E-commerce & DTC brands',
+            'description' => 'Building a brand from scratch means managing content, social, email, and ads with one person\'s bandwidth. We give you a structured content operation so every channel is covered, every week, without the chaos.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'logistics',
-            'title'       => 'Agencies & Freelancers',
-            'description' => 'White-label content and research support for agencies that need to scale output without scaling headcount.',
+            'title'       => 'Professional services firms',
+            'description' => 'Your expertise wins clients. But if that expertise is not being published consistently, the people who need it most will never find it. We turn your knowledge into a steady stream of content that builds trust before the first conversation.',
             'link'        => home_url( '/industries' ),
         ],
     ];
@@ -75,10 +75,18 @@ function bluu_icp_icon_hp( $name ) {
                         class="industry-hp-card__link"
                         aria-label="<?php echo esc_attr( sprintf( __( 'Learn more about %s', 'bluu-interactive' ), $vertical['title'] ) ); ?>"
                     >
-                        <?php esc_html_e( 'Learn More', 'bluu-interactive' ); ?> &rarr;
+                        <?php esc_html_e( 'Learn more', 'bluu-interactive' ); ?> &rarr;
                     </a>
                 </article>
             <?php endforeach; ?>
+        </div>
+
+        <!-- Industries CTA -->
+        <div class="industries-hp__cta animate-on-scroll">
+            <p class="industries-hp__cta-text"><?php esc_html_e( 'We work with a focused range of industries where consistent content makes the biggest commercial difference.', 'bluu-interactive' ); ?></p>
+            <a href="<?php echo esc_url( home_url( '/industries' ) ); ?>" class="btn-outline">
+                <?php esc_html_e( 'Explore all industries', 'bluu-interactive' ); ?>
+            </a>
         </div>
 
     </div>

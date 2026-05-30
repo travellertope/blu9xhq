@@ -6,26 +6,26 @@
  */
 
 $problem_badge    = ( function_exists( 'get_field' ) ? get_field( 'problem_badge' )    : '' ) ?: 'The Problem';
-$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Inconsistency Is Costing You Clients';
-$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most SMEs and startups are paying for content that never connects — no strategy behind it, no consistency across channels, and no one accountable for the results.';
+$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Inconsistency is costing you clients.';
+$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most growing teams are producing content when they can, not when they should — with no strategy behind it, no one accountable for it, and no clear picture of whether it\'s working.';
 $problem_items    = ( function_exists( 'get_field' ) ? get_field( 'problem_items' )    : [] );
 
 if ( empty( $problem_items ) ) {
     $problem_items = [
         [
             'icon'        => 'alert',
-            'title'       => 'No Strategic Intelligence',
-            'description' => "You're producing content with no real insight into what your competitors are doing, what your audience actually wants, or what's shifting in your market.",
+            'title'       => 'No strategic foundation',
+            'description' => 'You are producing content without knowing what your competitors are publishing, what your audience actually responds to, or what is shifting in your market. You are guessing.',
         ],
         [
             'icon'        => 'trend-down',
-            'title'       => 'Generic Content That Goes Nowhere',
-            'description' => 'Posts go out, nothing comes back. No engagement, no leads, no compounding value — because content without strategy is just noise.',
+            'title'       => 'Content without consistency',
+            'description' => 'Posts go out, nothing comes back. No consistent schedule, no compounding effect, no clear narrative. Content without a system is just noise with extra steps.',
         ],
         [
             'icon'        => 'lock',
-            'title'       => 'No One Owns the Publishing',
-            'description' => 'Content gets written but never published consistently. It sits in Notion, Google Docs, or someone\'s inbox while your channels go quiet.',
+            'title'       => 'No one owns the result',
+            'description' => 'Content gets written but not published. Campaigns get started but not finished. Without a dedicated team running the operation, everything defaults to the bottom of the priority list.',
         ],
     ];
 }
