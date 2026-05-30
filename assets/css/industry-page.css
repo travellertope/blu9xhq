@@ -25,7 +25,7 @@
     border: 1px solid rgba(13,110,253,0.3);
     padding: 4px 12px;
     font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: var(--space-5);
@@ -33,7 +33,7 @@
 
 .industry-pg-hero__headline {
     font-size: clamp(2rem, 4vw, 3.25rem);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.1;
     letter-spacing: -0.025em;
     color: #fff;
@@ -85,7 +85,7 @@
 .industry-section-badge {
     display: inline-block;
     font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--md-accent);
@@ -94,7 +94,7 @@
 
 .industry-section-heading {
     font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 500;
+    font-weight: 400;
     line-height: 1.2;
     letter-spacing: -0.02em;
     color: var(--md-primary);
@@ -121,7 +121,7 @@
 
 .industry-pain-card__title {
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--md-primary);
     margin-bottom: var(--space-3);
 }
@@ -176,7 +176,7 @@
     background: var(--md-accent);
     color: #fff;
     font-size: var(--font-size-sm);
-    font-weight: 500;
+    font-weight: 400;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -184,7 +184,7 @@
 
 .industry-step__title {
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--md-primary);
     margin-bottom: var(--space-1);
 }
@@ -219,7 +219,7 @@
     gap: var(--space-2);
     font-size: var(--font-size-sm);
     color: var(--md-accent);
-    font-weight: 500;
+    font-weight: 400;
     margin-top: var(--space-4);
     border: 1px solid var(--md-accent);
     padding: var(--space-2) var(--space-4);
@@ -239,7 +239,7 @@
 
 .industry-deliverable-card__name {
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--md-primary);
     margin-bottom: var(--space-2);
 }
@@ -344,7 +344,7 @@
 
 .industry-related-card__title {
     font-size: var(--font-size-lg);
-    font-weight: 500;
+    font-weight: 400;
     color: var(--md-primary);
     margin-bottom: var(--space-3);
 }
@@ -360,7 +360,7 @@
 .industry-related-card__arrow {
     color: var(--md-accent);
     font-size: var(--font-size-xs);
-    font-weight: 500;
+    font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -374,7 +374,7 @@
 
 .industry-pg-cta__headline {
     font-size: clamp(1.75rem, 3vw, 2.5rem);
-    font-weight: 500;
+    font-weight: 400;
     color: #fff;
     line-height: 1.2;
     margin-bottom: var(--space-4);
@@ -395,6 +395,173 @@
     flex-wrap: wrap;
 }
 
+/* ── Sub-industry: Who this is for ───────────────────────────────────────── */
+.si-who {
+    padding: var(--space-10) 0;
+    background: #fff;
+}
+
+.si-who__header {
+    max-width: 680px;
+    margin: 0 auto var(--space-9);
+    text-align: center;
+}
+
+.si-who__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.si-who-item {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+    background: var(--md-surface-variant);
+    padding: var(--space-6);
+    border-left: 3px solid var(--md-accent);
+}
+
+.si-who-item__icon {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    background: var(--md-accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.si-who-item__text {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.7;
+}
+
+/* ── Sub-industry: Pain ───────────────────────────────────────────────────── */
+.si-pain {
+    padding: var(--space-10) 0;
+    background: var(--md-surface-variant);
+}
+
+.si-pain__header {
+    max-width: 680px;
+    margin: 0 auto var(--space-9);
+    text-align: center;
+}
+
+/* ── Sub-industry: Use Cases ──────────────────────────────────────────────── */
+.si-usecases {
+    padding: var(--space-10) 0;
+    background: #fff;
+}
+
+.si-usecases__header {
+    max-width: 680px;
+    margin: 0 auto var(--space-9);
+    text-align: center;
+}
+
+.si-usecases__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+}
+
+.si-uc-card {
+    background: var(--md-surface-variant);
+    padding: var(--space-7);
+    border-top: 3px solid var(--md-accent);
+    display: flex;
+    flex-direction: column;
+}
+
+.si-uc-card__title {
+    font-size: var(--font-size-lg);
+    font-weight: 400;
+    color: var(--md-primary);
+    margin-bottom: var(--space-4);
+}
+
+.si-uc-card__why {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.7;
+    flex: 1;
+    margin-bottom: var(--space-5);
+}
+
+.si-uc-card__link {
+    color: var(--md-accent);
+    font-size: var(--font-size-xs);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+}
+
+.si-uc-card__link:hover { opacity: 0.75; }
+
+/* ── Sub-industry: Why Bluu fits ──────────────────────────────────────────── */
+.si-fit {
+    padding: var(--space-10) 0;
+    background: var(--md-primary);
+    color: #fff;
+}
+
+.si-fit__inner {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--space-10);
+    align-items: start;
+}
+
+.si-fit__body {
+    font-size: var(--font-size-lg);
+    color: rgba(255,255,255,0.8);
+    line-height: 1.75;
+    margin-top: var(--space-5);
+}
+
+.si-fit__proof {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: var(--space-7);
+    position: sticky;
+    top: calc(var(--header-height) + var(--space-6));
+}
+
+.si-fit__proof-label {
+    font-size: var(--font-size-xs);
+    font-weight: 400;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #7eb8ff;
+    margin-bottom: var(--space-3);
+}
+
+.si-fit__proof-text {
+    font-size: var(--font-size-sm);
+    color: rgba(255,255,255,0.82);
+    line-height: 1.7;
+    margin-bottom: var(--space-5);
+}
+
+.si-fit__proof-link {
+    color: #7eb8ff;
+    font-size: var(--font-size-sm);
+    font-weight: 400;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+}
+
+.si-fit__proof-link:hover { opacity: 0.75; }
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 960px) {
     .industry-pg-hero__inner { grid-template-columns: 1fr; }
@@ -403,6 +570,9 @@
     .industry-approach__image { display: none; }
     .industry-deliverables__inner { grid-template-columns: 1fr; }
     .industry-deliverables__intro { position: static; }
+    .si-fit__inner { grid-template-columns: 1fr; }
+    .si-fit__proof { position: static; }
+    .si-usecases__grid { grid-template-columns: 1fr 1fr; }
 }
 
 @media (max-width: 768px) {
@@ -410,4 +580,6 @@
     .industry-deliverables__grid { grid-template-columns: 1fr; }
     .industry-fit__grid { grid-template-columns: 1fr; }
     .industry-related__grid { grid-template-columns: 1fr; }
+    .si-who__grid { grid-template-columns: 1fr; }
+    .si-usecases__grid { grid-template-columns: 1fr; }
 }
