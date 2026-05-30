@@ -183,6 +183,132 @@ function bluu_body_classes( $classes ) {
 }
 add_filter( 'body_class', 'bluu_body_classes' );
 
+// ── Mega Menu Helpers ──────────────────────────────────────────────────────────
+
+function bluu_mega_chevron() {
+    return '<svg class="mega-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
+}
+
+function bluu_mega_icon( $paths, $size = 16 ) {
+    return sprintf(
+        '<svg width="%1$d" height="%1$d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%2$s</svg>',
+        (int) $size,
+        $paths
+    );
+}
+
+function bluu_mega_item( $url, $icon_paths, $title, $desc = '' ) {
+    $icon = bluu_mega_icon( $icon_paths );
+    return '<li><a href="' . esc_url( $url ) . '" class="mega-panel__item">' .
+        '<span class="mega-panel__item-icon">' . $icon . '</span>' .
+        '<span class="mega-panel__item-body">' .
+        '<span class="mega-panel__item-title">' . esc_html( $title ) . '</span>' .
+        ( $desc ? '<span class="mega-panel__item-desc">' . esc_html( $desc ) . '</span>' : '' ) .
+        '</span></a></li>';
+}
+
+// ── Desktop Mega Menu Walker ───────────────────────────────────────────────────
+if ( ! class_exists( 'Bluu_Mega_Menu_Walker' ) ) :
+class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
+
+    public function start_lvl( &$output, $depth = 0, $args = null ) {
+        if ( 0 === $depth ) {
+            $output .= '<div class="mega-panel"><div class="mega-panel__inner"><ul class="mega-panel__simple-list">';
+        } else {
+            $output .= '<ul class="sub-menu">';
+        }
+    }
+
+    public function end_lvl( &$output, $depth = 0, $args = null ) {
+        if ( 0 === $depth ) {
+            $output .= '</ul></div></div>';
+        } else {
+            $output .= '</ul>';
+        }
+    }
+
+    public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+        $classes      = empty( $item->classes ) ? array() : (array) $item->classes;
+        $has_children = in_array( 'menu-item-has-children', $classes );
+        $filtered     = array_diff( $classes, array( 'menu-item-has-children' ) );
+        if ( $depth === 0 && $has_children ) {
+            $filtered[] = 'has-mega';
+        }
+        $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+
+        $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
+
+        $url   = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
+        $title = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
+        $lb    = isset( $args->link_before ) ? $args->link_before : '';
+        $la    = isset( $args->link_after )  ? $args->link_after  : '';
+
+        if ( $depth === 0 && $has_children ) {
+            $output .= '<a href="' . $url . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_mega_chevron() . '</a>';
+        } else {
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+        }
+    }
+
+    public function end_el( &$output, $item, $depth = 0, $args = null ) {
+        $output .= '</li>';
+    }
+}
+endif;
+
+// ── Mobile Mega Menu Walker ────────────────────────────────────────────────────
+if ( ! class_exists( 'Bluu_Mobile_Menu_Walker' ) ) :
+class Bluu_Mobile_Menu_Walker extends Walker_Nav_Menu {
+
+    public function start_lvl( &$output, $depth = 0, $args = null ) {
+        if ( 0 === $depth ) {
+            $output .= '<ul class="mobile-mega-list">';
+        } else {
+            $output .= '<ul class="sub-menu">';
+        }
+    }
+
+    public function end_lvl( &$output, $depth = 0, $args = null ) {
+        $output .= '</ul>';
+    }
+
+    public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+        $classes      = empty( $item->classes ) ? array() : (array) $item->classes;
+        $has_children = in_array( 'menu-item-has-children', $classes );
+        $filtered     = array_diff( $classes, array( 'menu-item-has-children' ) );
+        if ( $depth === 0 && $has_children ) {
+            $filtered[] = 'has-mega';
+        }
+        $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+
+        $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
+
+        $url   = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
+        $title = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
+        $lb    = isset( $args->link_before ) ? $args->link_before : '';
+        $la    = isset( $args->link_after )  ? $args->link_after  : '';
+
+        if ( $depth === 0 && $has_children ) {
+            $label = sprintf(
+                /* translators: %s: menu item name */
+                esc_attr__( 'Expand %s submenu', 'bluu-interactive' ),
+                $item->title
+            );
+            $output .= '<div class="mobile-mega-header">';
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+            $output .= '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . $label . '">' . bluu_mega_chevron() . '</button>';
+            $output .= '</div>';
+        } else {
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+        }
+    }
+
+    public function end_el( &$output, $item, $depth = 0, $args = null ) {
+        $output .= '</li>';
+    }
+}
+endif;
+
 // ── Admin Enqueue ──────────────────────────────────────────────────────────────
 function bluu_admin_assets( $hook ) {
     if ( 'post.php' !== $hook && 'post-new.php' !== $hook ) {
