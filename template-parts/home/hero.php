@@ -1,6 +1,6 @@
 <?php
 /**
- * Home Hero Section — Redesigned
+ * Home Hero Section
  *
  * @package bluu-interactive
  */
@@ -13,6 +13,16 @@ $hero_cta_primary_url    = ( function_exists( 'get_field' ) ? get_field( 'hero_c
 $hero_cta_secondary_text = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_text' ): '' ) ?: "See What's Included";
 $hero_cta_secondary_url  = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_url' ) : '' ) ?: '#solution';
 $hero_stats              = ( function_exists( 'get_field' ) ? get_field( 'hero_stats' )             : [] );
+
+// Hero image — ACF image field returns array; fallback to Unsplash
+$hero_image = function_exists( 'get_field' ) ? get_field( 'hero_image' ) : null;
+if ( ! empty( $hero_image ) ) {
+    $hero_img_src = is_array( $hero_image ) ? esc_url( $hero_image['url'] ) : esc_url( $hero_image );
+    $hero_img_alt = is_array( $hero_image ) ? esc_attr( $hero_image['alt'] ) : '';
+} else {
+    $hero_img_src = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80';
+    $hero_img_alt = 'A modern, focused workspace';
+}
 
 if ( empty( $hero_stats ) ) {
     $hero_stats = [
@@ -53,58 +63,18 @@ $headline_2 = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
                     </a>
                 </div>
 
-
             </div><!-- /.home-hero__content -->
 
-            <!-- Right: Geometric Dashboard Illustration -->
-            <div class="home-hero__visual animate-on-scroll" aria-hidden="true">
-                <div class="hero-dash">
-                    <!-- Tilted background plane -->
-                    <div class="hero-dash__bg"></div>
-
-                    <!-- Dashboard card -->
-                    <div class="hero-dash__card">
-
-                        <!-- Header bar -->
-                        <div class="hero-dash__header">
-                            <div class="hero-dash__title-bar"></div>
-                            <div class="hero-dash__dots">
-                                <div class="hero-dash__dot"></div>
-                                <div class="hero-dash__dot"></div>
-                            </div>
-                        </div>
-
-                        <!-- Two info blocks -->
-                        <div class="hero-dash__blocks">
-                            <div class="hero-dash__block hero-dash__block--blue">
-                                <div class="hero-dash__block-num">1</div>
-                                <div class="hero-dash__lines">
-                                    <div class="hero-dash__line hero-dash__line--lg"></div>
-                                    <div class="hero-dash__line hero-dash__line--sm"></div>
-                                </div>
-                            </div>
-                            <div class="hero-dash__block hero-dash__block--green">
-                                <div class="hero-dash__block-num hero-dash__block-num--green">2</div>
-                                <div class="hero-dash__lines">
-                                    <div class="hero-dash__line hero-dash__line--lg"></div>
-                                    <div class="hero-dash__line hero-dash__line--sm"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Hub / Revenue Engine -->
-                        <div class="hero-dash__hub">
-                            <div>
-                                <div class="hero-dash__hub-label"><?php esc_html_e( 'Unified Output', 'bluu-interactive' ); ?></div>
-                                <div class="hero-dash__hub-title"><?php esc_html_e( 'Content Engine', 'bluu-interactive' ); ?></div>
-                            </div>
-                            <svg class="hero-dash__hub-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-                                <path d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-                            </svg>
-                        </div>
-
-                    </div><!-- /.hero-dash__card -->
-                </div><!-- /.hero-dash -->
+            <!-- Right: Hero Image -->
+            <div class="home-hero__visual animate-on-scroll">
+                <div class="hero-image">
+                    <img
+                        src="<?php echo $hero_img_src; ?>"
+                        alt="<?php echo $hero_img_alt; ?>"
+                        loading="eager"
+                        decoding="async"
+                    >
+                </div>
             </div><!-- /.home-hero__visual -->
 
         </div><!-- /.home-hero__inner -->

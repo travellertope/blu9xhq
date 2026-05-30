@@ -94,6 +94,16 @@ acf_add_local_field_group( array(
                 ),
             ),
         ),
+        array(
+            'key'           => 'field_hero_image',
+            'label'         => 'Hero Image',
+            'name'          => 'hero_image',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'medium',
+            'library'       => 'all',
+            'instructions'  => 'Right-hand image in the hero section. Recommended size: 900×675px (4:3). If left empty a default image is used.',
+        ),
     ),
     'location' => array(
         array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
