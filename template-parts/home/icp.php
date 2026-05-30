@@ -81,13 +81,5 @@ function bluu_icp_icon_hp( $name ) {
             <?php endforeach; ?>
         </div>
 
-        <!-- Industries CTA -->
-        <div class="industries-hp__cta animate-on-scroll">
-            <p class="industries-hp__cta-text"><?php esc_html_e( 'We work with a focused range of industries where consistent content makes the biggest commercial difference.', 'bluu-interactive' ); ?></p>
-            <a href="<?php echo esc_url( home_url( '/industries' ) ); ?>" class="btn-outline">
-                <?php esc_html_e( 'Explore all industries', 'bluu-interactive' ); ?>
-            </a>
-        </div>
-
     </div>
 </section>

@@ -94,6 +94,16 @@ acf_add_local_field_group( array(
                 ),
             ),
         ),
+        array(
+            'key'           => 'field_hero_image',
+            'label'         => 'Hero Image',
+            'name'          => 'hero_image',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'medium',
+            'library'       => 'all',
+            'instructions'  => 'Right-hand image in the hero section. Recommended size: 900×675px (4:3). If left empty a default image is used.',
+        ),
     ),
     'location' => array(
         array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
@@ -1321,4 +1331,150 @@ acf_add_local_field_group( array(
     ) ) ),
     'menu_order' => 70,
     'active'     => true,
+) );
+
+// ── INDUSTRY PAGE (page-industry.php) ─────────────────────────────────────────
+
+// Group 1 — SEO & meta
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_meta',
+    'title'  => 'Industry: SEO & Meta',
+    'fields' => array(
+        array( 'key' => 'field_ind_seo_title',        'label' => 'SEO Title',          'name' => 'ind_seo_title',        'type' => 'text',     'maxlength' => 60 ),
+        array( 'key' => 'field_ind_meta_description', 'label' => 'Meta Description',   'name' => 'ind_meta_description', 'type' => 'textarea', 'maxlength' => 155, 'rows' => 3 ),
+        array( 'key' => 'field_ind_industry_slug',    'label' => 'Industry Slug',       'name' => 'ind_industry_slug',    'type' => 'text', 'instructions' => 'e.g. tech-saas — matches URL segment' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 10, 'active' => true,
+) );
+
+// Group 2 — Hero
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_hero',
+    'title'  => 'Industry: Hero',
+    'fields' => array(
+        array( 'key' => 'field_ind_hero_tag',         'label' => 'Tag',         'name' => 'ind_hero_tag',         'type' => 'text',     'maxlength' => 60,  'default_value' => 'Industry — Tech & SaaS startups' ),
+        array( 'key' => 'field_ind_hero_headline',    'label' => 'Headline',    'name' => 'ind_hero_headline',    'type' => 'text',     'maxlength' => 100, 'default_value' => 'You are building the product. We run the content.' ),
+        array( 'key' => 'field_ind_hero_subheadline', 'label' => 'Subheadline', 'name' => 'ind_hero_subheadline', 'type' => 'textarea', 'rows' => 3,        'default_value' => 'SaaS founders are pulled in every direction. Content is always the thing that gets pushed to next week — and next week never comes. Bluu becomes your content team: research, writing, publishing, and results tracking handled every month without you having to manage it.' ),
+        array( 'key' => 'field_ind_hero_cta_label',   'label' => 'CTA Label',   'name' => 'ind_hero_cta_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_ind_hero_cta_url',     'label' => 'CTA URL',     'name' => 'ind_hero_cta_url',     'type' => 'url',      'default_value' => '/contact' ),
+        array( 'key' => 'field_ind_hero_image',       'label' => 'Hero Image',  'name' => 'ind_hero_image',       'type' => 'image',    'return_format' => 'array', 'preview_size' => 'medium', 'instructions' => 'Right-hand hero image. ~1200×800px recommended.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 20, 'active' => true,
+) );
+
+// Group 3 — Pain
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_pain',
+    'title'  => 'Industry: Pain Section',
+    'fields' => array(
+        array( 'key' => 'field_ind_pain_heading', 'label' => 'Heading', 'name' => 'ind_pain_heading', 'type' => 'text', 'default_value' => 'The content problem every SaaS founder recognises' ),
+        array( 'key' => 'field_ind_pain_body',    'label' => 'Body',    'name' => 'ind_pain_body',    'type' => 'textarea', 'rows' => 4, 'default_value' => 'You know content drives pipeline. You know competitor intelligence matters. You know your personal brand on LinkedIn is an untapped growth channel. But between product, sales, and team, none of it gets the attention it deserves. Content is something you intend to do properly — just not this sprint, not this quarter, not until things slow down. Things do not slow down.' ),
+        array( 'key' => 'field_ind_pain_1_title', 'label' => 'Pain 1 Title', 'name' => 'ind_pain_point_1_title', 'type' => 'text', 'default_value' => 'No competitor visibility' ),
+        array( 'key' => 'field_ind_pain_1_body',  'label' => 'Pain 1 Body',  'name' => 'ind_pain_point_1_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'By the time you notice a competitor\'s new positioning or campaign, they have had weeks of impact. Reactive awareness is not a competitive advantage.' ),
+        array( 'key' => 'field_ind_pain_2_title', 'label' => 'Pain 2 Title', 'name' => 'ind_pain_point_2_title', 'type' => 'text', 'default_value' => 'Inconsistent publishing' ),
+        array( 'key' => 'field_ind_pain_2_body',  'label' => 'Pain 2 Body',  'name' => 'ind_pain_point_2_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'Posts go up when someone has time. Months pass between pieces. The compounding effect of consistent content never kicks in because there is no consistent engine behind it.' ),
+        array( 'key' => 'field_ind_pain_3_title', 'label' => 'Pain 3 Title', 'name' => 'ind_pain_point_3_title', 'type' => 'text', 'default_value' => 'Founder brand invisible' ),
+        array( 'key' => 'field_ind_pain_3_body',  'label' => 'Pain 3 Body',  'name' => 'ind_pain_point_3_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'Your name and perspective should be building trust with your target market every week. Instead they are building product documentation and replying to investor updates.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 30, 'active' => true,
+) );
+
+// Group 4 — Solution
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_solution',
+    'title'  => 'Industry: Solution Section',
+    'fields' => array(
+        array( 'key' => 'field_ind_solution_heading', 'label' => 'Heading', 'name' => 'ind_solution_heading', 'type' => 'text', 'default_value' => 'What the retainer covers for SaaS teams' ),
+        array( 'key' => 'field_ind_solution_body',    'label' => 'Body',    'name' => 'ind_solution_body',    'type' => 'textarea', 'rows' => 3, 'default_value' => 'Bluu runs a complete monthly content operation tailored to the specific needs of a SaaS startup. Everything below is included in a single flat retainer — no project fees, no hourly billing, no scope creep conversations.' ),
+        array( 'key' => 'field_ind_solution_image',   'label' => 'Section Image', 'name' => 'ind_solution_image', 'type' => 'image', 'return_format' => 'array', 'preview_size' => 'medium', 'instructions' => 'Image shown alongside the solution list.' ),
+        array( 'key' => 'field_ind_sol_1_title', 'label' => 'Item 1 Title', 'name' => 'ind_solution_item_1_title', 'type' => 'text', 'default_value' => 'Weekly competitor intelligence' ),
+        array( 'key' => 'field_ind_sol_1_body',  'label' => 'Item 1 Body',  'name' => 'ind_solution_item_1_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'A structured weekly digest monitoring your top competitors — content output, messaging shifts, new feature announcements, and positioning changes. Delivered every Monday.' ),
+        array( 'key' => 'field_ind_sol_2_title', 'label' => 'Item 2 Title', 'name' => 'ind_solution_item_2_title', 'type' => 'text', 'default_value' => 'Founder brand content' ),
+        array( 'key' => 'field_ind_sol_2_body',  'label' => 'Item 2 Body',  'name' => 'ind_solution_item_2_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'Consistent LinkedIn content written in your voice — opinion, market commentary, product perspective, and lessons learned. Published on your schedule without taking hours from your week.' ),
+        array( 'key' => 'field_ind_sol_3_title', 'label' => 'Item 3 Title', 'name' => 'ind_solution_item_3_title', 'type' => 'text', 'default_value' => 'Long-form content and repurposing' ),
+        array( 'key' => 'field_ind_sol_3_body',  'label' => 'Item 3 Body',  'name' => 'ind_solution_item_3_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'Blog posts, LinkedIn articles, and newsletter content — each piece repurposed across every channel so your best thinking reaches the widest possible audience.' ),
+        array( 'key' => 'field_ind_sol_4_title', 'label' => 'Item 4 Title', 'name' => 'ind_solution_item_4_title', 'type' => 'text', 'default_value' => 'Product launch content packages' ),
+        array( 'key' => 'field_ind_sol_4_body',  'label' => 'Item 4 Body',  'name' => 'ind_solution_item_4_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'A complete content package for every significant launch or feature release — blog post, email, LinkedIn posts, X thread, and social captions — ready before the launch date.' ),
+        array( 'key' => 'field_ind_sol_5_title', 'label' => 'Item 5 Title', 'name' => 'ind_solution_item_5_title', 'type' => 'text', 'default_value' => 'Monthly performance reporting' ),
+        array( 'key' => 'field_ind_sol_5_body',  'label' => 'Item 5 Body',  'name' => 'ind_solution_item_5_body',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'A clean monthly report covering what content performed, what drove engagement, and what changes in the month ahead. No vanity metrics — just a clear picture of what is working.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 40, 'active' => true,
+) );
+
+// Group 5 — Who it's for
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_who',
+    'title'  => 'Industry: Who This Is For',
+    'fields' => array(
+        array( 'key' => 'field_ind_who_heading', 'label' => 'Heading', 'name' => 'ind_who_heading', 'type' => 'text', 'default_value' => 'Who this is right for' ),
+        array( 'key' => 'field_ind_who_body',    'label' => 'Body',    'name' => 'ind_who_body',    'type' => 'textarea', 'rows' => 3, 'default_value' => 'Bluu works best with SaaS companies between seed and Series B where the founding team is still deeply involved in product and sales, and content is chronically under-resourced as a result. If you have a full in-house content team, you probably do not need us. If you are doing it yourself or not doing it at all, you almost certainly do.' ),
+        array( 'key' => 'field_ind_who_1', 'label' => 'Statement 1', 'name' => 'ind_who_item_1', 'type' => 'textarea', 'rows' => 2, 'default_value' => 'You are a seed to Series B SaaS company with between 2 and 30 people and no dedicated content resource.' ),
+        array( 'key' => 'field_ind_who_2', 'label' => 'Statement 2', 'name' => 'ind_who_item_2', 'type' => 'textarea', 'rows' => 2, 'default_value' => 'You are shipping product in a competitive category where positioning and content visibility genuinely influence purchase decisions.' ),
+        array( 'key' => 'field_ind_who_3', 'label' => 'Statement 3', 'name' => 'ind_who_item_3', 'type' => 'textarea', 'rows' => 2, 'default_value' => 'You want content that is informed by real market intelligence — not just blog posts written in a vacuum.' ),
+        array( 'key' => 'field_ind_who_4', 'label' => 'Statement 4', 'name' => 'ind_who_item_4', 'type' => 'textarea', 'rows' => 2, 'default_value' => 'You have tried to manage content yourself or with a freelancer and it has been inconsistent. You want a system, not another supplier to chase.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 50, 'active' => true,
+) );
+
+// Group 6 — Use cases grid
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_usecases',
+    'title'  => 'Industry: Use Cases Grid',
+    'fields' => array(
+        array( 'key' => 'field_ind_usecases_heading', 'label' => 'Heading', 'name' => 'ind_usecases_heading', 'type' => 'text', 'default_value' => 'Use cases for Tech & SaaS startups' ),
+        array( 'key' => 'field_ind_usecases_intro',   'label' => 'Intro',   'name' => 'ind_usecases_intro',   'type' => 'textarea', 'rows' => 2, 'default_value' => 'Each use case below is a specific way Bluu solves a specific problem for SaaS teams. Most retainers combine two or three use cases depending on what your business needs most right now.' ),
+        array(
+            'key'          => 'field_ind_use_cases',
+            'label'        => 'Use Cases',
+            'name'         => 'ind_use_cases',
+            'type'         => 'repeater',
+            'min'          => 2,
+            'max'          => 6,
+            'layout'       => 'block',
+            'button_label' => 'Add use case',
+            'sub_fields'   => array(
+                array( 'key' => 'field_ind_uc_title',       'label' => 'Title',       'name' => 'ind_uc_title',       'type' => 'text' ),
+                array( 'key' => 'field_ind_uc_description', 'label' => 'Description', 'name' => 'ind_uc_description', 'type' => 'textarea', 'rows' => 2 ),
+                array( 'key' => 'field_ind_uc_url',         'label' => 'URL',         'name' => 'ind_uc_url',         'type' => 'url' ),
+                array( 'key' => 'field_ind_uc_cta',         'label' => 'CTA Text',    'name' => 'ind_uc_cta',         'type' => 'text', 'default_value' => 'See this use case' ),
+            ),
+        ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 60, 'active' => true,
+) );
+
+// Group 7 — Pricing callout
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_pricing',
+    'title'  => 'Industry: Pricing Callout',
+    'fields' => array(
+        array( 'key' => 'field_ind_pricing_heading',   'label' => 'Heading',   'name' => 'ind_pricing_heading',   'type' => 'text',     'default_value' => 'One flat monthly retainer. No surprises.' ),
+        array( 'key' => 'field_ind_pricing_body',      'label' => 'Body',      'name' => 'ind_pricing_body',      'type' => 'textarea', 'rows' => 3, 'default_value' => 'Bluu retainers for SaaS startups start at $1,500 per month and scale to $3,500 depending on the volume of content, number of platforms, and depth of intelligence coverage you need. No project fees. No hourly billing. Everything in one predictable monthly number.' ),
+        array( 'key' => 'field_ind_pricing_cta_label', 'label' => 'CTA Label', 'name' => 'ind_pricing_cta_label', 'type' => 'text',     'default_value' => 'See full pricing' ),
+        array( 'key' => 'field_ind_pricing_cta_url',   'label' => 'CTA URL',   'name' => 'ind_pricing_cta_url',   'type' => 'url',      'default_value' => '/pricing' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 70, 'active' => true,
+) );
+
+// Group 8 — Closing CTA
+acf_add_local_field_group( array(
+    'key'    => 'group_ind_cta',
+    'title'  => 'Industry: Closing CTA',
+    'fields' => array(
+        array( 'key' => 'field_ind_cta_heading',         'label' => 'Heading',          'name' => 'ind_cta_heading',         'type' => 'text',     'default_value' => 'Stop putting content off until next sprint.' ),
+        array( 'key' => 'field_ind_cta_subtext',         'label' => 'Subtext',          'name' => 'ind_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.' ),
+        array( 'key' => 'field_ind_cta_primary_label',   'label' => 'Primary Label',    'name' => 'ind_cta_primary_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_ind_cta_primary_url',     'label' => 'Primary URL',      'name' => 'ind_cta_primary_url',     'type' => 'url',      'default_value' => '/contact' ),
+        array( 'key' => 'field_ind_cta_secondary_label', 'label' => 'Secondary Label',  'name' => 'ind_cta_secondary_label', 'type' => 'text',     'default_value' => 'See pricing' ),
+        array( 'key' => 'field_ind_cta_secondary_url',   'label' => 'Secondary URL',    'name' => 'ind_cta_secondary_url',   'type' => 'url',      'default_value' => '/pricing' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
+    'menu_order' => 80, 'active' => true,
 ) );

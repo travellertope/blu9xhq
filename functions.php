@@ -96,6 +96,16 @@ function bluu_enqueue_assets() {
         $version
     );
 
+    // Industry page styles — loaded on industry + sub-industry templates only
+    if ( is_page_template( array( 'page-industry.php', 'page-subindustry.php' ) ) ) {
+        wp_enqueue_style(
+            'bluu-industry-css',
+            get_template_directory_uri() . '/assets/css/industry-page.css',
+            array( 'bluu-main-css' ),
+            $version
+        );
+    }
+
     // Main JavaScript
     wp_enqueue_script(
         'bluu-main-js',
