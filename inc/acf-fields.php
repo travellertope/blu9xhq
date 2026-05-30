@@ -880,3 +880,445 @@ acf_add_local_field_group( array(
     'menu_order' => 10,
     'active'     => true,
 ) );
+
+// ── USE CASE PAGE TEMPLATE ─────────────────────────────────────────────────────
+
+// Group 1 — Page meta & hero
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_hero',
+    'title'  => 'Use Case: Page Meta & Hero',
+    'fields' => array(
+        array(
+            'key'     => 'field_uc_industry',
+            'label'   => 'Industry',
+            'name'    => 'uc_industry',
+            'type'    => 'select',
+            'choices' => array(
+                'tech-saas'              => 'Tech & SaaS',
+                'agencies-consultants'   => 'Agencies & Consultants',
+                'ecommerce-dtc'          => 'E-commerce & DTC',
+                'professional-services'  => 'Professional Services',
+            ),
+            'allow_null'    => 0,
+            'multiple'      => 0,
+            'return_format' => 'value',
+        ),
+        array(
+            'key'           => 'field_uc_seo_title',
+            'label'         => 'SEO Page Title',
+            'name'          => 'uc_seo_title',
+            'type'          => 'text',
+            'maxlength'     => 60,
+            'instructions'  => 'Used in the <title> tag. Different from the hero headline.',
+        ),
+        array(
+            'key'          => 'field_uc_meta_description',
+            'label'        => 'Meta Description',
+            'name'         => 'uc_meta_description',
+            'type'         => 'textarea',
+            'maxlength'    => 155,
+            'rows'         => 3,
+            'instructions' => 'Meta description for search engines.',
+        ),
+        array(
+            'key'          => 'field_uc_hero_tag',
+            'label'        => 'Hero Tag',
+            'name'         => 'uc_hero_tag',
+            'type'         => 'text',
+            'maxlength'    => 40,
+            'instructions' => 'Small label above the headline. E.g. "Use case — Tech & SaaS"',
+        ),
+        array(
+            'key'          => 'field_uc_hero_headline',
+            'label'        => 'Hero Headline',
+            'name'         => 'uc_hero_headline',
+            'type'         => 'text',
+            'maxlength'    => 80,
+            'instructions' => 'Main H1 headline. Outcome-led. Sentence case.',
+        ),
+        array(
+            'key'          => 'field_uc_hero_subheadline',
+            'label'        => 'Hero Subheadline',
+            'name'         => 'uc_hero_subheadline',
+            'type'         => 'textarea',
+            'maxlength'    => 180,
+            'rows'         => 3,
+            'instructions' => '1–2 sentences below the headline. Plain language, no jargon.',
+        ),
+        array(
+            'key'           => 'field_uc_hero_cta_label',
+            'label'         => 'Primary CTA Label',
+            'name'          => 'uc_hero_cta_label',
+            'type'          => 'text',
+            'maxlength'     => 40,
+            'default_value' => 'Book a Discovery Call',
+        ),
+        array(
+            'key'           => 'field_uc_hero_cta_url',
+            'label'         => 'Primary CTA URL',
+            'name'          => 'uc_hero_cta_url',
+            'type'          => 'url',
+            'default_value' => '/contact',
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 10,
+    'active'     => true,
+) );
+
+// Group 2 — The situation
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_situation',
+    'title'  => 'Use Case: The Situation',
+    'fields' => array(
+        array(
+            'key'          => 'field_uc_situation_heading',
+            'label'        => 'Section Heading',
+            'name'         => 'uc_situation_heading',
+            'type'         => 'text',
+            'maxlength'    => 60,
+            'default_value' => 'The situation',
+        ),
+        array(
+            'key'          => 'field_uc_situation_body',
+            'label'        => 'Section Body',
+            'name'         => 'uc_situation_body',
+            'type'         => 'textarea',
+            'maxlength'    => 400,
+            'rows'         => 4,
+            'instructions' => '2–3 sentences describing the specific pain this use case addresses. Written for the reader, not about them.',
+        ),
+        array(
+            'key'          => 'field_uc_situation_pain_points',
+            'label'        => 'Pain Points',
+            'name'         => 'uc_situation_pain_points',
+            'type'         => 'repeater',
+            'min'          => 3,
+            'max'          => 3,
+            'layout'       => 'block',
+            'button_label' => 'Add pain point',
+            'sub_fields'   => array(
+                array(
+                    'key'       => 'field_uc_pain_title',
+                    'label'     => 'Title',
+                    'name'      => 'uc_pain_title',
+                    'type'      => 'text',
+                    'maxlength' => 50,
+                ),
+                array(
+                    'key'       => 'field_uc_pain_body',
+                    'label'     => 'Body',
+                    'name'      => 'uc_pain_body',
+                    'type'      => 'textarea',
+                    'maxlength' => 120,
+                    'rows'      => 2,
+                ),
+            ),
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 20,
+    'active'     => true,
+) );
+
+// Group 3 — The approach
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_approach',
+    'title'  => 'Use Case: The Approach',
+    'fields' => array(
+        array(
+            'key'           => 'field_uc_approach_heading',
+            'label'         => 'Section Heading',
+            'name'          => 'uc_approach_heading',
+            'type'          => 'text',
+            'maxlength'     => 60,
+            'default_value' => 'How Bluu approaches this',
+        ),
+        array(
+            'key'          => 'field_uc_approach_body',
+            'label'        => 'Section Body',
+            'name'         => 'uc_approach_body',
+            'type'         => 'textarea',
+            'maxlength'    => 400,
+            'rows'         => 4,
+            'instructions' => "2–3 sentences explaining Bluu's method for this use case. Specific, not generic.",
+        ),
+        array(
+            'key'          => 'field_uc_approach_steps',
+            'label'        => 'Steps',
+            'name'         => 'uc_approach_steps',
+            'type'         => 'repeater',
+            'min'          => 3,
+            'max'          => 4,
+            'layout'       => 'block',
+            'button_label' => 'Add step',
+            'sub_fields'   => array(
+                array(
+                    'key'   => 'field_uc_step_number',
+                    'label' => 'Step Number',
+                    'name'  => 'uc_step_number',
+                    'type'  => 'text',
+                ),
+                array(
+                    'key'       => 'field_uc_step_title',
+                    'label'     => 'Step Title',
+                    'name'      => 'uc_step_title',
+                    'type'      => 'text',
+                    'maxlength' => 50,
+                ),
+                array(
+                    'key'       => 'field_uc_step_body',
+                    'label'     => 'Step Body',
+                    'name'      => 'uc_step_body',
+                    'type'      => 'textarea',
+                    'maxlength' => 140,
+                    'rows'      => 2,
+                ),
+            ),
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 30,
+    'active'     => true,
+) );
+
+// Group 4 — What you get
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_deliverables',
+    'title'  => 'Use Case: What You Get',
+    'fields' => array(
+        array(
+            'key'           => 'field_uc_deliverables_heading',
+            'label'         => 'Section Heading',
+            'name'          => 'uc_deliverables_heading',
+            'type'          => 'text',
+            'maxlength'     => 60,
+            'default_value' => 'What you receive',
+        ),
+        array(
+            'key'          => 'field_uc_deliverables_intro',
+            'label'        => 'Intro Sentence',
+            'name'         => 'uc_deliverables_intro',
+            'type'         => 'textarea',
+            'maxlength'    => 200,
+            'rows'         => 2,
+            'instructions' => 'One sentence framing the deliverables list.',
+        ),
+        array(
+            'key'          => 'field_uc_deliverables_list',
+            'label'        => 'Deliverables',
+            'name'         => 'uc_deliverables_list',
+            'type'         => 'repeater',
+            'min'          => 4,
+            'max'          => 6,
+            'layout'       => 'block',
+            'button_label' => 'Add deliverable',
+            'sub_fields'   => array(
+                array(
+                    'key'       => 'field_uc_deliverable_name',
+                    'label'     => 'Deliverable Name',
+                    'name'      => 'uc_deliverable_name',
+                    'type'      => 'text',
+                    'maxlength' => 60,
+                ),
+                array(
+                    'key'       => 'field_uc_deliverable_detail',
+                    'label'     => 'Detail',
+                    'name'      => 'uc_deliverable_detail',
+                    'type'      => 'textarea',
+                    'maxlength' => 120,
+                    'rows'      => 2,
+                ),
+            ),
+        ),
+        array(
+            'key'          => 'field_uc_cadence',
+            'label'        => 'Cadence Note',
+            'name'         => 'uc_cadence',
+            'type'         => 'text',
+            'maxlength'    => 80,
+            'default_value' => 'Delivered weekly as part of your retainer.',
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 40,
+    'active'     => true,
+) );
+
+// Group 5 — Who this is for
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_fit',
+    'title'  => 'Use Case: Who This Is For',
+    'fields' => array(
+        array(
+            'key'           => 'field_uc_fit_heading',
+            'label'         => 'Section Heading',
+            'name'          => 'uc_fit_heading',
+            'type'          => 'text',
+            'maxlength'     => 60,
+            'default_value' => 'Who this is right for',
+        ),
+        array(
+            'key'          => 'field_uc_fit_list',
+            'label'        => 'Fit Statements',
+            'name'         => 'uc_fit_list',
+            'type'         => 'repeater',
+            'min'          => 3,
+            'max'          => 4,
+            'layout'       => 'block',
+            'button_label' => 'Add fit statement',
+            'instructions' => 'Each statement should start with "You are..." or "You have..."',
+            'sub_fields'   => array(
+                array(
+                    'key'       => 'field_uc_fit_statement',
+                    'label'     => 'Statement',
+                    'name'      => 'uc_fit_statement',
+                    'type'      => 'textarea',
+                    'maxlength' => 120,
+                    'rows'      => 2,
+                ),
+            ),
+        ),
+        array(
+            'key'          => 'field_uc_not_fit_note',
+            'label'        => 'Not a Fit Note',
+            'name'         => 'uc_not_fit_note',
+            'type'         => 'textarea',
+            'maxlength'    => 180,
+            'rows'         => 2,
+            'instructions' => 'Optional. One honest sentence about who this is NOT right for. Builds trust.',
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 50,
+    'active'     => true,
+) );
+
+// Group 6 — Related use cases
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_related',
+    'title'  => 'Use Case: Related Use Cases',
+    'fields' => array(
+        array(
+            'key'          => 'field_uc_related_pages',
+            'label'        => 'Related Pages',
+            'name'         => 'uc_related_pages',
+            'type'         => 'repeater',
+            'min'          => 2,
+            'max'          => 3,
+            'layout'       => 'block',
+            'button_label' => 'Add related page',
+            'sub_fields'   => array(
+                array(
+                    'key'   => 'field_uc_related_title',
+                    'label' => 'Title',
+                    'name'  => 'uc_related_title',
+                    'type'  => 'text',
+                ),
+                array(
+                    'key'   => 'field_uc_related_url',
+                    'label' => 'URL',
+                    'name'  => 'uc_related_url',
+                    'type'  => 'url',
+                ),
+                array(
+                    'key'       => 'field_uc_related_description',
+                    'label'     => 'Description',
+                    'name'      => 'uc_related_description',
+                    'type'      => 'textarea',
+                    'maxlength' => 100,
+                    'rows'      => 2,
+                ),
+            ),
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 60,
+    'active'     => true,
+) );
+
+// Group 7 — Closing CTA
+acf_add_local_field_group( array(
+    'key'    => 'group_uc_cta',
+    'title'  => 'Use Case: Closing CTA',
+    'fields' => array(
+        array(
+            'key'          => 'field_uc_cta_heading',
+            'label'        => 'CTA Heading',
+            'name'         => 'uc_cta_heading',
+            'type'         => 'text',
+            'maxlength'    => 80,
+            'instructions' => 'Closing CTA headline. Specific to this use case, not generic.',
+        ),
+        array(
+            'key'          => 'field_uc_cta_subtext',
+            'label'        => 'CTA Subtext',
+            'name'         => 'uc_cta_subtext',
+            'type'         => 'textarea',
+            'maxlength'    => 200,
+            'rows'         => 3,
+            'instructions' => '1–2 sentences. Low pressure. References the Discovery Call.',
+        ),
+        array(
+            'key'           => 'field_uc_cta_primary_label',
+            'label'         => 'Primary Button Label',
+            'name'          => 'uc_cta_primary_label',
+            'type'          => 'text',
+            'maxlength'     => 40,
+            'default_value' => 'Book a Discovery Call',
+        ),
+        array(
+            'key'           => 'field_uc_cta_primary_url',
+            'label'         => 'Primary Button URL',
+            'name'          => 'uc_cta_primary_url',
+            'type'          => 'url',
+            'default_value' => '/contact',
+        ),
+        array(
+            'key'           => 'field_uc_cta_secondary_label',
+            'label'         => 'Secondary Button Label',
+            'name'          => 'uc_cta_secondary_label',
+            'type'          => 'text',
+            'maxlength'     => 40,
+            'default_value' => 'See pricing',
+        ),
+        array(
+            'key'           => 'field_uc_cta_secondary_url',
+            'label'         => 'Secondary Button URL',
+            'name'          => 'uc_cta_secondary_url',
+            'type'          => 'url',
+            'default_value' => '/pricing',
+        ),
+    ),
+    'location'   => array( array( array(
+        'param'    => 'page_template',
+        'operator' => '==',
+        'value'    => 'page-use-case.php',
+    ) ) ),
+    'menu_order' => 70,
+    'active'     => true,
+) );
