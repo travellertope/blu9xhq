@@ -18,15 +18,17 @@
     <div class="site-header__inner container">
 
         <!-- Logo -->
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-header__logo" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-            <?php if ( has_custom_logo() ) : ?>
+        <?php if ( has_custom_logo() ) : ?>
+            <div class="site-header__logo">
                 <?php the_custom_logo(); ?>
-            <?php else : ?>
+            </div>
+        <?php else : ?>
+            <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-header__logo" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
                 <span class="site-header__logo-text">
                     <span class="site-header__logo-name">Bluu</span> <span class="site-header__logo-name site-header__logo-name--accent">Interactive</span>
                 </span>
-            <?php endif; ?>
-        </a>
+            </a>
+        <?php endif; ?>
 
         <!-- Primary Navigation -->
         <nav class="site-header__nav" id="primary-nav" role="navigation" aria-label="<?php esc_attr_e( 'Primary Navigation', 'bluu-interactive' ); ?>">
