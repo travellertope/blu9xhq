@@ -6,7 +6,7 @@
  */
 
 $icp_badge    = ( function_exists( 'get_field' ) ? get_field( 'icp_badge' )    : '' ) ?: 'Who We Serve';
-$icp_headline = ( function_exists( 'get_field' ) ? get_field( 'icp_headline' ) : '' ) ?: 'Built for High-Growth B2B Companies';
+$icp_headline = ( function_exists( 'get_field' ) ? get_field( 'icp_headline' ) : '' ) ?: 'Built for SMEs, Startups & Agencies';
 $icp_body     = ( function_exists( 'get_field' ) ? get_field( 'icp_body' )     : '' ) ?: '';
 
 $icp_verticals = ( function_exists( 'get_field' ) ? get_field( 'icp_verticals' ) : [] );
@@ -15,26 +15,26 @@ if ( empty( $icp_verticals ) ) {
     $icp_verticals = [
         [
             'icon'        => 'saas',
-            'title'       => 'B2B SaaS',
-            'description' => 'Complex platform positioning, ARPU-focused campaigns, and sophisticated GTM plays to outmaneuver legacy competitors.',
+            'title'       => 'Startups & Scale-ups',
+            'description' => 'Fast-moving teams that need a full content operation without hiring in-house — research, publishing, and reporting all handled.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'health',
-            'title'       => 'Healthcare & BioTech',
-            'description' => 'HIPAA-compliant platforms, institutional trust building, and highly technical value translation for clinical audiences.',
+            'title'       => 'Professional Services',
+            'description' => 'Law firms, consultancies, and financial advisors who need authoritative content that builds trust and fills the top of the funnel.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'legal',
-            'title'       => 'Legal & Finance',
-            'description' => 'Institutional authority generation, partner-led growth infrastructure, and secure conversion funnels for high-ticket clients.',
+            'title'       => 'E-commerce & DTC Brands',
+            'description' => 'Brands that need consistent content across channels to drive discovery, build loyalty, and turn browsers into buyers.',
             'link'        => home_url( '/industries' ),
         ],
         [
             'icon'        => 'logistics',
-            'title'       => 'Logistics & Supply Chain',
-            'description' => 'Enterprise integration showcases, global capability narratives, and digital transformation positioning for legacy operators.',
+            'title'       => 'Agencies & Freelancers',
+            'description' => 'White-label content and research support for agencies that need to scale output without scaling headcount.',
             'link'        => home_url( '/industries' ),
         ],
     ];

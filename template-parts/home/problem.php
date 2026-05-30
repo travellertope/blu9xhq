@@ -6,26 +6,26 @@
  */
 
 $problem_badge    = ( function_exists( 'get_field' ) ? get_field( 'problem_badge' )    : '' ) ?: 'The Problem';
-$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Fragmentation Is Costing You Revenue';
-$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most B2B companies are paying full-service rates for multi-vendor chaos. The result is an agency-managed digital ship where code, copy, and sales never connect.';
+$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Inconsistency Is Costing You Clients';
+$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most SMEs and startups are paying for content that never connects — no strategy behind it, no consistency across channels, and no one accountable for the results.';
 $problem_items    = ( function_exists( 'get_field' ) ? get_field( 'problem_items' )    : [] );
 
 if ( empty( $problem_items ) ) {
     $problem_items = [
         [
             'icon'        => 'alert',
-            'title'       => 'Time-Sinking Maintenance',
-            'description' => 'You scheduled updates for a quarter, not a week. Your lead channels hit problems as vendors pass you like a hot potato.',
+            'title'       => 'No Strategic Intelligence',
+            'description' => "You're producing content with no real insight into what your competitors are doing, what your audience actually wants, or what's shifting in your market.",
         ],
         [
             'icon'        => 'trend-down',
-            'title'       => 'Low-Intent Content',
-            'description' => 'Your SEO agency publishes generic articles that rank but drive zero qualified leads because you lack expert authority.',
+            'title'       => 'Generic Content That Goes Nowhere',
+            'description' => 'Posts go out, nothing comes back. No engagement, no leads, no compounding value — because content without strategy is just noise.',
         ],
         [
             'icon'        => 'lock',
-            'title'       => 'Non-Existent Enablement',
-            'description' => 'You step out for calls with static documents that lack strong visual and direct narrative value for enterprise prospects.',
+            'title'       => 'No One Owns the Publishing',
+            'description' => 'Content gets written but never published consistently. It sits in Notion, Google Docs, or someone\'s inbox while your channels go quiet.',
         ],
     ];
 }

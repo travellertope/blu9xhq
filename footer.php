@@ -26,7 +26,7 @@ $contact_location = function_exists( 'get_field' ) ? ( get_field( 'contact_locat
                         <?php endif; ?>
                     </a>
                     <p class="footer__tagline"><?php echo esc_html( $footer_tagline ); ?></p>
-                    <p class="site-footer__descriptor"><?php esc_html_e( 'The Premium Anti-Fragmentation Agency for High-Growth B2B Brands.', 'bluu-interactive' ); ?></p>
+                    <p class="site-footer__descriptor"><?php esc_html_e( 'The AI-powered content operation for ambitious SMEs, startups, and agencies.', 'bluu-interactive' ); ?></p>
 
                     <!-- Social Icons -->
                     <div class="site-footer__social" aria-label="<?php esc_attr_e( 'Social media links', 'bluu-interactive' ); ?>">

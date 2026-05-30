@@ -6,45 +6,46 @@
  */
 
 $solution_badge    = ( function_exists( 'get_field' ) ? get_field( 'solution_badge' )    : '' ) ?: 'The Solution';
-$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One Team, Total Growth.';
-$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We have eliminated the friction of fragmented marketing. Experience a single, cohesive service built specifically for B2B scale.';
+$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One Retainer. Everything Running.';
+$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: "We've eliminated the gap between research, content, and publishing. One retainer covers your entire content operation — built for SMEs, startups, and agencies who need it done right.";
 
-$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The Complete Ecosystem';
-$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of juggling separate vendors, our unified approach seamlessly connects your digital presence, your market authority, and your sales enablement into one unstoppable force.';
+$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The Full Content Engine';
+$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different vendors and chasing deliverables, Bluu runs your research, content, publishing, and reporting in one connected motion — every month, without the management overhead.';
 $solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: 'Explore the Framework';
 $solution_sidebar_url   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_url' )  : '' ) ?: home_url( '/pricing' );
 
 $solution_features = [
     [
         'icon'   => 'monitor',
-        'title'  => 'Digital Infrastructure',
+        'title'  => 'Research & Intelligence',
         'items'  => [
-            'Fast, technical SEO-optimized builds.',
-            'Seamless CRM & tracking integration.',
+            'Weekly competitor monitoring.',
+            'Audience & sentiment insights.',
+            'Trend radar for your niche.',
         ],
     ],
     [
         'icon'   => 'trending-up',
-        'title'  => 'Authority Content',
+        'title'  => 'Content That Actually Works',
         'items'  => [
-            'Deeply researched, expert-level IP.',
-            'Long-form assets driving B2B demand.',
+            'AI-assisted, strategist-reviewed.',
+            'Blog, LinkedIn, newsletter, social — all formats.',
         ],
     ],
     [
         'icon'   => 'briefcase',
-        'title'  => 'Strategic Sales Assets',
+        'title'  => 'Full-Service Publishing',
         'items'  => [
-            'High-fidelity pitch decks & one-pagers.',
-            'Closing materials aligned to client pain.',
+            'We publish to your website, socials & newsletter.',
+            'One content piece repurposed across every channel.',
         ],
     ],
     [
         'icon'   => 'users',
-        'title'  => 'Dedicated Partnership',
+        'title'  => 'Measurable Monthly Outcomes',
         'items'  => [
-            'One point of contact, total alignment.',
-            'Proactive strategy, zero finger-pointing.',
+            'Monthly performance reports.',
+            'Quarterly case studies & use cases (Growth & Premium).',
         ],
     ],
 ];

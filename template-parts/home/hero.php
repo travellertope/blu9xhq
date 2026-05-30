@@ -6,11 +6,11 @@
  */
 
 $hero_badge              = ( function_exists( 'get_field' ) ? get_field( 'hero_badge' )             : '' ) ?: 'B2B Growth Agency';
-$hero_headline           = ( function_exists( 'get_field' ) ? get_field( 'hero_headline' )          : '' ) ?: "Stop Managing Vendors.\nStart Closing Revenue.";
-$hero_subheadline        = ( function_exists( 'get_field' ) ? get_field( 'hero_subheadline' )       : '' ) ?: 'Bluu Interactive develops top-tier digital infrastructure, authority content, and strategic sales assets into one seamless motion, so you can focus entirely on closing deals.';
+$hero_headline           = ( function_exists( 'get_field' ) ? get_field( 'hero_headline' )          : '' ) ?: "Stop Guessing.\nStart Growing With Intelligence.";
+$hero_subheadline        = ( function_exists( 'get_field' ) ? get_field( 'hero_subheadline' )       : '' ) ?: 'Bluu Interactive combines AI-powered research, strategic content, and full-service publishing into one seamless retainer — so your brand shows up everywhere, consistently, without the chaos.';
 $hero_cta_primary_text   = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_primary_text' )  : '' ) ?: 'Book a Discovery Call';
 $hero_cta_primary_url    = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_primary_url' )   : '' ) ?: home_url( '/contact' );
-$hero_cta_secondary_text = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_text' ): '' ) ?: 'See How It Works';
+$hero_cta_secondary_text = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_text' ): '' ) ?: "See What's Included";
 $hero_cta_secondary_url  = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_url' ) : '' ) ?: '#solution';
 $hero_stats              = ( function_exists( 'get_field' ) ? get_field( 'hero_stats' )             : [] );
 
@@ -96,7 +96,7 @@ $headline_2 = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
                         <div class="hero-dash__hub">
                             <div>
                                 <div class="hero-dash__hub-label"><?php esc_html_e( 'Unified Output', 'bluu-interactive' ); ?></div>
-                                <div class="hero-dash__hub-title"><?php esc_html_e( 'Revenue Engine', 'bluu-interactive' ); ?></div>
+                                <div class="hero-dash__hub-title"><?php esc_html_e( 'Content Engine', 'bluu-interactive' ); ?></div>
                             </div>
                             <svg class="hero-dash__hub-icon" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
                                 <path d="M13 7l5 5m0 0l-5 5m5-5H6"/>
