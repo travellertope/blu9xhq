@@ -481,9 +481,18 @@ h6 { font-size: var(--font-size-base); font-weight: 500; line-height: 1.5; }
     align-items: center;
 }
 
-.site-header__logo img {
+.site-header__logo img,
+.site-header__logo .wp-custom-logo img {
     height: 36px;
     width: auto;
+    display: block;
+}
+
+.site-header__logo figure,
+.site-header__logo .wp-custom-logo {
+    margin: 0;
+    padding: 0;
+    line-height: 0;
 }
 
 .site-header__logo-text {
@@ -3679,6 +3688,17 @@ a.contact-info__value:hover {
 
 .industry-hp-card__link:hover {
     text-decoration: underline;
+}
+
+.industries-hp__cta {
+    text-align: center;
+    margin-top: var(--space-8);
+}
+
+.industries-hp__cta-text {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--space-4);
 }
 
 @media (max-width: 768px) {

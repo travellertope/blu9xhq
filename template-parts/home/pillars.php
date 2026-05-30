@@ -6,45 +6,46 @@
  */
 
 $solution_badge    = ( function_exists( 'get_field' ) ? get_field( 'solution_badge' )    : '' ) ?: 'The Solution';
-$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One Team, Total Growth.';
-$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We have eliminated the friction of fragmented marketing. Experience a single, cohesive service built specifically for B2B scale.';
+$solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_headline' ) : '' ) ?: 'One retainer. Everything running.';
+$solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We handle research, content creation, publishing, and reporting in one connected monthly retainer — so your brand shows up consistently, across every channel, without you having to manage it.';
 
-$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The Complete Ecosystem';
-$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of juggling separate vendors, our unified approach seamlessly connects your digital presence, your market authority, and your sales enablement into one unstoppable force.';
-$solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: 'Explore the Framework';
+$solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The complete content operation';
+$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different suppliers and chasing deliverables across four different tools, Bluu runs your entire content operation in one seamless monthly engagement. Research informs content. Content gets published. Results get reported. Every month, without fail.';
+$solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: "See what's included";
 $solution_sidebar_url   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_url' )  : '' ) ?: home_url( '/pricing' );
 
 $solution_features = [
     [
         'icon'   => 'monitor',
-        'title'  => 'Digital Infrastructure',
+        'title'  => 'Research & intelligence',
         'items'  => [
-            'Fast, technical SEO-optimized builds.',
-            'Seamless CRM & tracking integration.',
+            'Weekly competitor monitoring.',
+            'Audience insight reports.',
+            'Trend analysis for your niche.',
         ],
     ],
     [
         'icon'   => 'trending-up',
-        'title'  => 'Authority Content',
+        'title'  => 'Content that earns attention',
         'items'  => [
-            'Deeply researched, expert-level IP.',
-            'Long-form assets driving B2B demand.',
+            'Long-form pieces, social content, newsletters, and case studies.',
+            'Written for your audience, reviewed for quality before anything goes out.',
         ],
     ],
     [
         'icon'   => 'briefcase',
-        'title'  => 'Strategic Sales Assets',
+        'title'  => 'Published across every channel',
         'items'  => [
-            'High-fidelity pitch decks & one-pagers.',
-            'Closing materials aligned to client pain.',
+            'We schedule and publish to your website, social platforms, and newsletter.',
+            'One piece of content repurposed intelligently across every format.',
         ],
     ],
     [
         'icon'   => 'users',
-        'title'  => 'Dedicated Partnership',
+        'title'  => 'Accountable monthly outcomes',
         'items'  => [
-            'One point of contact, total alignment.',
-            'Proactive strategy, zero finger-pointing.',
+            'A performance report every month — what worked, what did not, what changes.',
+            'No vanity metrics. A clear picture of what your content is doing.',
         ],
     ],
 ];

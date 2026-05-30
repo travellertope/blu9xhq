@@ -6,26 +6,26 @@
  */
 
 $problem_badge    = ( function_exists( 'get_field' ) ? get_field( 'problem_badge' )    : '' ) ?: 'The Problem';
-$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Fragmentation Is Costing You Revenue';
-$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most B2B companies are paying full-service rates for multi-vendor chaos. The result is an agency-managed digital ship where code, copy, and sales never connect.';
+$problem_headline = ( function_exists( 'get_field' ) ? get_field( 'problem_headline' ) : '' ) ?: 'Inconsistency is costing you clients.';
+$problem_body     = ( function_exists( 'get_field' ) ? get_field( 'problem_body' )     : '' ) ?: 'Most growing teams are producing content when they can, not when they should — with no strategy behind it, no one accountable for it, and no clear picture of whether it\'s working.';
 $problem_items    = ( function_exists( 'get_field' ) ? get_field( 'problem_items' )    : [] );
 
 if ( empty( $problem_items ) ) {
     $problem_items = [
         [
             'icon'        => 'alert',
-            'title'       => 'Time-Sinking Maintenance',
-            'description' => 'You scheduled updates for a quarter, not a week. Your lead channels hit problems as vendors pass you like a hot potato.',
+            'title'       => 'No strategic foundation',
+            'description' => 'You are producing content without knowing what your competitors are publishing, what your audience actually responds to, or what is shifting in your market. You are guessing.',
         ],
         [
             'icon'        => 'trend-down',
-            'title'       => 'Low-Intent Content',
-            'description' => 'Your SEO agency publishes generic articles that rank but drive zero qualified leads because you lack expert authority.',
+            'title'       => 'Content without consistency',
+            'description' => 'Posts go out, nothing comes back. No consistent schedule, no compounding effect, no clear narrative. Content without a system is just noise with extra steps.',
         ],
         [
             'icon'        => 'lock',
-            'title'       => 'Non-Existent Enablement',
-            'description' => 'You step out for calls with static documents that lack strong visual and direct narrative value for enterprise prospects.',
+            'title'       => 'No one owns the result',
+            'description' => 'Content gets written but not published. Campaigns get started but not finished. Without a dedicated team running the operation, everything defaults to the bottom of the priority list.',
         ],
     ];
 }
