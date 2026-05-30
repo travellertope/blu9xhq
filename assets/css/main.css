@@ -977,37 +977,47 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     border-top: none;
 }
 
-.mobile-mega-header {
+/* ── Mobile accordion header row ────────────────────────────────────────────
+   Use full parent chain for higher specificity than .mobile-nav__menu li a
+   so display:flex is guaranteed to override display:block on the <a>. */
+.mobile-nav__menu li.has-mega > .mobile-mega-header {
     display: flex;
-    align-items: center;
+    align-items: stretch;
 }
 
-.mobile-mega-header > a {
-    flex: 1;
-    display: block;
+/* Parent page link — stretches to fill available width */
+.mobile-nav__menu li.has-mega > .mobile-mega-header > a {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
     padding: var(--space-4) var(--space-2);
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-lg);
     font-weight: 500;
     text-decoration: none;
     transition: color var(--transition-fast);
+    min-width: 0;
 }
 
-.mobile-mega-header > a:hover,
+.mobile-nav__menu li.has-mega > .mobile-mega-header > a:hover,
 .mobile-nav__menu .has-mega.is-open > .mobile-mega-header > a {
     color: var(--md-accent);
 }
 
+/* Chevron toggle button — fixed-size, flush right with visible divider */
 .mobile-mega-btn {
     background: none;
     border: none;
+    border-left: 1px solid var(--md-outline-variant);
     cursor: pointer;
-    padding: var(--space-3) var(--space-3);
+    padding: var(--space-3) var(--space-4);
     color: var(--md-on-surface-variant);
     display: flex;
     align-items: center;
+    justify-content: center;
     transition: color var(--transition-fast), background var(--transition-fast);
-    flex-shrink: 0;
+    flex: 0 0 48px; /* fixed 48px tap target — never shrinks or grows */
+    min-height: 48px;
 }
 
 .mobile-mega-btn:hover {
@@ -1019,18 +1029,25 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     transform: rotate(180deg);
 }
 
+/* ── Accordion sub-list ──────────────────────────────────────────────────────
+   display:none is simpler and more reliable than max-height:0 — no
+   specificity or caching edge-cases that let items bleed through. */
 .mobile-mega-list {
+    display: none;
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 260ms cubic-bezier(0.4, 0, 0.2, 1);
     background: var(--md-surface-variant);
 }
 
 .mobile-nav__menu .has-mega.is-open > .mobile-mega-list {
-    max-height: 640px;
+    display: block;
+    animation: mobileAccordionIn 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes mobileAccordionIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .mobile-mega-list li a {
