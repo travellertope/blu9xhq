@@ -3241,27 +3241,27 @@ a.contact-info__value:hover {
 
 .hero-dash__block {
     background: var(--md-surface-variant);
-    padding: var(--space-4);
+    padding: var(--space-3);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border-left: 4px solid;
+    border-left: 3px solid;
 }
 
 .hero-dash__block--blue { border-left-color: var(--md-accent); }
 .hero-dash__block--green { border-left-color: #198754; }
 
 .hero-dash__block-num {
-    width: 30px;
-    height: 30px;
+    width: 22px;
+    height: 22px;
     background: var(--md-accent-container);
     color: var(--md-accent);
     font-weight: 700;
-    font-size: var(--font-size-sm);
+    font-size: 11px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: var(--space-4);
+    margin-bottom: var(--space-2);
 }
 
 .hero-dash__block-num--green {
@@ -3272,11 +3272,11 @@ a.contact-info__value:hover {
 .hero-dash__lines {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
 }
 
 .hero-dash__line {
-    height: 8px;
+    height: 6px;
     background: #cbd5e0;
 }
 
