@@ -1478,3 +1478,128 @@ acf_add_local_field_group( array(
     'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industry.php' ) ) ),
     'menu_order' => 80, 'active' => true,
 ) );
+
+// ── Sub-industry (si_*) field groups ─────────────────────────────────────────
+// Targeting page-subindustry.php
+
+// SI Group 1 — SEO & page meta
+acf_add_local_field_group( array(
+    'key'    => 'group_si_meta',
+    'title'  => 'Sub-industry: SEO & Meta',
+    'fields' => array(
+        array( 'key' => 'field_si_seo_title',          'label' => 'SEO Title',          'name' => 'si_seo_title',          'type' => 'text' ),
+        array( 'key' => 'field_si_meta_description',   'label' => 'Meta Description',   'name' => 'si_meta_description',   'type' => 'textarea', 'rows' => 2 ),
+        array( 'key' => 'field_si_industry_parent',    'label' => 'Industry Parent Slug','name' => 'si_industry_parent',   'type' => 'text' ),
+        array( 'key' => 'field_si_slug',               'label' => 'Page Slug',           'name' => 'si_slug',              'type' => 'text' ),
+        array( 'key' => 'field_si_publish_status',     'label' => 'Publish Status Note', 'name' => 'si_publish_status',    'type' => 'text' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 10, 'active' => true,
+) );
+
+// SI Group 2 — Hero
+acf_add_local_field_group( array(
+    'key'    => 'group_si_hero',
+    'title'  => 'Sub-industry: Hero',
+    'fields' => array(
+        array( 'key' => 'field_si_hero_tag',         'label' => 'Tag',         'name' => 'si_hero_tag',         'type' => 'text',     'default_value' => 'Tech & SaaS — Seed to Series A founders' ),
+        array( 'key' => 'field_si_hero_headline',    'label' => 'Headline',    'name' => 'si_hero_headline',    'type' => 'text',     'default_value' => 'You are building the company. Content should not be your problem too.' ),
+        array( 'key' => 'field_si_hero_subheadline', 'label' => 'Subheadline', 'name' => 'si_hero_subheadline', 'type' => 'textarea', 'rows' => 3, 'default_value' => 'Between product, hiring, fundraising, and sales, content is always the thing that gets pushed to next sprint. At seed to Series A stage, your brand needs to be moving even when you cannot give it attention. Bluu runs the content operation so it does not depend on you finding the time.' ),
+        array( 'key' => 'field_si_hero_cta_label',  'label' => 'CTA Label',   'name' => 'si_hero_cta_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_si_hero_cta_url',    'label' => 'CTA URL',     'name' => 'si_hero_cta_url',     'type' => 'url',      'default_value' => '/contact' ),
+        array( 'key' => 'field_si_hero_image',      'label' => 'Hero Image',  'name' => 'si_hero_image',       'type' => 'image',    'return_format' => 'array', 'preview_size' => 'medium' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 20, 'active' => true,
+) );
+
+// SI Group 3 — Who this is for
+acf_add_local_field_group( array(
+    'key'    => 'group_si_who',
+    'title'  => 'Sub-industry: Who This Is For',
+    'fields' => array(
+        array( 'key' => 'field_si_who_heading', 'label' => 'Heading',  'name' => 'si_who_heading', 'type' => 'text',     'default_value' => 'Exactly who this is built for' ),
+        array( 'key' => 'field_si_who_body',    'label' => 'Body',     'name' => 'si_who_body',    'type' => 'textarea', 'rows' => 3, 'default_value' => 'This is for SaaS founders between pre-seed and Series A — typically 2 to 15 people — where the founding team is still doing most things and content is the lowest priority despite being strategically important.' ),
+        array( 'key' => 'field_si_who_item_1',  'label' => 'Item 1',   'name' => 'si_who_item_1',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'You are building a B2B SaaS product in a competitive category and you know that visibility and positioning matter as much as the product itself.' ),
+        array( 'key' => 'field_si_who_item_2',  'label' => 'Item 2',   'name' => 'si_who_item_2',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'You have no dedicated content resource and no realistic plans to hire one in the next six months — but content is falling further behind every week.' ),
+        array( 'key' => 'field_si_who_item_3',  'label' => 'Item 3',   'name' => 'si_who_item_3',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'You or a co-founder have things worth saying — market opinions, product perspectives, hard-won lessons — but no system for saying them consistently.' ),
+        array( 'key' => 'field_si_who_item_4',  'label' => 'Item 4',   'name' => 'si_who_item_4',  'type' => 'textarea', 'rows' => 2, 'default_value' => 'You want competitor intelligence but have never had a structured way to get it without spending hours doing it yourself.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 30, 'active' => true,
+) );
+
+// SI Group 4 — Pain
+acf_add_local_field_group( array(
+    'key'    => 'group_si_pain',
+    'title'  => 'Sub-industry: Specific Pain',
+    'fields' => array(
+        array( 'key' => 'field_si_pain_heading',  'label' => 'Heading',       'name' => 'si_pain_heading',  'type' => 'text',     'default_value' => 'The early-stage content problem' ),
+        array( 'key' => 'field_si_pain_body',     'label' => 'Body',          'name' => 'si_pain_body',     'type' => 'textarea', 'rows' => 3, 'default_value' => 'At seed to Series A, content is caught between being critically important and completely deprioritised. You know your competitors are publishing. You know your founder LinkedIn should be more active. You know a weekly competitor digest would make your product and GTM decisions better. None of it happens consistently because everything else is on fire.' ),
+        array( 'key' => 'field_si_pain_1_title',  'label' => 'Pain 1 Title',  'name' => 'si_pain_1_title',  'type' => 'text',     'default_value' => 'Fundraising narrative has no content amplification' ),
+        array( 'key' => 'field_si_pain_1_body',   'label' => 'Pain 1 Body',   'name' => 'si_pain_1_body',   'type' => 'textarea', 'rows' => 2, 'default_value' => 'Your investor pitch deck tells a compelling story. Almost none of that narrative is visible to the market — it lives in a PDF that only people you have already met ever see.' ),
+        array( 'key' => 'field_si_pain_2_title',  'label' => 'Pain 2 Title',  'name' => 'si_pain_2_title',  'type' => 'text',     'default_value' => 'Competitors are building authority you are not' ),
+        array( 'key' => 'field_si_pain_2_body',   'label' => 'Pain 2 Body',   'name' => 'si_pain_2_body',   'type' => 'textarea', 'rows' => 2, 'default_value' => 'While you are heads-down building, competitors are publishing consistently. By the time you surface for air, they have six months of compounding content advantage working against you.' ),
+        array( 'key' => 'field_si_pain_3_title',  'label' => 'Pain 3 Title',  'name' => 'si_pain_3_title',  'type' => 'text',     'default_value' => 'Every sprint deprioritises content' ),
+        array( 'key' => 'field_si_pain_3_body',   'label' => 'Pain 3 Body',   'name' => 'si_pain_3_body',   'type' => 'textarea', 'rows' => 2, 'default_value' => 'Content never makes it into the sprint because there is always something more urgent. A content operation that runs independently of your sprint cycle is the only solution that actually works at this stage.' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 40, 'active' => true,
+) );
+
+// SI Group 5 — Use cases (repeater)
+acf_add_local_field_group( array(
+    'key'    => 'group_si_usecases',
+    'title'  => 'Sub-industry: Curated Use Cases',
+    'fields' => array(
+        array( 'key' => 'field_si_usecases_heading', 'label' => 'Heading', 'name' => 'si_usecases_heading', 'type' => 'text',     'default_value' => 'Where most seed to Series A founders start' ),
+        array( 'key' => 'field_si_usecases_intro',   'label' => 'Intro',   'name' => 'si_usecases_intro',   'type' => 'textarea', 'rows' => 2, 'default_value' => 'Most early-stage SaaS retainers combine competitor intelligence with founder brand content — the two use cases that deliver the most visible impact fastest with the least input required from the founding team.' ),
+        array(
+            'key'          => 'field_si_use_cases',
+            'label'        => 'Use Cases',
+            'name'         => 'si_use_cases',
+            'type'         => 'repeater',
+            'min'          => 0,
+            'max'          => 6,
+            'layout'       => 'block',
+            'button_label' => 'Add Use Case',
+            'sub_fields'   => array(
+                array( 'key' => 'field_si_uc_title', 'label' => 'Title',    'name' => 'si_uc_title', 'type' => 'text' ),
+                array( 'key' => 'field_si_uc_why',   'label' => 'Why text', 'name' => 'si_uc_why',   'type' => 'textarea', 'rows' => 3 ),
+                array( 'key' => 'field_si_uc_url',   'label' => 'URL',      'name' => 'si_uc_url',   'type' => 'url' ),
+                array( 'key' => 'field_si_uc_cta',   'label' => 'CTA Text', 'name' => 'si_uc_cta',   'type' => 'text', 'default_value' => 'See this use case' ),
+            ),
+        ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 50, 'active' => true,
+) );
+
+// SI Group 6 — Why Bluu fits
+acf_add_local_field_group( array(
+    'key'    => 'group_si_fit',
+    'title'  => 'Sub-industry: Why Bluu Fits',
+    'fields' => array(
+        array( 'key' => 'field_si_fit_heading', 'label' => 'Heading',    'name' => 'si_fit_heading', 'type' => 'text',     'default_value' => 'Why Bluu works at this stage' ),
+        array( 'key' => 'field_si_fit_body',    'label' => 'Body',       'name' => 'si_fit_body',    'type' => 'textarea', 'rows' => 4, 'default_value' => 'Bluu is designed to run with minimal input from founders. A single monthly conversation is enough to keep the content relevant and in your voice. Everything else — research, writing, publishing, reporting — is handled. No briefing overhead, no project management, no chasing. For a founding team already at capacity, that is the only model that actually works.' ),
+        array( 'key' => 'field_si_fit_proof',   'label' => 'Investment / Proof', 'name' => 'si_fit_proof', 'type' => 'textarea', 'rows' => 3, 'default_value' => "Retainers for early-stage SaaS teams start at \$1,500 per month — less than a junior hire's first month salary, with no onboarding time and no management overhead." ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 60, 'active' => true,
+) );
+
+// SI Group 7 — Closing CTA
+acf_add_local_field_group( array(
+    'key'    => 'group_si_cta',
+    'title'  => 'Sub-industry: Closing CTA',
+    'fields' => array(
+        array( 'key' => 'field_si_cta_heading',         'label' => 'Heading',         'name' => 'si_cta_heading',         'type' => 'text',     'default_value' => 'Your content should be working while you are in product reviews.' ),
+        array( 'key' => 'field_si_cta_subtext',         'label' => 'Subtext',         'name' => 'si_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Book a 15-minute Discovery Call — we will tell you honestly whether Bluu makes sense for your stage and what starting would look like.' ),
+        array( 'key' => 'field_si_cta_primary_label',   'label' => 'Primary Label',   'name' => 'si_cta_primary_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_si_cta_primary_url',     'label' => 'Primary URL',     'name' => 'si_cta_primary_url',     'type' => 'url',      'default_value' => '/contact' ),
+        array( 'key' => 'field_si_cta_secondary_label', 'label' => 'Secondary Label', 'name' => 'si_cta_secondary_label', 'type' => 'text',     'default_value' => 'See pricing' ),
+        array( 'key' => 'field_si_cta_secondary_url',   'label' => 'Secondary URL',   'name' => 'si_cta_secondary_url',   'type' => 'url',      'default_value' => '/pricing' ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
+    'menu_order' => 70, 'active' => true,
+) );
