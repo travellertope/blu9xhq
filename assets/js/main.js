@@ -397,6 +397,121 @@
         } );
     }
 
+    /* ── Mega Menu (Desktop) ────────────────────────────────────────────────── */
+    function initMegaMenu() {
+        var megaItems = qsa( '.site-header__menu .has-mega' );
+        if ( ! megaItems.length ) { return; }
+
+        var closeTimer;
+
+        function openMega( li ) {
+            clearTimeout( closeTimer );
+            megaItems.forEach( function ( other ) {
+                if ( other !== li ) { closeMegaNow( other ); }
+            } );
+            li.classList.add( 'is-open' );
+            var trigger = qs( '.mega-trigger', li );
+            if ( trigger ) { trigger.setAttribute( 'aria-expanded', 'true' ); }
+        }
+
+        function closeMegaNow( li ) {
+            li.classList.remove( 'is-open' );
+            var trigger = qs( '.mega-trigger', li );
+            if ( trigger ) { trigger.setAttribute( 'aria-expanded', 'false' ); }
+        }
+
+        function closeMegaAfterDelay( li ) {
+            clearTimeout( closeTimer );
+            closeTimer = setTimeout( function () { closeMegaNow( li ); }, 120 );
+        }
+
+        megaItems.forEach( function ( li ) {
+            var trigger = qs( '.mega-trigger', li );
+            var panel   = qs( '.mega-panel',   li );
+
+            li.addEventListener( 'mouseenter', function () { openMega( li ); } );
+            li.addEventListener( 'mouseleave', function () { closeMegaAfterDelay( li ); } );
+
+            if ( panel ) {
+                panel.addEventListener( 'mouseenter', function () { clearTimeout( closeTimer ); } );
+                panel.addEventListener( 'mouseleave', function () { closeMegaAfterDelay( li ); } );
+            }
+
+            if ( trigger ) {
+                // First click opens; second click navigates to parent page
+                trigger.addEventListener( 'click', function ( e ) {
+                    if ( ! li.classList.contains( 'is-open' ) ) {
+                        e.preventDefault();
+                        openMega( li );
+                    }
+                } );
+
+                trigger.addEventListener( 'keydown', function ( e ) {
+                    if ( e.key === 'ArrowDown' || ( e.key === 'Enter' && ! li.classList.contains( 'is-open' ) ) ) {
+                        e.preventDefault();
+                        openMega( li );
+                        var firstLink = panel ? qs( 'a', panel ) : null;
+                        if ( firstLink ) { firstLink.focus(); }
+                    }
+                    if ( e.key === 'Escape' ) {
+                        closeMegaNow( li );
+                        trigger.focus();
+                    }
+                } );
+            }
+
+            li.addEventListener( 'keydown', function ( e ) {
+                if ( e.key === 'Escape' && li.classList.contains( 'is-open' ) ) {
+                    closeMegaNow( li );
+                    if ( trigger ) { trigger.focus(); }
+                }
+            } );
+        } );
+
+        // Close on click outside any mega item
+        document.addEventListener( 'click', function ( e ) {
+            megaItems.forEach( function ( li ) {
+                if ( ! li.contains( e.target ) ) { closeMegaNow( li ); }
+            } );
+        } );
+
+        // Close all on Escape from anywhere
+        document.addEventListener( 'keydown', function ( e ) {
+            if ( e.key === 'Escape' ) { megaItems.forEach( closeMegaNow ); }
+        } );
+    }
+
+    /* ── Mobile Mega Accordion ──────────────────────────────────────────────── */
+    function initMobileMegaMenu() {
+        var toggleBtns = qsa( '.mobile-mega-btn' );
+        if ( ! toggleBtns.length ) { return; }
+
+        toggleBtns.forEach( function ( btn ) {
+            var li   = btn.closest( '.has-mega' );
+            if ( ! li ) { return; }
+
+            btn.addEventListener( 'click', function () {
+                var isOpen = li.classList.contains( 'is-open' );
+                li.classList.toggle( 'is-open', ! isOpen );
+                btn.setAttribute( 'aria-expanded', String( ! isOpen ) );
+            } );
+        } );
+
+        // Reset accordion when mobile drawer closes
+        var mobileToggle = qs( '#mobile-menu-toggle' );
+        var mobileNav    = qs( '#mobile-nav' );
+        if ( mobileToggle && mobileNav ) {
+            mobileToggle.addEventListener( 'click', function () {
+                if ( mobileNav.classList.contains( 'is-open' ) ) { return; }
+                qsa( '.mobile-nav__menu .has-mega.is-open' ).forEach( function ( li ) {
+                    li.classList.remove( 'is-open' );
+                    var btn = qs( '.mobile-mega-btn', li );
+                    if ( btn ) { btn.setAttribute( 'aria-expanded', 'false' ); }
+                } );
+            } );
+        }
+    }
+
     /* ── Sticky Header scroll class ─────────────────────────────────────────── */
     function initStickyHeader() {
         var header = qs( '.site-header' );
@@ -417,6 +532,8 @@
     /* ── Init ────────────────────────────────────────────────────────────────── */
     document.addEventListener( 'DOMContentLoaded', function () {
         initMobileNav();
+        initMegaMenu();
+        initMobileMegaMenu();
         initScrollAnimations();
         initFaqAccordion();
         initFaqSearch();
