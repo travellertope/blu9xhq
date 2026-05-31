@@ -51,6 +51,12 @@ $ind_content = array(
         'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.',
         'cta_p_label'       => 'Book a Discovery Call',
         'cta_s_label'       => 'See pricing',
+        'sub_industries'    => array(
+            array( 'name' => 'Seed to Series A',         'url' => '/industries/tech-saas/seed-series-a' ),
+            array( 'name' => 'B2B SaaS growth teams',    'url' => '/industries/tech-saas/b2b-saas-growth' ),
+            array( 'name' => 'No-code & AI startups',    'url' => '/industries/tech-saas/no-code-ai-startups' ),
+            array( 'name' => 'Developer tools',          'url' => '/industries/tech-saas/developer-tools' ),
+        ),
     ),
 
     'agencies-consultants' => array(
@@ -91,6 +97,16 @@ $ind_content = array(
         'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your firm, your stage, and your goals. No pitch, no pressure.',
         'cta_p_label'       => 'Book a Discovery Call',
         'cta_s_label'       => 'See pricing',
+        'sub_industries'    => array(
+            array( 'name' => 'Marketing consultants',       'url' => '/industries/agencies-consultants/marketing-consultants' ),
+            array( 'name' => 'Branding & design studios',  'url' => '/industries/agencies-consultants/branding-design-studios' ),
+            array( 'name' => 'PR & communications',        'url' => '/industries/agencies-consultants/pr-communications' ),
+            array( 'name' => 'Strategy consultants',       'url' => '/industries/agencies-consultants/strategy-consultants' ),
+            array( 'name' => 'Recruitment consultants',    'url' => '/industries/agencies-consultants/recruitment-consultants' ),
+            array( 'name' => 'Business coaches',           'url' => '/industries/agencies-consultants/business-coaches' ),
+            array( 'name' => 'Paid media agencies',        'url' => '/industries/agencies-consultants/paid-media-agencies' ),
+            array( 'name' => 'Full-service agencies',      'url' => '/industries/agencies-consultants/full-service-agencies' ),
+        ),
     ),
 
     'ecommerce-dtc' => array(
@@ -131,6 +147,11 @@ $ind_content = array(
         'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your brand, your stage, and your goals. No pitch, no pressure.',
         'cta_p_label'       => 'Book a Discovery Call',
         'cta_s_label'       => 'See pricing',
+        'sub_industries'    => array(
+            array( 'name' => 'Emerging DTC brands',         'url' => '/industries/ecommerce-dtc/emerging-dtc-brands' ),
+            array( 'name' => 'Subscription & lifestyle',    'url' => '/industries/ecommerce-dtc/subscription-lifestyle' ),
+            array( 'name' => 'Marketplaces & platforms',   'url' => '/industries/ecommerce-dtc/marketplaces-platforms' ),
+        ),
     ),
 
     'professional-services' => array(
@@ -171,6 +192,11 @@ $ind_content = array(
         'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your firm, your goals, and your growth stage. No pitch, no pressure.',
         'cta_p_label'       => 'Book a Discovery Call',
         'cta_s_label'       => 'See pricing',
+        'sub_industries'    => array(
+            array( 'name' => 'Financial advisors',          'url' => '/industries/professional-services/financial-advisors' ),
+            array( 'name' => 'Boutique law firms',          'url' => '/industries/professional-services/boutique-law-firms' ),
+            array( 'name' => 'Management consultancies',    'url' => '/industries/professional-services/management-consultancies' ),
+        ),
     ),
 );
 
@@ -245,6 +271,9 @@ for ( $i = 1; $i <= 4; $i++ ) {
 if ( empty( $who_items ) ) {
     $who_items = $d['who_items'];
 }
+
+// Sub-industries
+$sub_industries = isset( $d['sub_industries'] ) ? $d['sub_industries'] : array();
 
 // Use cases
 $uc_heading = ( $gf ? get_field( 'ind_usecases_heading' ) : '' ) ?: $d['uc_heading'];
@@ -377,6 +406,27 @@ get_header();
 
     </div>
 </section>
+
+<!-- ── Sub-industries ────────────────────────────────────────────────────────── -->
+<?php if ( ! empty( $sub_industries ) ) : ?>
+<section class="ind-subindustries" aria-label="Sub-industries">
+    <div class="container">
+        <div class="ind-subindustries__header animate-on-scroll">
+            <span class="industry-section-badge">Explore by sector</span>
+            <h2 class="industry-section-heading">Find your specific sector</h2>
+            <p class="industry-section-body" style="max-width:560px;margin:0 auto">Every sector within this industry has its own content challenges. Select yours for more specific detail on how we work and what that looks like in practice.</p>
+        </div>
+        <div class="ind-subindustries__grid">
+            <?php foreach ( $sub_industries as $si ) : ?>
+                <a href="<?php echo esc_url( home_url( $si['url'] ) ); ?>" class="ind-subindustry-card animate-on-scroll">
+                    <span class="ind-subindustry-card__name"><?php echo esc_html( $si['name'] ); ?></span>
+                    <svg class="ind-subindustry-card__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 
 <!-- ── Use Cases Grid ────────────────────────────────────────────────────────── -->
 <section class="industry-related" aria-label="<?php esc_attr_e( 'Use cases', 'bluu-interactive' ); ?>" style="background:#fff;">
