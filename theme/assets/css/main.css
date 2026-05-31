@@ -5267,7 +5267,7 @@ a.contact-info__value:hover {
 }
 .pricing-comparison__header {
     text-align: center;
-    margin-bottom: var(--space-8);
+    margin-bottom: var(--space-6);
 }
 .pricing-comparison__headline {
     font-size: var(--font-size-3xl);
@@ -5298,17 +5298,15 @@ a.contact-info__value:hover {
 .pricing-table__feature-col { width: 34%; }
 .pricing-table__featured-col { width: 22%; }
 
-/* ── Sticky header — offset by fixed navbar height ───────────────────────────── */
+/* ── Table header — sticky handled by JS (CSS sticky breaks inside overflow-x) ── */
 .pricing-table thead th {
-    position: sticky;
-    top: var(--header-height);
     background: #fff;
-    z-index: 20;
     padding: var(--space-5) var(--space-5);
     text-align: center;
     vertical-align: bottom;
     border-bottom: 2px solid var(--md-outline-variant);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    position: relative;
+    z-index: 5;
 }
 .pricing-table thead th:first-child {
     text-align: left;
@@ -5440,7 +5438,7 @@ a.contact-info__value:hover {
 }
 .pricing-addons__header {
     text-align: center;
-    margin-bottom: var(--space-10);
+    margin-bottom: var(--space-6);
 }
 .pricing-addons__headline {
     font-size: var(--font-size-3xl);
@@ -5494,7 +5492,7 @@ a.contact-info__value:hover {
 }
 .pricing-know__header {
     text-align: center;
-    margin-bottom: var(--space-9);
+    margin-bottom: var(--space-6);
 }
 .pricing-know__headline {
     font-size: var(--font-size-3xl);

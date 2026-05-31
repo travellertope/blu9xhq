@@ -563,6 +563,41 @@
         onScroll();
     }
 
+    /* ── Pricing table sticky thead (JS — overflow-x:auto breaks CSS sticky) ── */
+    function initPricingTableSticky() {
+        var wrap  = qs( '.pricing-table-wrap' );
+        if ( ! wrap ) { return; }
+
+        var thead  = wrap.querySelector( 'thead' );
+        var ths    = Array.from( thead.querySelectorAll( 'th' ) );
+        var navH   = parseInt(
+            getComputedStyle( document.documentElement )
+                .getPropertyValue( '--header-height' ), 10
+        ) || 80;
+
+        function update() {
+            var r      = wrap.getBoundingClientRect();
+            var theadH = thead.getBoundingClientRect().height;
+
+            if ( r.top < navH && r.bottom > navH + theadH ) {
+                var offset = navH - r.top;
+                ths.forEach( function ( th ) {
+                    th.style.transform  = 'translateY(' + offset + 'px)';
+                    th.style.boxShadow  = '0 2px 6px rgba(0,0,0,0.08)';
+                } );
+            } else {
+                ths.forEach( function ( th ) {
+                    th.style.transform = '';
+                    th.style.boxShadow = '';
+                } );
+            }
+        }
+
+        window.addEventListener( 'scroll', update, { passive: true } );
+        window.addEventListener( 'resize', update );
+        update();
+    }
+
     /* ── Init ────────────────────────────────────────────────────────────────── */
     document.addEventListener( 'DOMContentLoaded', function () {
         initMobileNav();
@@ -574,6 +609,7 @@
         initFaqSearch();
         initContactForm();
         initStickyHeader();
+        initPricingTableSticky();
     } );
 
 } )();
