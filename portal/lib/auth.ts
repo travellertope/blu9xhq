@@ -64,30 +64,33 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.username || !credentials.password) return null;
 
-        const user = await validateWPCredentials(credentials.username, credentials.password);
-        if (!user) return null;
+        try {
+          const user = await validateWPCredentials(credentials.username, credentials.password);
+          if (!user) return null;
 
-        const isAdmin = user.roles.includes("bluu_admin") || user.roles.includes("administrator");
-        const isTeam  = user.roles.includes("bluu_team");
-        if (!isAdmin && !isTeam) return null;
+          const isAdmin = user.roles.includes("bluu_admin") || user.roles.includes("administrator");
+          const isTeam  = user.roles.includes("bluu_team");
+          if (!isAdmin && !isTeam) return null;
 
-        // Block deactivated team members immediately at login
-        if (user.meta?.bluuhq_status === "deactivated") return null;
+          if (user.meta?.bluuhq_status === "deactivated") return null;
 
-        // bluu_admin WP role defaults to super_admin CRM role unless overridden in meta
-        const bluuhqRole = user.meta?.bluuhq_role
-          ?? (isAdmin ? "super_admin" : "viewer");
+          const bluuhqRole = user.meta?.bluuhq_role
+            ?? (isAdmin ? "super_admin" : "viewer");
 
-        return {
-          id: String(user.id),
-          name: user.name,
-          email: user.email,
-          role: "bluu_admin" as UserRole,       // gate role for middleware
-          wpUserId: user.id,
-          bluuhqRole,
-          assignedClients: user.meta?.bluuhq_assigned_clients ?? [],
-          status: user.meta?.bluuhq_status ?? "active",
-        };
+          return {
+            id: String(user.id),
+            name: user.name,
+            email: user.email,
+            role: "bluu_admin" as UserRole,
+            wpUserId: user.id,
+            bluuhqRole,
+            assignedClients: user.meta?.bluuhq_assigned_clients ?? [],
+            status: user.meta?.bluuhq_status ?? "active",
+          };
+        } catch (err) {
+          console.error("[admin-authorize] Unexpected error:", err);
+          return null;
+        }
       },
     }),
 
