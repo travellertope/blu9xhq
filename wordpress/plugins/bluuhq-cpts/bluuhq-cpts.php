@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 define( 'BLUUHQ_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BLUUHQ_VERSION', '1.0.0' );
 
-foreach ( [ 'cpts', 'roles', 'rest-auth', 'rest-team', 'acf-fields', 'graphql', 'settings' ] as $module ) {
+foreach ( [ 'cpts', 'roles', 'rest-auth', 'rest-team', 'acf-fields', 'graphql', 'settings', 'tickets' ] as $module ) {
     require_once BLUUHQ_DIR . "includes/{$module}.php";
 }
 

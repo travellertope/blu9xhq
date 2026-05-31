@@ -171,3 +171,35 @@ export async function sendCredentialRevealed(
   const { default: T, getSubject } = await import("./emails/CredentialRevealed");
   return sendEmail({ to: adminEmail, subject: getSubject(props.clientName, props.action), template: React.createElement(T, props) });
 }
+
+export async function sendTicketCreated(
+  to: string,
+  props: import("./emails/TicketCreated").TicketCreatedProps
+) {
+  const { default: T, getSubject } = await import("./emails/TicketCreated");
+  return sendEmail({ to, subject: getSubject(props.ticketNumber), template: React.createElement(T, props) });
+}
+
+export async function sendTicketReply(
+  to: string,
+  props: import("./emails/TicketReply").TicketReplyProps
+) {
+  const { default: T, getSubject } = await import("./emails/TicketReply");
+  return sendEmail({ to, subject: getSubject(props.ticketNumber), template: React.createElement(T, props) });
+}
+
+export async function sendTicketStatusChanged(
+  to: string,
+  props: import("./emails/TicketStatusChanged").TicketStatusChangedProps
+) {
+  const { default: T, getSubject } = await import("./emails/TicketStatusChanged");
+  return sendEmail({ to, subject: getSubject(props.ticketNumber, props.toStatus), template: React.createElement(T, props) });
+}
+
+export async function sendTicketSlaBreached(
+  adminEmail: string,
+  props: import("./emails/TicketSlaBreached").TicketSlaBreachedProps
+) {
+  const { default: T, getSubject } = await import("./emails/TicketSlaBreached");
+  return sendEmail({ to: adminEmail, subject: getSubject(props.ticketNumber, props.breachType), template: React.createElement(T, props) });
+}
