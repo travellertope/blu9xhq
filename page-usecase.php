@@ -742,64 +742,75 @@ get_header();
                 </div>
             </div>
             <div class="industry-pg-hero__image">
-                <img src="<?php echo ; ?>" alt="<?php echo ; ?>" loading="eager" decoding="async">
+                <img src="<?php echo esc_url( $hero_img_src ); ?>" alt="<?php echo esc_attr( $hero_img_alt ); ?>" loading="eager" decoding="async">
             </div>
         </div>
     </div>
 </section>
 
-<!-- ── Situation ────────────────────────────────────────────────────────────── -->
-<section class="industry-situation" aria-label="<?php esc_attr_e( 'The situation', 'bluu-interactive' ); ?>">
+<!-- ── Situation ─────────────────────────────────────────────────────────────── -->
+<section class="uc-situation" aria-label="<?php esc_attr_e( 'The situation', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="industry-situation__header animate-on-scroll">
-            <span class="industry-section-badge"><?php esc_html_e( 'The situation', 'bluu-interactive' ); ?></span>
-            <h2 class="industry-section-heading"><?php esc_html_e( 'The situation', 'bluu-interactive' ); ?></h2>
+        <div class="uc-situation__inner">
+
             <?php if ( $situation_body ) : ?>
-                <p class="industry-section-body"><?php echo esc_html( $situation_body ); ?></p>
+            <div class="uc-situation__body animate-on-scroll">
+                <span class="industry-section-badge"><?php esc_html_e( 'The situation', 'bluu-interactive' ); ?></span>
+                <p class="uc-situation__text"><?php echo esc_html( $situation_body ); ?></p>
+            </div>
             <?php endif; ?>
+
+            <?php if ( ! empty( $pains ) ) : ?>
+            <div class="uc-pain-list">
+                <?php foreach ( $pains as $pain ) : ?>
+                    <div class="uc-pain-item animate-on-scroll">
+                        <div class="uc-pain-item__marker" aria-hidden="true">✕</div>
+                        <div>
+                            <div class="uc-pain-item__title"><?php echo esc_html( $pain['title'] ); ?></div>
+                            <p class="uc-pain-item__body"><?php echo esc_html( $pain['body'] ); ?></p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
         </div>
-        <?php if ( ! empty( $pains ) ) : ?>
-        <div class="industry-pain-grid">
-            <?php foreach ( $pains as $pain ) : ?>
-                <div class="industry-pain-card animate-on-scroll">
-                    <h3 class="industry-pain-card__title"><?php echo esc_html( $pain['title'] ); ?></h3>
-                    <p class="industry-pain-card__body"><?php echo esc_html( $pain['body'] ); ?></p>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <?php endif; ?>
     </div>
 </section>
 
-<!-- ── Approach ─────────────────────────────────────────────────────────────── -->
-<section class="industry-approach" aria-label="<?php esc_attr_e( 'How we approach this', 'bluu-interactive' ); ?>">
+<!-- ── Approach ──────────────────────────────────────────────────────────────── -->
+<section class="uc-approach" aria-label="<?php esc_attr_e( 'How we approach this', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div style="max-width:800px;margin:0 auto" class="animate-on-scroll">
+
+        <div class="uc-approach__header animate-on-scroll">
             <span class="industry-section-badge"><?php esc_html_e( 'Our approach', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php esc_html_e( 'How Bluu approaches this', 'bluu-interactive' ); ?></h2>
             <?php if ( $approach_body ) : ?>
-                <p class="industry-section-body" style="margin-bottom:var(--space-8)"><?php echo esc_html( $approach_body ); ?></p>
+                <p class="industry-section-body"><?php echo esc_html( $approach_body ); ?></p>
             <?php endif; ?>
         </div>
+
         <?php if ( ! empty( $steps ) ) : ?>
-        <div class="industry-steps" style="max-width:800px;margin:0 auto">
-            <?php foreach ( $steps as $step ) : ?>
-                <div class="industry-step animate-on-scroll">
-                    <div class="industry-step__num"><?php echo esc_html( $step['num'] ); ?></div>
-                    <div>
-                        <div class="industry-step__title"><?php echo esc_html( $step['title'] ); ?></div>
-                        <p class="industry-step__body"><?php echo esc_html( $step['body'] ); ?></p>
+        <div class="uc-steps">
+            <?php foreach ( $steps as $idx => $step ) : ?>
+                <div class="uc-step animate-on-scroll">
+                    <div class="uc-step__num"><?php echo esc_html( str_pad( $idx + 1, 2, '0', STR_PAD_LEFT ) ); ?></div>
+                    <div class="uc-step__content">
+                        <div class="uc-step__title"><?php echo esc_html( $step['title'] ); ?></div>
+                        <p class="uc-step__body"><?php echo esc_html( $step['body'] ); ?></p>
                     </div>
                 </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
+
     </div>
 </section>
 
-<!-- ── Deliverables ──────────────────────────────────────────────────────────── -->
+<!-- ── Deliverables ───────────────────────────────────────────────────────────── -->
 <section class="uc-deliverables" aria-label="<?php esc_attr_e( 'What you get', 'bluu-interactive' ); ?>">
     <div class="container">
+
         <div class="uc-deliverables__header animate-on-scroll">
             <span class="industry-section-badge"><?php esc_html_e( 'What you receive', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php esc_html_e( 'What you get', 'bluu-interactive' ); ?></h2>
@@ -807,68 +818,86 @@ get_header();
                 <p class="industry-section-body"><?php echo esc_html( $deliverables_intro ); ?></p>
             <?php endif; ?>
         </div>
+
         <?php if ( ! empty( $deliverables ) ) : ?>
         <div class="uc-deliverables__grid">
             <?php foreach ( $deliverables as $item ) :
-                $name   = isset( $item['uc_deliverable_name'] )   ? $item['uc_deliverable_name']   : ( $item['name'] ?? '' );
+                $name   = isset( $item['uc_deliverable_name'] )   ? $item['uc_deliverable_name']   : ( $item['name']   ?? '' );
                 $detail = isset( $item['uc_deliverable_detail'] ) ? $item['uc_deliverable_detail'] : ( $item['detail'] ?? '' );
             ?>
                 <div class="uc-deliverable-card animate-on-scroll">
-                    <div class="uc-deliverable-card__name"><?php echo esc_html( $name ); ?></div>
-                    <p class="uc-deliverable-card__detail"><?php echo esc_html( $detail ); ?></p>
+                    <div class="uc-deliverable-card__icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+                    </div>
+                    <div>
+                        <div class="uc-deliverable-card__name"><?php echo esc_html( $name ); ?></div>
+                        <p class="uc-deliverable-card__detail"><?php echo esc_html( $detail ); ?></p>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
+
         <?php if ( $cadence ) : ?>
         <p class="uc-cadence animate-on-scroll"><?php echo esc_html( $cadence ); ?></p>
         <?php endif; ?>
+
     </div>
 </section>
 
-<!-- ── Who it's for ──────────────────────────────────────────────────────────── -->
-<section class="industry-fit" aria-label="<?php esc_attr_e( 'Who this is for', 'bluu-interactive' ); ?>">
+<!-- ── Who it's for ───────────────────────────────────────────────────────────── -->
+<section class="uc-fit" aria-label="<?php esc_attr_e( 'Who this is for', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="industry-fit__header animate-on-scroll">
-            <span class="industry-section-badge"><?php esc_html_e( 'Right fit', 'bluu-interactive' ); ?></span>
-            <h2 class="industry-section-heading"><?php esc_html_e( 'Who this is right for', 'bluu-interactive' ); ?></h2>
+
+        <div class="uc-fit__header animate-on-scroll">
+            <span class="industry-section-badge" style="color:#7eb8ff"><?php esc_html_e( 'Right fit', 'bluu-interactive' ); ?></span>
+            <h2 class="industry-section-heading" style="color:#fff"><?php esc_html_e( 'Who this is right for', 'bluu-interactive' ); ?></h2>
         </div>
-        <div class="industry-fit__grid">
+
+        <div class="uc-fit__grid">
             <?php foreach ( $fit_statements as $stmt ) : ?>
-                <div class="industry-fit-item animate-on-scroll">
-                    <svg class="industry-fit-item__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
-                    <p class="industry-fit-item__text"><?php echo esc_html( $stmt ); ?></p>
+                <div class="uc-fit-item animate-on-scroll">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7eb8ff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+                    <p class="uc-fit-item__text"><?php echo esc_html( $stmt ); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
+
         <?php if ( $not_fit ) : ?>
-        <p class="industry-fit__not-fit"><?php echo esc_html( $not_fit ); ?></p>
+        <div class="uc-fit__not-fit animate-on-scroll">
+            <strong><?php esc_html_e( 'Not the right fit?', 'bluu-interactive' ); ?></strong>
+            <?php echo esc_html( $not_fit ); ?>
+        </div>
         <?php endif; ?>
+
     </div>
 </section>
 
-<!-- ── Related Use Cases ────────────────────────────────────────────────────── -->
+<!-- ── Related Use Cases ──────────────────────────────────────────────────────── -->
 <?php if ( ! empty( $related ) ) : ?>
-<section class="industry-related" aria-label="<?php esc_attr_e( 'Related use cases', 'bluu-interactive' ); ?>">
+<section class="uc-related" aria-label="<?php esc_attr_e( 'Related use cases', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="industry-related__header animate-on-scroll">
+
+        <div class="uc-related__header animate-on-scroll">
             <span class="industry-section-badge"><?php esc_html_e( 'Keep exploring', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php esc_html_e( 'Related use cases', 'bluu-interactive' ); ?></h2>
         </div>
-        <div class="industry-related__grid">
+
+        <div class="uc-related__grid">
             <?php foreach ( $related as $rel ) : ?>
-                <a href="<?php echo esc_url( home_url( $rel['url'] ) ); ?>" class="industry-related-card animate-on-scroll">
-                    <div class="industry-related-card__title"><?php echo esc_html( $rel['title'] ); ?></div>
-                    <p class="industry-related-card__desc"><?php echo esc_html( $rel['desc'] ); ?></p>
-                    <span class="industry-related-card__arrow"><?php esc_html_e( 'See this use case', 'bluu-interactive' ); ?> &rarr;</span>
+                <a href="<?php echo esc_url( home_url( $rel['url'] ) ); ?>" class="uc-related-card animate-on-scroll">
+                    <div class="uc-related-card__title"><?php echo esc_html( $rel['title'] ); ?></div>
+                    <p class="uc-related-card__desc"><?php echo esc_html( $rel['desc'] ); ?></p>
+                    <span class="uc-related-card__link"><?php esc_html_e( 'See this use case', 'bluu-interactive' ); ?> &rarr;</span>
                 </a>
             <?php endforeach; ?>
         </div>
+
     </div>
 </section>
 <?php endif; ?>
 
-<!-- ── CTA ───────────────────────────────────────────────────────────────────── -->
+<!-- ── CTA ────────────────────────────────────────────────────────────────────── -->
 <section class="industry-pg-cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">
     <div class="container">
         <div class="animate-on-scroll">
