@@ -142,7 +142,6 @@ export async function POST(req: NextRequest) {
   const { session } = result;
   const actor = session.user as any;
 
-  const clientIdHeader = new URL(req.url).searchParams.get("clientId");
   const body = await req.json().catch(() => ({}));
 
   const parsed = postSchema.safeParse(body);

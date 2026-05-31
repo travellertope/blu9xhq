@@ -3,11 +3,11 @@
 import { useMemo } from "react";
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
-  CartesianGrid, Tooltip, ReferenceLine, Dot,
+  CartesianGrid, Tooltip, ReferenceLine,
 } from "recharts";
 import { MessageSquare } from "lucide-react";
 import type { BluuCommunication, CommMoodSentiment } from "@/types";
-import { format, startOfWeek, addDays, parseISO } from "date-fns";
+import { format, startOfWeek, addDays } from "date-fns";
 
 const MOOD_SCORES: Record<CommMoodSentiment, number> = {
   positive:  5,

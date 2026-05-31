@@ -3,7 +3,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getClientPost, updateClientPost } from "@/lib/wp-api";
 import { sendPortalInvite } from "@/lib/resend";
-import { decrypt } from "@/lib/encryption";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);

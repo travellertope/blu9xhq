@@ -103,9 +103,6 @@ export function ClientTable({ clients, total, totalPages, page }: ClientTablePro
     }
   }
 
-  const orderby = searchParams.get("orderby") ?? "date";
-  const order = searchParams.get("order") ?? "desc";
-
   return (
     <div className="space-y-4">
       {/* Toolbar */}

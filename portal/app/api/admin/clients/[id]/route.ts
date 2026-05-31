@@ -8,7 +8,7 @@ import {
 } from "@/lib/wp-api";
 import { calculateHealthScore } from "@/lib/healthScore";
 import { z } from "zod";
-import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommChannel, CommDirection, CommType, CommEmailStatus } from "@/types";
+import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommChannel, CommDirection, CommType } from "@/types";
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions);

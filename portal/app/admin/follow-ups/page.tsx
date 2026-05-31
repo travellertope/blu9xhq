@@ -19,7 +19,6 @@ const TABS: { id: TabId; label: string }[] = [
 ];
 
 function filterByTab(entries: BluuCommunication[], tab: TabId): BluuCommunication[] {
-  const now = new Date();
   switch (tab) {
     case "overdue":
       return entries.filter(e =>
@@ -79,8 +78,8 @@ function FollowUpsPage() {
         nameMap[c.id] = c.acf?.contact_name || c.title?.rendered || `Client #${c.id}`;
       }
       setClientNames(nameMap);
-    } catch (err: any) {
-      toast.error(err.message ?? "Failed to load follow-ups");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to load follow-ups");
     } finally {
       setLoading(false);
     }
@@ -102,8 +101,8 @@ function FollowUpsPage() {
       setAllEntries(prev =>
         prev.map(e => e.id === entry.id ? { ...e, followUpCompleted: true } : e)
       );
-    } catch (err: any) {
-      toast.error(err.message);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to update");
     } finally {
       setCompleting(null);
     }

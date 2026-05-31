@@ -69,7 +69,7 @@ export async function requirePermission(
  * Lightweight session-only check (no permission key).
  * Use for routes that only need an authenticated bluu_admin session.
  */
-export async function requireSession(req: NextRequest): Promise<PermissionResult> {
+export async function requireSession(_req: NextRequest): Promise<PermissionResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "bluu_admin") {
     return NextResponse.json({ error: "Unauthorized", code: "NO_SESSION" }, { status: 401 });
