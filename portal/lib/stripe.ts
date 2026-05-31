@@ -80,3 +80,97 @@ export function constructStripeWebhookEvent(
     process.env.STRIPE_WEBHOOK_SECRET!
   );
 }
+
+// ─── Payment method management ────────────────────────────────────────────────
+
+export interface PaymentMethod {
+  id: string;
+  brand: string;
+  last4: string;
+  expMonth: number;
+  expYear: number;
+  isDefault: boolean;
+}
+
+export async function createSetupIntent(
+  customerId: string
+): Promise<{ clientSecret: string }> {
+  const si = await getStripe().setupIntents.create({
+    customer: customerId,
+    payment_method_types: ["card"],
+  });
+  return { clientSecret: si.client_secret! };
+}
+
+export async function listPaymentMethods(
+  customerId: string
+): Promise<PaymentMethod[]> {
+  const [methods, customer] = await Promise.all([
+    getStripe().paymentMethods.list({ customer: customerId, type: "card" }),
+    getStripe().customers.retrieve(customerId),
+  ]);
+  const defaultPmId =
+    !customer.deleted &&
+    typeof customer.invoice_settings?.default_payment_method === "string"
+      ? customer.invoice_settings.default_payment_method
+      : null;
+  return methods.data.map((pm) => ({
+    id: pm.id,
+    brand: pm.card?.brand ?? "card",
+    last4: pm.card?.last4 ?? "****",
+    expMonth: pm.card?.exp_month ?? 0,
+    expYear: pm.card?.exp_year ?? 0,
+    isDefault: pm.id === defaultPmId,
+  }));
+}
+
+export async function setDefaultPaymentMethod(
+  customerId: string,
+  paymentMethodId: string
+): Promise<void> {
+  await getStripe().customers.update(customerId, {
+    invoice_settings: { default_payment_method: paymentMethodId },
+  });
+}
+
+export async function detachPaymentMethod(paymentMethodId: string): Promise<void> {
+  await getStripe().paymentMethods.detach(paymentMethodId);
+}
+
+/** Charge an existing saved payment method against an invoice. */
+export async function createPaymentIntent(params: {
+  amount: number;
+  currency: string;
+  customerId: string;
+  paymentMethodId: string;
+  invoiceId: string;
+}): Promise<{ clientSecret: string; paymentIntentId: string; status: string }> {
+  const pi = await getStripe().paymentIntents.create({
+    amount: params.amount,
+    currency: params.currency.toLowerCase(),
+    customer: params.customerId,
+    payment_method: params.paymentMethodId,
+    confirm: true,
+    metadata: { invoiceId: params.invoiceId },
+    return_url:
+      (process.env.NEXTAUTH_URL ?? "") + "/portal/invoices/" + params.invoiceId,
+  });
+  return { clientSecret: pi.client_secret!, paymentIntentId: pi.id, status: pi.status };
+}
+
+/** Create a PaymentIntent for new-card flow (client confirms via Stripe.js). */
+export async function createPaymentIntentForNewCard(params: {
+  amount: number;
+  currency: string;
+  customerId: string;
+  invoiceId: string;
+}): Promise<{ clientSecret: string; paymentIntentId: string }> {
+  const pi = await getStripe().paymentIntents.create({
+    amount: params.amount,
+    currency: params.currency.toLowerCase(),
+    customer: params.customerId,
+    metadata: { invoiceId: params.invoiceId },
+    setup_future_usage: "off_session",
+  });
+  return { clientSecret: pi.client_secret!, paymentIntentId: pi.id };
+}

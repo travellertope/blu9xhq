@@ -215,6 +215,10 @@ export interface WPSubscriptionPost {
   acf: WPSubscriptionACF;
 }
 
+export function getSubscription(postId: number): Promise<WPSubscriptionPost> {
+  return wpRestFetch<WPSubscriptionPost>(`/wp/v2/bluu_subscription/${postId}`);
+}
+
 /** @deprecated Use listSubscriptionsByClient for portal use */
 export function listClientSubscriptions(_clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
   return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {

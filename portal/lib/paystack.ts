@@ -63,8 +63,90 @@ export async function initializePaystackTransaction(params: {
 /** Verify a Paystack transaction by reference. */
 export async function verifyPaystackTransaction(
   reference: string
-): Promise<{ status: string; amount: number; currency: string }> {
-  return paystackFetch(`/transaction/verify/${reference}`);
+): Promise<{ status: string; amount: number; currency: string; paidAt: string }> {
+  const data = await paystackFetch<{
+    status: string;
+    amount: number;
+    currency: string;
+    paid_at: string;
+  }>(`/transaction/verify/${reference}`);
+  return {
+    status: data.status,
+    amount: data.amount,
+    currency: data.currency,
+    paidAt: data.paid_at,
+  };
+}
+
+// ─── Saved card management ────────────────────────────────────────────────────
+
+export interface PaystackCard {
+  authorizationCode: string;
+  bin: string;
+  last4: string;
+  expMonth: string;
+  expYear: string;
+  cardType: string;
+  isDefault: boolean;
+}
+
+interface PaystackAuthorization {
+  authorization_code: string;
+  bin: string;
+  last4: string;
+  exp_month: string;
+  exp_year: string;
+  card_type: string;
+  channel: string;
+  reusable: boolean;
+}
+
+interface PaystackCustomerDetail {
+  email: string;
+  customer_code: string;
+  authorizations: PaystackAuthorization[];
+  metadata?: { default_authorization?: string };
+}
+
+export async function listPaystackCards(customerId: string): Promise<PaystackCard[]> {
+  const customer = await paystackFetch<PaystackCustomerDetail>(
+    `/customer/${customerId}`
+  );
+  const defaultCode = customer.metadata?.default_authorization ?? null;
+  return (customer.authorizations ?? [])
+    .filter((a) => a.channel === "card" && a.reusable)
+    .map((a) => ({
+      authorizationCode: a.authorization_code,
+      bin: a.bin,
+      last4: a.last4,
+      expMonth: a.exp_month,
+      expYear: a.exp_year,
+      cardType: a.card_type,
+      isDefault: a.authorization_code === defaultCode,
+    }));
+}
+
+export async function chargePaystackCard(params: {
+  authorizationCode: string;
+  email: string;
+  amount: number;
+  reference: string;
+  metadata?: object;
+}): Promise<{ status: string; reference: string }> {
+  const data = await paystackFetch<{ status: string; reference: string }>(
+    "/transaction/charge_authorization",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        authorization_code: params.authorizationCode,
+        email: params.email,
+        amount: params.amount,
+        reference: params.reference,
+        metadata: params.metadata ?? {},
+      }),
+    }
+  );
+  return data;
 }
 
 /** Create a Paystack subscription plan. */
