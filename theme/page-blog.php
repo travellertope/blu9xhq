@@ -27,7 +27,7 @@ get_header();
         <span class="bluu-archive-hero__eyebrow"><?php esc_html_e( 'Bluu Insights', 'bluu-interactive' ); ?></span>
         <h1 class="bluu-archive-hero__title"><?php esc_html_e( 'Bluu Insights', 'bluu-interactive' ); ?></h1>
         <p class="bluu-archive-hero__subtitle">
-            <?php esc_html_e( 'Research, strategy, and honest perspective on content, market intelligence, and what actually works for growing businesses.', 'bluu-interactive' ); ?>
+            <?php esc_html_e( 'Research, strategy, and honest perspective on content, market intelligence, and what actually works for growing businesses. Every post written and structured to SEO and AI crawl standard.', 'bluu-interactive' ); ?>
         </p>
     </div>
 </section>

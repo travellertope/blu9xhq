@@ -159,6 +159,29 @@ function bluu_preconnect_fonts() {
 }
 add_action( 'wp_head', 'bluu_preconnect_fonts', 1 );
 
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────────
+function bluu_seo_meta_tags() {
+    if ( ! function_exists( 'yoast_head' ) && ! class_exists( 'RankMath\RankMath' ) ) {
+        $description = get_bloginfo( 'description' ) ?: 'Bluu Interactive runs your complete content operation — research, writing, publishing, and reporting — all content built to SEO and AI crawl standard.';
+        echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+
+        $schema = array(
+            '@context'        => 'https://schema.org',
+            '@type'           => 'Organization',
+            'name'            => 'Bluu Interactive',
+            'url'             => 'https://bluuhq.com',
+            'description'     => 'B2B content operations agency. All content built to SEO and AI crawl standard — structured for discovery in Google, AI Overviews, and Perplexity.',
+            'contentStandard' => 'SEO and AI crawl standard',
+            'sameAs'          => array(
+                'https://linkedin.com/company/bluuinteractive',
+                'https://twitter.com/bluuinteractive',
+            ),
+        );
+        echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>' . "\n";
+    }
+}
+add_action( 'wp_head', 'bluu_seo_meta_tags', 5 );
+
 // Contact form AJAX handler is registered in inc/contact-submissions.php
 
 // ── Custom Excerpt Length ──────────────────────────────────────────────────────
