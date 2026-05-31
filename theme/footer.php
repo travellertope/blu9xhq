@@ -109,6 +109,9 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                     <?php endif; ?>
                 </p>
 
+                <!-- SEO tagline -->
+                <p class="site-footer__seo-tagline"><?php esc_html_e( 'All content produced to SEO and AI crawl standard.', 'bluu-interactive' ); ?></p>
+
                 <!-- Legal nav -->
                 <nav class="site-footer__legal-nav" aria-label="<?php esc_attr_e( 'Legal navigation', 'bluu-interactive' ); ?>">
                     <a href="<?php echo esc_url( home_url( '/privacy-policy' ) ); ?>"><?php esc_html_e( 'Privacy', 'bluu-interactive' ); ?></a>

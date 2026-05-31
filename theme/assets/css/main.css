@@ -1817,6 +1817,12 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     font-size: var(--font-size-xs);
     color: var(--md-on-surface-muted);
 }
+.site-footer__seo-tagline {
+    font-size: var(--font-size-xs);
+    color: rgba(255,255,255,0.35);
+    margin: 0;
+    letter-spacing: 0.02em;
+}
 .site-footer__legal-nav {
     display: flex;
     align-items: center;
@@ -2598,6 +2604,30 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     color: #198754;
     display: flex;
     align-items: center;
+}
+
+.pricing-seo-note {
+    background: var(--md-accent);
+    padding: var(--space-4) 0;
+    text-align: center;
+}
+.pricing-seo-note__text {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    letter-spacing: 0.01em;
+}
+.pricing-footer-note {
+    padding: var(--space-4) 0;
+    text-align: center;
+    border-top: 1px solid var(--md-outline-variant);
+}
+.pricing-footer-note__text {
+    font-size: var(--font-size-xs);
+    color: var(--md-on-surface-variant);
+    margin: 0;
+    letter-spacing: 0.02em;
 }
 
 /* ── Pricing FAQ ────────────────────────────────────────────────────────────── */
