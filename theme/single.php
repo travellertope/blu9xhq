@@ -202,8 +202,8 @@ while ( have_posts() ) :
 
                     <!-- Post CTA -->
                     <div class="bluu-post-cta">
-                        <h2 class="bluu-post-cta__heading"><?php echo esc_html( $cta_heading ); ?></h2>
-                        <p class="bluu-post-cta__subtext"><?php echo esc_html( $cta_subtext ); ?></p>
+                        <h2 class="bluu-post-cta__heading"><?php echo bluu_text( $cta_heading ); ?></h2>
+                        <p class="bluu-post-cta__subtext"><?php echo bluu_text( $cta_subtext ); ?></p>
                         <a href="<?php echo esc_url( $cta_btn_url ); ?>"
                            class="btn-primary"
                            aria-label="<?php echo esc_attr( $cta_btn_lbl . ' — Bluu Interactive' ); ?>">
