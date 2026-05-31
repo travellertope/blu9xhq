@@ -367,7 +367,7 @@
 
 /* ── Closing CTA ──────────────────────────────────────────────────────────── */
 .industry-pg-cta {
-    padding: var(--space-11) 0;
+    padding: 96px 0;
     background: var(--md-accent);
     text-align: center;
 }
@@ -395,8 +395,23 @@
     flex-wrap: wrap;
 }
 
+/* ── White-filled primary button override for CTA section ────────────────── */
+.industry-pg-cta .btn-primary--white,
+.industry-pg-cta a.btn-primary--white {
+    background: #fff !important;
+    color: var(--md-accent) !important;
+    border: 2px solid #fff !important;
+}
+
+.industry-pg-cta .btn-primary--white:hover,
+.industry-pg-cta a.btn-primary--white:hover {
+    background: rgba(255,255,255,0.88) !important;
+    border-color: rgba(255,255,255,0.88) !important;
+}
+
 /* ── Outline button variant for dark/coloured hero and CTA backgrounds ──── */
-.industry-btn-outline--cta {
+.industry-btn-outline--cta,
+.industry-pg-cta .btn-outline.industry-btn-outline--cta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -404,19 +419,20 @@
     font-size: var(--font-size-base);
     font-weight: 400;
     line-height: 1;
-    color: #fff;
-    background: transparent;
-    border: 1.5px solid rgba(255,255,255,0.55);
+    color: #fff !important;
+    background: transparent !important;
+    border: 1.5px solid rgba(255,255,255,0.6) !important;
     text-decoration: none;
     transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
     white-space: nowrap;
     cursor: pointer;
 }
 
-.industry-btn-outline--cta:hover {
-    border-color: #fff;
-    background: rgba(255,255,255,0.1);
-    color: #fff;
+.industry-btn-outline--cta:hover,
+.industry-pg-cta .btn-outline.industry-btn-outline--cta:hover {
+    border-color: #fff !important;
+    background: rgba(255,255,255,0.1) !important;
+    color: #fff !important;
 }
 
 /* ── Sub-industry: Who this is for ───────────────────────────────────────── */
