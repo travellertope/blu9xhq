@@ -10,6 +10,7 @@ import { ClientProfileActions } from "@/components/admin/ClientProfileActions";
 import { CommunicationTimeline } from "@/components/admin/CommunicationTimeline";
 import { MoodTrendChart } from "@/components/admin/MoodTrendChart";
 import { FollowUpBadge } from "@/components/admin/FollowUpBadge";
+import { ClientSequences } from "@/components/admin/ClientSequences";
 import type { WPClientPost, WPSubscriptionPost } from "@/lib/wp-api";
 import type { BluuCommunication } from "@/types";
 
@@ -232,6 +233,21 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
               <CommunicationTimeline
                 clientId={clientIdNum}
                 initialEntries={communications}
+              />
+            </CardContent>
+          </Card>
+
+          {/* ── Sequences ───────────────────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                Email Sequences
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ClientSequences
+                clientId={clientIdNum}
+                clientEmail={acf.portal_email ?? acf.contact_email ?? ""}
               />
             </CardContent>
           </Card>

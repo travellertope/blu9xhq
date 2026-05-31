@@ -205,6 +205,7 @@ export interface WPCommunicationACF {
   comm_follow_up_due?:     string;
   comm_follow_up_completed?: boolean | string | number;
   comm_email_status?:      string;
+  comm_resend_email_id?:   string;
 }
 
 export interface WPCommunicationPost {
@@ -240,5 +241,112 @@ export function listFollowUpCommunications(
     orderby:    "date",
     order:      "desc",
     ...params,
+  });
+}
+
+// ─── bluu_email_template types & helpers ─────────────────────────────────────
+
+export interface WPEmailTemplateACF {
+  subject:    string;
+  body_html:  string;
+  body_text?: string;
+  type:       string;
+  merge_tags?: string;
+}
+
+export interface WPEmailTemplatePost {
+  id:       number;
+  title:    { rendered: string; raw?: string };
+  date:     string;
+  modified: string;
+  status:   string;
+  acf:      WPEmailTemplateACF;
+}
+
+export function listEmailTemplates(params: Record<string, string | number> = {}): Promise<WPListResult<WPEmailTemplatePost>> {
+  return wpRestList<WPEmailTemplatePost>("/wp/v2/bluu_email_template", {
+    per_page: 100,
+    status:   "publish",
+    orderby:  "title",
+    order:    "asc",
+    ...params,
+  });
+}
+
+export function getEmailTemplate(postId: number): Promise<WPEmailTemplatePost> {
+  return wpRestFetch<WPEmailTemplatePost>(`/wp/v2/bluu_email_template/${postId}`);
+}
+
+export function createEmailTemplate(params: { title: string; acf: Partial<WPEmailTemplateACF> }): Promise<WPEmailTemplatePost> {
+  return wpRestFetch("/wp/v2/bluu_email_template", {
+    method: "POST",
+    body:   JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+export function updateEmailTemplate(postId: number, params: { title?: string; acf?: Partial<WPEmailTemplateACF> }): Promise<WPEmailTemplatePost> {
+  return wpRestFetch(`/wp/v2/bluu_email_template/${postId}`, {
+    method: "POST",
+    body:   JSON.stringify(params),
+  });
+}
+
+export function deleteEmailTemplate(postId: number): Promise<void> {
+  return wpRestFetch(`/wp/v2/bluu_email_template/${postId}?force=true`, { method: "DELETE" });
+}
+
+// ─── bluu_sequence types & helpers ────────────────────────────────────────────
+
+export interface WPSequenceStepACF {
+  step_number:       number;
+  delay_days:        number;
+  email_template_id: number;
+}
+
+export interface WPSequenceACF {
+  trigger:             string;
+  trigger_delay_days?: number;
+  exit_conditions?:    string;   // JSON-encoded string[]
+  description?:        string;
+  is_active:           boolean | string | number;
+  seq_loops_id?:       string;
+  seq_loops_synced_at?: string;
+  steps?:              WPSequenceStepACF[];
+}
+
+export interface WPSequencePost {
+  id:       number;
+  title:    { rendered: string; raw?: string };
+  date:     string;
+  modified: string;
+  status:   string;
+  acf:      WPSequenceACF;
+}
+
+export function listSequences(params: Record<string, string | number> = {}): Promise<WPListResult<WPSequencePost>> {
+  return wpRestList<WPSequencePost>("/wp/v2/bluu_sequence", {
+    per_page: 100,
+    status:   "publish",
+    orderby:  "date",
+    order:    "desc",
+    ...params,
+  });
+}
+
+export function getSequence(postId: number): Promise<WPSequencePost> {
+  return wpRestFetch<WPSequencePost>(`/wp/v2/bluu_sequence/${postId}`);
+}
+
+export function createSequence(params: { title: string; acf: Partial<WPSequenceACF> }): Promise<WPSequencePost> {
+  return wpRestFetch("/wp/v2/bluu_sequence", {
+    method: "POST",
+    body:   JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+export function updateSequence(postId: number, params: { title?: string; acf?: Partial<WPSequenceACF> }): Promise<WPSequencePost> {
+  return wpRestFetch(`/wp/v2/bluu_sequence/${postId}`, {
+    method: "POST",
+    body:   JSON.stringify(params),
   });
 }
