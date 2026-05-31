@@ -19,18 +19,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const REASONS = [
+const CANCELLATION_REASONS = [
   { value: "no_longer_needed", label: "No longer needed" },
   { value: "too_expensive", label: "Too expensive" },
   { value: "switching_provider", label: "Switching to another provider" },
-  { value: "project_complete", label: "Project complete" },
-  { value: "dissatisfied", label: "Not satisfied with the service" },
+  { value: "project_completed", label: "Project completed" },
+  { value: "budget_constraints", label: "Budget constraints" },
+  { value: "not_satisfied", label: "Not satisfied with results" },
   { value: "other", label: "Other" },
 ];
 
-interface Props {
+interface CancellationModalProps {
   subscriptionId: number;
-  subscriptionTitle: string;
+  serviceName: string;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -38,17 +39,17 @@ interface Props {
 
 export default function CancellationModal({
   subscriptionId,
-  subscriptionTitle,
+  serviceName,
   open,
   onClose,
   onSuccess,
-}: Props) {
+}: CancellationModalProps) {
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function submit() {
+  async function handleSubmit() {
     if (!reason) {
       setError("Please select a reason.");
       return;
@@ -57,54 +58,63 @@ export default function CancellationModal({
     setError(null);
 
     try {
-      const res = await fetch(`/api/portal/subscriptions/${subscriptionId}/cancel`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reason, note }),
-      });
-      const data = await res.json();
+      const res = await fetch(
+        `/api/portal/subscriptions/${subscriptionId}/cancel`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reason, note: note.trim() || undefined }),
+        }
+      );
+
       if (!res.ok) {
-        setError(data.error ?? "Failed to submit request.");
-        return;
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(data.error ?? "Request failed");
       }
+
       onSuccess();
       onClose();
-    } catch {
-      setError("Network error. Please try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setLoading(false);
     }
   }
 
-  function handleClose() {
-    if (loading) return;
-    setReason("");
-    setNote("");
-    setError(null);
-    onClose();
+  function handleOpenChange(isOpen: boolean) {
+    if (!isOpen) onClose();
   }
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Request Cancellation</DialogTitle>
+          <DialogTitle className="text-slate-800">
+            Request Cancellation
+          </DialogTitle>
         </DialogHeader>
 
-        <p className="text-sm text-muted-foreground">
-          You're requesting cancellation for <strong>{subscriptionTitle}</strong>. Our team will
-          review and confirm within 1–2 business days.
-        </p>
+        <div className="space-y-4 py-2">
+          <p className="text-sm text-muted-foreground">
+            You are requesting to cancel{" "}
+            <span className="font-medium text-slate-700">{serviceName}</span>.
+            Our team will reach out to confirm.
+          </p>
 
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label>Reason for cancellation</Label>
+          {error && (
+            <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="cancel-reason">Reason for cancellation *</Label>
             <Select value={reason} onValueChange={setReason}>
-              <SelectTrigger>
+              <SelectTrigger id="cancel-reason">
                 <SelectValue placeholder="Select a reason…" />
               </SelectTrigger>
               <SelectContent>
-                {REASONS.map((r) => (
+                {CANCELLATION_REASONS.map((r) => (
                   <SelectItem key={r.value} value={r.value}>
                     {r.label}
                   </SelectItem>
@@ -113,28 +123,31 @@ export default function CancellationModal({
             </Select>
           </div>
 
-          <div className="space-y-1.5">
-            <Label>Additional notes (optional)</Label>
+          <div className="space-y-2">
+            <Label htmlFor="cancel-note">
+              Additional notes{" "}
+              <span className="text-muted-foreground">(optional)</span>
+            </Label>
             <Textarea
+              id="cancel-note"
+              placeholder="Any additional context for our team…"
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Help us improve by sharing more details…"
               rows={3}
-              maxLength={1000}
             />
           </div>
-
-          {error && (
-            <p className="text-sm text-destructive">{error}</p>
-          )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
-            Cancel
+        <DialogFooter className="gap-2">
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            Keep Subscription
           </Button>
-          <Button variant="destructive" onClick={submit} disabled={loading || !reason}>
-            {loading ? "Submitting…" : "Request cancellation"}
+          <Button
+            variant="destructive"
+            onClick={handleSubmit}
+            disabled={loading || !reason}
+          >
+            {loading ? "Submitting…" : "Request Cancellation"}
           </Button>
         </DialogFooter>
       </DialogContent>

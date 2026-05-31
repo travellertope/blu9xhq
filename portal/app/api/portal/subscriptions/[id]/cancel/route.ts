@@ -1,90 +1,133 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { getSubscription, updateSubscription } from "@/lib/wp-api";
-import { logAuditEvent } from "@/lib/auditLog";
+import {
+  findClientByWpUserId,
+  updateSubscription,
+  wpRestFetch,
+} from "@/lib/wp-api";
+import type { WPSubscriptionPost } from "@/lib/wp-api";
 import { sendEmail } from "@/lib/resend";
+import { logAuditEvent } from "@/lib/auditLog";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const auth = await requireClientSession(req);
-  if (auth instanceof NextResponse) return auth;
-  const { session } = auth;
+  const result = await requireClientSession(req);
+  if (result instanceof NextResponse) return result;
+  const { session } = result;
 
-  const user = session.user as any;
-  const clientId = parseInt(user.clientId ?? "0", 10);
+  const user = session.user as {
+    wpUserId?: number;
+    name?: string | null;
+    email?: string | null;
+  };
+  const wpUserId = user.wpUserId;
 
-  if (!clientId) {
-    return NextResponse.json({ error: "No client profile linked" }, { status: 403 });
+  if (!wpUserId) {
+    return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
   }
 
-  const subId = parseInt(params.id, 10);
-  if (isNaN(subId)) {
-    return NextResponse.json({ error: "Invalid subscription id" }, { status: 400 });
+  const { id: rawId } = await params;
+  const subscriptionId = parseInt(rawId, 10);
+  if (isNaN(subscriptionId)) {
+    return NextResponse.json({ error: "Invalid subscription ID" }, { status: 400 });
   }
 
-  let reason = "";
-  let note = "";
+  let body: unknown;
   try {
-    const body = await req.json();
-    reason = String(body.reason ?? "").slice(0, 200);
-    note = String(body.note ?? "").slice(0, 1000);
+    body = await req.json();
   } catch {
+    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (typeof body !== "object" || body === null) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (!reason) {
-    return NextResponse.json({ error: "reason is required" }, { status: 422 });
+  const { reason, note } = body as { reason?: unknown; note?: unknown };
+  if (typeof reason !== "string" || !reason.trim()) {
+    return NextResponse.json({ error: "reason is required" }, { status: 400 });
   }
 
   try {
-    const sub = await getSubscription(subId);
+    const clientPost = await findClientByWpUserId(wpUserId);
+    if (!clientPost) {
+      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    }
 
-    if (sub.acf.client_id !== clientId) {
+    // Fetch the subscription and verify ownership
+    const sub = await wpRestFetch<WPSubscriptionPost>(
+      `/wp/v2/bluu_subscription/${subscriptionId}`
+    );
+
+    if (sub.acf.client_id !== clientPost.id) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    if (sub.acf.sub_cancellation_requested_at) {
-      return NextResponse.json({ error: "Cancellation already requested" }, { status: 409 });
-    }
-
-    if (sub.acf.status === "cancelled") {
-      return NextResponse.json({ error: "Subscription is already cancelled" }, { status: 409 });
-    }
-
     const now = new Date().toISOString();
-    await updateSubscription(subId, {
+
+    // Update subscription status
+    await updateSubscription(subscriptionId, {
       acf: {
-        sub_cancellation_requested_at: now,
+        status: "cancellation_pending",
         sub_cancellation_reason: reason,
-        sub_cancellation_note: note,
+        sub_cancellation_note: typeof note === "string" ? note : undefined,
+        sub_cancellation_requested_at: now,
       },
     });
 
+    // Log audit event (fire and forget)
     logAuditEvent({
-      action: "portal.subscription.cancel_requested",
-      actorName: user.name ?? user.email,
-      actorWpUserId: user.wpUserId,
-      detail: `Subscription #${subId} — reason: ${reason}`,
-      clientId,
-    }).catch(() => {});
+      action: "subscription_cancellation_requested",
+      actorName: user.name ?? "Client",
+      actorWpUserId: wpUserId,
+      detail: `Reason: ${reason}${typeof note === "string" && note ? ` | Note: ${note}` : ""}`,
+      clientId: clientPost.id,
+    }).catch((err) => console.error("[cancel] auditLog failed:", err));
 
-    const adminEmail = process.env.ADMIN_EMAIL ?? process.env.EMAIL_FROM ?? "hello@bluuhq.com";
+    // Create communication entry (fire and forget)
+    wpRestFetch("/wp/v2/bluu_communication", {
+      method: "POST",
+      body: JSON.stringify({
+        title: `Cancellation request: subscription ${subscriptionId}`,
+        status: "publish",
+        acf: {
+          comm_direction: "inbound",
+          comm_channel: "system",
+          comm_type: "system",
+          comm_subject: `Cancellation request for subscription ${subscriptionId}`,
+          comm_content: `Reason: ${reason}${typeof note === "string" && note ? `\nNote: ${note}` : ""}`,
+          comm_occurred_at: now,
+          comm_client: clientPost.id,
+          comm_logged_by: wpUserId,
+        },
+      }),
+    }).catch((err) => console.error("[cancel] comm post failed:", err));
+
+    // Send admin email (fire and forget)
+    const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
     sendEmail({
       to: adminEmail,
-      subject: `Cancellation Request — ${user.name}`,
-      html: `<p><strong>${user.name}</strong> has requested cancellation of subscription #${subId}.</p>
-<p><strong>Reason:</strong> ${reason}</p>
-${note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
-<p>Log in to the admin panel to review and action this request.</p>`,
-      text: `${user.name} requested cancellation of subscription #${subId}.\nReason: ${reason}\n${note ? `Note: ${note}` : ""}`,
+      subject: `Cancellation request — Subscription #${subscriptionId}`,
+      html: `
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+          <h2>Cancellation Request Received</h2>
+          <p><strong>Client:</strong> ${user.name ?? "Unknown"} (${user.email ?? ""})</p>
+          <p><strong>Subscription ID:</strong> ${subscriptionId}</p>
+          <p><strong>Reason:</strong> ${reason}</p>
+          ${typeof note === "string" && note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
+          <p><strong>Requested at:</strong> ${now}</p>
+          <p>Please review in the admin dashboard and process the cancellation.</p>
+        </div>
+      `,
+      text: `Cancellation Request\n\nClient: ${user.name ?? "Unknown"} (${user.email ?? ""})\nSubscription ID: ${subscriptionId}\nReason: ${reason}\nRequested at: ${now}`,
       tags: [{ name: "type", value: "cancellation_request" }],
-    }).catch(() => {});
+    }).catch((err) => console.error("[cancel] email failed:", err));
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error("[PATCH /api/portal/subscriptions/[id]/cancel]", err);
-    return NextResponse.json({ error: "Failed to process request" }, { status: 500 });
+    console.error("[portal/subscriptions/cancel] Error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

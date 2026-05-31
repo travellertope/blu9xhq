@@ -1,165 +1,260 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
-import { listClientSubscriptions, listInvoices, listClientFiles } from "@/lib/wp-api";
+"use client";
 
-interface StatCardProps {
-  label: string;
-  value: string | number;
-  href?: string;
-  sub?: string;
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+interface MeData {
+  clientId?: number;
+  name?: string;
+  activeSubscriptionCount?: number;
+  unpaidInvoiceCount?: number;
 }
 
-function StatCard({ label, value, href, sub }: StatCardProps) {
-  const card = (
-    <div className="border rounded-lg p-5 bg-card space-y-1 hover:border-primary/40 transition-colors">
-      <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
-      {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
-    </div>
-  );
-  if (href) return <a href={href}>{card}</a>;
-  return card;
+interface SubscriptionItem {
+  id: number;
+  status: string;
+  amount: number;
+  currency: string;
+  billingCycle: string;
+  nextBillingDate?: string | null;
+  service?: { name: string } | null;
 }
 
-async function getPortalStats(clientId: number) {
-  const [subsResult, invoicesResult, filesResult] = await Promise.allSettled([
-    listClientSubscriptions(clientId),
-    listInvoices({ clientId, per_page: 100 }),
-    listClientFiles(clientId),
-  ]);
-
-  const subscriptions = subsResult.status === "fulfilled" ? subsResult.value.items : [];
-  const invoices = invoicesResult.status === "fulfilled" ? invoicesResult.value.items : [];
-  const files = filesResult.status === "fulfilled" ? filesResult.value.items : [];
-
-  const activeSubscriptions = subscriptions.filter((s) => s.acf.status === "active").length;
-
-  const openInvoices = invoices.filter(
-    (i) => i.acf.inv_status === "sent" || i.acf.inv_status === "overdue"
-  );
-  const openInvoiceCount = openInvoices.length;
-  const totalDue = openInvoices.reduce((sum, i) => sum + (i.acf.inv_total ?? 0), 0);
-  const primaryCurrency = openInvoices[0]?.acf.inv_currency ?? "USD";
-
-  const sharedFiles = files.filter((f) => f.acf.file_visibility === "shared").length;
-
-  const recentSubs = subscriptions.slice(0, 3).map((sub) => ({
-    id: sub.id,
-    title: sub.title.rendered,
-    status: sub.acf.status,
-    amount: sub.acf.amount,
-    currency: sub.acf.currency,
-    billingCycle: sub.acf.billing_cycle,
-  }));
-
-  return {
-    activeSubscriptions,
-    openInvoiceCount,
-    totalDue,
-    primaryCurrency,
-    sharedFiles,
-    recentSubs,
-  };
+interface SubscriptionsData {
+  subscriptions?: SubscriptionItem[];
 }
 
-export default async function ClientPortalDashboard() {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any)?.role !== "bluu_client") {
-    redirect("/portal-login");
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
+
+function getStatusBadgeClass(status: string): string {
+  switch (status) {
+    case "active":
+      return "bg-green-100 text-green-700 border-green-200";
+    case "paused":
+      return "bg-amber-100 text-amber-700 border-amber-200";
+    case "cancellation_pending":
+      return "bg-orange-100 text-orange-700 border-orange-200";
+    case "cancelled":
+      return "bg-slate-100 text-slate-600 border-slate-200";
+    default:
+      return "bg-slate-100 text-slate-600 border-slate-200";
   }
+}
 
-  const user = session.user as any;
-  const clientId = parseInt(user.clientId ?? "0", 10);
-  const firstName = session.user?.name?.split(" ")[0] ?? "there";
+function formatStatusLabel(status: string): string {
+  switch (status) {
+    case "active": return "Active";
+    case "paused": return "Paused";
+    case "cancellation_pending": return "Cancellation Pending";
+    case "cancelled": return "Cancelled";
+    default: return status;
+  }
+}
 
-  const stats = clientId
-    ? await getPortalStats(clientId).catch(() => null)
-    : null;
+export default function ClientPortalDashboard() {
+  const [me, setMe] = useState<MeData | null>(null);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalDueDisplay = stats
-    ? `${stats.primaryCurrency} ${stats.totalDue.toLocaleString()}`
-    : "—";
+  useEffect(() => {
+    // Fire and forget login ping
+    fetch("/api/portal/profile/login-ping", { method: "PATCH" }).catch(() => undefined);
+
+    Promise.all([
+      fetch("/api/portal/me").then((r) => r.json() as Promise<MeData>),
+      fetch("/api/portal/subscriptions").then((r) => r.json() as Promise<SubscriptionsData>),
+    ])
+      .then(([meData, subsData]) => {
+        setMe(meData);
+        setSubscriptions(subsData.subscriptions ?? []);
+      })
+      .catch((err) => {
+        console.error("[dashboard] fetch error:", err);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  const firstName = me?.name?.split(" ")[0] ?? "";
+  const activeCount = me?.activeSubscriptionCount ?? 0;
+  const unpaidCount = me?.unpaidInvoiceCount ?? 0;
+
+  const activeSubscriptions = subscriptions.filter((s) => s.status === "active");
+
+  const nextBilling = activeSubscriptions
+    .filter((s) => s.nextBillingDate)
+    .sort(
+      (a, b) =>
+        new Date(a.nextBillingDate!).getTime() - new Date(b.nextBillingDate!).getTime()
+    )[0];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Welcome back, {firstName}</h1>
-        <p className="text-muted-foreground text-sm">Here's a summary of your account</p>
+        <h1 className="text-2xl font-bold text-slate-800">
+          {getGreeting()}{firstName ? `, ${firstName}` : ""}
+        </h1>
+        <p className="text-slate-500 text-sm mt-1">
+          Here&apos;s a summary of your account
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard
-          label="Active Services"
-          value={stats?.activeSubscriptions ?? 0}
-          href="/portal/subscriptions"
-        />
-        <StatCard
-          label="Open Invoices"
-          value={stats?.openInvoiceCount ?? 0}
-          href="/portal/invoices"
-        />
-        <StatCard
-          label="Total Due"
-          value={totalDueDisplay}
-          href="/portal/invoices"
-        />
-        <StatCard
-          label="Shared Files"
-          value={stats?.sharedFiles ?? 0}
-          href="/portal/files"
-        />
-      </div>
+      {/* Unpaid invoice alert */}
+      {!loading && unpaidCount > 0 && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-center justify-between">
+          <p className="text-sm text-amber-800 font-medium">
+            You have {unpaidCount} unpaid invoice{unpaidCount > 1 ? "s" : ""} outstanding.
+          </p>
+          <Link
+            href="/portal/invoices"
+            className="text-sm font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-900"
+          >
+            View Invoices
+          </Link>
+        </div>
+      )}
 
-      {stats && stats.recentSubs.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Your Services</h2>
-            <a href="/portal/subscriptions" className="text-sm text-muted-foreground hover:text-foreground">
-              View all →
-            </a>
-          </div>
-          <div className="space-y-2">
-            {stats.recentSubs.map((sub) => (
-              <div
-                key={sub.id}
-                className="flex items-center justify-between border rounded-lg px-4 py-3 bg-card text-sm"
-              >
-                <span className="font-medium">{sub.title}</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">
-                    {sub.currency} {sub.amount?.toLocaleString()}
-                    {sub.billingCycle === "monthly"
-                      ? "/mo"
-                      : sub.billingCycle === "annually"
-                      ? "/yr"
-                      : ""}
-                  </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      sub.status === "active"
-                        ? "bg-green-100 text-green-800"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {sub.status}
-                  </span>
-                </div>
+      {/* Summary cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <Link href="/portal/subscriptions">
+          <Card className="hover:border-indigo-300 transition-colors cursor-pointer">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-500">Active Services</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-slate-800">
+                {loading ? "—" : activeCount}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-slate-500">Next Payment</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <p className="text-slate-400">Loading…</p>
+            ) : nextBilling ? (
+              <div>
+                <p className="text-lg font-bold text-slate-800">
+                  {nextBilling.currency} {nextBilling.amount.toLocaleString()}
+                </p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {new Date(nextBilling.nextBillingDate!).toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </p>
               </div>
+            ) : (
+              <p className="text-slate-400 text-sm">No upcoming payments</p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Link href="/portal/invoices">
+          <Card className="hover:border-indigo-300 transition-colors cursor-pointer">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-500">Invoices</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold text-slate-800">
+                {loading ? "—" : unpaidCount}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">unpaid</p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Active subscriptions */}
+      {!loading && activeSubscriptions.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-800">Your Services</h2>
+            <Link
+              href="/portal/subscriptions"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {activeSubscriptions.map((sub) => (
+              <Link
+                key={sub.id}
+                href={`/portal/subscriptions#subscription-${sub.id}`}
+                className="block"
+              >
+                <Card className="hover:border-indigo-200 hover:shadow-sm transition-all">
+                  <CardContent className="pt-4 pb-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-medium text-slate-800 text-sm leading-snug">
+                        {sub.service?.name ?? "Service"}
+                      </p>
+                      <span
+                        className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-full border shrink-0 ${getStatusBadgeClass(sub.status)}`}
+                      >
+                        {formatStatusLabel(sub.status)}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">
+                      {sub.nextBillingDate
+                        ? `Next billing: ${new Date(sub.nextBillingDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })} · ${sub.currency} ${sub.amount.toLocaleString()}`
+                        : `${sub.currency} ${sub.amount.toLocaleString()} / ${sub.billingCycle}`}
+                    </p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
       )}
 
-      <div className="border rounded-lg p-6 bg-card">
-        <h2 className="font-semibold mb-1">Need help?</h2>
-        <p className="text-sm text-muted-foreground">
-          Reach out to your account manager at{" "}
-          <a href="mailto:hello@bluuhq.com" className="text-foreground underline underline-offset-2">
-            hello@bluuhq.com
-          </a>
-        </p>
-      </div>
+      {/* Files CTA */}
+      <Card>
+        <CardContent className="pt-5 pb-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-slate-800">Shared Files</h3>
+              <p className="text-sm text-slate-500 mt-0.5">
+                Contracts, deliverables, and documents from your team
+              </p>
+            </div>
+            <Link
+              href="/portal/files"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+            >
+              View Files
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Help */}
+      <Card>
+        <CardContent className="pt-5 pb-5">
+          <h3 className="font-semibold text-slate-800 mb-1">Need help?</h3>
+          <p className="text-sm text-slate-500">
+            Reach out to your account manager at{" "}
+            <a
+              href="mailto:hello@bluuhq.com"
+              className="text-indigo-600 hover:text-indigo-800 underline underline-offset-2"
+            >
+              hello@bluuhq.com
+            </a>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   );
 }

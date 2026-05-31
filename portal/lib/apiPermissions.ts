@@ -78,13 +78,13 @@ export async function requireSession(_req: NextRequest): Promise<PermissionResul
 }
 
 /**
- * Client portal session check.
- * Use for all /api/portal/* routes — verifies role === 'bluu_client'.
+ * Client session check — verifies role === 'bluu_client'.
+ * Use for all portal API routes.
  */
 export async function requireClientSession(_req: NextRequest): Promise<PermissionResult> {
   const session = await getServerSession(authOptions);
   if (!session?.user || (session.user as any).role !== "bluu_client") {
-    return NextResponse.json({ error: "Unauthorized", code: "NO_SESSION" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   return { ok: true, session: session as AuthedSession };
 }
