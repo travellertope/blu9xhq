@@ -7,14 +7,22 @@ export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
 
+  const { searchParams } = new URL(req.url);
+  const statusFilter   = searchParams.get("status")   ?? null;
+  const priorityFilter = searchParams.get("priority") ?? null;
+
   try {
     const now = new Date().toISOString();
 
-    // Fetch all non-closed tickets
     const result = await listTickets({ per_page: 100 });
-    const openTickets = result.items.filter(
-      (t) => t.acf.tkt_status !== "closed"
-    );
+    // When no status filter is set, default to non-closed (dashboard view)
+    const openTickets = result.items.filter((t) => {
+      if (statusFilter) return t.acf.tkt_status === statusFilter;
+      return t.acf.tkt_status !== "closed";
+    }).filter((t) => {
+      if (priorityFilter) return t.acf.tkt_priority === priorityFilter;
+      return true;
+    });
 
     // Enrich with client names and assignee names
     const enriched = await Promise.all(

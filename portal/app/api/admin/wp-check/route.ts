@@ -1,8 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { requireSession } from "@/lib/apiPermissions";
 
 // Diagnostic endpoint — tests whether the WordPress plugin endpoint is reachable.
-// Visit /api/admin/wp-check in your browser to see the result.
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const auth = await requireSession(req);
+  if (auth instanceof NextResponse) return auth;
+
   const wpUrl = process.env.WORDPRESS_URL;
 
   if (!wpUrl) {

@@ -30,7 +30,7 @@ interface TicketRow {
 }
 
 const STATUS_OPTS = [
-  { value: "", label: "All Statuses" },
+  { value: "all", label: "All Statuses" },
   { value: "open", label: "Open" },
   { value: "in_progress", label: "In Progress" },
   { value: "awaiting_client", label: "Awaiting Client" },
@@ -40,7 +40,7 @@ const STATUS_OPTS = [
 ];
 
 const PRIORITY_OPTS = [
-  { value: "", label: "All Priorities" },
+  { value: "all", label: "All Priorities" },
   { value: "urgent", label: "Urgent" },
   { value: "high", label: "High" },
   { value: "normal", label: "Normal" },
@@ -70,14 +70,13 @@ function SlaIndicator({ slaStatus }: { slaStatus: TicketRow["slaStatus"] }) {
 export default function AdminTicketsPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("");
-  const [priorityFilter, setPriorityFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const load = useCallback(() => {
     const params = new URLSearchParams();
-    if (statusFilter) params.set("status", statusFilter);
-    if (priorityFilter) params.set("priority", priorityFilter);
-    params.set("per_page", "50");
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (priorityFilter !== "all") params.set("priority", priorityFilter);
     fetch(`/api/admin/tickets/dashboard?${params}`)
       .then((r) => r.json())
       .then((d) => {
@@ -119,7 +118,7 @@ export default function AdminTicketsPage() {
           </SelectTrigger>
           <SelectContent>
             {STATUS_OPTS.map((o) => (
-              <SelectItem key={o.value} value={o.value || "__all__"}>
+              <SelectItem key={o.value} value={o.value}>
                 {o.label}
               </SelectItem>
             ))}
@@ -132,18 +131,18 @@ export default function AdminTicketsPage() {
           </SelectTrigger>
           <SelectContent>
             {PRIORITY_OPTS.map((o) => (
-              <SelectItem key={o.value} value={o.value || "__all__"}>
+              <SelectItem key={o.value} value={o.value}>
                 {o.label}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {(statusFilter || priorityFilter) && (
+        {(statusFilter !== "all" || priorityFilter !== "all") && (
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => { setStatusFilter(""); setPriorityFilter(""); }}
+            onClick={() => { setStatusFilter("all"); setPriorityFilter("all"); }}
           >
             Clear
           </Button>
