@@ -338,9 +338,11 @@
 }
 .bluu-post-hero__meta-sep { color: rgba(255,255,255,0.3); }
 
-/* ── Single post back link ───────────────────────────────────────────────────── */
+/* ── Single post back link nav strip ─────────────────────────────────────────── */
 .bluu-post-back {
-    padding: var(--space-5) 0 0;
+    background: var(--md-surface-variant);
+    border-bottom: 1px solid var(--md-outline-variant);
+    padding-block: var(--space-3);
 }
 .bluu-post-back a {
     display: inline-flex;
@@ -353,6 +355,7 @@
     transition: color var(--transition-fast);
 }
 .bluu-post-back a:hover { color: var(--md-accent); }
+.bluu-post-back svg { flex-shrink: 0; }
 
 /* ── Single post layout ──────────────────────────────────────────────────────── */
 .bluu-post-section {

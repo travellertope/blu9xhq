@@ -139,21 +139,24 @@ while ( have_posts() ) :
         </div>
     </section>
 
+    <!-- ── Back nav strip ────────────────────────────────────────────────────── -->
+    <?php
+    $blog_url = get_option( 'page_for_posts' )
+        ? get_permalink( get_option( 'page_for_posts' ) )
+        : home_url( '/blog/' );
+    ?>
+    <nav class="bluu-post-back" aria-label="<?php esc_attr_e( 'Return to blog', 'bluu-interactive' ); ?>">
+        <div class="container">
+            <a href="<?php echo esc_url( $blog_url ); ?>">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+                <?php esc_html_e( 'Back to all posts', 'bluu-interactive' ); ?>
+            </a>
+        </div>
+    </nav>
+
     <!-- ── Post content section ──────────────────────────────────────────────── -->
     <div class="bluu-post-section">
         <div class="container">
-
-            <!-- Back link -->
-            <div class="bluu-post-back">
-                <?php
-                $blog_url = get_option( 'page_for_posts' )
-                    ? get_permalink( get_option( 'page_for_posts' ) )
-                    : home_url( '/blog/' );
-                ?>
-                <a href="<?php echo esc_url( $blog_url ); ?>">
-                    &larr; <?php esc_html_e( 'Back to all posts', 'bluu-interactive' ); ?>
-                </a>
-            </div>
 
             <div class="bluu-post-layout">
 

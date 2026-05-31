@@ -216,48 +216,6 @@ get_header();
     </div>
 </section>
 
-<!-- ── FAQ ────────────────────────────────────────────────────────────────── -->
-<section class="pricing-faq" aria-label="<?php esc_attr_e( 'Frequently asked questions', 'bluu-interactive' ); ?>">
-    <div class="container container--narrow">
-
-        <div class="pricing-faq__header animate-on-scroll">
-            <div class="pricing-hero__badge"><?php esc_html_e( 'FAQ', 'bluu-interactive' ); ?></div>
-            <h2 class="pricing-faq__headline"><?php esc_html_e( 'Questions Worth Asking', 'bluu-interactive' ); ?></h2>
-            <p class="pricing-faq__body"><?php esc_html_e( "If you're not sure, ask. We'd rather you understand the model than sign up for something that doesn't fit.", 'bluu-interactive' ); ?></p>
-        </div>
-
-        <div class="faq-list pricing-faq__list" role="list">
-            <?php foreach ( $faq_items as $i => $faq ) :
-                $item_id = 'pricing-faq-' . ( $i + 1 );
-            ?>
-            <div class="faq-item" role="listitem">
-                <button
-                    class="faq-item__question"
-                    id="<?php echo esc_attr( $item_id . '-q' ); ?>"
-                    aria-expanded="false"
-                    aria-controls="<?php echo esc_attr( $item_id . '-a' ); ?>"
-                >
-                    <span><?php echo esc_html( $faq['question'] ); ?></span>
-                    <svg class="faq-item__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">
-                        <path d="M12 4v16m8-8H4"/>
-                    </svg>
-                </button>
-                <div
-                    class="faq-item__answer"
-                    id="<?php echo esc_attr( $item_id . '-a' ); ?>"
-                    role="region"
-                    aria-labelledby="<?php echo esc_attr( $item_id . '-q' ); ?>"
-                    hidden
-                >
-                    <p><?php echo esc_html( $faq['answer'] ); ?></p>
-                </div>
-            </div>
-            <?php endforeach; ?>
-        </div>
-
-    </div>
-</section>
-
 <!-- ── Bottom CTA ─────────────────────────────────────────────────────────── -->
 <section class="pricing-cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">
     <div class="container">
