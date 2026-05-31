@@ -712,6 +712,441 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     display: none !important;
 }
 
+/* ── Mega Menu ──────────────────────────────────────────────────────────────── */
+
+/* Chevron icon */
+.mega-chevron {
+    display: inline-flex;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+    vertical-align: middle;
+}
+
+.site-header__menu .has-mega > .mega-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.site-header__menu .has-mega.is-open > .mega-trigger .mega-chevron {
+    transform: rotate(180deg);
+}
+
+/* ── Mega Panel ─────────────────────────────────────────────────────────────── */
+.mega-panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: var(--header-height);
+    z-index: 890;
+    background: #FFFFFF;
+    border-top: 3px solid var(--md-accent);
+    border-bottom: 1px solid var(--md-outline-variant);
+    box-shadow: 0 24px 48px -8px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.06);
+
+    /* Hidden state — opacity + translateY for smooth reveal */
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    visibility: hidden;
+    transition:
+        opacity 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s 180ms;
+}
+
+.has-mega.is-open > .mega-panel {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+    transition:
+        opacity 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s 0s;
+}
+
+/* Panel inner — mirrors .container for alignment */
+.mega-panel__inner {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-padding);
+}
+
+/* Services layout: 3 columns + feature */
+.mega-panel__body {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 260px;
+    align-items: stretch;
+}
+
+/* ── Column ─────────────────────────────────────────────────────────────────── */
+.mega-panel__col {
+    padding: var(--space-5) var(--space-5) var(--space-6);
+    border-right: 1px solid var(--md-outline-variant);
+}
+
+.mega-panel__col-head {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid var(--md-accent);
+}
+
+/* ── Item list ──────────────────────────────────────────────────────────────── */
+.mega-panel__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+/* ── Item link ──────────────────────────────────────────────────────────────── */
+.mega-panel__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    text-decoration: none;
+    color: var(--md-on-surface);
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+}
+
+.mega-panel__item:hover {
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+}
+
+.mega-panel__item-icon {
+    width: 34px;
+    height: 34px;
+    background: var(--md-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--md-accent);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mega-panel__item:hover .mega-panel__item-icon {
+    background: var(--md-accent);
+    color: #FFFFFF;
+}
+
+.mega-panel__item-icon svg { display: block; }
+
+.mega-panel__item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.mega-panel__item-title {
+    display: block;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: inherit;
+    line-height: 1.3;
+}
+
+.mega-panel__item-desc {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--md-on-surface-variant);
+    line-height: 1.4;
+}
+
+.mega-panel__item:hover .mega-panel__item-desc {
+    color: var(--md-accent-dark);
+    opacity: 0.85;
+}
+
+/* ── Feature Panel (navy) ───────────────────────────────────────────────────── */
+.mega-panel__feature {
+    background: var(--md-navy);
+    color: #FFFFFF;
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Geometric accent shapes */
+.mega-panel__feature::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: var(--md-accent);
+    opacity: 0.09;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    pointer-events: none;
+}
+
+.mega-panel__feature::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    left: -20px;
+    width: 120px;
+    height: 120px;
+    background: var(--md-accent);
+    opacity: 0.06;
+    clip-path: polygon(0 0, 100% 0, 100% 100%);
+    pointer-events: none;
+}
+
+.mega-panel__feature-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--md-accent);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 3px 10px;
+    align-self: flex-start;
+    position: relative;
+    z-index: 1;
+}
+
+.mega-panel__feature-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+}
+
+.mega-panel__feature-desc {
+    font-size: var(--font-size-xs);
+    color: rgba(255, 255, 255, 0.65);
+    margin: 0;
+    line-height: 1.6;
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.mega-panel__feature .btn-primary--small {
+    align-self: flex-start;
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+    margin-top: auto;
+}
+
+/* ── Industries Grid ────────────────────────────────────────────────────────── */
+.mega-panel--industries .mega-panel__body {
+    grid-template-columns: 1fr 260px;
+}
+
+.mega-panel__industries-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-right: 1px solid var(--md-outline-variant);
+    align-self: stretch;
+}
+
+.mega-panel__industry-tile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    text-decoration: none;
+    color: var(--md-on-surface);
+    border-bottom: 1px solid var(--md-outline-variant);
+    border-right: 1px solid var(--md-outline-variant);
+    transition:
+        background var(--transition-fast),
+        color var(--transition-fast);
+    position: relative;
+}
+
+.mega-panel__industry-tile:hover {
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+    z-index: 1;
+}
+
+.mega-panel__industry-tile:nth-child(3n) { border-right: none; }
+.mega-panel__industry-tile:nth-last-child(-n+3) { border-bottom: none; }
+
+.mega-panel__industry-icon {
+    width: 38px;
+    height: 38px;
+    background: var(--md-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--md-accent);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.mega-panel__industry-tile:hover .mega-panel__industry-icon {
+    background: var(--md-accent);
+    color: #FFFFFF;
+}
+
+.mega-panel__industry-name {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: inherit;
+    line-height: 1.3;
+}
+
+/* ── Walker-generated simple list ───────────────────────────────────────────── */
+.mega-panel__simple-list {
+    list-style: none;
+    padding: var(--space-5);
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: var(--space-2);
+    align-content: start;
+}
+
+.mega-panel__simple-list li a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mega-panel__simple-list li a:hover {
+    color: var(--md-accent);
+    background: var(--md-accent-container);
+}
+
+/* ── Mobile Mega Accordion ──────────────────────────────────────────────────── */
+
+/* Suppress the li+li top border on accordion sub-items */
+.mobile-nav__menu .mobile-mega-list li + li {
+    border-top: none;
+}
+
+/* ── Mobile accordion header row ────────────────────────────────────────────
+   Use full parent chain for higher specificity than .mobile-nav__menu li a
+   so display:flex is guaranteed to override display:block on the <a>. */
+.mobile-nav__menu li.has-mega > .mobile-mega-header {
+    display: flex;
+    align-items: stretch;
+}
+
+/* Parent page link — stretches to fill available width */
+.mobile-nav__menu li.has-mega > .mobile-mega-header > a {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    padding: var(--space-4) var(--space-2);
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-lg);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    min-width: 0;
+}
+
+.mobile-nav__menu li.has-mega > .mobile-mega-header > a:hover,
+.mobile-nav__menu .has-mega.is-open > .mobile-mega-header > a {
+    color: var(--md-accent);
+}
+
+/* Chevron toggle button — fixed-size, flush right with visible divider */
+.mobile-mega-btn {
+    background: none;
+    border: none;
+    border-left: 1px solid var(--md-outline-variant);
+    cursor: pointer;
+    padding: var(--space-3) var(--space-4);
+    color: var(--md-on-surface-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    flex: 0 0 48px; /* fixed 48px tap target — never shrinks or grows */
+    min-height: 48px;
+}
+
+.mobile-mega-btn:hover {
+    color: var(--md-accent);
+    background: var(--md-accent-container);
+}
+
+.mobile-nav__menu .has-mega.is-open > .mobile-mega-header .mega-chevron {
+    transform: rotate(180deg);
+}
+
+/* ── Accordion sub-list ──────────────────────────────────────────────────────
+   display:none is simpler and more reliable than max-height:0 — no
+   specificity or caching edge-cases that let items bleed through. */
+.mobile-mega-list {
+    display: none;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    background: var(--md-surface-variant);
+}
+
+.mobile-nav__menu .has-mega.is-open > .mobile-mega-list {
+    display: block;
+    animation: mobileAccordionIn 220ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes mobileAccordionIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-mega-list li a {
+    display: block;
+    padding: var(--space-3) var(--space-6);
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    text-decoration: none;
+    border-top: 1px solid var(--md-outline);
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mobile-mega-list li:first-child a {
+    border-top: none;
+}
+
+.mobile-mega-list li a:hover {
+    color: var(--md-accent);
+    background: var(--md-accent-container);
+}
+
+/* Hide fixed-position mega panel on mobile — accordion handles sub-items */
+@media (max-width: 900px) {
+    .mega-panel {
+        display: none;
+    }
+}
+
 /* ── Hero Section ───────────────────────────────────────────────────────────── */
 .hero {
     background: #FFFFFF;
@@ -3251,12 +3686,14 @@ a.contact-info__value:hover {
     justify-content: center;
     align-items: stretch;
     overflow: visible;
+    align-self: stretch; /* fill the full grid row height */
 }
 
 .hero-image {
     width: 140%;
-    aspect-ratio: 4 / 3;
+    min-height: 420px; /* fallback height; flex-stretch fills grid row height */
     overflow: hidden;
+    /* aspect-ratio removed — height now fills available space */
 }
 
 .hero-image img {
