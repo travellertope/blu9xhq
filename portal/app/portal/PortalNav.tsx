@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { Menu, X } from "lucide-react";
@@ -50,11 +51,8 @@ export default function PortalNav({ firstName }: PortalNavProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex h-14 items-center justify-between gap-4">
           {/* Logo */}
-          <Link
-            href="/portal"
-            className="font-bold text-lg tracking-tight text-slate-800 shrink-0"
-          >
-            BluuHQ
+          <Link href="/portal" className="shrink-0">
+            <Image src="/logo.png" alt="BluuHQ" width={100} height={28} priority className="object-contain" />
           </Link>
 
           {/* Desktop nav */}
