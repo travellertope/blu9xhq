@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,14 @@ export default function SetupPage() {
   const [step, setStep] = useState<Step>(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Redirect to portal if setup is already complete
+  useEffect(() => {
+    fetch("/api/portal/me")
+      .then((r) => r.json())
+      .then((d) => { if (d.setupComplete === true) router.replace("/portal"); })
+      .catch(() => undefined);
+  }, [router]);
 
   // Step 1
   const [password, setPassword] = useState("");
