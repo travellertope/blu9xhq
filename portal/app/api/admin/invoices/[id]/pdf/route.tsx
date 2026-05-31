@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
 import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
 import { uploadToR2 } from "@/lib/r2";
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
-import React from "react";
+import { type DocumentProps, Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import React, { type ReactElement, type JSXElementConstructor } from "react";
 
 const styles = StyleSheet.create({
   page: {
@@ -235,19 +235,19 @@ export async function POST(
       lineItems = [];
     }
 
-    const pdfBuffer = await renderToBuffer(
-      React.createElement(InvoicePDF, {
-        invNumber: invoice.acf.inv_number,
-        issuedDate: invoice.acf.inv_issued_date,
-        dueDate: invoice.acf.inv_due_date,
-        clientName: clientPost.acf.contact_name || clientPost.title.rendered,
-        clientCompany: clientPost.acf.company_name,
-        lineItems,
-        total: invoice.acf.inv_total,
-        currency: invoice.acf.inv_currency,
-        notes: invoice.acf.inv_notes,
-      })
-    );
+    const pdfElement = React.createElement(InvoicePDF, {
+      invNumber: invoice.acf.inv_number,
+      issuedDate: invoice.acf.inv_issued_date,
+      dueDate: invoice.acf.inv_due_date,
+      clientName: clientPost.acf.contact_name || clientPost.title.rendered,
+      clientCompany: clientPost.acf.company_name,
+      lineItems,
+      total: invoice.acf.inv_total,
+      currency: invoice.acf.inv_currency,
+      notes: invoice.acf.inv_notes,
+    }) as unknown as ReactElement<DocumentProps, string | JSXElementConstructor<DocumentProps>>;
+
+    const pdfBuffer = await renderToBuffer(pdfElement);
 
     const invNumber = invoice.acf.inv_number.replace(/[^a-zA-Z0-9-]/g, "-");
     const key = `invoices/${postId}/invoice-${invNumber}.pdf`;
@@ -257,7 +257,7 @@ export async function POST(
     const publicUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL ?? ""}/${key}`;
     await updateInvoice(postId, { acf: { inv_pdf_url: publicUrl } });
 
-    return new Response(pdfBuffer, {
+    return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
