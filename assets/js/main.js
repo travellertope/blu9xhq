@@ -64,7 +64,28 @@
             }
         } );
 
-        // Close nav when a link is clicked
+        // Inject chevron toggle buttons for items with sub-menus
+        qsa( '.mobile-nav__menu > li.menu-item-has-children', nav ).forEach( function ( li ) {
+            var subMenu = li.querySelector( ':scope > .sub-menu' );
+            if ( ! subMenu ) return;
+
+            var btn = document.createElement( 'button' );
+            btn.className = 'mobile-sub-toggle';
+            btn.setAttribute( 'aria-expanded', 'false' );
+            btn.setAttribute( 'aria-label', 'Toggle submenu' );
+            btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+            btn.addEventListener( 'click', function ( e ) {
+                e.stopPropagation();
+                var isOpen = subMenu.classList.contains( 'is-open' );
+                subMenu.classList.toggle( 'is-open', ! isOpen );
+                btn.setAttribute( 'aria-expanded', String( ! isOpen ) );
+            } );
+
+            li.appendChild( btn );
+        } );
+
+        // Close nav when a link is clicked (but not the toggle buttons)
         qsa( '.mobile-nav__menu a', nav ).forEach( function ( link ) {
             link.addEventListener( 'click', closeNav );
         } );
