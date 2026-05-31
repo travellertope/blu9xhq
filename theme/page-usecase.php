@@ -653,6 +653,27 @@ $uc_content = array(
 // Resolve slug to content
 $d = isset( $uc_content[ $current_slug ] ) ? $uc_content[ $current_slug ] : reset( $uc_content );
 
+// Breadcrumb — map each use case slug to its parent industry
+$_uc_industry_map = array(
+    'competitor-intelligence'  => array( 'label' => 'Tech &amp; SaaS',           'url' => '/industries/tech-saas' ),
+    'founder-brand'            => array( 'label' => 'Tech &amp; SaaS',           'url' => '/industries/tech-saas' ),
+    'content-repurposing'      => array( 'label' => 'Tech &amp; SaaS',           'url' => '/industries/tech-saas' ),
+    'product-launch-content'   => array( 'label' => 'Tech &amp; SaaS',           'url' => '/industries/tech-saas' ),
+    'own-brand-content'        => array( 'label' => 'Agencies &amp; Consultants','url' => '/industries/agencies-consultants' ),
+    'thought-leadership'       => array( 'label' => 'Agencies &amp; Consultants','url' => '/industries/agencies-consultants' ),
+    'white-label-production'   => array( 'label' => 'Agencies &amp; Consultants','url' => '/industries/agencies-consultants' ),
+    'service-launch'           => array( 'label' => 'Agencies &amp; Consultants','url' => '/industries/agencies-consultants' ),
+    'brand-storytelling'       => array( 'label' => 'E-commerce &amp; DTC',      'url' => '/industries/ecommerce-dtc' ),
+    'product-content'          => array( 'label' => 'E-commerce &amp; DTC',      'url' => '/industries/ecommerce-dtc' ),
+    'email-newsletter'         => array( 'label' => 'E-commerce &amp; DTC',      'url' => '/industries/ecommerce-dtc' ),
+    'market-intelligence'      => array( 'label' => 'E-commerce &amp; DTC',      'url' => '/industries/ecommerce-dtc' ),
+    'expert-commentary'        => array( 'label' => 'Professional Services',     'url' => '/industries/professional-services' ),
+    'client-education'         => array( 'label' => 'Professional Services',     'url' => '/industries/professional-services' ),
+    'referral-trust-content'   => array( 'label' => 'Professional Services',     'url' => '/industries/professional-services' ),
+    'linkedin-authority'       => array( 'label' => 'Professional Services',     'url' => '/industries/professional-services' ),
+);
+$_uc_ind = isset( $_uc_industry_map[ $current_slug ] ) ? $_uc_industry_map[ $current_slug ] : array( 'label' => 'Industries', 'url' => '/industries' );
+
 // Hero
 $hero_tag  = ( $gf ? get_field( 'uc_hero_tag' )         : '' ) ?: ( $d['hero_tag'] ?? '' );
 $hero_hl   = ( $gf ? get_field( 'uc_hero_headline' )    : '' ) ?: ( $d['hero_headline'] ?? '' );
@@ -729,7 +750,13 @@ get_header();
     <div class="container">
         <div class="industry-pg-hero__inner">
             <div class="industry-pg-hero__content animate-on-scroll">
-                <div class="industry-pg-hero__tag"><?php echo esc_html( $hero_tag ); ?></div>
+                <nav class="industry-pg-hero__tag industry-pg-hero__breadcrumb" aria-label="Breadcrumb">
+                    <a href="<?php echo esc_url( home_url( '/industries' ) ); ?>">Industries</a>
+                    <span aria-hidden="true"> / </span>
+                    <a href="<?php echo esc_url( home_url( $_uc_ind['url'] ) ); ?>"><?php echo $_uc_ind['label']; ?></a>
+                    <span aria-hidden="true"> / </span>
+                    <span><?php echo esc_html( $hero_hl ); ?></span>
+                </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
                 <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
                 <div class="industry-pg-hero__cta">

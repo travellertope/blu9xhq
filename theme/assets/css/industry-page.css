@@ -31,6 +31,30 @@
     margin-bottom: var(--space-5);
 }
 
+.industry-pg-hero__breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.industry-pg-hero__breadcrumb a {
+    color: #7eb8ff;
+    text-decoration: none;
+}
+
+.industry-pg-hero__breadcrumb a:hover {
+    text-decoration: underline;
+    color: #fff;
+}
+
+.industry-pg-hero__breadcrumb span[aria-hidden] {
+    color: rgba(255,255,255,0.35);
+}
+
+.industry-pg-hero__breadcrumb > span:not([aria-hidden]) {
+    color: rgba(255,255,255,0.65);
+}
+
 .industry-pg-hero__headline {
     font-size: clamp(2rem, 4vw, 3.25rem);
     font-weight: 400;
@@ -143,6 +167,14 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--space-10);
     align-items: start;
+}
+
+.industry-approach__image {
+    position: sticky;
+    top: var(--header-height, 72px);
+    height: calc(100vh - var(--header-height, 72px));
+    display: flex;
+    align-items: center;
 }
 
 .industry-approach__image img {
@@ -393,6 +425,13 @@
     gap: var(--space-4);
     justify-content: center;
     flex-wrap: wrap;
+}
+
+.industry-pg-cta__note {
+    margin-top: var(--space-6);
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.02em;
 }
 
 /* ── White-filled primary button override for CTA section ────────────────── */

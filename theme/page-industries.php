@@ -31,14 +31,12 @@ get_header();
         <div class="hub-industry-grid">
 
             <a href="<?php echo esc_url( home_url( '/industries/tech-saas' ) ); ?>" class="hub-industry-card hub-industry-card--primary animate-on-scroll">
-                <div class="hub-industry-card__eyebrow">4 use cases</div>
                 <h2 class="hub-industry-card__name">Tech &amp; SaaS startups</h2>
                 <p class="hub-industry-card__desc">Founders and growth teams who need a complete content operation — research, writing, publishing, and reporting — without the overhead of building one in-house.</p>
                 <span class="hub-industry-card__cta">Learn more →</span>
             </a>
 
             <a href="<?php echo esc_url( home_url( '/industries/agencies-consultants' ) ); ?>" class="hub-industry-card hub-industry-card--primary animate-on-scroll">
-                <div class="hub-industry-card__eyebrow">4 use cases</div>
                 <h2 class="hub-industry-card__name">Agencies &amp; consultants</h2>
                 <p class="hub-industry-card__desc">Agency principals and independent consultants who know their own content should be generating inbound — but client work always wins. We run it for them.</p>
                 <span class="hub-industry-card__cta">Learn more →</span>
@@ -61,14 +59,12 @@ get_header();
         <div class="hub-industry-grid hub-industry-grid--secondary">
 
             <a href="<?php echo esc_url( home_url( '/industries/ecommerce-dtc' ) ); ?>" class="hub-industry-card animate-on-scroll">
-                <div class="hub-industry-card__eyebrow">4 use cases</div>
                 <h2 class="hub-industry-card__name">E-commerce &amp; DTC brands</h2>
                 <p class="hub-industry-card__desc">DTC and e-commerce brands that need a consistent content presence across channels — brand storytelling, product launch content, email, and market intelligence.</p>
                 <span class="hub-industry-card__cta">Learn more →</span>
             </a>
 
             <a href="<?php echo esc_url( home_url( '/industries/professional-services' ) ); ?>" class="hub-industry-card animate-on-scroll">
-                <div class="hub-industry-card__eyebrow">4 use cases</div>
                 <h2 class="hub-industry-card__name">Professional services</h2>
                 <p class="hub-industry-card__desc">Partners, principals, and senior advisors in law, finance, and consulting who want to build authority, nurture client relationships, and stop being a well-kept secret.</p>
                 <span class="hub-industry-card__cta">Learn more →</span>

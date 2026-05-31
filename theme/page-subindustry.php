@@ -615,6 +615,18 @@ $si_content = array(
 // ── Resolve content: ACF overrides slug defaults ──────────────────────────────
 $d = isset( $si_content[ $current_slug ] ) ? $si_content[ $current_slug ] : reset( $si_content );
 
+// Breadcrumb — derive parent industry from hero_tag "{Industry} — {Sub-industry}"
+$_tag_parts      = explode( ' — ', $d['hero_tag'] ?? '', 2 );
+$_ind_name_raw   = $_tag_parts[0] ?? '';
+$_si_name_raw    = $_tag_parts[1] ?? get_the_title();
+$_ind_url_map    = array(
+    'Tech & SaaS'            => '/industries/tech-saas',
+    'Agencies & consultants' => '/industries/agencies-consultants',
+    'E-commerce & DTC'       => '/industries/ecommerce-dtc',
+    'Professional services'  => '/industries/professional-services',
+);
+$_ind_url = isset( $_ind_url_map[ $_ind_name_raw ] ) ? home_url( $_ind_url_map[ $_ind_name_raw ] ) : home_url( '/industries' );
+
 $hero_tag    = ( $gf ? get_field( 'si_hero_tag' )         : '' ) ?: ( $d['hero_tag']    ?? 'Use case' );
 $hero_hl     = ( $gf ? get_field( 'si_hero_headline' )    : '' ) ?: ( $d['hero_headline'] ?? get_the_title() );
 $hero_sub    = ( $gf ? get_field( 'si_hero_subheadline' ) : '' ) ?: ( $d['hero_sub']   ?? '' );
@@ -676,7 +688,13 @@ get_header();
         <div class="industry-pg-hero__inner">
 
             <div class="industry-pg-hero__content animate-on-scroll">
-                <div class="industry-pg-hero__tag"><?php echo esc_html( $hero_tag ); ?></div>
+                <nav class="industry-pg-hero__tag industry-pg-hero__breadcrumb" aria-label="Breadcrumb">
+                    <a href="<?php echo esc_url( home_url( '/industries' ) ); ?>">Industries</a>
+                    <span aria-hidden="true"> / </span>
+                    <a href="<?php echo esc_url( $_ind_url ); ?>"><?php echo esc_html( $_ind_name_raw ); ?></a>
+                    <span aria-hidden="true"> / </span>
+                    <span><?php echo esc_html( $_si_name_raw ); ?></span>
+                </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
                 <?php if ( $hero_sub ) : ?>
                     <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
