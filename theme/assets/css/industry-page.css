@@ -145,6 +145,11 @@
     align-items: start;
 }
 
+.industry-approach__image {
+    position: sticky;
+    top: calc(var(--header-height, 72px) + var(--space-5));
+}
+
 .industry-approach__image img {
     width: 100%;
     aspect-ratio: 4 / 3;
