@@ -395,6 +395,30 @@
     flex-wrap: wrap;
 }
 
+/* ── Outline button variant for dark/coloured hero and CTA backgrounds ──── */
+.industry-btn-outline--cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.75rem;
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    line-height: 1;
+    color: #fff;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,0.55);
+    text-decoration: none;
+    transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.industry-btn-outline--cta:hover {
+    border-color: #fff;
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
 /* ── Sub-industry: Who this is for ───────────────────────────────────────── */
 .si-who {
     padding: var(--space-10) 0;
@@ -561,6 +585,57 @@
 }
 
 .si-fit__proof-link:hover { opacity: 0.75; }
+
+/* ── Use Case: Deliverables ──────────────────────────────────────────────── */
+.uc-deliverables {
+    padding: var(--space-10) 0;
+    background: var(--md-surface-variant);
+}
+
+.uc-deliverables__header {
+    max-width: 680px;
+    margin: 0 auto var(--space-9);
+    text-align: center;
+}
+
+.uc-deliverables__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.uc-deliverable-card {
+    background: #fff;
+    padding: var(--space-6);
+    border-left: 3px solid var(--md-accent);
+}
+
+.uc-deliverable-card__name {
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    color: var(--md-primary);
+    margin-bottom: var(--space-3);
+}
+
+.uc-deliverable-card__detail {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.7;
+}
+
+.uc-cadence {
+    max-width: 680px;
+    margin: var(--space-7) auto 0;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    font-style: italic;
+    line-height: 1.65;
+    padding: var(--space-4);
+    border: 1px dashed var(--md-outline-variant);
+}
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 960px) {

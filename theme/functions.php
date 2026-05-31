@@ -469,3 +469,6 @@ function bluu_faq_category_icon( $icon ) {
 require_once get_template_directory() . '/inc/acf-fields.php';
 require_once get_template_directory() . '/inc/customizer.php';
 require_once get_template_directory() . '/inc/contact-submissions.php';
+if ( is_admin() ) {
+    require_once get_template_directory() . '/inc/seeder-tool.php';
+}
