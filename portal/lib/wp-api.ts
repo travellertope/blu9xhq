@@ -181,6 +181,16 @@ export function getServicePost(postId: number): Promise<WPServicePost> {
   return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`);
 }
 
+export function listServices(params: Record<string, string | number> = {}): Promise<WPListResult<WPServicePost>> {
+  return wpRestList<WPServicePost>("/wp/v2/bluu_service", {
+    per_page: 100,
+    status: "publish",
+    orderby: "title",
+    order: "asc",
+    ...params,
+  });
+}
+
 // ─── bluu_subscription CPT types & helpers ───────────────────────────────────
 
 export interface WPSubscriptionACF {
@@ -244,6 +254,16 @@ export function listSubscriptionsByClient(clientPostId: number): Promise<WPListR
     status: "publish",
     meta_key: "client_id",
     meta_value: clientPostId,
+  });
+}
+
+export function listAllSubscriptions(params: { per_page?: number; page?: number } = {}): Promise<WPListResult<WPSubscriptionPost>> {
+  return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
+    per_page: params.per_page ?? 50,
+    page: params.page ?? 1,
+    status: "publish",
+    orderby: "date",
+    order: "desc",
   });
 }
 
@@ -455,6 +475,16 @@ export function listClientFiles(
     orderby:    "date",
     order:      "desc",
     ...params,
+  });
+}
+
+export function listAllFiles(params: { per_page?: number; page?: number } = {}): Promise<WPListResult<WPFilePost>> {
+  return wpRestList<WPFilePost>("/wp/v2/bluu_file", {
+    per_page: params.per_page ?? 50,
+    page:     params.page ?? 1,
+    status:   "publish",
+    orderby:  "date",
+    order:    "desc",
   });
 }
 

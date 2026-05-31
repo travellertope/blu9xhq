@@ -60,10 +60,13 @@ function bluuhq_ping( WP_REST_Request $request ): WP_REST_Response {
 
 function bluuhq_is_admin_request(): bool {
     $user = wp_get_current_user();
-    return $user && in_array( 'bluu_admin', (array) $user->roles, true );
+    return $user && array_intersect(
+        [ 'bluu_admin', 'administrator' ],
+        (array) $user->roles
+    ) !== [];
 }
 
 function bluuhq_is_team_request(): bool {
     $user = wp_get_current_user();
-    return $user && array_intersect( [ 'bluu_admin', 'bluu_team' ], (array) $user->roles ) !== [];
+    return $user && array_intersect( [ 'bluu_admin', 'bluu_team', 'administrator' ], (array) $user->roles ) !== [];
 }
