@@ -25,7 +25,7 @@ while ( have_posts() ) :
     $author_name = get_the_author();
     $post_date   = get_the_date( 'j M Y' );
     $author_id   = (int) get_post_field( 'post_author', $post_id );
-    $show_author = user_can( $author_id, 'administrator' );
+    $show_author = ! user_can( $author_id, 'administrator' );
 
     // Thumbnail
     $thumb_id  = get_post_thumbnail_id( $post_id );

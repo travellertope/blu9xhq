@@ -21,7 +21,7 @@ $read_time = function_exists( 'bluu_reading_time' ) ? bluu_reading_time( $post_i
 
 $author_id   = (int) get_post_field( 'post_author', $post_id );
 $author_name = get_the_author_meta( 'display_name', $author_id );
-$show_author = user_can( $author_id, 'administrator' );
+$show_author = ! user_can( $author_id, 'administrator' );
 $post_date   = get_the_date( 'j M Y', $post_id );
 
 $thumb_id  = get_post_thumbnail_id( $post_id );
