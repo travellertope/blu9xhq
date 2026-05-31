@@ -543,3 +543,13 @@ export async function listAllClients(): Promise<WPClientPost[]> {
   const result = await listClientPosts({ per_page: 100 });
   return result.items;
 }
+
+/** Find a bluu_client post by its linked WP user ID. */
+export async function findClientByWpUserId(wpUserId: number): Promise<WPClientPost | null> {
+  const result = await wpRestList<WPClientPost>("/wp/v2/bluu_client", {
+    meta_key: "wp_user_id",
+    meta_value: wpUserId,
+    per_page: 1,
+  });
+  return result.items[0] ?? null;
+}
