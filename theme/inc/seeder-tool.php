@@ -158,17 +158,22 @@ function bluu_seeder_run() {
 }
 
 function bluu_seeder_render_page() {
-    $results = null;
+    $results      = null;
+    $faq_result   = null;
     $nonce_action = 'bluu_run_seeder';
 
-    if (
-        isset( $_POST['bluu_run_seeder'] ) &&
-        check_admin_referer( $nonce_action )
-    ) {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( 'Insufficient permissions.' );
-        }
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( 'Insufficient permissions.' );
+    }
+
+    if ( isset( $_POST['bluu_run_seeder'] ) && check_admin_referer( $nonce_action ) ) {
         $results = bluu_seeder_run();
+    }
+
+    if ( isset( $_POST['bluu_run_faq_seeder'] ) && check_admin_referer( $nonce_action ) ) {
+        ob_start();
+        require_once get_template_directory() . '/inc/faq-seeder.php';
+        $faq_result = ob_get_clean();
     }
 
     $counts = array( 'created' => 0, 'updated' => 0, 'exists' => 0, 'error' => 0 );
@@ -266,6 +271,25 @@ function bluu_seeder_render_page() {
             <input type="hidden" name="bluu_run_seeder" value="1">
             <?php submit_button( $results ? 'Run seeder again' : 'Create all pages now', 'primary large' ); ?>
         </form>
+
+        <hr style="margin:2.5em 0">
+
+        <h2>FAQ Content Seeder</h2>
+        <p>Clears all existing FAQ ACF data and writes the current Bluu-approved FAQ content (6 categories, 33 questions). <strong>This is destructive</strong> — any manually entered FAQ content will be replaced. Run this after clearing old FAQ entries.</p>
+
+        <?php if ( $faq_result ) : ?>
+            <div style="background:#f0f6e4;border-left:4px solid #00a32a;padding:1em 1.5em;max-width:640px;margin-bottom:1.5em">
+                <strong>FAQ seeder output:</strong>
+                <pre style="margin:0.5em 0 0;white-space:pre-wrap;font-size:13px"><?php echo esc_html( $faq_result ); ?></pre>
+            </div>
+        <?php endif; ?>
+
+        <form method="post">
+            <?php wp_nonce_field( $nonce_action ); ?>
+            <input type="hidden" name="bluu_run_faq_seeder" value="1">
+            <?php submit_button( 'Seed FAQ content now', 'secondary large' ); ?>
+        </form>
+
     </div>
     <?php
 }
