@@ -1603,3 +1603,91 @@ acf_add_local_field_group( array(
     'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-subindustry.php' ) ) ),
     'menu_order' => 70, 'active' => true,
 ) );
+
+// ── BLOG POST META ─────────────────────────────────────────────────────────────
+add_action( 'acf/init', function () {
+    if ( ! function_exists( 'acf_add_local_field_group' ) ) { return; }
+
+    acf_add_local_field_group( array(
+        'key'      => 'group_blog_post_meta',
+        'title'    => 'Blog Post Meta',
+        'fields'   => array(
+            array(
+                'key'          => 'field_bluu_post_subtitle',
+                'label'        => 'Post subtitle',
+                'name'         => 'bluu_post_subtitle',
+                'type'         => 'text',
+                'instructions' => 'A short supporting sentence shown below the headline on the archive card and single post hero. Max 120 characters. Optional.',
+            ),
+            array(
+                'key'          => 'field_bluu_post_category_label',
+                'label'        => 'Category label',
+                'name'         => 'bluu_post_category_label',
+                'type'         => 'text',
+                'instructions' => "Short label shown as a badge on the card and post header. E.g. 'Content strategy' or 'Competitor intelligence'. Optional — falls back to first WordPress category if empty.",
+            ),
+            array(
+                'key'          => 'field_bluu_post_author_bio',
+                'label'        => 'Author bio (short)',
+                'name'         => 'bluu_post_author_bio',
+                'type'         => 'textarea',
+                'rows'         => 3,
+                'instructions' => '1–2 sentence bio shown in the author block at the bottom of single posts. Optional.',
+            ),
+            array(
+                'key'          => 'field_bluu_post_cta_heading',
+                'label'        => 'Post CTA heading',
+                'name'         => 'bluu_post_cta_heading',
+                'type'         => 'text',
+                'instructions' => "The headline for the CTA block at the bottom of each single post. E.g. 'Ready to hand off your content operation?' If empty, a default CTA is shown.",
+            ),
+            array(
+                'key'          => 'field_bluu_post_cta_subtext',
+                'label'        => 'Post CTA subtext',
+                'name'         => 'bluu_post_cta_subtext',
+                'type'         => 'textarea',
+                'rows'         => 2,
+                'instructions' => 'The supporting sentence under the CTA heading. If empty, a default is shown.',
+            ),
+            array(
+                'key'          => 'field_bluu_post_cta_button_label',
+                'label'        => 'CTA button label',
+                'name'         => 'bluu_post_cta_button_label',
+                'type'         => 'text',
+                'instructions' => "Defaults to 'Book a Discovery Call' if empty.",
+            ),
+            array(
+                'key'          => 'field_bluu_post_cta_button_url',
+                'label'        => 'CTA button URL',
+                'name'         => 'bluu_post_cta_button_url',
+                'type'         => 'url',
+                'instructions' => 'Defaults to /contact if empty.',
+            ),
+            array(
+                'key'          => 'field_bluu_post_related_posts',
+                'label'        => 'Related posts',
+                'name'         => 'bluu_post_related_posts',
+                'type'         => 'relationship',
+                'post_type'    => array( 'post' ),
+                'max'          => 3,
+                'instructions' => 'Manually select up to 3 related posts to show at the bottom of this post. If empty, fallback to 3 most recent posts in the same category.',
+                'return_format' => 'post_object',
+            ),
+        ),
+        'location' => array(
+            array(
+                array(
+                    'param'    => 'post_type',
+                    'operator' => '==',
+                    'value'    => 'post',
+                ),
+            ),
+        ),
+        'menu_order'            => 0,
+        'position'              => 'normal',
+        'style'                 => 'default',
+        'label_placement'       => 'top',
+        'instruction_placement' => 'label',
+        'active'                => true,
+    ) );
+} );

@@ -755,7 +755,7 @@ get_header();
                     <span aria-hidden="true"> / </span>
                     <a href="<?php echo esc_url( home_url( $_uc_ind['url'] ) ); ?>"><?php echo $_uc_ind['label']; ?></a>
                     <span aria-hidden="true"> / </span>
-                    <span><?php echo esc_html( $hero_hl ); ?></span>
+                    <span><?php echo esc_html( get_the_title() ); ?></span>
                 </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
                 <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>

@@ -955,66 +955,86 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 }
 
 /* ── Industries Grid ────────────────────────────────────────────────────────── */
+/* ── Industries mega panel — 4-column grid layout ──────────────────────────── */
 .mega-panel--industries .mega-panel__body {
-    grid-template-columns: 1fr 260px;
-}
-
-.mega-panel__industries-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    border-right: 1px solid var(--md-outline-variant);
-    align-self: stretch;
+    grid-template-columns: repeat(4, 1fr);
+    align-items: start;
+    padding: 0;
 }
 
-.mega-panel__industry-tile {
+.mega-ind-col {
+    padding: var(--space-5) var(--space-5) var(--space-6);
+    border-right: 1px solid var(--md-outline-variant);
+}
+.mega-ind-col:last-child { border-right: none; }
+
+.mega-ind-col__head {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4) var(--space-5);
-    text-decoration: none;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
     color: var(--md-on-surface);
-    border-bottom: 1px solid var(--md-outline-variant);
-    border-right: 1px solid var(--md-outline-variant);
-    transition:
-        background var(--transition-fast),
-        color var(--transition-fast);
-    position: relative;
+    text-decoration: none;
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
+    border-bottom: 2px solid var(--md-accent);
+    transition: color var(--transition-fast);
+}
+.mega-ind-col__head:hover { color: var(--md-accent); }
+
+.mega-ind-section {
+    margin-bottom: var(--space-4);
+}
+.mega-ind-section:last-child { margin-bottom: 0; }
+
+.mega-ind-section__label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--space-2);
 }
 
-.mega-panel__industry-tile:hover {
-    background: var(--md-accent-container);
+.mega-ind-section--uc .mega-ind-section__label {
     color: var(--md-accent);
-    z-index: 1;
 }
 
-.mega-panel__industry-tile:nth-child(3n) { border-right: none; }
-.mega-panel__industry-tile:nth-last-child(-n+3) { border-bottom: none; }
+.mega-pill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+}
 
-.mega-panel__industry-icon {
-    width: 38px;
-    height: 38px;
+.mega-pill {
+    display: block;
+    padding: 5px 7px;
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: var(--md-on-surface);
     background: var(--md-surface-variant);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--md-accent);
+    text-decoration: none;
     transition: background var(--transition-fast), color var(--transition-fast);
 }
-
-.mega-panel__industry-tile:hover .mega-panel__industry-icon {
+.mega-pill:hover {
     background: var(--md-accent);
-    color: #FFFFFF;
+    color: #fff;
 }
 
-.mega-panel__industry-name {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: inherit;
-    line-height: 1.3;
+.mega-pill--uc {
+    color: var(--md-accent);
+    background: rgba(13,110,253,0.07);
+}
+.mega-pill--uc:hover {
+    background: var(--md-accent);
+    color: #fff;
 }
 
-/* ── Walker-generated simple list ───────────────────────────────────────────── */
+/* ── Walker-generated simple list (non-industries fallback) ─────────────────── */
 .mega-panel__simple-list {
     list-style: none;
     padding: var(--space-5);
@@ -1039,6 +1059,86 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     color: var(--md-accent);
     background: var(--md-accent-container);
 }
+
+/* ── Mobile Industries Accordion ────────────────────────────────────────────── */
+.mobile-mega-list--industries {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mobile-ind-group {
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+
+.mobile-ind-group__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mobile-ind-group__name {
+    flex: 1;
+    padding: var(--space-3) var(--space-5);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--md-on-surface);
+    text-decoration: none;
+}
+
+.mobile-ind-toggle {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--md-on-surface-variant);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+.mobile-ind-toggle[aria-expanded="true"] { transform: rotate(180deg); }
+
+.mobile-ind-group__body {
+    display: none;
+    padding: 0 var(--space-5) var(--space-4);
+}
+.mobile-ind-group__body.is-open { display: block; }
+
+.mobile-ind-section {
+    margin-bottom: var(--space-4);
+}
+.mobile-ind-section__label {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin-bottom: var(--space-2);
+}
+.mobile-ind-section--uc .mobile-ind-section__label { color: var(--md-accent); }
+
+.mobile-pill-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
+.mobile-pill {
+    display: block;
+    padding: 6px 8px;
+    font-size: 12px;
+    line-height: 1.3;
+    color: var(--md-on-surface);
+    background: var(--md-surface-variant);
+    text-decoration: none;
+}
+.mobile-pill:hover, .mobile-pill:active { background: var(--md-accent); color: #fff; }
+.mobile-pill--uc { color: var(--md-accent); background: rgba(13,110,253,0.07); }
+.mobile-pill--uc:hover { background: var(--md-accent); color: #fff; }
 
 /* ── Mobile Mega Accordion ──────────────────────────────────────────────────── */
 
@@ -1120,7 +1220,8 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.mobile-mega-list li a {
+/* Generic list styles — scoped to non-industries lists only */
+.mobile-mega-list:not(.mobile-mega-list--industries) li a {
     display: block;
     padding: var(--space-3) var(--space-6);
     color: var(--md-on-surface-variant);
@@ -1131,13 +1232,18 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     transition: color var(--transition-fast), background var(--transition-fast);
 }
 
-.mobile-mega-list li:first-child a {
+.mobile-mega-list:not(.mobile-mega-list--industries) li:first-child a {
     border-top: none;
 }
 
-.mobile-mega-list li a:hover {
+.mobile-mega-list:not(.mobile-mega-list--industries) li a:hover {
     color: var(--md-accent);
     background: var(--md-accent-container);
+}
+
+/* Industries list — override inherited background from .mobile-mega-list */
+.mobile-mega-list--industries {
+    background: transparent;
 }
 
 /* Hide fixed-position mega panel on mobile — accordion handles sub-items */
