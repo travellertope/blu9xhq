@@ -6,14 +6,21 @@ import type { UserRole } from "@/types";
 const WORDPRESS_URL = process.env.WORDPRESS_URL!;
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET!;
 
-// ─── WP REST API user validation ──────────────────────────────────────────────
+// ─── WP credential validation ─────────────────────────────────────────────────
+
+interface WPUserMeta {
+  bluu_client_post_id?: string | null;
+  bluuhq_role?: string;
+  bluuhq_assigned_clients?: number[];
+  bluuhq_status?: string;
+}
 
 interface WPUser {
   id: number;
   name: string;
   email: string;
   roles: string[];
-  meta: { bluu_client_post_id?: string };
+  meta: WPUserMeta;
 }
 
 async function validateWPCredentials(
@@ -45,7 +52,9 @@ export const authOptions: NextAuthOptions = {
   },
 
   providers: [
-    // ── Admin login (WP username + password, role = bluu_admin) ────────────
+    // ── Admin + Team login ──────────────────────────────────────────────────
+    // Accepts users with WP role bluu_admin (owner) OR bluu_team (internal team).
+    // The CRM-level permission (bluuhqRole) comes from the bluuhq_role user meta.
     CredentialsProvider({
       id: "admin-credentials",
       name: "Admin Login",
@@ -55,22 +64,35 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials.password) return null;
-        const user = await validateWPCredentials(
-          credentials.username,
-          credentials.password
-        );
-        if (!user || !user.roles.includes("bluu_admin")) return null;
+
+        const user = await validateWPCredentials(credentials.username, credentials.password);
+        if (!user) return null;
+
+        const isAdmin = user.roles.includes("bluu_admin");
+        const isTeam  = user.roles.includes("bluu_team");
+        if (!isAdmin && !isTeam) return null;
+
+        // Block deactivated team members immediately at login
+        if (user.meta?.bluuhq_status === "deactivated") return null;
+
+        // bluu_admin WP role defaults to super_admin CRM role unless overridden in meta
+        const bluuhqRole = user.meta?.bluuhq_role
+          ?? (isAdmin ? "super_admin" : "viewer");
+
         return {
           id: String(user.id),
           name: user.name,
           email: user.email,
-          role: "bluu_admin" as UserRole,
+          role: "bluu_admin" as UserRole,       // gate role for middleware
           wpUserId: user.id,
+          bluuhqRole,
+          assignedClients: user.meta?.bluuhq_assigned_clients ?? [],
+          status: user.meta?.bluuhq_status ?? "active",
         };
       },
     }),
 
-    // ── Client login (WP username + password, role = bluu_client) ──────────
+    // ── Client portal login ─────────────────────────────────────────────────
     CredentialsProvider({
       id: "client-credentials",
       name: "Client Login",
@@ -80,10 +102,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials.password) return null;
-        const user = await validateWPCredentials(
-          credentials.username,
-          credentials.password
-        );
+        const user = await validateWPCredentials(credentials.username, credentials.password);
         if (!user || !user.roles.includes("bluu_client")) return null;
         return {
           id: String(user.id),
@@ -91,12 +110,12 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           role: "bluu_client" as UserRole,
           wpUserId: user.id,
-          clientId: user.meta?.bluu_client_post_id,
+          clientId: user.meta?.bluu_client_post_id ?? undefined,
         };
       },
     }),
 
-    // ── Magic link — client portal invite flow (sent via Resend) ───────────
+    // ── Magic link — client portal invite flow (sent via Resend SMTP) ───────
     EmailProvider({
       server: {
         host: process.env.EMAIL_SERVER_HOST!,
@@ -113,18 +132,26 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role;
-        token.wpUserId = (user as any).wpUserId;
-        token.clientId = (user as any).clientId;
+        const u = user as any;
+        token.role            = u.role;
+        token.wpUserId        = u.wpUserId;
+        token.clientId        = u.clientId;
+        token.bluuhqRole      = u.bluuhqRole;
+        token.assignedClients = u.assignedClients;
+        token.status          = u.status;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).wpUserId = token.wpUserId;
-        (session.user as any).clientId = token.clientId;
-        (session.user as any).id = token.sub;
+        const u = session.user as any;
+        u.id              = token.sub;
+        u.role            = token.role;
+        u.wpUserId        = token.wpUserId;
+        u.clientId        = token.clientId;
+        u.bluuhqRole      = token.bluuhqRole;
+        u.assignedClients = token.assignedClients;
+        u.status          = token.status;
       }
       return session;
     },

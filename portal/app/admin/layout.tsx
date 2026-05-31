@@ -11,20 +11,21 @@ export const metadata = {
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
+
   if (!session || (session.user as any)?.role !== "bluu_admin") {
     redirect("/login");
   }
 
-  const userName = session.user?.name ?? session.user?.email ?? "Admin";
+  const user = session.user as any;
+  const userName   = user?.name ?? user?.email ?? "Team Member";
+  const bluuhqRole = user?.bluuhqRole ?? "super_admin";
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* Sidebar — handles both desktop fixed and mobile sheet */}
-      <Sidebar userName={userName} />
+      <Sidebar userName={userName} bluuhqRole={bluuhqRole} />
 
-      {/* Main content area */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Spacer for mobile top bar (rendered inside Sidebar component) */}
+        {/* Spacer for mobile top bar rendered inside Sidebar */}
         <div className="lg:hidden h-14 shrink-0" />
         <main className="flex-1 overflow-auto p-6">
           {children}

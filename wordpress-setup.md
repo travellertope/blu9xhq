@@ -551,7 +551,202 @@ When you create a client and issue portal access:
 
 ---
 
-## 9. Deployment Checklist
+## 9. Team Role System — PHP Additions
+
+Add the following to your `bluuhq-cpts.php` plugin file (or a dedicated `bluuhq-team.php` file activated alongside it).
+
+### 9.1 Register `bluu_team` WP Role
+
+```php
+// Register bluu_team WP role on plugin activation
+register_activation_hook( __FILE__, 'bluuhq_register_roles' );
+function bluuhq_register_roles() {
+    // bluu_team: portal login access, read-only WP admin
+    add_role( 'bluu_team', 'BluuHQ Team', [
+        'read'                    => true,
+        'upload_files'            => false,
+        'edit_posts'              => false,
+        // CPT capabilities — needed for REST API access
+        'edit_bluu_clients'       => true,
+        'edit_bluu_communications'=> true,
+        'edit_bluu_invoices'      => true,
+        'edit_bluu_files'         => true,
+        'edit_bluu_subscriptions' => true,
+        'edit_bluu_services'      => true,
+        'edit_bluu_sequences'     => true,
+    ] );
+
+    // bluu_admin already registered? Ensure it exists
+    if ( ! get_role( 'bluu_admin' ) ) {
+        add_role( 'bluu_admin', 'BluuHQ Admin', [
+            'read'           => true,
+            'manage_options' => true,
+            'upload_files'   => true,
+            // Grant all bluu CPT caps
+            'edit_bluu_clients'         => true,
+            'publish_bluu_clients'      => true,
+            'delete_bluu_clients'       => true,
+            'edit_bluu_communications'  => true,
+            'publish_bluu_communications' => true,
+            'delete_bluu_communications'=> true,
+            'edit_bluu_invoices'        => true,
+            'publish_bluu_invoices'     => true,
+            'delete_bluu_invoices'      => true,
+            'edit_bluu_files'           => true,
+            'publish_bluu_files'        => true,
+            'delete_bluu_files'         => true,
+            'edit_bluu_subscriptions'   => true,
+            'publish_bluu_subscriptions'=> true,
+            'delete_bluu_subscriptions' => true,
+            'edit_bluu_services'        => true,
+            'publish_bluu_services'     => true,
+            'delete_bluu_services'      => true,
+            'edit_bluu_sequences'       => true,
+            'publish_bluu_sequences'    => true,
+            'delete_bluu_sequences'     => true,
+        ] );
+    }
+}
+```
+
+### 9.2 Register Team User Meta Keys
+
+```php
+// Register meta keys so they appear in REST API responses for /wp/v2/users
+add_action( 'init', 'bluuhq_register_user_meta' );
+function bluuhq_register_user_meta() {
+    $base_args = [
+        'show_in_rest'   => true,
+        'single'         => true,
+        'auth_callback'  => function() { return current_user_can( 'manage_options' ); },
+    ];
+
+    register_meta( 'user', 'bluuhq_role', array_merge( $base_args, [
+        'type'        => 'string',
+        'description' => 'CRM role: super_admin|account_manager|billing_manager|support_staff|viewer',
+        'default'     => 'viewer',
+    ] ) );
+
+    register_meta( 'user', 'bluuhq_status', array_merge( $base_args, [
+        'type'        => 'string',
+        'description' => 'Account status: active|deactivated',
+        'default'     => 'active',
+    ] ) );
+
+    register_meta( 'user', 'bluuhq_last_active', array_merge( $base_args, [
+        'type'        => 'string',
+        'description' => 'ISO 8601 timestamp of last portal login',
+        'default'     => '',
+    ] ) );
+
+    // bluuhq_assigned_clients is an array — register as string (JSON-encoded) for REST
+    register_meta( 'user', 'bluuhq_assigned_clients', [
+        'type'           => 'string',
+        'description'    => 'JSON array of bluu_client post IDs assigned to this account_manager',
+        'single'         => true,
+        'show_in_rest'   => true,
+        'default'        => '[]',
+        'auth_callback'  => function() { return current_user_can( 'manage_options' ); },
+    ] );
+}
+```
+
+> **Note on `bluuhq_assigned_clients`**: WordPress stores this as a serialised string. When saving from Next.js, send it as a JSON-encoded string: `JSON.stringify([1, 2, 3])`. The portal reads it back via the custom `/bluuhq/v1/team` endpoint (below) which handles the decode.
+
+### 9.3 Custom REST Endpoint: GET `/wp-json/bluuhq/v1/team`
+
+This endpoint returns all `bluu_admin` and `bluu_team` users with their CRM meta, in one call (avoids N+1 REST queries).
+
+```php
+add_action( 'rest_api_init', 'bluuhq_register_team_endpoint' );
+function bluuhq_register_team_endpoint() {
+    register_rest_route( 'bluuhq/v1', '/team', [
+        'methods'             => 'GET',
+        'callback'            => 'bluuhq_get_team',
+        'permission_callback' => function( WP_REST_Request $request ) {
+            // Only bluu_admin users may list team members
+            $user = wp_get_current_user();
+            return $user && in_array( 'bluu_admin', (array) $user->roles, true );
+        },
+    ] );
+}
+
+function bluuhq_get_team( WP_REST_Request $request ): WP_REST_Response {
+    $users = get_users( [
+        'role__in' => [ 'bluu_admin', 'bluu_team' ],
+        'number'   => -1,
+        'orderby'  => 'display_name',
+        'order'    => 'ASC',
+    ] );
+
+    $result = [];
+    foreach ( $users as $user ) {
+        $assigned_raw = get_user_meta( $user->ID, 'bluuhq_assigned_clients', true );
+        // Handle both JSON string and WP serialised array
+        if ( is_array( $assigned_raw ) ) {
+            $assigned = array_map( 'intval', $assigned_raw );
+        } elseif ( is_string( $assigned_raw ) && $assigned_raw !== '' ) {
+            $decoded = json_decode( $assigned_raw, true );
+            $assigned = is_array( $decoded ) ? array_map( 'intval', $decoded ) : [];
+        } else {
+            $assigned = [];
+        }
+
+        $result[] = [
+            'id'                       => $user->ID,
+            'name'                     => $user->display_name,
+            'email'                    => $user->user_email,
+            'wp_roles'                 => array_values( $user->roles ),
+            'bluuhq_role'              => get_user_meta( $user->ID, 'bluuhq_role', true ) ?: 'viewer',
+            'bluuhq_status'            => get_user_meta( $user->ID, 'bluuhq_status', true ) ?: 'active',
+            'bluuhq_assigned_clients'  => $assigned,
+            'bluuhq_last_active'       => get_user_meta( $user->ID, 'bluuhq_last_active', true ) ?: null,
+        ];
+    }
+
+    return new WP_REST_Response( $result, 200 );
+}
+```
+
+### 9.4 Update `bluuhq/v1/auth/validate` to Return Team Meta
+
+Find the existing `bluuhq_auth_validate` callback and add the team meta fields to its response:
+
+```php
+// Inside bluuhq_auth_validate(), add to the response array:
+'bluuhq_role'             => get_user_meta( $user->ID, 'bluuhq_role', true ) ?: 'viewer',
+'bluuhq_status'           => get_user_meta( $user->ID, 'bluuhq_status', true ) ?: 'active',
+'bluuhq_assigned_clients' => (function() use ($user) {
+    $raw = get_user_meta( $user->ID, 'bluuhq_assigned_clients', true );
+    if ( is_array( $raw ) ) return array_map( 'intval', $raw );
+    if ( is_string( $raw ) && $raw !== '' ) {
+        $d = json_decode( $raw, true );
+        return is_array( $d ) ? array_map( 'intval', $d ) : [];
+    }
+    return [];
+})(),
+'bluuhq_last_active'      => get_user_meta( $user->ID, 'bluuhq_last_active', true ) ?: null,
+```
+
+### 9.5 Update Last Active Timestamp on Login
+
+Stamp `bluuhq_last_active` whenever a team member authenticates through the portal. Add this hook:
+
+```php
+// Fired after successful WP authenticate call — update last active
+add_action( 'wp_login', 'bluuhq_stamp_last_active', 10, 2 );
+function bluuhq_stamp_last_active( string $user_login, WP_User $user ): void {
+    if ( array_intersect( [ 'bluu_admin', 'bluu_team' ], (array) $user->roles ) ) {
+        update_user_meta( $user->ID, 'bluuhq_last_active', gmdate( 'c' ) );
+    }
+}
+```
+
+> The Next.js portal does not use WordPress cookie auth — it calls `/bluuhq/v1/auth/validate` with Application Password credentials. To stamp last active from the portal, call `update_user_meta` via WP REST or add a dedicated `POST /bluuhq/v1/ping` endpoint that stamping triggers on each portal session validation.
+
+---
+
+## 10. Deployment Checklist
 
 - [ ] All 8 CPTs appear in WP Admin sidebar after activating `bluuhq-cpts` plugin
 - [ ] ACF field groups created and visible on each CPT edit screen
