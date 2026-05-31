@@ -758,7 +758,7 @@ get_header();
                     <span><?php echo esc_html( get_the_title() ); ?></span>
                 </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
-                <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
+                <p class="industry-pg-hero__sub"><?php echo bluu_text( $hero_sub ); ?></p>
                 <div class="industry-pg-hero__cta">
                     <a href="<?php echo esc_url( $hero_url ); ?>" class="btn-primary btn-primary--large">
                         <?php echo esc_html( $hero_cta ); ?>
@@ -842,7 +842,7 @@ get_header();
             <span class="industry-section-badge"><?php esc_html_e( 'What you receive', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php esc_html_e( 'What you get', 'bluu-interactive' ); ?></h2>
             <?php if ( $deliverables_intro ) : ?>
-                <p class="industry-section-body"><?php echo esc_html( $deliverables_intro ); ?></p>
+                <p class="industry-section-body"><?php echo bluu_text( $deliverables_intro ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -866,7 +866,7 @@ get_header();
         <?php endif; ?>
 
         <?php if ( $cadence ) : ?>
-        <p class="uc-cadence animate-on-scroll"><?php echo esc_html( $cadence ); ?></p>
+        <p class="uc-cadence animate-on-scroll"><?php echo bluu_text( $cadence ); ?></p>
         <?php endif; ?>
 
     </div>
@@ -929,7 +929,7 @@ get_header();
     <div class="container">
         <div class="animate-on-scroll">
             <h2 class="industry-pg-cta__headline"><?php echo esc_html( $cta_heading ); ?></h2>
-            <p class="industry-pg-cta__sub"><?php echo esc_html( $cta_sub ); ?></p>
+            <p class="industry-pg-cta__sub"><?php echo bluu_text( $cta_sub ); ?></p>
             <div class="industry-pg-cta__buttons">
                 <a href="<?php echo esc_url( $cta_p_url ); ?>" class="btn-primary btn-primary--large btn-primary--white">
                     <?php echo esc_html( $cta_p_label ); ?>

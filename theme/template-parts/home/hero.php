@@ -52,7 +52,7 @@ $headline_2 = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
                     <?php endif; ?>
                 </h1>
 
-                <p class="home-hero__subheadline"><?php echo esc_html( $hero_subheadline ); ?></p>
+                <p class="home-hero__subheadline"><?php echo bluu_text( $hero_subheadline ); ?></p>
 
                 <div class="home-hero__cta-group">
                     <a href="<?php echo esc_url( $hero_cta_primary_url ); ?>" class="btn-primary btn-primary--large">

@@ -138,7 +138,7 @@ get_header();
         <div class="pricing-hero__inner animate-on-scroll">
             <div class="pricing-hero__badge"><?php echo esc_html( $hero_badge ); ?></div>
             <h1 class="pricing-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
-            <p class="pricing-hero__body"><?php echo esc_html( $hero_body ); ?></p>
+            <p class="pricing-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
         </div>
     </div>
 </section>
@@ -173,7 +173,7 @@ get_header();
                     <?php endif; ?>
                 </div>
 
-                <p class="pricing-card__description"><?php echo esc_html( $tier['description'] ); ?></p>
+                <p class="pricing-card__description"><?php echo bluu_text( $tier['description'] ); ?></p>
 
                 <div class="pricing-card__divider" aria-hidden="true"></div>
 
@@ -237,7 +237,7 @@ get_header();
 
             <div class="pricing-cta__text">
                 <h2 class="pricing-cta__headline"><?php echo esc_html( $cta_headline ); ?></h2>
-                <p class="pricing-cta__body"><?php echo esc_html( $cta_body ); ?></p>
+                <p class="pricing-cta__body"><?php echo bluu_text( $cta_body ); ?></p>
             </div>
 
             <div class="pricing-cta__actions">

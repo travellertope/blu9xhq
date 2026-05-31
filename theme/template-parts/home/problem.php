@@ -43,7 +43,7 @@ $icons = [
         <div class="problem-section__header animate-on-scroll">
             <div class="problem-section__badge"><?php echo esc_html( $problem_badge ); ?></div>
             <h2 class="problem-section__headline"><?php echo esc_html( $problem_headline ); ?></h2>
-            <p class="problem-section__body"><?php echo esc_html( $problem_body ); ?></p>
+            <p class="problem-section__body"><?php echo bluu_text( $problem_body ); ?></p>
         </div>
 
         <div class="problem-section__grid">
@@ -56,7 +56,7 @@ $icons = [
                         <?php echo $icon_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                     <h3 class="problem-card__title"><?php echo esc_html( $item['title'] ); ?></h3>
-                    <p class="problem-card__description"><?php echo esc_html( $item['description'] ); ?></p>
+                    <p class="problem-card__description"><?php echo bluu_text( $item['description'] ); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>

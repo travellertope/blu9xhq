@@ -1637,7 +1637,7 @@ add_action( 'acf/init', function () {
                 'key'          => 'field_bluu_post_cta_button_url',
                 'label'        => 'CTA button URL',
                 'name'         => 'bluu_post_cta_button_url',
-                'type'         => 'url',
+                'type'         => 'text',
                 'instructions' => 'Defaults to /contact if empty.',
             ),
             array(

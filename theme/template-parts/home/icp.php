@@ -58,7 +58,7 @@ function bluu_icp_icon_hp( $name ) {
             <div class="industries-hp__badge"><?php echo esc_html( $icp_badge ); ?></div>
             <h2 class="industries-hp__headline"><?php echo esc_html( $icp_headline ); ?></h2>
             <?php if ( $icp_body ) : ?>
-                <p class="industries-hp__body"><?php echo esc_html( $icp_body ); ?></p>
+                <p class="industries-hp__body"><?php echo bluu_text( $icp_body ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -69,7 +69,7 @@ function bluu_icp_icon_hp( $name ) {
                         <?php echo bluu_icp_icon_hp( $vertical['icon'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
                     </div>
                     <h3 class="industry-hp-card__title"><?php echo esc_html( $vertical['title'] ); ?></h3>
-                    <p class="industry-hp-card__description"><?php echo esc_html( $vertical['description'] ); ?></p>
+                    <p class="industry-hp-card__description"><?php echo bluu_text( $vertical['description'] ); ?></p>
                     <a
                         href="<?php echo esc_url( $vertical['link'] ?? home_url( '/industries' ) ); ?>"
                         class="industry-hp-card__link"
