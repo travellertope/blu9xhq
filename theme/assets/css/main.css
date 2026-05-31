@@ -2374,7 +2374,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 /* ── Pricing Cards ──────────────────────────────────────────────────────────── */
 .pricing-section {
-    padding-bottom: var(--space-8);
+    /* padding consolidated in new block below — do not add here */
 }
 
 .pricing-grid {
@@ -5212,15 +5212,15 @@ a.contact-info__value:hover {
    PRICING — NEW TIER LAYOUT (v2.0.1)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-/* ── Pricing section top padding ─────────────────────────────────────────────── */
+/* ── Pricing section (cards) — single consolidated rule ──────────────────────── */
 .pricing-section {
-    padding-top: var(--space-12);
+    padding: var(--space-10) 0;
 }
 
 /* ── Baseline banner ──────────────────────────────────────────────────────────── */
 .pricing-baseline {
     background: var(--md-primary);
-    padding: var(--space-12) 0;
+    padding: var(--space-9) 0;
     text-align: center;
 }
 .pricing-baseline__label {
@@ -5263,11 +5263,11 @@ a.contact-info__value:hover {
 
 /* ── Comparison section ───────────────────────────────────────────────────────── */
 .pricing-comparison {
-    padding: var(--space-16) 0 var(--space-8);
+    padding: var(--space-10) 0 var(--space-6);
 }
 .pricing-comparison__header {
     text-align: center;
-    margin-bottom: var(--space-12);
+    margin-bottom: var(--space-8);
 }
 .pricing-comparison__headline {
     font-size: var(--font-size-3xl);
@@ -5282,14 +5282,11 @@ a.contact-info__value:hover {
     margin: 0 auto;
 }
 
-/* ── Table wrapper — own scroll container so sticky header works reliably ──────── */
+/* ── Table wrapper ────────────────────────────────────────────────────────────── */
 .pricing-table-wrap {
     overflow-x: auto;
-    overflow-y: auto;
-    max-height: 72vh;
     -webkit-overflow-scrolling: touch;
     margin-bottom: var(--space-8);
-    border: 1px solid var(--md-outline-variant);
 }
 .pricing-table {
     width: 100%;
@@ -5301,10 +5298,10 @@ a.contact-info__value:hover {
 .pricing-table__feature-col { width: 34%; }
 .pricing-table__featured-col { width: 22%; }
 
-/* ── Sticky header — top:0 is relative to the table-wrap scroll container ──────── */
+/* ── Sticky header — offset by fixed navbar height ───────────────────────────── */
 .pricing-table thead th {
     position: sticky;
-    top: 0;
+    top: var(--header-height);
     background: #fff;
     z-index: 20;
     padding: var(--space-5) var(--space-5);
@@ -5439,7 +5436,7 @@ a.contact-info__value:hover {
 /* ── Add-ons section ──────────────────────────────────────────────────────────── */
 .pricing-addons {
     background: var(--md-surface-variant);
-    padding: var(--space-16) 0;
+    padding: var(--space-10) 0;
 }
 .pricing-addons__header {
     text-align: center;
@@ -5493,7 +5490,7 @@ a.contact-info__value:hover {
 
 /* ── What every client should know ───────────────────────────────────────────── */
 .pricing-know {
-    padding: var(--space-12) 0;
+    padding: var(--space-10) 0;
 }
 .pricing-know__header {
     text-align: center;
