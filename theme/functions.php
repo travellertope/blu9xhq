@@ -132,7 +132,7 @@ function bluu_enqueue_assets() {
     }
 
     // Blog CSS & JS — only on blog-related pages
-    if ( is_singular( 'post' ) || is_home() || is_archive() ) {
+    if ( is_singular( 'post' ) || is_home() || is_archive() || is_page_template( 'page-blog.php' ) ) {
         wp_enqueue_style(
             'bluu-blog-css',
             get_template_directory_uri() . '/assets/css/blog.css',
@@ -158,6 +158,29 @@ function bluu_preconnect_fonts() {
     echo '<style>:root{--font-family-base:"Plus Jakarta Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}</style>' . "\n";
 }
 add_action( 'wp_head', 'bluu_preconnect_fonts', 1 );
+
+// ── SEO Meta Tags ──────────────────────────────────────────────────────────────
+function bluu_seo_meta_tags() {
+    if ( ! function_exists( 'yoast_head' ) && ! class_exists( 'RankMath\RankMath' ) ) {
+        $description = get_bloginfo( 'description' ) ?: 'Bluu Interactive runs your complete content operation — research, writing, publishing, and reporting — all content built to SEO and AI crawl standard.';
+        echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+
+        $schema = array(
+            '@context'        => 'https://schema.org',
+            '@type'           => 'Organization',
+            'name'            => 'Bluu Interactive',
+            'url'             => 'https://bluuhq.com',
+            'description'     => 'B2B content operations agency. All content built to SEO and AI crawl standard — structured for discovery in Google, AI Overviews, and Perplexity.',
+            'contentStandard' => 'SEO and AI crawl standard',
+            'sameAs'          => array(
+                'https://linkedin.com/company/bluuinteractive',
+                'https://twitter.com/bluuinteractive',
+            ),
+        );
+        echo '<script type="application/ld+json">' . wp_json_encode( $schema ) . '</script>' . "\n";
+    }
+}
+add_action( 'wp_head', 'bluu_seo_meta_tags', 5 );
 
 // Contact form AJAX handler is registered in inc/contact-submissions.php
 

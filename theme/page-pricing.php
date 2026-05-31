@@ -32,7 +32,7 @@ $tiers = array(
             array( 'text' => 'Up to 2 authority articles per month',  'bold' => false ),
             array( 'text' => '1 premium case study per quarter',       'bold' => false ),
             array( 'text' => 'Technical SEO ownership',                'bold' => false ),
-            array( 'text' => 'Monthly strategy sync',                  'bold' => false ),
+            array( 'text' => 'Monthly strategy sync · all content SEO and AI crawl ready', 'bold' => false ),
         ),
     ),
     array(
@@ -202,6 +202,13 @@ get_header();
     </div>
 </section>
 
+<!-- ── SEO Standard Note ─────────────────────────────────────────────────────── -->
+<div class="pricing-seo-note">
+    <div class="container">
+        <p class="pricing-seo-note__text"><?php esc_html_e( 'All content produced at every tier is built to SEO and AI crawl standard — included, not charged as an extra.', 'bluu-interactive' ); ?></p>
+    </div>
+</div>
+
 <!-- ── Trust Signals ──────────────────────────────────────────────────────── -->
 <section class="pricing-trust" aria-label="<?php esc_attr_e( 'Trust signals', 'bluu-interactive' ); ?>">
     <div class="container">
@@ -215,6 +222,13 @@ get_header();
         </ul>
     </div>
 </section>
+
+<!-- ── Pricing footer note ────────────────────────────────────────────────────── -->
+<div class="pricing-footer-note">
+    <div class="container">
+        <p class="pricing-footer-note__text"><?php esc_html_e( 'All plans billed monthly · No lock-in contracts for the first 3 months · Founding client rate available — ask us · SEO and AI crawl standard built into every deliverable', 'bluu-interactive' ); ?></p>
+    </div>
+</div>
 
 <!-- ── Bottom CTA ─────────────────────────────────────────────────────────── -->
 <section class="pricing-cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">

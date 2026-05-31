@@ -10,7 +10,7 @@ $solution_headline = ( function_exists( 'get_field' ) ? get_field( 'solution_hea
 $solution_body     = ( function_exists( 'get_field' ) ? get_field( 'solution_body' )     : '' ) ?: 'We handle research, content creation, publishing, and reporting in one connected monthly retainer — so your brand shows up consistently, across every channel, without you having to manage it.';
 
 $solution_sidebar_title = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_title' ) : '' ) ?: 'The complete content operation';
-$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different suppliers and chasing deliverables across four different tools, Bluu runs your entire content operation in one seamless monthly engagement. Research informs content. Content gets published. Results get reported. Every month, without fail.';
+$solution_sidebar_body  = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_body' )  : '' ) ?: 'Instead of briefing three different suppliers and chasing deliverables across four different tools, Bluu runs your entire content operation in one seamless monthly engagement. Research informs content. Content gets published. Results get reported. Every month, without fail. Every piece built to SEO and AI crawl standard from the first draft.';
 $solution_sidebar_cta   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_text' ) : '' ) ?: "See what's included";
 $solution_sidebar_url   = ( function_exists( 'get_field' ) ? get_field( 'solution_sidebar_cta_url' )  : '' ) ?: home_url( '/pricing' );
 
@@ -45,7 +45,7 @@ $solution_features = [
         'title'  => 'Accountable monthly outcomes',
         'items'  => [
             'A performance report every month — what worked, what did not, what changes.',
-            'No vanity metrics. A clear picture of what your content is doing.',
+            'No vanity metrics. A clear picture of what your content is doing — and how it is performing in search and AI discovery.',
         ],
     ],
 ];

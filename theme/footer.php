@@ -87,16 +87,18 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
         <div class="container">
             <div class="site-footer__bottom-inner">
 
-                <!-- Logo -->
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-footer__logo" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                <!-- Logo — div wrapper avoids nesting <a> inside <a> when custom logo is active -->
+                <div class="site-footer__logo">
                     <?php if ( has_custom_logo() ) : ?>
                         <?php the_custom_logo(); ?>
                     <?php else : ?>
-                        <span class="site-footer__logo-text">
-                            <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent"> Interactive</span>
-                        </span>
+                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                            <span class="site-footer__logo-text">
+                                <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent"> Interactive</span>
+                            </span>
+                        </a>
                     <?php endif; ?>
-                </a>
+                </div>
 
                 <!-- Copyright -->
                 <p class="site-footer__copyright">
@@ -106,6 +108,9 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                         &copy; <?php echo esc_html( date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>. <?php esc_html_e( 'All rights reserved.', 'bluu-interactive' ); ?>
                     <?php endif; ?>
                 </p>
+
+                <!-- SEO tagline -->
+                <p class="site-footer__seo-tagline"><?php esc_html_e( 'All content produced to SEO and AI crawl standard.', 'bluu-interactive' ); ?></p>
 
                 <!-- Legal nav -->
                 <nav class="site-footer__legal-nav" aria-label="<?php esc_attr_e( 'Legal navigation', 'bluu-interactive' ); ?>">

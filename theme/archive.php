@@ -32,7 +32,7 @@ get_header();
             </h1>
             <?php if ( is_home() || is_archive() && ! is_category() ) : ?>
                 <p class="bluu-archive-hero__subtitle">
-                    <?php esc_html_e( 'Research, strategy, and honest perspective on content, market intelligence, and what actually works for growing businesses.', 'bluu-interactive' ); ?>
+                    <?php esc_html_e( 'Research, strategy, and honest perspective on content, market intelligence, and what actually works for growing businesses. Every post written and structured to SEO and AI crawl standard.', 'bluu-interactive' ); ?>
                 </p>
             <?php elseif ( is_category() ) : ?>
                 <?php

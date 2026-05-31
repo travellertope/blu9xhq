@@ -14,7 +14,7 @@ get_header();
         <div class="hub-hero__inner animate-on-scroll">
             <div class="hub-hero__tag">Who we work with</div>
             <h1 class="hub-hero__headline">Content that works is content built for the right audience.</h1>
-            <p class="hub-hero__sub">Generic content operations produce generic results. Bluu works with a focused range of industries where we understand the specific pain, the specific audience, and what consistent content actually does for a business like yours. Find your industry below.</p>
+            <p class="hub-hero__sub">Generic content operations produce generic results. Bluu works with a focused range of industries where we understand the specific pain, the specific audience, and what consistent content actually does for a business like yours. Find your industry below. Every piece of content we produce is built to SEO and AI crawl standard — so it gets found, not just published.</p>
         </div>
     </div>
 </section>
