@@ -400,6 +400,13 @@
     flex-wrap: wrap;
 }
 
+.industry-pg-cta__note {
+    margin-top: var(--space-6);
+    font-size: var(--font-size-sm);
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.02em;
+}
+
 /* ── White-filled primary button override for CTA section ────────────────── */
 .industry-pg-cta .btn-primary--white,
 .industry-pg-cta a.btn-primary--white {

@@ -486,7 +486,7 @@ get_header();
                     <?php echo esc_html( $cta_s_label ); ?>
                 </a>
             </div>
-            <p style="margin-top:var(--space-5);font-size:var(--font-size-sm);color:rgba(255,255,255,0.6);">
+            <p class="industry-pg-cta__note">
                 <?php esc_html_e( 'Free 15-minute call. No commitment required.', 'bluu-interactive' ); ?>
             </p>
         </div>
