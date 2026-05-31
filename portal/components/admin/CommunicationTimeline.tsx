@@ -192,7 +192,7 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
   const [dateTo,     setDateTo]     = useState("");
   const isFirstLoad = useRef(true);
 
-  const buildUrl = useCallback((p: number, append: boolean) => {
+  const buildUrl = useCallback((p: number, _append?: boolean) => {
     const sp = new URLSearchParams({ clientId: String(clientId), page: String(p), perPage: "20" });
     if (tab !== "all")  sp.set("type", tab);
     if (moodFilter)     sp.set("mood", moodFilter);

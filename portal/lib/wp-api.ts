@@ -179,7 +179,7 @@ export interface WPSubscriptionPost {
   acf: WPSubscriptionACF;
 }
 
-export function listClientSubscriptions(clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
+export function listClientSubscriptions(_clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
   return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
     per_page: 100,
     status: "publish",

@@ -11,14 +11,6 @@ function getKey(): Buffer {
   return buf;
 }
 
-function getIV(): Buffer {
-  const iv = process.env.ENCRYPTION_IV;
-  if (!iv) throw new Error("ENCRYPTION_IV environment variable is not set");
-  const buf = Buffer.from(iv, "hex");
-  if (buf.length !== 16)
-    throw new Error("ENCRYPTION_IV must be 16 bytes (32 hex characters)");
-  return buf;
-}
 
 /**
  * Encrypts plaintext using AES-256-CBC.
