@@ -1,42 +1,37 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { Sidebar } from "@/components/admin/Sidebar";
+import { Toaster } from "@/components/ui/sonner";
 import type { ReactNode } from "react";
 
 export const metadata = {
-  title: "BluuHQ Admin",
-  description: "BluuHQ CRM — Admin Panel",
+  title: { default: "BluuHQ Admin", template: "%s — BluuHQ Admin" },
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getServerSession(authOptions);
-
   if (!session || (session.user as any)?.role !== "bluu_admin") {
     redirect("/login");
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Top nav */}
-      <header className="border-b bg-card">
-        <div className="flex h-14 items-center px-6 gap-6">
-          <span className="font-bold text-lg tracking-tight">BluuHQ</span>
-          <nav className="flex gap-4 text-sm text-muted-foreground">
-            <a href="/admin" className="hover:text-foreground transition-colors">Dashboard</a>
-            <a href="/admin/clients" className="hover:text-foreground transition-colors">Clients</a>
-            <a href="/admin/invoices" className="hover:text-foreground transition-colors">Invoices</a>
-            <a href="/admin/subscriptions" className="hover:text-foreground transition-colors">Subscriptions</a>
-            <a href="/admin/files" className="hover:text-foreground transition-colors">Files</a>
-            <a href="/admin/communications" className="hover:text-foreground transition-colors">Communications</a>
-            <a href="/admin/sequences" className="hover:text-foreground transition-colors">Sequences</a>
-          </nav>
-          <div className="ml-auto text-sm text-muted-foreground">
-            {session.user?.name}
-          </div>
-        </div>
-      </header>
+  const userName = session.user?.name ?? session.user?.email ?? "Admin";
 
-      <main className="p-6">{children}</main>
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* Sidebar — handles both desktop fixed and mobile sheet */}
+      <Sidebar userName={userName} />
+
+      {/* Main content area */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
+        {/* Spacer for mobile top bar (rendered inside Sidebar component) */}
+        <div className="lg:hidden h-14 shrink-0" />
+        <main className="flex-1 overflow-auto p-6">
+          {children}
+        </main>
+      </div>
+
+      <Toaster richColors position="top-right" />
     </div>
   );
 }
