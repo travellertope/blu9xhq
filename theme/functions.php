@@ -130,6 +130,23 @@ function bluu_enqueue_assets() {
     if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
         wp_enqueue_script( 'comment-reply' );
     }
+
+    // Blog CSS & JS — only on blog-related pages
+    if ( is_singular( 'post' ) || is_home() || is_archive() ) {
+        wp_enqueue_style(
+            'bluu-blog-css',
+            get_template_directory_uri() . '/assets/css/blog.css',
+            array( 'bluu-main-css' ),
+            $version
+        );
+        wp_enqueue_script(
+            'bluu-blog-js',
+            get_template_directory_uri() . '/assets/js/blog.js',
+            array(),
+            $version,
+            true
+        );
+    }
 }
 add_action( 'wp_enqueue_scripts', 'bluu_enqueue_assets' );
 
@@ -488,6 +505,42 @@ function bluu_admin_assets( $hook ) {
     );
 }
 add_action( 'admin_enqueue_scripts', 'bluu_admin_assets' );
+
+// ── Blog Helpers ───────────────────────────────────────────────────────────────
+
+/**
+ * Returns estimated reading time string, e.g. "4 min read".
+ */
+function bluu_reading_time( $post_id = null ) {
+    if ( ! $post_id ) { $post_id = get_the_ID(); }
+    $content    = get_post_field( 'post_content', $post_id );
+    $word_count = str_word_count( strip_tags( $content ) );
+    $minutes    = max( 1, (int) ceil( $word_count / 200 ) );
+    return $minutes . ' min read';
+}
+
+/**
+ * Returns a CSS class string mapping a post's primary category to a colour token.
+ */
+function bluu_get_cat_class( $post_id = null ) {
+    if ( ! $post_id ) { $post_id = get_the_ID(); }
+    $cat = get_the_category( $post_id );
+    if ( empty( $cat ) ) { return 'bluu-cat-default'; }
+    $map = array(
+        'content-strategy'   => 'bluu-cat-content-strategy',
+        'competitor-intel'   => 'bluu-cat-competitor-intel',
+        'thought-leadership' => 'bluu-cat-thought-leadership',
+        'industry'           => 'bluu-cat-industry',
+        'bluu-pov'           => 'bluu-cat-bluu-pov',
+    );
+    return isset( $map[ $cat[0]->slug ] ) ? $map[ $cat[0]->slug ] : 'bluu-cat-default';
+}
+
+/**
+ * Default OG image used when no featured image and no SEO plugin is active.
+ * (Place the actual image at /theme/assets/images/bluu-og-default.jpg)
+ */
+define( 'BLUU_DEFAULT_OG_IMAGE', get_template_directory_uri() . '/assets/images/bluu-og-default.jpg' );
 
 // ── FAQ Helper: Default Categories & Content ───────────────────────────────────
 function bluu_default_faq_categories() {
