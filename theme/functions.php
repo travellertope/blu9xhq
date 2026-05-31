@@ -132,7 +132,7 @@ function bluu_enqueue_assets() {
     }
 
     // Blog CSS & JS — only on blog-related pages
-    if ( is_singular( 'post' ) || is_home() || is_archive() ) {
+    if ( is_singular( 'post' ) || is_home() || is_archive() || is_page_template( 'page-blog.php' ) ) {
         wp_enqueue_style(
             'bluu-blog-css',
             get_template_directory_uri() . '/assets/css/blog.css',
