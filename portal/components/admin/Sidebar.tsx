@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -47,9 +48,8 @@ function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Logo */}
-      <div className="flex h-14 items-center px-6 border-b shrink-0">
-        <span className="font-bold text-slate-900 tracking-tight">BluuHQ</span>
-        <span className="ml-1 text-xs text-slate-400 font-normal">CRM</span>
+      <div className="flex h-14 items-center px-5 border-b shrink-0">
+        <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
       </div>
 
       {/* Navigation */}
@@ -130,8 +130,7 @@ export function Sidebar({ userName, bluuhqRole }: SidebarProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="font-bold text-slate-900 tracking-tight">BluuHQ</span>
-        <span className="text-xs text-slate-400">CRM</span>
+        <Image src="/logo.png" alt="BluuHQ" width={90} height={26} priority className="object-contain" />
       </div>
 
       {/* Mobile sheet */}
