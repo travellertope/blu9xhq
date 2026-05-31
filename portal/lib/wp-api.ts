@@ -159,7 +159,7 @@ export function listClientPosts(params: {
   return wpRestList<WPClientPost>("/wp/v2/bluu_client", qp);
 }
 
-// ─── bluu_subscription (for profile sidebar count) ───────────────────────────
+// ─── bluu_subscription types & helpers ───────────────────────────────────────
 
 export interface WPSubscriptionACF {
   client_id: number;
@@ -170,6 +170,18 @@ export interface WPSubscriptionACF {
   billing_cycle: string;
   next_billing_date?: string;
   start_date?: string;
+  end_date?: string;
+  payment_gateway?: string;
+  gateway_subscription_id?: string;
+  notes?: string;
+  // Client portal fields
+  sub_action_button_labels?: string;    // JSON: string[]
+  sub_action_button_urls?: string;      // JSON: string[]
+  sub_sensitive_field_labels?: string;  // JSON: string[]
+  sub_sensitive_field_values?: string;  // JSON: string[] (AES-256 encrypted)
+  sub_cancellation_requested_at?: string;
+  sub_cancellation_reason?: string;
+  sub_cancellation_note?: string;
 }
 
 export interface WPSubscriptionPost {
@@ -179,11 +191,52 @@ export interface WPSubscriptionPost {
   acf: WPSubscriptionACF;
 }
 
-export function listClientSubscriptions(_clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
+export function listClientSubscriptions(clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
   return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
     per_page: 100,
     status: "publish",
+    meta_key: "client_id",
+    meta_value: clientPostId,
+    orderby: "date",
+    order: "desc",
   });
+}
+
+export function getSubscription(postId: number): Promise<WPSubscriptionPost> {
+  return wpRestFetch<WPSubscriptionPost>(`/wp/v2/bluu_subscription/${postId}`);
+}
+
+export function updateSubscription(
+  postId: number,
+  params: { title?: string; acf?: Partial<WPSubscriptionACF> }
+): Promise<WPSubscriptionPost> {
+  return wpRestFetch(`/wp/v2/bluu_subscription/${postId}`, {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+}
+
+// ─── bluu_service types & helpers ─────────────────────────────────────────────
+
+export interface WPServiceACF {
+  description?: string;
+  category: string;
+  base_price: number;
+  currency: string;
+  billing_cycle: string;
+  deliverables?: string;
+  is_active: boolean | string | number;
+}
+
+export interface WPServicePost {
+  id: number;
+  title: { rendered: string };
+  date: string;
+  acf: WPServiceACF;
+}
+
+export function getServicePost(postId: number): Promise<WPServicePost> {
+  return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`);
 }
 
 // ─── bluu_communication types & helpers ──────────────────────────────────────
