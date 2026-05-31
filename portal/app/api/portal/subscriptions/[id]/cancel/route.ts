@@ -6,7 +6,7 @@ import {
   wpRestFetch,
 } from "@/lib/wp-api";
 import type { WPSubscriptionPost } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent } from "@/lib/auditLog";
 
 export async function PATCH(
@@ -107,7 +107,7 @@ export async function PATCH(
 
     // Send admin email (fire and forget)
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
-    sendEmail({
+    sendEmailHtml({
       to: adminEmail,
       subject: `Cancellation request — Subscription #${subscriptionId}`,
       html: `

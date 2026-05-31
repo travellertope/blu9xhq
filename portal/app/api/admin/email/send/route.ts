@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { wpRestFetch } from "@/lib/wp-api";
 import { z } from "zod";
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const actor = session.user as Record<string, unknown>;
 
   try {
-    const messageId = await sendEmail({
+    const messageId = await sendEmailHtml({
       to:      d.to,
       subject: d.subject,
       html:    d.htmlBody,

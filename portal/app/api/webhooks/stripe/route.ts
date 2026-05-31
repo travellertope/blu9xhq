@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { constructStripeWebhookEvent } from "@/lib/stripe";
 import { listInvoices, updateInvoice } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -67,7 +67,7 @@ async function sendReceiptEmail(invoiceId: number, paymentRef: string): Promise<
     const wpUser = await wpRestFetch<{ email: string }>(`/wp/v2/users/${invoice.acf.inv_client}`).catch(() => null);
     if (!wpUser?.email) return;
 
-    await sendEmail({
+    await sendEmailHtml({
       to: wpUser.email,
       subject: `Payment received — Invoice ${invoice.acf.inv_number}`,
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

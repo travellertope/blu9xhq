@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function POST(
@@ -41,7 +41,7 @@ export async function POST(
     const dueDate = invoice.acf.inv_due_date;
     const portalUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-    await sendEmail({
+    await sendEmailHtml({
       to: clientEmail,
       subject: `Invoice ${invNumber} from BluuHQ`,
       html: `

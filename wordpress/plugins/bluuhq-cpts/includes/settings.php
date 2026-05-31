@@ -32,14 +32,21 @@ function bluuhq_register_settings(): void {
         );
     }
 
-    // ── Payment gateway customer IDs stored on WP users ──────────────────────
+    // ── User meta stored on WP users ─────────────────────────────────────────
 
-    $user_meta_keys = [
-        'client_stripe_customer_id'   => 'Stripe customer ID for this portal client',
-        'client_paystack_customer_id' => 'Paystack customer code for this portal client',
+    $string_user_meta = [
+        'client_stripe_customer_id'    => 'Stripe customer ID for this portal client',
+        'client_paystack_customer_id'  => 'Paystack customer code for this portal client',
+        'first_name'                   => 'Contact first name',
+        'last_name'                    => 'Contact last name',
+        'portal_phone'                 => 'Client phone number shown in portal',
+        'billing_address'              => 'JSON-encoded billing address for the client',
+        'portal_setup_complete'        => 'Whether the client has completed portal setup (1 or empty)',
+        'portal_setup_completed_at'    => 'ISO timestamp of portal setup completion',
+        'portal_last_login'            => 'ISO timestamp of most recent portal login',
     ];
 
-    foreach ( $user_meta_keys as $key => $description ) {
+    foreach ( $string_user_meta as $key => $description ) {
         register_meta(
             'user',
             $key,
@@ -52,4 +59,22 @@ function bluuhq_register_settings(): void {
             ]
         );
     }
+
+    // notification_preferences is stored as a serialised PHP array
+    register_meta(
+        'user',
+        'notification_preferences',
+        [
+            'type'         => 'array',
+            'description'  => 'Enabled notification types for this portal client',
+            'single'       => true,
+            'default'      => [],
+            'show_in_rest' => [
+                'schema' => [
+                    'type'  => 'array',
+                    'items' => [ 'type' => 'string' ],
+                ],
+            ],
+        ]
+    );
 }

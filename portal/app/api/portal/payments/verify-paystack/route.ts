@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import { findClientByWpUserId, listInvoices, updateInvoice } from "@/lib/wp-api";
 import { verifyPaystackTransaction } from "@/lib/paystack";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 
 export async function GET(req: NextRequest) {
   const auth = await requireClientSession(req);
@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     });
 
     try {
-      await sendEmail({
+      await sendEmailHtml({
         to: user.email ?? "",
         subject: `Payment received — Invoice ${invoice.acf.inv_number}`,
         html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

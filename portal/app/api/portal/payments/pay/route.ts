@@ -3,7 +3,7 @@ import { requireClientSession } from "@/lib/apiPermissions";
 import { wpRestFetch, findClientByWpUserId, getInvoice, updateInvoice, getSubscription } from "@/lib/wp-api";
 import { createPaymentIntent, listPaymentMethods } from "@/lib/stripe";
 import { chargePaystackCard } from "@/lib/paystack";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import type { WPUser } from "@/lib/wp-api";
 import crypto from "crypto";
 
@@ -156,7 +156,7 @@ async function sendPaymentReceiptEmail(
 ): Promise<void> {
   if (!email) return;
   try {
-    await sendEmail({
+    await sendEmailHtml({
       to: email,
       subject: `Payment received — Invoice ${invoiceNumber}`,
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { ALLOWED_MIME_TYPES, uploadFile, generateFileKey } from "@/lib/r2";
 import { createFilePost, getClientPost } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
         const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
         const clientName  = clientPost.acf.contact_name || clientPost.title.rendered;
         if (clientEmail) {
-          await sendEmail({
+          await sendEmailHtml({
             to:      clientEmail,
             subject: "A new file has been shared with you",
             html: `

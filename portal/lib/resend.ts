@@ -1,94 +1,173 @@
 import { Resend } from "resend";
+import React from "react";
 
-// Lazy singleton — only instantiated at request time, never during build
 let _resend: Resend | null = null;
 function getResend(): Resend {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!);
   return _resend;
 }
 
-const FROM_ADDRESS = () => process.env.EMAIL_FROM ?? "BluuHQ <hello@bluuhq.com>";
+function fromAddress() {
+  const name = process.env.RESEND_FROM_NAME ?? "BluuHQ";
+  const email = process.env.RESEND_FROM_EMAIL ?? "hello@bluuhq.com";
+  return name + " <" + email + ">";
+}
 
-export interface SendEmailParams {
+const DEFAULT_REPLY_TO = () => process.env.RESEND_REPLY_TO ?? "hello@bluuhq.com";
+
+// ─── Core send (React Email template) ────────────────────────────────────────
+
+export async function sendEmail({
+  to,
+  subject,
+  template,
+  replyTo,
+}: {
+  to: string;
+  subject: string;
+  template: React.ReactElement;
+  replyTo?: string;
+}): Promise<{ messageId: string | null }> {
+  try {
+    const { data, error } = await getResend().emails.send({
+      from: fromAddress(),
+      to: [to],
+      subject,
+      react: template,
+      replyTo: replyTo ?? DEFAULT_REPLY_TO(),
+    });
+    if (error) {
+      console.error("[resend] send error:", error);
+      return { messageId: null };
+    }
+    return { messageId: data?.id ?? null };
+  } catch (err) {
+    console.error("[resend] unexpected error:", err);
+    return { messageId: null };
+  }
+}
+
+// Backward-compatible HTML path for existing routes
+export async function sendEmailHtml(params: {
   to: string | string[];
   subject: string;
   html: string;
   text?: string;
   replyTo?: string;
   tags?: { name: string; value: string }[];
+}): Promise<string | null> {
+  try {
+    const { data, error } = await getResend().emails.send({
+      from: fromAddress(),
+      to: Array.isArray(params.to) ? params.to : [params.to],
+      subject: params.subject,
+      html: params.html,
+      text: params.text,
+      replyTo: params.replyTo ?? DEFAULT_REPLY_TO(),
+      tags: params.tags,
+    });
+    if (error) { console.error("[resend] sendEmailHtml error:", error); return null; }
+    return data?.id ?? null;
+  } catch (err) {
+    console.error("[resend] sendEmailHtml unexpected error:", err);
+    return null;
+  }
 }
 
-/** Send a transactional email via Resend. */
-export async function sendEmail(params: SendEmailParams): Promise<string> {
-  const { data, error } = await getResend().emails.send({
-    from: FROM_ADDRESS(),
-    to: Array.isArray(params.to) ? params.to : [params.to],
-    subject: params.subject,
-    html: params.html,
-    text: params.text,
-    replyTo: params.replyTo,
-    tags: params.tags,
-  });
-  if (error) throw new Error(`Resend error: ${error.message}`);
-  return data!.id;
+// ─── Convenience functions ────────────────────────────────────────────────────
+
+export async function sendPortalInvite(
+  to: string,
+  props: import("./emails/PortalInvite").PortalInviteProps
+) {
+  const { default: T, subject } = await import("./emails/PortalInvite");
+  return sendEmail({ to, subject, template: React.createElement(T, props) });
 }
 
-/** Send a portal invite magic link email. */
-export async function sendPortalInvite(params: {
-  to: string;
-  clientName: string;
-  magicLink: string;
-  agencyName?: string;
-}): Promise<string> {
-  const agency = params.agencyName ?? "BluuHQ";
-  return sendEmail({
-    to: params.to,
-    subject: `You're invited to the ${agency} client portal`,
-    html: `
-      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-        <h2>Welcome, ${params.clientName}!</h2>
-        <p>You've been invited to access the ${agency} client portal where you can view your invoices, files, and project updates.</p>
-        <p>
-          <a href="${params.magicLink}" style="background:#0f172a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
-            Access Your Portal
-          </a>
-        </p>
-        <p style="color:#64748b;font-size:14px">This link expires in 24 hours. If you didn't expect this email, you can safely ignore it.</p>
-      </div>
-    `,
-    text: `Welcome, ${params.clientName}!\n\nAccess your portal: ${params.magicLink}\n\nThis link expires in 24 hours.`,
-    tags: [{ name: "type", value: "portal_invite" }],
-  });
+export async function sendTeamInvite(
+  to: string,
+  props: import("./emails/TeamInvite").TeamInviteProps
+) {
+  const { default: T, subject } = await import("./emails/TeamInvite");
+  return sendEmail({ to, subject, template: React.createElement(T, props) });
 }
 
-/** Send an invoice notification email. */
-export async function sendInvoiceEmail(params: {
-  to: string;
-  clientName: string;
-  invoiceNumber: string;
-  amount: string;
-  dueDate: string;
-  paymentLink: string;
-}): Promise<string> {
-  return sendEmail({
-    to: params.to,
-    subject: `Invoice ${params.invoiceNumber} from BluuHQ`,
-    html: `
-      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-        <h2>Invoice ${params.invoiceNumber}</h2>
-        <p>Hi ${params.clientName},</p>
-        <p>Please find your invoice details below:</p>
-        <table style="width:100%;border-collapse:collapse">
-          <tr><td style="padding:8px 0;color:#64748b">Amount Due</td><td style="padding:8px 0;font-weight:bold">${params.amount}</td></tr>
-          <tr><td style="padding:8px 0;color:#64748b">Due Date</td><td style="padding:8px 0">${params.dueDate}</td></tr>
-        </table>
-        <p>
-          <a href="${params.paymentLink}" style="background:#0f172a;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
-            Pay Now
-          </a>
-        </p>
-      </div>
-    `,
-    tags: [{ name: "type", value: "invoice" }],
-  });
+export async function sendPasswordReset(
+  to: string,
+  props: import("./emails/PasswordReset").PasswordResetProps
+) {
+  const { default: T, subject } = await import("./emails/PasswordReset");
+  return sendEmail({ to, subject, template: React.createElement(T, props) });
+}
+
+export async function sendInvoiceReady(
+  to: string,
+  props: import("./emails/InvoiceReady").InvoiceReadyProps
+) {
+  const { default: T, getSubject } = await import("./emails/InvoiceReady");
+  return sendEmail({ to, subject: getSubject(props.invoiceNumber, props.amount, props.dueDate), template: React.createElement(T, props) });
+}
+
+export async function sendInvoiceReminder(
+  to: string,
+  props: import("./emails/InvoiceReminder").InvoiceReminderProps
+) {
+  const { default: T, getSubject } = await import("./emails/InvoiceReminder");
+  return sendEmail({ to, subject: getSubject(props.daysOverdue, props.invoiceNumber), template: React.createElement(T, props) });
+}
+
+export async function sendPaymentReceipt(
+  to: string,
+  props: import("./emails/PaymentReceipt").PaymentReceiptProps
+) {
+  const { default: T, getSubject } = await import("./emails/PaymentReceipt");
+  return sendEmail({ to, subject: getSubject(props.clientName), template: React.createElement(T, props) });
+}
+
+export async function sendNewService(
+  to: string,
+  props: import("./emails/NewService").NewServiceProps
+) {
+  const { default: T, getSubject } = await import("./emails/NewService");
+  return sendEmail({ to, subject: getSubject(), template: React.createElement(T, props) });
+}
+
+export async function sendFileShared(
+  to: string,
+  props: import("./emails/FileShared").FileSharedProps
+) {
+  const { default: T, getSubject } = await import("./emails/FileShared");
+  return sendEmail({ to, subject: getSubject(props.fileName), template: React.createElement(T, props) });
+}
+
+export async function sendClientFileUploaded(
+  adminEmail: string,
+  props: import("./emails/ClientFileUploaded").ClientFileUploadedProps
+) {
+  const { default: T, getSubject } = await import("./emails/ClientFileUploaded");
+  return sendEmail({ to: adminEmail, subject: getSubject(props.clientName), template: React.createElement(T, props) });
+}
+
+export async function sendCancellationRequested(
+  adminEmail: string,
+  props: import("./emails/CancellationRequested").CancellationRequestedProps
+) {
+  const { default: T, getSubject } = await import("./emails/CancellationRequested");
+  return sendEmail({ to: adminEmail, subject: getSubject(props.clientName, props.serviceName), template: React.createElement(T, props) });
+}
+
+export async function sendCancellationConfirmed(
+  to: string,
+  props: import("./emails/CancellationConfirmed").CancellationConfirmedProps
+) {
+  const { default: T, getSubject } = await import("./emails/CancellationConfirmed");
+  return sendEmail({ to, subject: getSubject(), template: React.createElement(T, props) });
+}
+
+export async function sendCredentialRevealed(
+  adminEmail: string,
+  props: import("./emails/CredentialRevealed").CredentialRevealedProps
+) {
+  const { default: T, getSubject } = await import("./emails/CredentialRevealed");
+  return sendEmail({ to: adminEmail, subject: getSubject(props.clientName, props.action), template: React.createElement(T, props) });
 }
