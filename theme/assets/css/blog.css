@@ -439,6 +439,11 @@
     height: auto;
     display: block;
     margin: var(--space-6) 0;
+    filter: grayscale(100%);
+    transition: filter 0.3s ease;
+}
+.bluu-post-content img:hover {
+    filter: grayscale(0%);
 }
 .bluu-post-content ul,
 .bluu-post-content ol {
