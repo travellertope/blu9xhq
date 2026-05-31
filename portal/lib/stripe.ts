@@ -1,9 +1,15 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-05-27.dahlia",
-  typescript: true,
-});
+let _stripe: Stripe | null = null;
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2026-05-27.dahlia",
+      typescript: true,
+    });
+  }
+  return _stripe;
+}
 
 /** Create a Stripe customer for a client. */
 export async function createStripeCustomer(params: {
@@ -11,7 +17,7 @@ export async function createStripeCustomer(params: {
   name: string;
   metadata?: Record<string, string>;
 }): Promise<string> {
-  const customer = await stripe.customers.create({
+  const customer = await getStripe().customers.create({
     email: params.email,
     name: params.name,
     metadata: params.metadata ?? {},
@@ -28,7 +34,7 @@ export async function createInvoicePaymentLink(params: {
   currency: string;
   description: string;
 }): Promise<string> {
-  const session = await stripe.checkout.sessions.create({
+  const session = await getStripe().checkout.sessions.create({
     mode: "payment",
     customer_email: params.clientEmail,
     line_items: [
@@ -54,7 +60,7 @@ export async function createStripeSubscription(params: {
   priceId: string;
   metadata?: Record<string, string>;
 }): Promise<Stripe.Subscription> {
-  return stripe.subscriptions.create({
+  return getStripe().subscriptions.create({
     customer: params.customerId,
     items: [{ price: params.priceId }],
     metadata: params.metadata ?? {},
@@ -68,7 +74,7 @@ export function constructStripeWebhookEvent(
   payload: Buffer,
   signature: string
 ): Stripe.Event {
-  return stripe.webhooks.constructEvent(
+  return getStripe().webhooks.constructEvent(
     payload,
     signature,
     process.env.STRIPE_WEBHOOK_SECRET!
