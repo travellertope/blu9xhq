@@ -563,6 +563,23 @@
         onScroll();
     }
 
+    /* ── Industries mega menu — left-nav panel switching ─────────────────── */
+    function initIndustriesMegaNav() {
+        var wrap = qs( '.mega-ind-wrap' );
+        if ( ! wrap ) { return; }
+        var btns = wrap.querySelectorAll( '.mega-ind-btn' );
+        btns.forEach( function ( btn ) {
+            btn.addEventListener( 'mouseenter', function () {
+                var key = btn.getAttribute( 'data-panel' );
+                wrap.querySelectorAll( '.mega-ind-btn' ).forEach( function ( b ) { b.classList.remove( 'is-active' ); } );
+                wrap.querySelectorAll( '.mega-ind-panel' ).forEach( function ( p ) { p.classList.remove( 'is-active' ); } );
+                btn.classList.add( 'is-active' );
+                var panel = document.getElementById( 'mega-ind-panel-' + key );
+                if ( panel ) { panel.classList.add( 'is-active' ); }
+            } );
+        } );
+    }
+
     /* ── Pricing table sticky thead (JS — overflow-x:auto breaks CSS sticky) ── */
     function initPricingTableSticky() {
         var wrap  = qs( '.pricing-table-wrap' );
@@ -602,6 +619,7 @@
     document.addEventListener( 'DOMContentLoaded', function () {
         initMobileNav();
         initMegaMenu();
+        initIndustriesMegaNav();
         initMobileMegaMenu();
         initMobileIndustriesAccordion();
         initScrollAnimations();
