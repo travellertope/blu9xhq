@@ -21,6 +21,54 @@ function bluuhq_register_acf_fields(): void {
     bluuhq_acf_communication();
     bluuhq_acf_sequence();
     bluuhq_acf_email_template();
+    bluuhq_acf_user_meta();
+}
+
+
+// ─── 9. User meta (shown on WP Admin → Users → Edit User) ────────────────────
+
+function bluuhq_acf_user_meta(): void {
+    acf_add_local_field_group( [
+        'key'      => 'group_bluuhq_user_meta',
+        'title'    => 'BluuHQ Team Settings',
+        'fields'   => [
+            [
+                'key'           => 'field_bluuhq_user_role',
+                'label'         => 'BluuHQ Role',
+                'name'          => 'bluuhq_role',
+                'type'          => 'select',
+                'instructions'  => 'Controls what this team member can do inside the CRM portal.',
+                'choices'       => [
+                    'super_admin'     => 'Super Admin',
+                    'account_manager' => 'Account Manager',
+                    'billing_manager' => 'Billing Manager',
+                    'support_staff'   => 'Support Staff',
+                    'viewer'          => 'Viewer',
+                ],
+                'default_value' => 'viewer',
+                'allow_null'    => 0,
+                'ui'            => 1,
+            ],
+            [
+                'key'           => 'field_bluuhq_user_status',
+                'label'         => 'Status',
+                'name'          => 'bluuhq_status',
+                'type'          => 'select',
+                'instructions'  => 'Deactivated users cannot log in to the portal.',
+                'choices'       => [
+                    'active'      => 'Active',
+                    'deactivated' => 'Deactivated',
+                ],
+                'default_value' => 'active',
+                'allow_null'    => 0,
+                'ui'            => 1,
+            ],
+        ],
+        'location' => [ [
+            [ 'param' => 'user_form', 'operator' => '==', 'value' => 'all' ],
+        ] ],
+        'active'   => true,
+    ] );
 }
 
 

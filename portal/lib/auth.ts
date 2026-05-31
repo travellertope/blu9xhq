@@ -68,7 +68,7 @@ export const authOptions: NextAuthOptions = {
         const user = await validateWPCredentials(credentials.username, credentials.password);
         if (!user) return null;
 
-        const isAdmin = user.roles.includes("bluu_admin");
+        const isAdmin = user.roles.includes("bluu_admin") || user.roles.includes("administrator");
         const isTeam  = user.roles.includes("bluu_team");
         if (!isAdmin && !isTeam) return null;
 

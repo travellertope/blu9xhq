@@ -112,6 +112,7 @@ function TemplatesTab() {
   const [form, setForm] = useState<Omit<EmailTemplate, "id">>(BLANK_TEMPLATE);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [seeding, setSeeding] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -168,6 +169,21 @@ function TemplatesTab() {
     }
   }
 
+  async function handleSeedDefaults() {
+    setSeeding(true);
+    try {
+      const res = await fetch("/api/admin/seed/templates", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Seed failed");
+      toast.success(`Seeded ${data.created} template${data.created !== 1 ? "s" : ""}${data.skipped ? ` (${data.skipped} already existed)` : ""}`);
+      await load();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to seed templates");
+    } finally {
+      setSeeding(false);
+    }
+  }
+
   async function handleDelete(t: EmailTemplate) {
     if (!confirm(`Delete template "${t.title}"? This cannot be undone.`)) return;
     setDeletingId(t.id);
@@ -191,10 +207,16 @@ function TemplatesTab() {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-semibold text-gray-700">Email Templates</h2>
         <PermissionGuard permission="build_sequences">
-          <Button size="sm" onClick={openNew}>
-            <Plus className="h-4 w-4 mr-1" />
-            New Template
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={handleSeedDefaults} disabled={seeding}>
+              {seeding ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+              {seeding ? "Seeding…" : "Seed Defaults"}
+            </Button>
+            <Button size="sm" onClick={openNew}>
+              <Plus className="h-4 w-4 mr-1" />
+              New Template
+            </Button>
+          </div>
         </PermissionGuard>
       </div>
 
