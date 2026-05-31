@@ -203,6 +203,15 @@ $ind_content = array(
 // Resolve slug to content — fall back to tech-saas defaults if slug not found
 $d = isset( $ind_content[ $current_slug ] ) ? $ind_content[ $current_slug ] : reset( $ind_content );
 
+// Breadcrumb label map
+$ind_labels = array(
+    'tech-saas'              => 'Tech &amp; SaaS',
+    'agencies-consultants'   => 'Agencies &amp; Consultants',
+    'ecommerce-dtc'          => 'E-commerce &amp; DTC',
+    'professional-services'  => 'Professional Services',
+);
+$ind_label = isset( $ind_labels[ $current_slug ] ) ? $ind_labels[ $current_slug ] : get_the_title();
+
 // SEO & meta
 $seo_title  = ( $gf ? get_field( 'ind_seo_title' )        : '' ) ?: get_the_title();
 $seo_desc   = ( $gf ? get_field( 'ind_meta_description' ) : '' ) ?: '';
@@ -303,7 +312,11 @@ get_header();
         <div class="industry-pg-hero__inner">
 
             <div class="industry-pg-hero__content animate-on-scroll">
-                <div class="industry-pg-hero__tag"><?php echo esc_html( $hero_tag ); ?></div>
+                <nav class="industry-pg-hero__tag industry-pg-hero__breadcrumb" aria-label="Breadcrumb">
+                    <a href="<?php echo esc_url( home_url( '/industries' ) ); ?>">Industries</a>
+                    <span aria-hidden="true"> / </span>
+                    <span><?php echo $ind_label; ?></span>
+                </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
                 <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
                 <div class="industry-pg-hero__cta">
