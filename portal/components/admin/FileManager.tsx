@@ -3,9 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -162,7 +160,7 @@ interface FileManagerProps {
   clientName?: string;
 }
 
-export function FileManager({ clientId, clientName }: FileManagerProps) {
+export function FileManager({ clientId }: FileManagerProps) {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -178,7 +176,7 @@ export function FileManager({ clientId, clientName }: FileManagerProps) {
       if (!res.ok) throw new Error("Failed to fetch files");
       const data = await res.json();
       setFiles(data.files ?? []);
-    } catch (err) {
+    } catch {
       toast.error("Failed to load files");
     } finally {
       setLoading(false);
@@ -259,10 +257,11 @@ export function FileManager({ clientId, clientName }: FileManagerProps) {
         }
 
         updateQueueItem(i, { status: "done", progress: 100 });
-      } catch (err: any) {
+      } catch (e: unknown) {
         clearInterval(interval);
-        updateQueueItem(i, { status: "error", progress: 0, error: err.message });
-        toast.error(`Failed to upload ${item.name}: ${err.message}`);
+        const msg = e instanceof Error ? e.message : "Unknown error";
+        updateQueueItem(i, { status: "error", progress: 0, error: msg });
+        toast.error(`Failed to upload ${item.name}: ${msg}`);
       }
     }
 
