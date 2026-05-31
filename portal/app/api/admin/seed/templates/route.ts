@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 
 const DEFAULT_TEMPLATES = [
@@ -160,9 +160,9 @@ function wpAuthHeader(): string {
   return `Basic ${Buffer.from(`${user}:${pass}`).toString("base64")}`;
 }
 
-export async function POST(req: Request) {
-  const authError = await requirePermission(req, "build_sequences");
-  if (authError) return authError;
+export async function POST(req: NextRequest) {
+  const result = await requirePermission(req, "build_sequences");
+  if (result instanceof NextResponse) return result;
 
   const wpBase = process.env.WORDPRESS_URL;
   if (!wpBase || !process.env.WP_APP_USERNAME || !process.env.WP_APP_PASSWORD) {
