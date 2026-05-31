@@ -6,6 +6,7 @@ import { Mail, MessageSquare, FolderUp, Send, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HealthOverrideModal } from "./HealthOverrideModal";
 import { LogCommunicationModal } from "./LogCommunicationModal";
+import { EmailComposer } from "./EmailComposer";
 import type { BluuCommunication } from "@/types";
 
 interface ClientProfileActionsProps {
@@ -17,6 +18,7 @@ interface ClientProfileActionsProps {
 export function ClientProfileActions({ clientId, clientIdNum, currentHealth }: ClientProfileActionsProps) {
   const [healthOpen,    setHealthOpen]    = useState(false);
   const [logOpen,       setLogOpen]       = useState(false);
+  const [emailOpen,     setEmailOpen]     = useState(false);
   const [health,        setHealth]        = useState(currentHealth);
   const [sendingInvite, setSendingInvite] = useState(false);
 
@@ -46,7 +48,7 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth }: C
         variant="outline"
         size="sm"
         className="gap-1.5"
-        onClick={() => toast.info("Email composer — built in Batch 5 (Sequences)")}
+        onClick={() => setEmailOpen(true)}
       >
         <Mail className="h-3.5 w-3.5" />
         Send Email
@@ -108,6 +110,12 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth }: C
           onSaved={handleCommSaved}
         />
       )}
+
+      <EmailComposer
+        open={emailOpen}
+        onClose={() => setEmailOpen(false)}
+        clientId={clientIdNum}
+      />
     </div>
   );
 }
