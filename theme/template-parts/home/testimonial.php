@@ -39,7 +39,7 @@ if ( ! empty( $photo ) ) {
 
             <!-- Quote block -->
             <blockquote class="home-testimonial__quote">
-                <p class="home-testimonial__text"><?php echo esc_html( $quote ); ?></p>
+                <p class="home-testimonial__text"><?php echo bluu_text( $quote ); ?></p>
                 <footer class="home-testimonial__attribution">
                     <cite class="home-testimonial__name"><?php echo esc_html( $name ); ?></cite>
                     <span class="home-testimonial__title"><?php echo esc_html( $title ); ?></span>

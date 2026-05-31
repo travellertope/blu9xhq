@@ -16,7 +16,7 @@ $cta_note        = ( function_exists( 'get_field' ) ? get_field( 'home_cta_note'
     <div class="container container--narrow">
         <div class="animate-on-scroll">
             <h2 class="home-cta__headline"><?php echo esc_html( $cta_headline ); ?></h2>
-            <p class="home-cta__body"><?php echo esc_html( $cta_body ); ?></p>
+            <p class="home-cta__body"><?php echo bluu_text( $cta_body ); ?></p>
             <a
                 href="<?php echo esc_url( $cta_button_url ); ?>"
                 class="btn-primary btn-primary--large"

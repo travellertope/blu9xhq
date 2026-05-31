@@ -697,7 +697,7 @@ get_header();
                 </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
                 <?php if ( $hero_sub ) : ?>
-                    <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
+                    <p class="industry-pg-hero__sub"><?php echo bluu_text( $hero_sub ); ?></p>
                 <?php endif; ?>
                 <div class="industry-pg-hero__cta">
                     <a href="<?php echo esc_url( $hero_url ); ?>" class="btn-primary btn-primary--large">
@@ -808,7 +808,7 @@ get_header();
             <?php if ( $fit_proof ) : ?>
                 <div class="si-fit__proof">
                     <div class="si-fit__proof-label"><?php esc_html_e( 'Investment', 'bluu-interactive' ); ?></div>
-                    <p class="si-fit__proof-text"><?php echo esc_html( $fit_proof ); ?></p>
+                    <p class="si-fit__proof-text"><?php echo bluu_text( $fit_proof ); ?></p>
                     <a href="<?php echo esc_url( home_url( '/pricing' ) ); ?>" class="si-fit__proof-link">
                         <?php esc_html_e( 'See full pricing →', 'bluu-interactive' ); ?>
                     </a>

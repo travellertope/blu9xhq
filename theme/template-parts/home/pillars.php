@@ -68,7 +68,7 @@ function bluu_solution_feature_icon( $name ) {
         <div class="solution-section__header animate-on-scroll">
             <div class="solution-section__badge"><?php echo esc_html( $solution_badge ); ?></div>
             <h2 class="solution-section__headline"><?php echo esc_html( $solution_headline ); ?></h2>
-            <p class="solution-section__body"><?php echo esc_html( $solution_body ); ?></p>
+            <p class="solution-section__body"><?php echo bluu_text( $solution_body ); ?></p>
         </div>
 
         <!-- Unified Solution Card -->
@@ -78,7 +78,7 @@ function bluu_solution_feature_icon( $name ) {
                 <!-- Left sidebar: narrative -->
                 <div class="solution-card__sidebar">
                     <h3 class="solution-card__sidebar-title"><?php echo esc_html( $solution_sidebar_title ); ?></h3>
-                    <p class="solution-card__sidebar-body"><?php echo esc_html( $solution_sidebar_body ); ?></p>
+                    <p class="solution-card__sidebar-body"><?php echo bluu_text( $solution_sidebar_body ); ?></p>
                     <a href="<?php echo esc_url( $solution_sidebar_url ); ?>" class="solution-card__sidebar-cta">
                         <?php echo esc_html( $solution_sidebar_cta ); ?>
                     </a>

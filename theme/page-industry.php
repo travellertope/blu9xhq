@@ -318,7 +318,7 @@ get_header();
                     <span><?php echo $ind_label; ?></span>
                 </nav>
                 <h1 class="industry-pg-hero__headline"><?php echo esc_html( $hero_hl ); ?></h1>
-                <p class="industry-pg-hero__sub"><?php echo esc_html( $hero_sub ); ?></p>
+                <p class="industry-pg-hero__sub"><?php echo bluu_text( $hero_sub ); ?></p>
                 <div class="industry-pg-hero__cta">
                     <a href="<?php echo esc_url( $hero_url ); ?>" class="btn-primary btn-primary--large">
                         <?php echo esc_html( $hero_cta ); ?>
@@ -345,7 +345,7 @@ get_header();
             <span class="industry-section-badge"><?php esc_html_e( 'The situation', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php echo esc_html( $pain_heading ); ?></h2>
             <?php if ( $pain_body ) : ?>
-                <p class="industry-section-body"><?php echo esc_html( $pain_body ); ?></p>
+                <p class="industry-section-body"><?php echo bluu_text( $pain_body ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -353,7 +353,7 @@ get_header();
             <?php foreach ( $pain_points as $point ) : ?>
                 <div class="industry-pain-card animate-on-scroll">
                     <h3 class="industry-pain-card__title"><?php echo esc_html( $point['title'] ); ?></h3>
-                    <p class="industry-pain-card__body"><?php echo esc_html( $point['body'] ); ?></p>
+                    <p class="industry-pain-card__body"><?php echo bluu_text( $point['body'] ); ?></p>
                 </div>
             <?php endforeach; ?>
         </div>
@@ -374,7 +374,7 @@ get_header();
                 <span class="industry-section-badge"><?php esc_html_e( 'What we do', 'bluu-interactive' ); ?></span>
                 <h2 class="industry-section-heading"><?php echo esc_html( $sol_heading ); ?></h2>
                 <?php if ( $sol_body ) : ?>
-                    <p class="industry-section-body" style="margin-bottom:var(--space-5)"><?php echo esc_html( $sol_body ); ?></p>
+                    <p class="industry-section-body" style="margin-bottom:var(--space-5)"><?php echo bluu_text( $sol_body ); ?></p>
                 <?php endif; ?>
 
                 <div class="industry-steps">
@@ -383,7 +383,7 @@ get_header();
                             <div class="industry-step__num"><?php echo esc_html( $idx + 1 ); ?></div>
                             <div>
                                 <div class="industry-step__title"><?php echo esc_html( $item['title'] ); ?></div>
-                                <p class="industry-step__body"><?php echo esc_html( $item['body'] ); ?></p>
+                                <p class="industry-step__body"><?php echo bluu_text( $item['body'] ); ?></p>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -402,7 +402,7 @@ get_header();
             <span class="industry-section-badge"><?php esc_html_e( 'Right fit', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php echo esc_html( $who_heading ); ?></h2>
             <?php if ( $who_body ) : ?>
-                <p class="industry-section-body" style="color:rgba(255,255,255,0.65)"><?php echo esc_html( $who_body ); ?></p>
+                <p class="industry-section-body" style="color:rgba(255,255,255,0.65)"><?php echo bluu_text( $who_body ); ?></p>
             <?php endif; ?>
         </div>
 
@@ -477,7 +477,7 @@ get_header();
         <div style="max-width:680px;margin:0 auto;text-align:center;" class="animate-on-scroll">
             <span class="industry-section-badge"><?php esc_html_e( 'Investment', 'bluu-interactive' ); ?></span>
             <h2 class="industry-section-heading"><?php echo esc_html( $pricing_heading ); ?></h2>
-            <p class="industry-section-body" style="margin-bottom:var(--space-6)"><?php echo esc_html( $pricing_body ); ?></p>
+            <p class="industry-section-body" style="margin-bottom:var(--space-6)"><?php echo bluu_text( $pricing_body ); ?></p>
             <a href="<?php echo esc_url( $pricing_cta_url ); ?>" class="btn-primary">
                 <?php echo esc_html( $pricing_cta_label ); ?>
             </a>

@@ -182,6 +182,17 @@ function bluu_seo_meta_tags() {
 }
 add_action( 'wp_head', 'bluu_seo_meta_tags', 5 );
 
+// ── Safe rich-text output helper ──────────────────────────────────────────────
+// Use bluu_text( $str ) instead of esc_html( $str ) for ACF fields where
+// editors need <br>, <strong>, or <em> — all other tags are stripped.
+function bluu_text( $str ) {
+    return wp_kses( $str, array(
+        'br'     => array(),
+        'strong' => array(),
+        'em'     => array(),
+    ) );
+}
+
 // Contact form AJAX handler is registered in inc/contact-submissions.php
 
 // ── Custom Excerpt Length ──────────────────────────────────────────────────────
