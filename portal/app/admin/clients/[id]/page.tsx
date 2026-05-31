@@ -11,6 +11,7 @@ import { CommunicationTimeline } from "@/components/admin/CommunicationTimeline"
 import { MoodTrendChart } from "@/components/admin/MoodTrendChart";
 import { FollowUpBadge } from "@/components/admin/FollowUpBadge";
 import { ClientSequences } from "@/components/admin/ClientSequences";
+import { FileManager } from "@/components/admin/FileManager";
 import type { WPClientPost, WPSubscriptionPost } from "@/lib/wp-api";
 import type { BluuCommunication } from "@/types";
 
@@ -252,11 +253,20 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
             </CardContent>
           </Card>
 
-          {/* ── File manager — placeholder ───────────────────────────────────── */}
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-slate-400">
-              <p className="text-sm font-medium">File Manager</p>
-              <p className="text-xs mt-1">Built in Batch 6 (Files)</p>
+          {/* ── File Manager ────────────────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                  Files
+                </CardTitle>
+                <Button asChild size="sm" variant="outline">
+                  <a href={`/admin/clients/${clientIdNum}/files`}>View All Files</a>
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <FileManager clientId={clientIdNum} />
             </CardContent>
           </Card>
 

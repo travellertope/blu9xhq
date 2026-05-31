@@ -350,3 +350,143 @@ export function updateSequence(postId: number, params: { title?: string; acf?: P
     body:   JSON.stringify(params),
   });
 }
+
+// ─── bluu_file CPT types & helpers ────────────────────────────────────────────
+
+export interface WPFileACF {
+  file_client: number;
+  file_r2_key: string;
+  file_original_name: string;
+  file_mime_type: string;
+  file_size: number;
+  file_category: string;       // contract | deliverable | invoice | brand_asset | brief | general
+  file_description?: string;
+  file_visibility: string;     // shared | internal
+  file_uploaded_by: number;    // wp user id
+  file_subscription_id?: number;
+  file_public_url?: string;
+}
+
+export interface WPFilePost {
+  id: number;
+  title: { rendered: string };
+  date: string;
+  acf: WPFileACF;
+}
+
+export function listClientFiles(
+  clientId: number,
+  params: Record<string, string | number> = {}
+): Promise<WPListResult<WPFilePost>> {
+  return wpRestList<WPFilePost>("/wp/v2/bluu_file", {
+    per_page:   100,
+    status:     "publish",
+    meta_key:   "file_client",
+    meta_value: clientId,
+    orderby:    "date",
+    order:      "desc",
+    ...params,
+  });
+}
+
+export function createFilePost(params: {
+  title: string;
+  acf: Partial<WPFileACF>;
+}): Promise<WPFilePost> {
+  return wpRestFetch("/wp/v2/bluu_file", {
+    method: "POST",
+    body:   JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+export function deleteFilePost(postId: number): Promise<void> {
+  return wpRestFetch(`/wp/v2/bluu_file/${postId}?force=true`, { method: "DELETE" });
+}
+
+// ─── bluu_invoice CPT types & helpers ────────────────────────────────────────
+
+export interface WPInvoiceACF {
+  inv_client: number;
+  inv_subscription?: number;
+  inv_number: string;                    // BLU-2024-0001
+  inv_line_items: string;               // JSON: [{description: string, amount: number}]
+  inv_total: number;
+  inv_currency: string;
+  inv_status: string;                   // draft | sent | paid | overdue | void
+  inv_due_date: string;
+  inv_issued_date: string;
+  inv_paid_at?: string;
+  inv_payment_method?: string;          // stripe | paystack | bank_transfer | cash
+  inv_payment_gateway_ref?: string;
+  inv_notes?: string;
+  inv_pdf_url?: string;
+  inv_last_reminder_sent?: string;
+}
+
+export interface WPInvoicePost {
+  id: number;
+  title: { rendered: string };
+  date: string;
+  acf: WPInvoiceACF;
+}
+
+export function listInvoices(params: {
+  page?: number;
+  per_page?: number;
+  clientId?: number;
+  status?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  currency?: string;
+} = {}): Promise<WPListResult<WPInvoicePost>> {
+  const qp: Record<string, string | number> = {
+    page:     params.page     ?? 1,
+    per_page: params.per_page ?? 20,
+    status:   "publish",
+    orderby:  "date",
+    order:    "desc",
+  };
+  if (params.clientId) {
+    qp.meta_key   = "inv_client";
+    qp.meta_value = params.clientId;
+  }
+  if (params.status) {
+    qp.meta_key   = "inv_status";
+    qp.meta_value = params.status;
+  }
+  if (params.currency) {
+    qp.meta_key   = "inv_currency";
+    qp.meta_value = params.currency;
+  }
+  return wpRestList<WPInvoicePost>("/wp/v2/bluu_invoice", qp);
+}
+
+export function getInvoice(postId: number): Promise<WPInvoicePost> {
+  return wpRestFetch<WPInvoicePost>(`/wp/v2/bluu_invoice/${postId}`);
+}
+
+export function createInvoice(params: {
+  title: string;
+  acf: Partial<WPInvoiceACF>;
+}): Promise<WPInvoicePost> {
+  return wpRestFetch("/wp/v2/bluu_invoice", {
+    method: "POST",
+    body:   JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+export function updateInvoice(
+  postId: number,
+  params: { title?: string; acf?: Partial<WPInvoiceACF> }
+): Promise<WPInvoicePost> {
+  return wpRestFetch(`/wp/v2/bluu_invoice/${postId}`, {
+    method: "POST",
+    body:   JSON.stringify(params),
+  });
+}
+
+/** Fetch all clients (up to 100). */
+export async function listAllClients(): Promise<WPClientPost[]> {
+  const result = await listClientPosts({ per_page: 100 });
+  return result.items;
+}

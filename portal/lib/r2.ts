@@ -90,3 +90,56 @@ export function buildFileKey(clientId: string, filename: string): string {
   const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
   return `clients/${clientId}/files/${timestamp}_${sanitized}`;
 }
+
+// ─── Batch 6 additions ────────────────────────────────────────────────────────
+
+export const ALLOWED_MIME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "video/mp4",
+  "video/quicktime",
+  "application/zip",
+] as const;
+
+export type AllowedMimeType = (typeof ALLOWED_MIME_TYPES)[number];
+
+/** Upload a file buffer to R2, validating size. Returns the public URL. */
+export async function uploadFile(
+  key: string,
+  buffer: Buffer,
+  mimeType: string
+): Promise<string> {
+  if (buffer.length > 50 * 1024 * 1024) throw new Error("File exceeds 50MB limit");
+  await uploadToR2(key, buffer, mimeType);
+  const publicUrl = process.env.CLOUDFLARE_R2_PUBLIC_URL ?? "";
+  return `${publicUrl}/${key}`;
+}
+
+/** Delete a file from R2 by key. */
+export async function deleteFile(key: string): Promise<void> {
+  return deleteFromR2(key);
+}
+
+/** Generate a pre-signed download URL with a custom expiry. */
+export async function r2SignedUrl(key: string, expiresInSeconds: number): Promise<string> {
+  return getPresignedDownloadUrl(key, expiresInSeconds);
+}
+
+/** Generate a unique R2 key for a client file: clients/{clientId}/{uuid}-{sanitised-filename} */
+export function generateFileKey(clientId: number, filename: string): string {
+  const sanitised = filename
+    .toLowerCase()
+    .replace(/[^a-z0-9.]/g, "-")
+    .replace(/-+/g, "-");
+  const id = crypto.randomUUID();
+  return `clients/${clientId}/${id}-${sanitised}`;
+}
