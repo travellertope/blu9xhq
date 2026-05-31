@@ -19,7 +19,15 @@ export async function GET(req: NextRequest) {
   if (result instanceof NextResponse) return result;
 
   try {
-    const { items: templates } = await listEmailTemplates();
+    const { items } = await listEmailTemplates();
+    const templates = items.map((t) => ({
+      id:       t.id,
+      title:    t.title.rendered,
+      subject:  t.acf.subject   ?? "",
+      bodyHtml: t.acf.body_html ?? "",
+      bodyText: t.acf.body_text ?? "",
+      type:     t.acf.type      ?? "general",
+    }));
     return NextResponse.json({ templates });
   } catch (err: unknown) {
     console.error("[GET /api/admin/email/templates]", err);

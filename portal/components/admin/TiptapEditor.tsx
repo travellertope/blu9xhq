@@ -47,7 +47,7 @@ export function TiptapEditor({
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({ link: false, underline: false }),
       Underline,
       Link.configure({ openOnClick: false, linkOnPaste: true }),
       Placeholder.configure({
