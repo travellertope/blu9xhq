@@ -533,6 +533,19 @@
         }
     }
 
+    /* ── Mobile Industries Sub-accordion ────────────────────────────────────── */
+    function initMobileIndustriesAccordion() {
+        qsa( '.mobile-ind-toggle' ).forEach( function ( btn ) {
+            var body = btn.closest( '.mobile-ind-group' ).querySelector( '.mobile-ind-group__body' );
+            if ( ! body ) { return; }
+            btn.addEventListener( 'click', function () {
+                var isOpen = body.classList.contains( 'is-open' );
+                body.classList.toggle( 'is-open', ! isOpen );
+                btn.setAttribute( 'aria-expanded', String( ! isOpen ) );
+            } );
+        } );
+    }
+
     /* ── Sticky Header scroll class ─────────────────────────────────────────── */
     function initStickyHeader() {
         var header = qs( '.site-header' );
@@ -555,6 +568,7 @@
         initMobileNav();
         initMegaMenu();
         initMobileMegaMenu();
+        initMobileIndustriesAccordion();
         initScrollAnimations();
         initFaqAccordion();
         initFaqSearch();

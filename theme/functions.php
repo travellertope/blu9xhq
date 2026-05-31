@@ -211,8 +211,12 @@ function bluu_mega_item( $url, $icon_paths, $title, $desc = '' ) {
 if ( ! class_exists( 'Bluu_Mega_Menu_Walker' ) ) :
 class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
 
+    private $industries_injected = false;
+
     public function start_lvl( &$output, $depth = 0, $args = null ) {
-        if ( 0 === $depth ) {
+        if ( $this->industries_injected && $depth === 0 ) {
+            $output .= '<div style="display:none" aria-hidden="true"><ul>';
+        } elseif ( 0 === $depth ) {
             $output .= '<div class="mega-panel"><div class="mega-panel__inner"><ul class="mega-panel__simple-list">';
         } else {
             $output .= '<ul class="sub-menu">';
@@ -220,7 +224,10 @@ class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
     }
 
     public function end_lvl( &$output, $depth = 0, $args = null ) {
-        if ( 0 === $depth ) {
+        if ( $this->industries_injected && $depth === 0 ) {
+            $output .= '</ul></div>';
+            $this->industries_injected = false;
+        } elseif ( 0 === $depth ) {
             $output .= '</ul></div></div>';
         } else {
             $output .= '</ul>';
@@ -228,24 +235,36 @@ class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
     }
 
     public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+        if ( $this->industries_injected && $depth > 0 ) {
+            $output .= '<li>';
+            return;
+        }
+
         $classes      = empty( $item->classes ) ? array() : (array) $item->classes;
         $has_children = in_array( 'menu-item-has-children', $classes );
-        $filtered     = array_diff( $classes, array( 'menu-item-has-children' ) );
-        if ( $depth === 0 && $has_children ) {
-            $filtered[] = 'has-mega';
-        }
-        $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+        $url          = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
+        $title        = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
+        $lb           = isset( $args->link_before ) ? $args->link_before : '';
+        $la           = isset( $args->link_after )  ? $args->link_after  : '';
 
-        $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
-
-        $url   = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
-        $title = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
-        $lb    = isset( $args->link_before ) ? $args->link_before : '';
-        $la    = isset( $args->link_after )  ? $args->link_after  : '';
-
-        if ( $depth === 0 && $has_children ) {
+        if ( $depth === 0 && $has_children && false !== strpos( $item->url, 'industries' ) ) {
+            $output .= '<li class="has-mega has-mega--industries">';
             $output .= '<a href="' . $url . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_mega_chevron() . '</a>';
+            $output .= bluu_industries_mega_panel();
+            $this->industries_injected = true;
+        } elseif ( $depth === 0 && $has_children ) {
+            $filtered  = array_diff( $classes, array( 'menu-item-has-children' ) );
+            $filtered[] = 'has-mega';
+            $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+            $output .= '<li class="' . esc_attr( $class_str ) . '">';
+            $output .= '<a href="' . $url . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_mega_chevron() . '</a>';
+        } elseif ( $depth === 0 ) {
+            $filtered  = array_diff( $classes, array( 'menu-item-has-children' ) );
+            $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+            $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
         } else {
+            $output .= '<li>';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
         }
     }
@@ -260,8 +279,12 @@ endif;
 if ( ! class_exists( 'Bluu_Mobile_Menu_Walker' ) ) :
 class Bluu_Mobile_Menu_Walker extends Walker_Nav_Menu {
 
+    private $industries_injected = false;
+
     public function start_lvl( &$output, $depth = 0, $args = null ) {
-        if ( 0 === $depth ) {
+        if ( $this->industries_injected && $depth === 0 ) {
+            $output .= '<div style="display:none" aria-hidden="true"><ul>';
+        } elseif ( 0 === $depth ) {
             $output .= '<ul class="mobile-mega-list">';
         } else {
             $output .= '<ul class="sub-menu">';
@@ -269,36 +292,51 @@ class Bluu_Mobile_Menu_Walker extends Walker_Nav_Menu {
     }
 
     public function end_lvl( &$output, $depth = 0, $args = null ) {
-        $output .= '</ul>';
+        if ( $this->industries_injected && $depth === 0 ) {
+            $output .= '</ul></div>';
+            $this->industries_injected = false;
+        } else {
+            $output .= '</ul>';
+        }
     }
 
     public function start_el( &$output, $item, $depth = 0, $args = null, $id = 0 ) {
+        if ( $this->industries_injected && $depth > 0 ) {
+            $output .= '<li>';
+            return;
+        }
+
         $classes      = empty( $item->classes ) ? array() : (array) $item->classes;
         $has_children = in_array( 'menu-item-has-children', $classes );
-        $filtered     = array_diff( $classes, array( 'menu-item-has-children' ) );
-        if ( $depth === 0 && $has_children ) {
-            $filtered[] = 'has-mega';
-        }
-        $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+        $url          = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
+        $title        = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
+        $lb           = isset( $args->link_before ) ? $args->link_before : '';
+        $la           = isset( $args->link_after )  ? $args->link_after  : '';
 
-        $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
-
-        $url   = ! empty( $item->url ) ? esc_url( $item->url ) : '#';
-        $title = apply_filters( 'nav_menu_item_title', $item->title, $item, $args, $depth );
-        $lb    = isset( $args->link_before ) ? $args->link_before : '';
-        $la    = isset( $args->link_after )  ? $args->link_after  : '';
-
-        if ( $depth === 0 && $has_children ) {
-            $label = sprintf(
-                /* translators: %s: menu item name */
-                esc_attr__( 'Expand %s submenu', 'bluu-interactive' ),
-                $item->title
-            );
+        if ( $depth === 0 && $has_children && false !== strpos( $item->url, 'industries' ) ) {
+            $label = esc_attr__( 'Expand Industries submenu', 'bluu-interactive' );
+            $output .= '<li class="has-mega has-mega--industries">';
             $output .= '<div class="mobile-mega-header">';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
             $output .= '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . $label . '">' . bluu_mega_chevron() . '</button>';
             $output .= '</div>';
+            $output .= bluu_industries_mobile_accordion();
+            $this->industries_injected = true;
+        } elseif ( $depth === 0 && $has_children ) {
+            $label = sprintf( esc_attr__( 'Expand %s submenu', 'bluu-interactive' ), $item->title );
+            $filtered   = array_diff( $classes, array( 'menu-item-has-children' ) );
+            $filtered[] = 'has-mega';
+            $class_str  = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+            $output .= '<li class="' . esc_attr( $class_str ) . '">';
+            $output .= '<div class="mobile-mega-header">';
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+            $output .= '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . $label . '">' . bluu_mega_chevron() . '</button>';
+            $output .= '</div>';
+        } elseif ( $depth === 0 ) {
+            $output .= '<li>';
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
         } else {
+            $output .= '<li>';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
         }
     }
@@ -308,6 +346,134 @@ class Bluu_Mobile_Menu_Walker extends Walker_Nav_Menu {
     }
 }
 endif;
+
+// ── Industries mega panel data ────────────────────────────────────────────────
+function bluu_industries_data() {
+    return array(
+        array(
+            'name' => 'Tech &amp; SaaS',
+            'url'  => '/industries/tech-saas',
+            'subs' => array(
+                array( 'Seed to Series A',         '/industries/tech-saas/seed-series-a' ),
+                array( 'B2B SaaS growth teams',    '/industries/tech-saas/b2b-saas-growth' ),
+                array( 'No-code &amp; AI startups','/industries/tech-saas/no-code-ai-startups' ),
+                array( 'Developer tools',          '/industries/tech-saas/developer-tools' ),
+            ),
+            'ucs' => array(
+                array( 'Competitor Intelligence', '/industries/tech-saas/competitor-intelligence' ),
+                array( 'Founder Brand',           '/industries/tech-saas/founder-brand' ),
+                array( 'Content Repurposing',     '/industries/tech-saas/content-repurposing' ),
+                array( 'Product Launch Content',  '/industries/tech-saas/product-launch-content' ),
+            ),
+        ),
+        array(
+            'name' => 'Agencies &amp; Consultants',
+            'url'  => '/industries/agencies-consultants',
+            'subs' => array(
+                array( 'Marketing Consultants',     '/industries/agencies-consultants/marketing-consultants' ),
+                array( 'Branding &amp; Design',     '/industries/agencies-consultants/branding-design-studios' ),
+                array( 'PR &amp; Communications',   '/industries/agencies-consultants/pr-communications' ),
+                array( 'Strategy Consultants',      '/industries/agencies-consultants/strategy-consultants' ),
+                array( 'Recruitment Consultants',   '/industries/agencies-consultants/recruitment-consultants' ),
+                array( 'Business Coaches',          '/industries/agencies-consultants/business-coaches' ),
+                array( 'Paid Media Agencies',       '/industries/agencies-consultants/paid-media-agencies' ),
+                array( 'Full-service Agencies',     '/industries/agencies-consultants/full-service-agencies' ),
+            ),
+            'ucs' => array(
+                array( 'Own-brand Content',      '/industries/agencies-consultants/own-brand-content' ),
+                array( 'Thought Leadership',     '/industries/agencies-consultants/thought-leadership' ),
+                array( 'White-label Production', '/industries/agencies-consultants/white-label-production' ),
+                array( 'Service Launch',         '/industries/agencies-consultants/service-launch' ),
+            ),
+        ),
+        array(
+            'name' => 'E-commerce &amp; DTC',
+            'url'  => '/industries/ecommerce-dtc',
+            'subs' => array(
+                array( 'Emerging DTC brands',          '/industries/ecommerce-dtc/emerging-dtc-brands' ),
+                array( 'Subscription &amp; lifestyle', '/industries/ecommerce-dtc/subscription-lifestyle' ),
+                array( 'Marketplaces &amp; platforms', '/industries/ecommerce-dtc/marketplaces-platforms' ),
+            ),
+            'ucs' => array(
+                array( 'Brand Storytelling',   '/industries/ecommerce-dtc/brand-storytelling' ),
+                array( 'Product Content',      '/industries/ecommerce-dtc/product-content' ),
+                array( 'Email &amp; Newsletter','/industries/ecommerce-dtc/email-newsletter' ),
+                array( 'Market Intelligence',  '/industries/ecommerce-dtc/market-intelligence' ),
+            ),
+        ),
+        array(
+            'name' => 'Professional Services',
+            'url'  => '/industries/professional-services',
+            'subs' => array(
+                array( 'Financial Advisors',       '/industries/professional-services/financial-advisors' ),
+                array( 'Boutique Law Firms',       '/industries/professional-services/boutique-law-firms' ),
+                array( 'Management Consultancies', '/industries/professional-services/management-consultancies' ),
+            ),
+            'ucs' => array(
+                array( 'Expert Commentary',     '/industries/professional-services/expert-commentary' ),
+                array( 'Client Education',      '/industries/professional-services/client-education' ),
+                array( 'Referral &amp; Trust',  '/industries/professional-services/referral-trust-content' ),
+                array( 'LinkedIn Authority',    '/industries/professional-services/linkedin-authority' ),
+            ),
+        ),
+    );
+}
+
+// ── Desktop industries mega panel HTML ────────────────────────────────────────
+function bluu_industries_mega_panel() {
+    $html = '<div class="mega-panel mega-panel--industries"><div class="mega-panel__inner"><div class="mega-panel__body">';
+    foreach ( bluu_industries_data() as $ind ) {
+        $html .= '<div class="mega-ind-col">';
+        $html .= '<a href="' . esc_url( home_url( $ind['url'] ) ) . '" class="mega-ind-col__head">' . $ind['name'] . '</a>';
+        if ( ! empty( $ind['subs'] ) ) {
+            $html .= '<div class="mega-ind-section"><span class="mega-ind-section__label">Sub-industries</span><div class="mega-pill-grid">';
+            foreach ( $ind['subs'] as $s ) {
+                $html .= '<a href="' . esc_url( home_url( $s[1] ) ) . '" class="mega-pill">' . $s[0] . '</a>';
+            }
+            $html .= '</div></div>';
+        }
+        if ( ! empty( $ind['ucs'] ) ) {
+            $html .= '<div class="mega-ind-section mega-ind-section--uc"><span class="mega-ind-section__label">Use cases</span><div class="mega-pill-grid">';
+            foreach ( $ind['ucs'] as $u ) {
+                $html .= '<a href="' . esc_url( home_url( $u[1] ) ) . '" class="mega-pill mega-pill--uc">' . $u[0] . '</a>';
+            }
+            $html .= '</div></div>';
+        }
+        $html .= '</div>';
+    }
+    $html .= '</div></div></div>';
+    return $html;
+}
+
+// ── Mobile industries accordion HTML ──────────────────────────────────────────
+function bluu_industries_mobile_accordion() {
+    $html = '<ul class="mobile-mega-list mobile-mega-list--industries">';
+    foreach ( bluu_industries_data() as $ind ) {
+        $html .= '<li class="mobile-ind-group">';
+        $html .= '<div class="mobile-ind-group__header">';
+        $html .= '<a href="' . esc_url( home_url( $ind['url'] ) ) . '" class="mobile-ind-group__name">' . $ind['name'] . '</a>';
+        $html .= '<button class="mobile-ind-toggle" aria-expanded="false">' . bluu_mega_chevron() . '</button>';
+        $html .= '</div>';
+        $html .= '<div class="mobile-ind-group__body">';
+        if ( ! empty( $ind['subs'] ) ) {
+            $html .= '<div class="mobile-ind-section"><span class="mobile-ind-section__label">Sub-industries</span><div class="mobile-pill-grid">';
+            foreach ( $ind['subs'] as $s ) {
+                $html .= '<a href="' . esc_url( home_url( $s[1] ) ) . '" class="mobile-pill">' . $s[0] . '</a>';
+            }
+            $html .= '</div></div>';
+        }
+        if ( ! empty( $ind['ucs'] ) ) {
+            $html .= '<div class="mobile-ind-section mobile-ind-section--uc"><span class="mobile-ind-section__label">Use cases</span><div class="mobile-pill-grid">';
+            foreach ( $ind['ucs'] as $u ) {
+                $html .= '<a href="' . esc_url( home_url( $u[1] ) ) . '" class="mobile-pill mobile-pill--uc">' . $u[0] . '</a>';
+            }
+            $html .= '</div></div>';
+        }
+        $html .= '</div></li>';
+    }
+    $html .= '</ul>';
+    return $html;
+}
 
 // ── Admin Enqueue ──────────────────────────────────────────────────────────────
 function bluu_admin_assets( $hook ) {
