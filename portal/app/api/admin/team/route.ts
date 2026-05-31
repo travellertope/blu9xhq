@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { wpRestFetch } from "@/lib/wp-api";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { z } from "zod";
 import crypto from "crypto";
 
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
 
     // Send invite email via Resend
     const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`;
-    await sendEmail({
+    await sendEmailHtml({
       to: d.email,
       subject: "You've been invited to the BluuHQ team workspace",
       html: `

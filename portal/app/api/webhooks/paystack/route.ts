@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaystackWebhook } from "@/lib/paystack";
 import { listInvoices, updateInvoice } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -77,7 +77,7 @@ async function sendPaystackReceiptEmail(invoiceId: number, reference: string): P
     ).catch(() => null);
     if (!wpUser?.email) return;
 
-    await sendEmail({
+    await sendEmailHtml({
       to: wpUser.email,
       subject: `Payment received — Invoice ${invoice.acf.inv_number}`,
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

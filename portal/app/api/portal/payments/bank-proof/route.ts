@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import { findClientByWpUserId, getInvoice, createFilePost } from "@/lib/wp-api";
 import { uploadToR2 } from "@/lib/r2";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import crypto from "crypto";
 
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     });
 
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
-    await sendEmail({
+    await sendEmailHtml({
       to: adminEmail,
       subject: `Proof of payment uploaded — Invoice ${invoice.acf.inv_number}`,
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

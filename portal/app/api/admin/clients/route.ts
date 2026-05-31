@@ -121,10 +121,9 @@ export async function POST(req: NextRequest) {
     // 4. Send portal invite if requested
     if (d.sendInvite) {
       const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/portal-login`;
-      await sendPortalInvite({
-        to: d.email,
+      await sendPortalInvite(d.email, {
         clientName: d.firstName,
-        magicLink: inviteLink,
+        loginUrl: inviteLink,
       }).catch(console.error);
     }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function POST(
@@ -63,7 +63,7 @@ export async function POST(
         const total = invoice.acf.inv_total;
         const currency = invoice.acf.inv_currency;
 
-        await sendEmail({
+        await sendEmailHtml({
           to: clientEmail,
           subject: `Payment received — Invoice ${invNumber}`,
           html: `

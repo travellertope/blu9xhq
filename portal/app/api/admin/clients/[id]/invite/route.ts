@@ -36,10 +36,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal-login`;
 
-    await sendPortalInvite({
-      to: portalEmail,
+    await sendPortalInvite(portalEmail, {
       clientName: contactName,
-      magicLink: portalUrl,
+      loginUrl: portalUrl,
     });
 
     // Record invite timestamp in WP

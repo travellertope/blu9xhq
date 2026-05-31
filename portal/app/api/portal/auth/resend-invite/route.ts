@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmail } from "@/lib/resend";
+import { sendEmailHtml } from "@/lib/resend";
 import { generateMagicToken, findWPClientByEmail, storeMagicToken } from "@/lib/magicToken";
 
 // Rate limit: 1 invite per email per hour (in-memory, resets on server restart)
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
     const link = `${appUrl}/portal/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
 
-    await sendEmail({
+    await sendEmailHtml({
       to: email,
       subject: "Your BluuHQ portal access link",
       html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">

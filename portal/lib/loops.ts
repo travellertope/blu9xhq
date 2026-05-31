@@ -118,6 +118,11 @@ export async function syncContact(client: {
   activeSubscriptionCount?: number;
   lastLoginAt?: string;
   lastContactedAt?: string;
+  lastInvoiceAmount?: number;
+  lastInvoiceDueDate?: string;
+  lastInvoiceStatus?: string;
+  totalMRR?: number;
+  portalSetupComplete?: boolean;
 }): Promise<void> {
   try {
     const [firstName, ...rest] = client.contactName.trim().split(" ");
@@ -127,13 +132,19 @@ export async function syncContact(client: {
       email:                    client.portalEmail,
       firstName,
       lastName,
+      company:                  client.companyName,
       userId:                   String(client.id),
       userGroup:                "client",
       clientStatus:             client.status,
       healthStatus:             client.healthStatus,
       activeSubscriptionsCount: client.activeSubscriptionCount,
-      portalLastLogin:          client.lastLoginAt,
+      lastInvoiceAmount:        client.lastInvoiceAmount,
+      lastInvoiceDueDate:       client.lastInvoiceDueDate,
+      lastInvoiceStatus:        client.lastInvoiceStatus,
       lastCommunicationDate:    client.lastContactedAt,
+      portalLastLogin:          client.lastLoginAt,
+      totalMRR:                 client.totalMRR,
+      portalSetupComplete:      client.portalSetupComplete,
     });
   } catch (err) {
     console.error("[loops] syncContact failed:", err);
