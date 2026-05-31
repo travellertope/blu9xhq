@@ -1220,7 +1220,8 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-.mobile-mega-list li a {
+/* Generic list styles — scoped to non-industries lists only */
+.mobile-mega-list:not(.mobile-mega-list--industries) li a {
     display: block;
     padding: var(--space-3) var(--space-6);
     color: var(--md-on-surface-variant);
@@ -1231,13 +1232,18 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     transition: color var(--transition-fast), background var(--transition-fast);
 }
 
-.mobile-mega-list li:first-child a {
+.mobile-mega-list:not(.mobile-mega-list--industries) li:first-child a {
     border-top: none;
 }
 
-.mobile-mega-list li a:hover {
+.mobile-mega-list:not(.mobile-mega-list--industries) li a:hover {
     color: var(--md-accent);
     background: var(--md-accent-container);
+}
+
+/* Industries list — override inherited background from .mobile-mega-list */
+.mobile-mega-list--industries {
+    background: transparent;
 }
 
 /* Hide fixed-position mega panel on mobile — accordion handles sub-items */
