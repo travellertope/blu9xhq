@@ -1,73 +1,96 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { listClientSubscriptions, getServicePost } from "@/lib/wp-api";
+import {
+  findClientByWpUserId,
+  listSubscriptionsByClient,
+  getServicePost,
+  listClientFiles,
+} from "@/lib/wp-api";
+
+interface ActionButton {
+  label: string;
+  url: string;
+}
 
 export async function GET(req: NextRequest) {
-  const auth = await requireClientSession(req);
-  if (auth instanceof NextResponse) return auth;
-  const { session } = auth;
+  const result = await requireClientSession(req);
+  if (result instanceof NextResponse) return result;
+  const { session } = result;
 
-  const user = session.user as any;
-  const clientId = parseInt(user.clientId ?? "0", 10);
+  const user = session.user as { wpUserId?: number };
+  const wpUserId = user.wpUserId;
 
-  if (!clientId) {
+  if (!wpUserId) {
     return NextResponse.json({ subscriptions: [] });
   }
 
   try {
-    const { items } = await listClientSubscriptions(clientId);
+    const clientPost = await findClientByWpUserId(wpUserId);
+    if (!clientPost) {
+      return NextResponse.json({ subscriptions: [] });
+    }
 
-    const enriched = await Promise.all(
-      items.map(async (sub) => {
-        let serviceName = "";
-        if (sub.acf.service_id) {
-          try {
-            const svc = await getServicePost(sub.acf.service_id);
-            serviceName = svc.title.rendered;
-          } catch {
-            serviceName = "";
-          }
+    const subsResult = await listSubscriptionsByClient(clientPost.id);
+
+    const subscriptions = await Promise.all(
+      subsResult.items.map(async (sub) => {
+        const [service, filesResult] = await Promise.all([
+          sub.acf.service_id
+            ? getServicePost(sub.acf.service_id).catch(() => null)
+            : Promise.resolve(null),
+          listClientFiles(clientPost.id, {
+            meta_key: "file_subscription_id",
+            meta_value: sub.id,
+          }).catch(() => ({ items: [] })),
+        ]);
+
+        let actionButtons: ActionButton[] = [];
+        try {
+          const labels: string[] = JSON.parse(sub.acf.sub_action_button_labels ?? "[]");
+          const urls: string[] = JSON.parse(sub.acf.sub_action_button_urls ?? "[]");
+          actionButtons = labels.map((label, i) => ({ label, url: urls[i] ?? "#" }));
+        } catch {
+          actionButtons = [];
         }
 
-        let actionButtonLabels: string[] = [];
-        let actionButtonUrls: string[] = [];
-        let credentialLabels: string[] = [];
-
+        let sensitiveFieldLabels: { label: string }[] = [];
         try {
-          actionButtonLabels = JSON.parse(sub.acf.sub_action_button_labels ?? "[]");
-        } catch { actionButtonLabels = []; }
-        try {
-          actionButtonUrls = JSON.parse(sub.acf.sub_action_button_urls ?? "[]");
-        } catch { actionButtonUrls = []; }
-        try {
-          credentialLabels = JSON.parse(sub.acf.sub_sensitive_field_labels ?? "[]");
-        } catch { credentialLabels = []; }
+          const labels: string[] = JSON.parse(sub.acf.sub_sensitive_field_labels ?? "[]");
+          sensitiveFieldLabels = labels.map((label) => ({ label }));
+        } catch {
+          sensitiveFieldLabels = [];
+        }
 
         return {
           id: sub.id,
           title: sub.title.rendered,
-          serviceName,
           status: sub.acf.status,
           amount: sub.acf.amount,
           currency: sub.acf.currency,
           billingCycle: sub.acf.billing_cycle,
-          nextBillingDate: sub.acf.next_billing_date,
-          startDate: sub.acf.start_date,
-          cancellationRequestedAt: sub.acf.sub_cancellation_requested_at,
-          cancellationReason: sub.acf.sub_cancellation_reason,
-          actionButtons: actionButtonLabels.map((label, i) => ({
-            label,
-            url: actionButtonUrls[i] ?? "#",
-          })),
-          credentialLabels,
-          credentialCount: credentialLabels.length,
+          nextBillingDate: sub.acf.next_billing_date ?? null,
+          startDate: sub.acf.start_date ?? null,
+          endDate: sub.acf.end_date ?? null,
+          cancellationReason: sub.acf.sub_cancellation_reason ?? null,
+          cancellationRequestedAt: sub.acf.sub_cancellation_requested_at ?? null,
+          actionButtons,
+          sensitiveFieldLabels,
+          filesCount: filesResult.items.length,
+          service: service
+            ? {
+                id: service.id,
+                name: service.title.rendered,
+                category: service.acf.category ?? null,
+                description: service.acf.description ?? null,
+              }
+            : null,
         };
       })
     );
 
-    return NextResponse.json({ subscriptions: enriched });
+    return NextResponse.json({ subscriptions });
   } catch (err) {
-    console.error("[GET /api/portal/subscriptions]", err);
-    return NextResponse.json({ error: "Failed to load subscriptions" }, { status: 500 });
+    console.error("[portal/subscriptions] Error:", err);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

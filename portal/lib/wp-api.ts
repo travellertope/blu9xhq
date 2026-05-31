@@ -159,7 +159,29 @@ export function listClientPosts(params: {
   return wpRestList<WPClientPost>("/wp/v2/bluu_client", qp);
 }
 
-// ─── bluu_subscription types & helpers ───────────────────────────────────────
+// ─── bluu_service CPT types & helpers ────────────────────────────────────────
+
+export interface WPServiceACF {
+  description?: string;
+  category?: string;
+  deliverables?: string;
+  base_price?: number;
+  currency?: string;
+  billing_cycle?: string;
+  is_active?: boolean;
+}
+
+export interface WPServicePost {
+  id: number;
+  title: { rendered: string };
+  acf: WPServiceACF;
+}
+
+export function getServicePost(postId: number): Promise<WPServicePost> {
+  return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`);
+}
+
+// ─── bluu_subscription CPT types & helpers ───────────────────────────────────
 
 export interface WPSubscriptionACF {
   client_id: number;
@@ -173,15 +195,17 @@ export interface WPSubscriptionACF {
   end_date?: string;
   payment_gateway?: string;
   gateway_subscription_id?: string;
-  notes?: string;
-  // Client portal fields
-  sub_action_button_labels?: string;    // JSON: string[]
-  sub_action_button_urls?: string;      // JSON: string[]
-  sub_sensitive_field_labels?: string;  // JSON: string[]
-  sub_sensitive_field_values?: string;  // JSON: string[] (AES-256 encrypted)
+  notes?: string;                          // internal — NEVER send to portal
+  // Cancellation (set by portal)
   sub_cancellation_requested_at?: string;
   sub_cancellation_reason?: string;
   sub_cancellation_note?: string;
+  // Portal action buttons — JSON: string[]
+  sub_action_button_labels?: string;
+  sub_action_button_urls?: string;
+  // Credentials vault — JSON: string[]; values are AES-256 encrypted — NEVER expose raw to portal
+  sub_sensitive_field_labels?: string;
+  sub_sensitive_field_values?: string;
 }
 
 export interface WPSubscriptionPost {
@@ -191,52 +215,40 @@ export interface WPSubscriptionPost {
   acf: WPSubscriptionACF;
 }
 
-export function listClientSubscriptions(clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
+/** @deprecated Use listSubscriptionsByClient for portal use */
+export function listClientSubscriptions(_clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
+  return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
+    per_page: 100,
+    status: "publish",
+  });
+}
+
+// Find bluu_client post by WP user ID (for portal session → clientId lookup)
+export async function findClientByWpUserId(wpUserId: number): Promise<WPClientPost | null> {
+  const result = await wpRestList<WPClientPost>("/wp/v2/bluu_client", {
+    meta_key: "wp_user_id",
+    meta_value: wpUserId,
+    per_page: 1,
+  });
+  return result.items[0] ?? null;
+}
+
+// List subscriptions by client post ID
+export function listSubscriptionsByClient(clientPostId: number): Promise<WPListResult<WPSubscriptionPost>> {
   return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
     per_page: 100,
     status: "publish",
     meta_key: "client_id",
     meta_value: clientPostId,
-    orderby: "date",
-    order: "desc",
   });
 }
 
-export function getSubscription(postId: number): Promise<WPSubscriptionPost> {
-  return wpRestFetch<WPSubscriptionPost>(`/wp/v2/bluu_subscription/${postId}`);
-}
-
-export function updateSubscription(
-  postId: number,
-  params: { title?: string; acf?: Partial<WPSubscriptionACF> }
-): Promise<WPSubscriptionPost> {
+// Update subscription ACF fields (for cancellation)
+export function updateSubscription(postId: number, params: { acf: Partial<WPSubscriptionACF> }): Promise<WPSubscriptionPost> {
   return wpRestFetch(`/wp/v2/bluu_subscription/${postId}`, {
     method: "POST",
     body: JSON.stringify(params),
   });
-}
-
-// ─── bluu_service types & helpers ─────────────────────────────────────────────
-
-export interface WPServiceACF {
-  description?: string;
-  category: string;
-  base_price: number;
-  currency: string;
-  billing_cycle: string;
-  deliverables?: string;
-  is_active: boolean | string | number;
-}
-
-export interface WPServicePost {
-  id: number;
-  title: { rendered: string };
-  date: string;
-  acf: WPServiceACF;
-}
-
-export function getServicePost(postId: number): Promise<WPServicePost> {
-  return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`);
 }
 
 // ─── bluu_communication types & helpers ──────────────────────────────────────
@@ -544,12 +556,3 @@ export async function listAllClients(): Promise<WPClientPost[]> {
   return result.items;
 }
 
-/** Find a bluu_client post by its linked WP user ID. */
-export async function findClientByWpUserId(wpUserId: number): Promise<WPClientPost | null> {
-  const result = await wpRestList<WPClientPost>("/wp/v2/bluu_client", {
-    meta_key: "wp_user_id",
-    meta_value: wpUserId,
-    per_page: 1,
-  });
-  return result.items[0] ?? null;
-}

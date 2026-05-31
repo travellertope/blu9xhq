@@ -1,119 +1,187 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Eye, EyeOff, Copy, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Eye, EyeOff, Copy, Loader2 } from "lucide-react";
 
-interface Props {
-  label: string;
+interface CredentialRowProps {
   subscriptionId: number;
-  fieldIndex: number;
+  fieldLabel: string;
 }
 
-const CLEAR_AFTER_MS = 30_000;
+const REVEAL_TIMEOUT = 30; // seconds
 
-export default function CredentialRow({ label, subscriptionId, fieldIndex }: Props) {
-  const [value, setValue] = useState<string | null>(null);
-  const [revealing, setRevealing] = useState(false);
-  const [copying, setCopying] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [secondsLeft, setSecondsLeft] = useState(0);
-  const [error, setError] = useState<string | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const countRef = useRef<ReturnType<typeof setInterval> | null>(null);
+export default function CredentialRow({
+  subscriptionId,
+  fieldLabel,
+}: CredentialRowProps) {
+  const [revealedValue, setRevealedValue] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(0);
+  const [revealLoading, setRevealLoading] = useState(false);
+  const [copyLoading, setCopyLoading] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  function clearValue() {
-    setValue(null);
-    setSecondsLeft(0);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (countRef.current) clearInterval(countRef.current);
+  function startCountdown() {
+    setCountdown(REVEAL_TIMEOUT);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!);
+          setRevealedValue(null);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
   }
 
-  useEffect(() => () => clearValue(), []);
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
-  async function fetchValue(action: "reveal" | "copy") {
-    setError(null);
-    if (action === "reveal") setRevealing(true);
-    else setCopying(true);
+  function hideValue() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRevealedValue(null);
+    setCountdown(0);
+  }
 
+  async function handleReveal() {
+    setRevealLoading(true);
     try {
-      const res = await fetch(`/api/portal/credentials/${action}`, {
+      const res = await fetch("/api/portal/credentials/reveal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subscriptionId, fieldIndex }),
+        body: JSON.stringify({ subscriptionId, fieldLabel }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Failed");
+      if (res.status === 429) {
+        toast.error("Please wait before revealing again");
         return;
       }
-
-      if (action === "copy") {
-        await navigator.clipboard.writeText(data.value);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } else {
-        clearValue();
-        setValue(data.value);
-        setSecondsLeft(Math.ceil(CLEAR_AFTER_MS / 1000));
-
-        timerRef.current = setTimeout(clearValue, CLEAR_AFTER_MS);
-        countRef.current = setInterval(() => {
-          setSecondsLeft((s) => {
-            if (s <= 1) {
-              if (countRef.current) clearInterval(countRef.current);
-              return 0;
-            }
-            return s - 1;
-          });
-        }, 1000);
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        toast.error(data.error ?? "Failed to reveal credential");
+        return;
       }
+      const data = (await res.json()) as { value: string };
+      setRevealedValue(data.value);
+      if (timerRef.current) clearInterval(timerRef.current);
+      startCountdown();
     } catch {
-      setError("Network error");
+      toast.error("Network error — please try again");
     } finally {
-      setRevealing(false);
-      setCopying(false);
+      setRevealLoading(false);
+    }
+  }
+
+  async function handleCopy() {
+    setCopyLoading(true);
+    try {
+      const res = await fetch("/api/portal/credentials/copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscriptionId, fieldLabel }),
+      });
+      if (res.status === 429) {
+        toast.error("Please wait before copying again");
+        return;
+      }
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        toast.error(data.error ?? "Failed to copy credential");
+        return;
+      }
+      const data = (await res.json()) as { value: string };
+
+      // Try Clipboard API first, fallback to execCommand
+      try {
+        await navigator.clipboard.writeText(data.value);
+      } catch {
+        const textarea = document.createElement("textarea");
+        textarea.value = data.value;
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textarea);
+      }
+
+      toast.success("Copied to clipboard!");
+    } catch {
+      toast.error("Network error — please try again");
+    } finally {
+      setCopyLoading(false);
     }
   }
 
   return (
-    <div className="flex items-center justify-between py-2 border-b last:border-0 gap-3">
-      <span className="text-sm font-medium text-muted-foreground w-36 shrink-0">{label}</span>
-
-      <div className="flex-1 font-mono text-sm truncate">
-        {value ? (
-          <span>
-            {value}
-            {secondsLeft > 0 && (
-              <span className="ml-2 text-xs text-muted-foreground">({secondsLeft}s)</span>
-            )}
-          </span>
-        ) : (
-          <span className="text-muted-foreground tracking-widest">••••••••</span>
+    <div className="flex items-center justify-between gap-3 py-2 px-3 rounded-md bg-slate-50 border border-slate-100">
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium text-slate-500 mb-0.5">{fieldLabel}</p>
+        <div className="font-mono text-sm text-slate-800 truncate">
+          {revealedValue ? (
+            <span className="break-all">{revealedValue}</span>
+          ) : (
+            <span className="tracking-widest text-slate-400">••••••••••••</span>
+          )}
+        </div>
+        {countdown > 0 && (
+          <p className="text-xs text-amber-600 mt-0.5">
+            Hiding in {countdown}s
+          </p>
         )}
       </div>
 
-      <div className="flex gap-1 shrink-0">
-        <button
-          onClick={() => (value ? clearValue() : fetchValue("reveal"))}
-          disabled={revealing}
-          aria-label={value ? "Hide" : "Reveal"}
-          className="p-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50"
-        >
-          {value ? <EyeOff size={14} /> : <Eye size={14} />}
-        </button>
-        <button
-          onClick={() => fetchValue("copy")}
-          disabled={copying}
-          aria-label="Copy to clipboard"
-          className="p-1.5 rounded hover:bg-muted transition-colors disabled:opacity-50"
-        >
-          {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
-        </button>
-      </div>
+      <div className="flex items-center gap-1.5 shrink-0">
+        {revealedValue ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs text-slate-500"
+            onClick={hideValue}
+          >
+            <EyeOff className="h-3.5 w-3.5 mr-1" />
+            Hide
+          </Button>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={handleReveal}
+            disabled={revealLoading}
+          >
+            {revealLoading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <>
+                <Eye className="h-3.5 w-3.5 mr-1" />
+                Reveal
+              </>
+            )}
+          </Button>
+        )}
 
-      {error && (
-        <span className="text-xs text-destructive ml-2 shrink-0">{error}</span>
-      )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs"
+          onClick={handleCopy}
+          disabled={copyLoading}
+        >
+          {copyLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5 mr-1" />
+              Copy
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
