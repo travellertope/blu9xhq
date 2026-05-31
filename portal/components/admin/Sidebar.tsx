@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { useState } from "react";
 import {
   LayoutDashboard, Users, Package, CalendarDays, FileText,
-  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare,
+  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare, TicketCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/admin/subscriptions", label: "Subscriptions", icon: CalendarDays,    permission: undefined },
   { href: "/admin/invoices",      label: "Invoices",      icon: FileText,        permission: undefined },
   { href: "/admin/files",         label: "Files",         icon: FolderOpen,      permission: undefined },
+  { href: "/admin/tickets",        label: "Tickets",       icon: TicketCheck,     permission: undefined },
   { href: "/admin/follow-ups",    label: "Follow-ups",    icon: CheckSquare,     permission: undefined },
   { href: "/admin/email",         label: "Email",         icon: Mail,            permission: undefined },
   { href: "/admin/services",      label: "Services",      icon: Package,         permission: "create_edit_services" },

@@ -20,6 +20,7 @@ const NAV_LINKS = [
   { href: "/portal/subscriptions", label: "Subscriptions" },
   { href: "/portal/invoices", label: "Invoices" },
   { href: "/portal/files", label: "Files" },
+  { href: "/portal/tickets", label: "Tickets" },
   { href: "/portal/profile", label: "Profile" },
 ];
 
