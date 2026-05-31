@@ -22,14 +22,14 @@ acf_add_local_field_group( array(
             'label'         => 'Badge Text',
             'name'          => 'hero_badge',
             'type'          => 'text',
-            'default_value' => 'Anti-Fragmentation Agency',
+            'default_value' => 'B2B Growth Agency',
         ),
         array(
             'key'           => 'field_hero_headline',
             'label'         => 'Headline',
             'name'          => 'hero_headline',
             'type'          => 'text',
-            'default_value' => 'Stop Managing Vendors. Start Closing Revenue.',
+            'default_value' => "Your content operation.\nRunning. Every month.",
         ),
         array(
             'key'           => 'field_hero_subheadline',
@@ -37,7 +37,7 @@ acf_add_local_field_group( array(
             'name'          => 'hero_subheadline',
             'type'          => 'textarea',
             'rows'          => 3,
-            'default_value' => 'Bluu Interactive replaces your web developer, SEO agency, and sales content team with one synchronized engine that drives traffic, converts leads, and closes deals.',
+            'default_value' => 'Bluu Interactive handles your research, content, publishing, and reporting — so your brand shows up consistently while you focus on running the business.',
         ),
         array(
             'key'           => 'field_hero_cta_primary_text',
@@ -58,14 +58,14 @@ acf_add_local_field_group( array(
             'label'         => 'Secondary CTA Text',
             'name'          => 'hero_cta_secondary_text',
             'type'          => 'text',
-            'default_value' => 'See How It Works',
+            'default_value' => "See What's Included",
         ),
         array(
             'key'           => 'field_hero_cta_secondary_url',
             'label'         => 'Secondary CTA URL',
             'name'          => 'hero_cta_secondary_url',
             'type'          => 'url',
-            'default_value' => '#pillars',
+            'default_value' => '#solution',
         ),
         array(
             'key'        => 'field_hero_stats',
@@ -133,7 +133,7 @@ acf_add_local_field_group( array(
             'label'         => 'Headline',
             'name'          => 'problem_headline',
             'type'          => 'text',
-            'default_value' => 'Fragmentation Is Costing You Revenue',
+            'default_value' => 'Inconsistency is costing you clients.',
         ),
         array(
             'key'           => 'field_problem_body',
@@ -141,7 +141,7 @@ acf_add_local_field_group( array(
             'name'          => 'problem_body',
             'type'          => 'textarea',
             'rows'          => 3,
-            'default_value' => 'Most B2B companies are paying 3–5 vendors who never talk to each other. The result: misaligned messaging, stalled pipeline, and a digital presence that doesn\'t convert.',
+            'default_value' => 'Most growing teams are producing content when they can, not when they should — with no strategy behind it, no one accountable for it, and no clear picture of whether it\'s working.',
         ),
         array(
             'key'        => 'field_problem_items',
@@ -1691,3 +1691,48 @@ add_action( 'acf/init', function () {
         'active'                => true,
     ) );
 } );
+
+// ── HOME: TESTIMONIAL ─────────────────────────────────────────────────────────
+acf_add_local_field_group( array(
+    'key'    => 'group_home_testimonial',
+    'title'  => 'Home: Testimonial Section',
+    'fields' => array(
+        array(
+            'key'           => 'field_testimonial_quote',
+            'label'         => 'Quote',
+            'name'          => 'testimonial_quote',
+            'type'          => 'textarea',
+            'rows'          => 4,
+            'default_value' => 'Bluu took the content operation completely off our plate. Within three months we were publishing consistently and our inbound pipeline started moving again.',
+        ),
+        array(
+            'key'           => 'field_testimonial_name',
+            'label'         => 'Person Name',
+            'name'          => 'testimonial_name',
+            'type'          => 'text',
+            'default_value' => 'Sarah Mitchell',
+        ),
+        array(
+            'key'           => 'field_testimonial_title',
+            'label'         => 'Person Title',
+            'name'          => 'testimonial_title',
+            'type'          => 'text',
+            'default_value' => 'VP of Marketing, Clairen Software',
+        ),
+        array(
+            'key'           => 'field_testimonial_photo',
+            'label'         => 'Person Photo',
+            'name'          => 'testimonial_photo',
+            'type'          => 'image',
+            'return_format' => 'array',
+            'preview_size'  => 'medium',
+            'instructions'  => 'Portrait photo. Recommended: 400×530px (3:4 ratio).',
+        ),
+    ),
+    'location' => array(
+        array( array( 'param' => 'page_type',     'operator' => '==', 'value' => 'front_page' ) ),
+        array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'front-page.php' ) ),
+    ),
+    'menu_order' => 35,
+    'active'     => true,
+) );
