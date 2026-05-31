@@ -87,7 +87,7 @@ $comparison = array(
             array( 'feature' => 'Brand sentiment tracking',                           'starter' => false,           'growth' => 'Monthly',       'premium' => 'Weekly' ),
             array( 'feature' => 'SEO keyword monitoring',                             'starter' => false,           'growth' => true,            'premium' => true ),
             array( 'feature' => 'Market pulse reports (on-demand)',                   'starter' => false,           'growth' => false,           'premium' => true ),
-            array( 'feature' => 'AI discovery monitoring (Perplexity, AI Overviews)', 'starter' => false,           'growth' => true,            'premium' => true ),
+            array( 'feature' => 'AI discovery monitoring (Perplexity, Google AI Overviews)', 'starter' => false,           'growth' => true,            'premium' => true ),
         ),
     ),
     array(
@@ -246,6 +246,7 @@ get_header();
             <li><?php esc_html_e( 'Human review before anything publishes', 'bluu-interactive' ); ?></li>
             <li><?php esc_html_e( 'Brand voice alignment', 'bluu-interactive' ); ?></li>
             <li><?php esc_html_e( 'Monthly performance report', 'bluu-interactive' ); ?></li>
+            <li><?php esc_html_e( 'Email support', 'bluu-interactive' ); ?></li>
             <li><?php esc_html_e( 'Client portal & support ticket system', 'bluu-interactive' ); ?></li>
         </ul>
     </div>
