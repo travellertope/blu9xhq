@@ -6,33 +6,34 @@
  */
 
 // ── ACF fields with defaults ──────────────────────────────────────────────────
-$hero_badge    = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_badge' )    : '' ) ?: 'Transparent Pricing';
-$hero_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_headline' ) : '' ) ?: 'Transparent, All-Inclusive Pricing';
-$hero_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_body' )     : '' ) ?: 'No retainer games. No surprise invoices. One subscription that covers everything your growth engine needs.';
+$hero_badge    = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_badge' )    : '' ) ?: 'Straightforward Retainer Pricing';
+$hero_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_headline' ) : '' ) ?: 'One retainer. No surprises.';
+$hero_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_body' )     : '' ) ?: 'Everything your content operation needs — research, writing, publishing, and reporting — in a single flat monthly number. No project fees. No hourly billing. No scope creep conversations.';
 
-$cta_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_headline' ) : '' ) ?: 'Not Sure Which Plan Fits?';
-$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_body' )     : '' ) ?: 'Let\'s talk. A 15-minute Discovery Call is free and commitment-free. We\'ll tell you exactly which plan — if any — makes sense for your stage.';
+$cta_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_headline' ) : '' ) ?: 'Not sure which retainer fits?';
+$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_body' )     : '' ) ?: 'Book a 15-minute Discovery Call. We\'ll tell you honestly which tier makes sense for your business right now — and if the timing isn\'t right, we\'ll say so. No pitch, no pressure.';
 $cta_url      = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_url' )      : '' ) ?: home_url( '/contact' );
 
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
 $tiers = array(
     array(
-        'tier_badge'  => 'Starter',
+        'tier_badge'  => '',
         'name'        => 'Growth Engine',
         'price'       => '$3,000–$4,500',
         'period'      => '/month',
-        'description' => 'For companies ready to build a serious digital presence.',
-        'note'        => 'Onboarding fee waived for 6-month commitment.',
+        'description' => 'For teams ready to run a consistent content operation for the first time.',
+        'note'        => '90-day initial commitment. Month-to-month after that.',
         'cta_text'    => 'Get Started',
         'cta_url'     => home_url( '/contact' ),
         'cta_style'   => 'outline-blue',
         'featured'    => false,
         'features'    => array(
-            array( 'text' => 'Managed web infrastructure (The Hub)', 'bold' => false ),
-            array( 'text' => 'Up to 2 authority articles per month',  'bold' => false ),
-            array( 'text' => '1 premium case study per quarter',       'bold' => false ),
-            array( 'text' => 'Technical SEO ownership',                'bold' => false ),
-            array( 'text' => 'Monthly strategy sync · all content SEO and AI crawl ready', 'bold' => false ),
+            array( 'text' => 'Competitor and audience intelligence (weekly)', 'bold' => false ),
+            array( 'text' => 'Up to 2 authority articles per month',          'bold' => false ),
+            array( 'text' => '1 case study per quarter',                      'bold' => false ),
+            array( 'text' => 'Published to website, LinkedIn, and newsletter', 'bold' => false ),
+            array( 'text' => 'Monthly performance report',                    'bold' => false ),
+            array( 'text' => 'Monthly strategy call · all content SEO and AI crawl ready', 'bold' => false ),
         ),
     ),
     array(
@@ -40,20 +41,20 @@ $tiers = array(
         'name'        => 'Scale Engine',
         'price'       => '$6,000–$8,500',
         'period'      => '/month',
-        'description' => 'For companies that need to dominate their category.',
-        'note'        => 'Best value for companies with active sales motions.',
+        'description' => 'For teams who need more volume and a closer strategic partnership.',
+        'note'        => 'Best for teams with an active sales motion.',
         'cta_text'    => 'Book a Call',
         'cta_url'     => home_url( '/contact' ),
         'cta_style'   => 'solid-blue',
         'featured'    => true,
         'features'    => array(
-            array( 'text' => 'Everything in Growth Engine',      'bold' => true ),
-            array( 'text' => 'Up to 4 authority articles per month', 'bold' => false ),
-            array( 'text' => '1 premium case study per month',       'bold' => false ),
-            array( 'text' => 'Battle cards & sales one-pagers',      'bold' => false ),
-            array( 'text' => 'VIP Slack support channel',            'bold' => false ),
-            array( 'text' => 'Bi-weekly strategy calls',             'bold' => false ),
-            array( 'text' => 'Conversion rate optimization',         'bold' => false ),
+            array( 'text' => 'Everything in Growth Engine',                   'bold' => true ),
+            array( 'text' => 'Up to 4 authority articles per month',          'bold' => false ),
+            array( 'text' => '1 case study per month',                        'bold' => false ),
+            array( 'text' => 'Founder / principal LinkedIn content programme', 'bold' => false ),
+            array( 'text' => 'Bi-weekly strategy calls',                      'bold' => false ),
+            array( 'text' => 'Dedicated Slack channel',                       'bold' => false ),
+            array( 'text' => 'Priority turnaround on all deliverables',       'bold' => false ),
         ),
     ),
     array(
@@ -61,20 +62,20 @@ $tiers = array(
         'name'        => 'Enterprise Engine',
         'price'       => 'Custom',
         'period'      => '',
-        'description' => 'For companies with complex, multi-market needs.',
-        'note'        => 'Pricing based on scope and commitment length.',
+        'description' => 'For teams with complex needs, multiple markets, or high-volume requirements.',
+        'note'        => 'Scoped to your requirements. Talk to us.',
         'cta_text'    => 'Contact Us',
         'cta_url'     => home_url( '/contact' ),
         'cta_style'   => 'outline-navy',
         'featured'    => false,
         'features'    => array(
-            array( 'text' => 'Everything in Scale Engine',             'bold' => true ),
-            array( 'text' => 'Custom article & asset volume',          'bold' => false ),
-            array( 'text' => 'Multi-market & multi-language support',  'bold' => false ),
-            array( 'text' => 'Dedicated account team',                 'bold' => false ),
-            array( 'text' => 'Executive strategy workshops',           'bold' => false ),
-            array( 'text' => 'Custom reporting dashboard',             'bold' => false ),
-            array( 'text' => 'SLA-backed delivery guarantees',         'bold' => false ),
+            array( 'text' => 'Everything in Scale Engine',            'bold' => true ),
+            array( 'text' => 'Custom article and asset volume',       'bold' => false ),
+            array( 'text' => 'Multi-market and multi-language support', 'bold' => false ),
+            array( 'text' => 'Dedicated account team',                'bold' => false ),
+            array( 'text' => 'Executive strategy workshops',          'bold' => false ),
+            array( 'text' => 'Custom reporting dashboard',            'bold' => false ),
+            array( 'text' => 'SLA-backed delivery guarantees',        'bold' => false ),
         ),
     ),
 );
@@ -87,43 +88,15 @@ $trust_items = array(
     ),
     array(
         'icon' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-        'text' => 'Cancel anytime after 90 days',
+        'text' => 'Month-to-month after 90 days',
     ),
     array(
         'icon' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
         'text' => 'Onboarding in 5 business days',
     ),
     array(
-        'icon' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>',
-        'text' => 'Dedicated account team',
-    ),
-);
-
-// ── FAQ ───────────────────────────────────────────────────────────────────────
-$faq_items = array(
-    array(
-        'question' => 'Do you offer one-off projects?',
-        'answer'   => 'We don\'t. Bluu Interactive is built for ongoing growth partnerships, not isolated deliverables. One-off projects produce outputs that don\'t talk to each other — which is exactly the fragmentation we eliminate. Our retainer model means everything we build compounds over time.',
-    ),
-    array(
-        'question' => 'What industries do you specialize in?',
-        'answer'   => 'We focus on B2B brands in high-consideration verticals: SaaS, professional services, legal tech, healthtech, logistics, and enterprise software. The common thread is a longer sales cycle where content authority and digital infrastructure actually move deals.',
-    ),
-    array(
-        'question' => 'How quickly can we start?',
-        'answer'   => 'Onboarding takes 5 business days from contract signature. We spend that time doing a full audit of your existing infrastructure, content, and sales assets — so day one of production work is informed, not exploratory.',
-    ),
-    array(
-        'question' => 'What\'s included in "Managed Web Infrastructure"?',
-        'answer'   => 'Everything your site needs to perform without you managing it: hosting, uptime monitoring, security patches, plugin/core updates, performance optimization, and conversion-focused landing page builds. You focus on the business. We own the digital foundation.',
-    ),
-    array(
-        'question' => 'Are there contracts or lock-in periods?',
-        'answer'   => 'We ask for a 90-day initial commitment — enough time to see meaningful momentum. After that, it\'s month-to-month. We earn retention by delivering results, not by trapping you in paperwork.',
-    ),
-    array(
-        'question' => 'What does "SME-Verified Content" mean?',
-        'answer'   => 'Every article we publish is reviewed by a subject matter expert in your industry before it goes live. This isn\'t AI-generated filler. It\'s researched, expert-reviewed authority content that ranks for intent-rich queries and converts the traffic it earns.',
+        'icon' => '<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+        'text' => 'All content SEO and AI crawl ready',
     ),
 );
 
