@@ -84,6 +84,11 @@ export function updateWPUser(userId: number, params: Partial<CreateWPUserParams>
   return wpRestFetch(`/wp/v2/users/${userId}`, { method: "POST", body: JSON.stringify(params) });
 }
 
+export async function getUserByEmail(email: string): Promise<WPUser | null> {
+  const result = await wpRestList<WPUser>("/wp/v2/users", { search: email, per_page: 5 });
+  return result.items.find((u) => u.email === email) ?? null;
+}
+
 // ─── bluu_client CPT types & helpers ─────────────────────────────────────────
 
 export interface WPClientACF {
