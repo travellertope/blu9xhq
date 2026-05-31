@@ -93,7 +93,7 @@ $ind_content = array(
         'cta_s_label'       => 'See pricing',
     ),
 
-    'ecommerce' => array(
+    'ecommerce-dtc' => array(
         'hero_tag'          => 'Industry — E-commerce & DTC Brands',
         'hero_headline'     => 'Acquisition costs keep rising. Content is the one channel that compounds.',
         'hero_sub'          => 'DTC brands built entirely on paid media are one algorithm update away from a crisis. Bluu builds the content engine that reduces your dependence on paid, deepens customer loyalty, and gives your brand a consistent voice across every channel — every month.',

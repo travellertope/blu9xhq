@@ -586,6 +586,57 @@
 
 .si-fit__proof-link:hover { opacity: 0.75; }
 
+/* ── Use Case: Deliverables ──────────────────────────────────────────────── */
+.uc-deliverables {
+    padding: var(--space-10) 0;
+    background: var(--md-surface-variant);
+}
+
+.uc-deliverables__header {
+    max-width: 680px;
+    margin: 0 auto var(--space-9);
+    text-align: center;
+}
+
+.uc-deliverables__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.uc-deliverable-card {
+    background: #fff;
+    padding: var(--space-6);
+    border-left: 3px solid var(--md-accent);
+}
+
+.uc-deliverable-card__name {
+    font-size: var(--font-size-base);
+    font-weight: 400;
+    color: var(--md-primary);
+    margin-bottom: var(--space-3);
+}
+
+.uc-deliverable-card__detail {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.7;
+}
+
+.uc-cadence {
+    max-width: 680px;
+    margin: var(--space-7) auto 0;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    font-style: italic;
+    line-height: 1.65;
+    padding: var(--space-4);
+    border: 1px dashed var(--md-outline-variant);
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 960px) {
     .industry-pg-hero__inner { grid-template-columns: 1fr; }
