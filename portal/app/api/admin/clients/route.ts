@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { encrypt } from "@/lib/encryption";
-import { createClientPost, createWPUser, listClientPosts } from "@/lib/wp-api";
+import { createClientPost, createWPUser, updateWPUser, getUserByEmail, findClientByWpUserId, listClientPosts } from "@/lib/wp-api";
 import { sendPortalInvite } from "@/lib/resend";
 import { z } from "zod";
 import crypto from "crypto";
@@ -78,13 +78,28 @@ export async function POST(req: NextRequest) {
   const tempPassword = crypto.randomBytes(16).toString("base64url");
 
   try {
-    // 1. Create WP user with role bluu_client
+    // 1. Create WP user with role bluu_client — or reuse an existing user
     const wpUser = await createWPUser({
       username: d.email,
       email: d.email,
       password: tempPassword,
       name: fullName,
       roles: ["bluu_client"],
+    }).catch(async (err: Error) => {
+      if (!err.message?.includes("existing_user_email")) throw err;
+
+      // Email already registered — look up the existing WP user
+      const existing = await getUserByEmail(d.email);
+      if (!existing) throw err;
+
+      // Check whether they already have a bluu_client profile
+      const existingProfile = await findClientByWpUserId(existing.id).catch(() => null);
+      if (existingProfile) {
+        throw new Error("A client profile already exists for this email address.");
+      }
+
+      // Safe to reuse — ensure they have the bluu_client role
+      return updateWPUser(existing.id, { roles: ["bluu_client"] });
     });
 
     // 2. Create bluu_client CPT post (encrypt PII at rest)
