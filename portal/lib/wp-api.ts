@@ -105,6 +105,7 @@ export interface WPClientACF {
   last_contacted_at?: string;
   portal_invited_at?: string;
   active_subscription_count?: number;
+  health_auto_score?: string;
 }
 
 export interface WPClientPost {
@@ -182,5 +183,62 @@ export function listClientSubscriptions(clientPostId: number): Promise<WPListRes
   return wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
     per_page: 100,
     status: "publish",
+  });
+}
+
+// ─── bluu_communication types & helpers ──────────────────────────────────────
+
+export interface WPCommunicationACF {
+  comm_direction:          string;
+  comm_channel:            string;
+  comm_type:               string;
+  comm_subject:            string;
+  comm_content:            string;
+  comm_occurred_at:        string;
+  comm_client:             number;
+  comm_logged_by:          number;
+  comm_mood?:              string;
+  comm_mood_source?:       string;
+  comm_mood_reasoning?:    string;
+  comm_red_flags?:         string;   // JSON-encoded string[]
+  comm_follow_up_needed?:  boolean | string | number;
+  comm_follow_up_due?:     string;
+  comm_follow_up_completed?: boolean | string | number;
+  comm_email_status?:      string;
+}
+
+export interface WPCommunicationPost {
+  id:     number;
+  date:   string;
+  title:  { rendered: string };
+  acf:    WPCommunicationACF;
+}
+
+export function listClientCommunications(
+  clientPostId: number,
+  params: Record<string, string | number> = {}
+): Promise<WPListResult<WPCommunicationPost>> {
+  return wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
+    per_page: 100,
+    status:   "publish",
+    meta_key:   "comm_client",
+    meta_value: clientPostId,
+    orderby:    "date",
+    order:      "desc",
+    ...params,
+  });
+}
+
+export function listFollowUpCommunications(
+  params: Record<string, string | number> = {}
+): Promise<WPListResult<WPCommunicationPost>> {
+  return wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
+    per_page:   100,
+    status:     "publish",
+    meta_key:   "comm_follow_up_needed",
+    meta_value: "1",
+    orderby:    "date",
+    order:      "desc",
+    ...params,
   });
 }

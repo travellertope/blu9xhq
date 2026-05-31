@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button";
 import { ClientStatusBadge } from "@/components/admin/ClientStatusBadge";
 import { HealthIndicator } from "@/components/admin/HealthIndicator";
 import { ClientProfileActions } from "@/components/admin/ClientProfileActions";
+import { CommunicationTimeline } from "@/components/admin/CommunicationTimeline";
+import { MoodTrendChart } from "@/components/admin/MoodTrendChart";
+import { FollowUpBadge } from "@/components/admin/FollowUpBadge";
 import type { WPClientPost, WPSubscriptionPost } from "@/lib/wp-api";
+import type { BluuCommunication } from "@/types";
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   return { title: `Client #${params.id}` };
@@ -17,15 +21,23 @@ async function fetchClient(id: string): Promise<{
   post: WPClientPost;
   subscriptions: WPSubscriptionPost[];
   subscriptionCount: number;
+  communications: BluuCommunication[];
 } | null> {
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/admin/clients/${id}`,
-      { cache: "no-store" }
-    );
-    if (res.status === 404) return null;
-    if (!res.ok) return null;
-    return res.json();
+    const [clientRes, commRes] = await Promise.all([
+      fetch(`${base}/api/admin/clients/${id}`,                                          { cache: "no-store" }),
+      fetch(`${base}/api/admin/communications?clientId=${id}&perPage=20&page=1`, { cache: "no-store" }),
+    ]);
+    if (clientRes.status === 404) return null;
+    if (!clientRes.ok) return null;
+    const clientData = await clientRes.json();
+    const commData   = commRes.ok ? await commRes.json() : { entries: [] };
+
+    return {
+      ...clientData,
+      communications: commData.entries ?? [],
+    };
   } catch {
     return null;
   }
@@ -52,10 +64,11 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
   const data = await fetchClient(params.id);
   if (!data) notFound();
 
-  const { post, subscriptions, subscriptionCount } = data;
+  const { post, subscriptions, subscriptionCount, communications } = data;
   const acf = post.acf;
-  const clientName = acf.contact_name || post.title.rendered;
+  const clientName  = acf.contact_name || post.title.rendered;
   const createdDate = post.date ? format(parseISO(post.date), "MMM d, yyyy") : "—";
+  const clientIdNum = post.id;
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -67,6 +80,7 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
             <h1 className="text-2xl font-bold text-slate-900">{clientName}</h1>
             <ClientStatusBadge status={acf.status ?? "onboarding"} />
             <HealthIndicator status={acf.health_status} showLabel />
+            <FollowUpBadge clientId={clientIdNum} />
           </div>
           <p className="text-slate-500 text-sm">
             {acf.company_name}
@@ -88,8 +102,11 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
           </p>
         </div>
 
-        {/* Quick actions — client component handles invite, health override */}
-        <ClientProfileActions clientId={params.id} currentHealth={acf.health_status} />
+        <ClientProfileActions
+          clientId={params.id}
+          clientIdNum={clientIdNum}
+          currentHealth={acf.health_status}
+        />
       </div>
 
       <Separator />
@@ -106,9 +123,9 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <InfoRow icon={Mail}     label="Email"   value={acf.contact_email} />
-              <InfoRow icon={Phone}    label="Phone"   value={acf.contact_phone} />
-              <InfoRow icon={Building2} label="Company" value={acf.company_name} />
+              <InfoRow icon={Mail}      label="Email"   value={acf.contact_email} />
+              <InfoRow icon={Phone}     label="Phone"   value={acf.contact_phone} />
+              <InfoRow icon={Building2} label="Company" value={acf.company_name}  />
               {acf.tags && (
                 <div className="flex flex-wrap gap-1.5 pt-1">
                   {acf.tags.split(",").filter(Boolean).map((tag) => (
@@ -137,11 +154,15 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
             </Card>
           )}
 
-          {/* Mood Trend — placeholder for Batch 4 */}
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-slate-400">
-              <p className="text-sm font-medium">Mood Trend Chart</p>
-              <p className="text-xs mt-1">Built in Batch 4 (AI + Communications)</p>
+          {/* Mood Trend Chart */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                Mood Trend (90 days)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <MoodTrendChart communications={communications} />
             </CardContent>
           </Card>
         </div>
@@ -200,11 +221,18 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
             </CardContent>
           </Card>
 
-          {/* ── Communication timeline — placeholder ────────────────────────── */}
-          <Card className="border-dashed">
-            <CardContent className="py-8 text-center text-slate-400">
-              <p className="text-sm font-medium">Communication Timeline</p>
-              <p className="text-xs mt-1">Built in Batch 4 (AI + Communications)</p>
+          {/* ── Communication Timeline ──────────────────────────────────────── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wide">
+                Communication History
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CommunicationTimeline
+                clientId={clientIdNum}
+                initialEntries={communications}
+              />
             </CardContent>
           </Card>
 

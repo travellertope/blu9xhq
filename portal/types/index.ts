@@ -320,3 +320,34 @@ export interface ClientDashboardStats {
   totalDue: number;
   recentFiles: number;
 }
+
+// ─── Communication (Batch 4) ──────────────────────────────────────────────────
+
+export type CommMoodSentiment = "positive" | "neutral" | "mixed" | "concerned" | "at_risk";
+export type CommMoodSource    = "ai_accepted" | "ai_overridden" | "manual";
+export type CommChannel       = "email" | "whatsapp" | "phone" | "meeting" | "sms" | "other" | "system";
+export type CommDirection     = "inbound" | "outbound" | "internal";
+export type CommType          = "manual" | "email" | "system";
+export type CommEmailStatus   = "sent" | "opened" | "replied" | "bounced";
+
+export interface BluuCommunication {
+  id: number;
+  date: string;
+  clientId: number;
+  type: CommType;
+  direction: CommDirection;
+  channel: CommChannel;
+  subject: string;
+  content: string;
+  occurredAt: string;
+  loggedBy: number;
+  loggedByName?: string;
+  mood?: CommMoodSentiment;
+  moodSource?: CommMoodSource;
+  moodReasoning?: string;
+  redFlags?: string[];
+  followUpNeeded?: boolean;
+  followUpDue?: string;
+  followUpCompleted?: boolean;
+  emailStatus?: CommEmailStatus;
+}
