@@ -19,7 +19,9 @@ if ( ! $cat_label && $categories ) {
 $subtitle = function_exists( 'get_field' ) ? get_field( 'bluu_post_subtitle', $post_id ) : '';
 $read_time = function_exists( 'bluu_reading_time' ) ? bluu_reading_time( $post_id ) : '';
 
-$author_name = get_the_author_meta( 'display_name', get_post_field( 'post_author', $post_id ) );
+$author_id   = (int) get_post_field( 'post_author', $post_id );
+$author_name = get_the_author_meta( 'display_name', $author_id );
+$show_author = ! user_can( $author_id, 'administrator' );
 $post_date   = get_the_date( 'j M Y', $post_id );
 
 $thumb_id  = get_post_thumbnail_id( $post_id );
@@ -64,8 +66,10 @@ if ( ! $thumb_alt ) {
         <?php endif; ?>
 
         <div class="bluu-post-card__meta">
-            <span><?php echo esc_html( $author_name ); ?></span>
-            <span class="bluu-post-card__meta-sep" aria-hidden="true">&middot;</span>
+            <?php if ( $show_author ) : ?>
+                <span><?php echo esc_html( $author_name ); ?></span>
+                <span class="bluu-post-card__meta-sep" aria-hidden="true">&middot;</span>
+            <?php endif; ?>
             <span><?php echo esc_html( $post_date ); ?></span>
             <?php if ( $read_time ) : ?>
                 <span class="bluu-post-card__meta-sep" aria-hidden="true">&middot;</span>

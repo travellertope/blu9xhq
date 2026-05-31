@@ -24,6 +24,8 @@ while ( have_posts() ) :
     $read_time = function_exists( 'bluu_reading_time' ) ? bluu_reading_time( $post_id ) : '';
     $author_name = get_the_author();
     $post_date   = get_the_date( 'j M Y' );
+    $author_id   = (int) get_post_field( 'post_author', $post_id );
+    $show_author = ! user_can( $author_id, 'administrator' );
 
     // Thumbnail
     $thumb_id  = get_post_thumbnail_id( $post_id );
@@ -127,8 +129,10 @@ while ( have_posts() ) :
                     <p class="bluu-post-hero__subtitle"><?php echo esc_html( $subtitle ); ?></p>
                 <?php endif; ?>
                 <div class="bluu-post-hero__meta">
-                    <span><?php echo esc_html( $author_name ); ?></span>
-                    <span class="bluu-post-hero__meta-sep" aria-hidden="true">&middot;</span>
+                    <?php if ( $show_author ) : ?>
+                        <span><?php echo esc_html( $author_name ); ?></span>
+                        <span class="bluu-post-hero__meta-sep" aria-hidden="true">&middot;</span>
+                    <?php endif; ?>
                     <span><?php echo esc_html( $post_date ); ?></span>
                     <?php if ( $read_time ) : ?>
                         <span class="bluu-post-hero__meta-sep" aria-hidden="true">&middot;</span>
@@ -181,10 +185,11 @@ while ( have_posts() ) :
                         </div>
                     <?php endif; ?>
 
-                    <!-- Author block -->
+                    <!-- Author block — only for administrators -->
+                    <?php if ( $show_author ) : ?>
                     <div class="bluu-author-block">
                         <div class="bluu-author-block__avatar">
-                            <?php echo get_avatar( get_the_author_meta( 'ID' ), 64, '', esc_attr( $author_name ), array( 'class' => '' ) ); ?>
+                            <?php echo get_avatar( $author_id, 64, '', esc_attr( $author_name ), array( 'class' => '' ) ); ?>
                         </div>
                         <div class="bluu-author-block__info">
                             <p class="bluu-author-block__name"><?php echo esc_html( $author_name ); ?></p>
@@ -193,6 +198,7 @@ while ( have_posts() ) :
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                     <!-- Post CTA -->
                     <div class="bluu-post-cta">
