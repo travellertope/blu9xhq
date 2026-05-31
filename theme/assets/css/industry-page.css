@@ -29,12 +29,19 @@
     letter-spacing: 0.1em;
     text-transform: uppercase;
     margin-bottom: var(--space-5);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .industry-pg-hero__breadcrumb {
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .industry-pg-hero__breadcrumb a {
@@ -49,10 +56,15 @@
 
 .industry-pg-hero__breadcrumb span[aria-hidden] {
     color: rgba(255,255,255,0.35);
+    flex-shrink: 0;
 }
 
 .industry-pg-hero__breadcrumb > span:not([aria-hidden]) {
     color: rgba(255,255,255,0.65);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
 }
 
 .industry-pg-hero__headline {
