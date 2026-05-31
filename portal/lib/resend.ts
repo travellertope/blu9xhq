@@ -1,8 +1,13 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Lazy singleton — only instantiated at request time, never during build
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!);
+  return _resend;
+}
 
-const FROM_ADDRESS = process.env.EMAIL_FROM ?? "BluuHQ <hello@bluuhq.com>";
+const FROM_ADDRESS = () => process.env.EMAIL_FROM ?? "BluuHQ <hello@bluuhq.com>";
 
 export interface SendEmailParams {
   to: string | string[];
@@ -15,8 +20,8 @@ export interface SendEmailParams {
 
 /** Send a transactional email via Resend. */
 export async function sendEmail(params: SendEmailParams): Promise<string> {
-  const { data, error } = await resend.emails.send({
-    from: FROM_ADDRESS,
+  const { data, error } = await getResend().emails.send({
+    from: FROM_ADDRESS(),
     to: Array.isArray(params.to) ? params.to : [params.to],
     subject: params.subject,
     html: params.html,
