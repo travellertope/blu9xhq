@@ -403,7 +403,10 @@ get_header();
 <!-- ── What every client should know ─────────────────────────────────────────── -->
 <section class="pricing-know" aria-label="<?php esc_attr_e( 'What every client should know', 'bluu-interactive' ); ?>">
     <div class="container">
-        <h2 class="pricing-know__headline animate-on-scroll"><?php esc_html_e( 'What every client should know', 'bluu-interactive' ); ?></h2>
+        <div class="pricing-know__header animate-on-scroll">
+            <h2 class="pricing-know__headline"><?php esc_html_e( 'What every client should know', 'bluu-interactive' ); ?></h2>
+            <p class="pricing-know__sub"><?php esc_html_e( 'All plans billed monthly · No lock-in for the first 3 months · Founding client rate available — ask us · SEO and AI crawl standard built into every deliverable', 'bluu-interactive' ); ?></p>
+        </div>
         <div class="pricing-know__grid">
             <?php foreach ( $client_knows as $item ) : ?>
                 <div class="pricing-know-card animate-on-scroll">
@@ -414,13 +417,6 @@ get_header();
         </div>
     </div>
 </section>
-
-<!-- ── Footer note ────────────────────────────────────────────────────────────── -->
-<div class="pricing-footer-note">
-    <div class="container">
-        <p class="pricing-footer-note__text"><?php esc_html_e( 'All plans billed monthly · No lock-in contracts for the first 3 months · Founding client rate available — ask us · SEO and AI crawl standard built into every deliverable', 'bluu-interactive' ); ?></p>
-    </div>
-</div>
 
 <!-- ── Bottom CTA ─────────────────────────────────────────────────────────── -->
 <section class="pricing-cta" aria-label="<?php esc_attr_e( 'Call to action', 'bluu-interactive' ); ?>">
