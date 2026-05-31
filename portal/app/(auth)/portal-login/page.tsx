@@ -2,36 +2,33 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Suspense } from "react";
 
-const passwordSchema = z.object({
+const schema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
 });
-const magicSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-});
-type PasswordFormData = z.infer<typeof passwordSchema>;
-type MagicFormData = z.infer<typeof magicSchema>;
+type FormData = z.infer<typeof schema>;
 
-export default function PortalLoginPage() {
+function PortalLoginForm() {
   const router = useRouter();
-  const [mode, setMode] = useState<"password" | "magic">("password");
-  const [error, setError] = useState<string | null>(null);
-  const [magicSent, setMagicSent] = useState(false);
+  const searchParams = useSearchParams();
+  const callbackError = searchParams.get("error");
+
+  const [error, setError] = useState<string | null>(
+    callbackError ? "Sign-in failed — please try again." : null
+  );
   const [loading, setLoading] = useState(false);
 
-  const passwordForm = useForm<PasswordFormData>({
-    resolver: zodResolver(passwordSchema),
-  });
-  const magicForm = useForm<MagicFormData>({
-    resolver: zodResolver(magicSchema),
+  const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    resolver: zodResolver(schema),
   });
 
-  async function onPasswordSubmit(data: PasswordFormData) {
+  async function onSubmit(data: FormData) {
     setLoading(true);
     setError(null);
     const result = await signIn("client-credentials", {
@@ -47,34 +44,6 @@ export default function PortalLoginPage() {
     router.replace("/portal");
   }
 
-  async function onMagicSubmit(data: MagicFormData) {
-    setLoading(true);
-    setError(null);
-    const result = await signIn("email", {
-      email: data.email,
-      redirect: false,
-    });
-    setLoading(false);
-    if (result?.error) {
-      setError("Could not send magic link. Please try again.");
-      return;
-    }
-    setMagicSent(true);
-  }
-
-  if (magicSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="w-full max-w-sm text-center space-y-3 p-8">
-          <h2 className="text-xl font-semibold">Check your inbox</h2>
-          <p className="text-sm text-muted-foreground">
-            We sent a secure login link to your email. The link expires in 24 hours.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-sm space-y-6 p-8 border rounded-lg shadow-sm">
@@ -83,84 +52,61 @@ export default function PortalLoginPage() {
           <p className="text-sm text-muted-foreground">Sign in to your BluuHQ portal</p>
         </div>
 
-        {/* Mode toggle */}
-        <div className="flex border rounded overflow-hidden text-sm">
-          <button
-            onClick={() => setMode("password")}
-            className={`flex-1 py-2 font-medium transition-colors ${
-              mode === "password" ? "bg-primary text-primary-foreground" : "bg-muted"
-            }`}
-          >
-            Password
-          </button>
-          <button
-            onClick={() => setMode("magic")}
-            className={`flex-1 py-2 font-medium transition-colors ${
-              mode === "magic" ? "bg-primary text-primary-foreground" : "bg-muted"
-            }`}
-          >
-            Magic Link
-          </button>
-        </div>
-
         {error && (
           <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded">
             {error}
           </div>
         )}
 
-        {mode === "password" ? (
-          <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                {...passwordForm.register("email")}
-                type="email"
-                className="w-full border rounded px-3 py-2 text-sm bg-background"
-              />
-              {passwordForm.formState.errors.email && (
-                <p className="text-xs text-destructive">{passwordForm.formState.errors.email.message}</p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Password</label>
-              <input
-                {...passwordForm.register("password")}
-                type="password"
-                className="w-full border rounded px-3 py-2 text-sm bg-background"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-primary-foreground rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
-            >
-              {loading ? "Signing in…" : "Sign in"}
-            </button>
-          </form>
-        ) : (
-          <form onSubmit={magicForm.handleSubmit(onMagicSubmit)} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-sm font-medium">Email</label>
-              <input
-                {...magicForm.register("email")}
-                type="email"
-                className="w-full border rounded px-3 py-2 text-sm bg-background"
-              />
-              {magicForm.formState.errors.email && (
-                <p className="text-xs text-destructive">{magicForm.formState.errors.email.message}</p>
-              )}
-            </div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary text-primary-foreground rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
-            >
-              {loading ? "Sending…" : "Send magic link"}
-            </button>
-          </form>
-        )}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Email</label>
+            <input
+              {...register("email")}
+              type="email"
+              className="w-full border rounded px-3 py-2 text-sm bg-background"
+              autoComplete="email"
+            />
+            {errors.email && (
+              <p className="text-xs text-destructive">{errors.email.message}</p>
+            )}
+          </div>
+          <div className="space-y-1">
+            <label className="text-sm font-medium">Password</label>
+            <input
+              {...register("password")}
+              type="password"
+              className="w-full border rounded px-3 py-2 text-sm bg-background"
+              autoComplete="current-password"
+            />
+            {errors.password && (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-primary text-primary-foreground rounded px-4 py-2 text-sm font-medium disabled:opacity-50"
+          >
+            {loading ? "Signing in…" : "Sign in"}
+          </button>
+        </form>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Team member?{" "}
+          <a href="/admin-login" className="underline">
+            Admin login
+          </a>
+        </p>
       </div>
     </div>
+  );
+}
+
+export default function PortalLoginPage() {
+  return (
+    <Suspense>
+      <PortalLoginForm />
+    </Suspense>
   );
 }
