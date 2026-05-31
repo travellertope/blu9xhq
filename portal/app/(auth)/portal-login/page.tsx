@@ -119,7 +119,7 @@ function PortalLoginForm() {
         </div>
 
         {/* Main login form */}
-        {!showForgotPassword && (
+        {!showForgotPassword && !showResendInvite && (
           <>
             {error && (
               <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded">
