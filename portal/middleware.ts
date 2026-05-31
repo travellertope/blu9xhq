@@ -10,14 +10,14 @@ export async function middleware(req: NextRequest) {
   // ── Admin routes ────────────────────────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
     if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin-login", req.url));
     }
     if ((token as any).role !== "bluu_admin") {
       // Authenticated but wrong role — send to their portal or show forbidden
       if ((token as any).role === "bluu_client") {
         return NextResponse.redirect(new URL("/portal", req.url));
       }
-      return NextResponse.redirect(new URL("/login", req.url));
+      return NextResponse.redirect(new URL("/admin-login", req.url));
     }
   }
 
