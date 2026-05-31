@@ -19,17 +19,18 @@ function VerifyContent() {
       return;
     }
 
-    signIn("client-credentials", {
-      username: email,
-      token,
-      redirect: false,
-    })
-      .then((result) => {
-        if (result?.ok && !result.error) {
-          setStatus("success");
-          router.replace("/portal");
-        } else {
+    signIn("magic-link", { email, token, redirect: false })
+      .then(async (result) => {
+        if (!result?.ok || result.error) {
           setStatus("error");
+          return;
+        }
+        setStatus("success");
+        try {
+          const me = await fetch("/api/portal/me").then((r) => r.json());
+          router.replace(me.setupComplete === false ? "/portal/setup" : "/portal");
+        } catch {
+          router.replace("/portal");
         }
       })
       .catch(() => setStatus("error"));

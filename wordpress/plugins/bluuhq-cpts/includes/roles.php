@@ -150,6 +150,32 @@ function bluuhq_register_user_meta(): void {
         'description' => 'The bluu_client CPT post ID linked to this WP user',
         'default'     => 0,
     ] ) );
+
+    // ── Client portal meta ────────────────────────────────────────────────────
+
+    register_meta( 'user', 'portal_magic_token', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'One-time magic-link token (hex). Cleared after use.',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'portal_magic_token_expires', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'ISO 8601 expiry for portal_magic_token (1 hour TTL).',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'portal_setup_complete', array_merge( $base, [
+        'type'        => 'string',
+        'description' => '"1" once the client has completed the first-login setup wizard.',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'portal_last_login', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'ISO 8601 timestamp of the client\'s last portal login.',
+        'default'     => '',
+    ] ) );
 }
 
 

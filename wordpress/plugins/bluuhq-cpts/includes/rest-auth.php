@@ -35,6 +35,9 @@ function bluuhq_auth_validate( WP_REST_Request $request ): WP_REST_Response|WP_E
         'meta'  => [
             // Client portal link
             'bluu_client_post_id'     => (int) ( get_user_meta( $user->ID, 'bluu_client_post_id', true ) ?: 0 ),
+            // Client portal state
+            'portal_setup_complete'   => get_user_meta( $user->ID, 'portal_setup_complete', true ) ?: '',
+            'portal_last_login'       => get_user_meta( $user->ID, 'portal_last_login', true ) ?: '',
             // CRM team meta
             'bluuhq_role'             => get_user_meta( $user->ID, 'bluuhq_role', true ) ?: null,
             'bluuhq_status'           => get_user_meta( $user->ID, 'bluuhq_status', true ) ?: 'active',

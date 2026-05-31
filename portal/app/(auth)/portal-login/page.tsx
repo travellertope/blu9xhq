@@ -30,6 +30,13 @@ function PortalLoginForm() {
   const [forgotSent, setForgotSent] = useState(false);
   const [forgotError, setForgotError] = useState<string | null>(null);
 
+  // Resend invite state
+  const [showResendInvite, setShowResendInvite] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -72,6 +79,27 @@ function PortalLoginForm() {
       setForgotError("Something went wrong. Please try again.");
     } finally {
       setForgotLoading(false);
+    }
+  }
+
+  async function handleResendInvite() {
+    if (!inviteEmail.includes("@")) {
+      setInviteError("Please enter a valid email address.");
+      return;
+    }
+    setInviteLoading(true);
+    setInviteError(null);
+    try {
+      await fetch("/api/portal/auth/resend-invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail }),
+      });
+      setInviteSent(true);
+    } catch {
+      setInviteError("Something went wrong. Please try again.");
+    } finally {
+      setInviteLoading(false);
     }
   }
 
@@ -133,16 +161,30 @@ function PortalLoginForm() {
               </button>
             </form>
 
-            <button
-              type="button"
-              onClick={() => {
-                setShowForgotPassword(true);
-                setError(null);
-              }}
-              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
-            >
-              Forgot your password?
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForgotPassword(true);
+                  setShowResendInvite(false);
+                  setError(null);
+                }}
+                className="text-sm text-slate-500 hover:text-indigo-600 transition-colors text-left"
+              >
+                Forgot your password?
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowResendInvite(true);
+                  setShowForgotPassword(false);
+                  setError(null);
+                }}
+                className="text-sm text-slate-500 hover:text-indigo-600 transition-colors text-left"
+              >
+                Never set a password? Get a sign-in link instead.
+              </button>
+            </div>
           </>
         )}
 
@@ -189,6 +231,60 @@ function PortalLoginForm() {
                 setForgotSent(false);
                 setForgotError(null);
                 setForgotEmail("");
+              }}
+              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              Back to sign in
+            </button>
+          </div>
+        )}
+
+        {/* Resend invite form */}
+        {showResendInvite && (
+          <div className="space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-base font-semibold text-slate-800">Get a sign-in link</h2>
+              <p className="text-sm text-slate-500">Enter your email and we'll send you a one-click link to sign in.</p>
+            </div>
+            {inviteSent ? (
+              <div className="bg-green-50 border border-green-200 rounded-md px-4 py-3 text-sm text-green-700">
+                If that email is in our system, you'll receive a sign-in link shortly. Check your inbox.
+              </div>
+            ) : (
+              <>
+                {inviteError && (
+                  <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded">
+                    {inviteError}
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <label className="text-sm font-medium text-slate-700">Email</label>
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleResendInvite}
+                  disabled={inviteLoading}
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
+                >
+                  {inviteLoading ? "Sending…" : "Send Sign-in Link"}
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setShowResendInvite(false);
+                setInviteSent(false);
+                setInviteError(null);
+                setInviteEmail("");
               }}
               className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
             >
