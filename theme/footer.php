@@ -87,16 +87,18 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
         <div class="container">
             <div class="site-footer__bottom-inner">
 
-                <!-- Logo -->
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-footer__logo" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                <!-- Logo — div wrapper avoids nesting <a> inside <a> when custom logo is active -->
+                <div class="site-footer__logo">
                     <?php if ( has_custom_logo() ) : ?>
                         <?php the_custom_logo(); ?>
                     <?php else : ?>
-                        <span class="site-footer__logo-text">
-                            <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent"> Interactive</span>
-                        </span>
+                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                            <span class="site-footer__logo-text">
+                                <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent"> Interactive</span>
+                            </span>
+                        </a>
                     <?php endif; ?>
-                </a>
+                </div>
 
                 <!-- Copyright -->
                 <p class="site-footer__copyright">
