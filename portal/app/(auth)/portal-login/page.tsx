@@ -91,13 +91,6 @@ function PortalLoginForm() {
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Team member?{" "}
-          <a href="/admin-login" className="underline">
-            Admin login
-          </a>
-        </p>
       </div>
     </div>
   );
