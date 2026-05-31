@@ -365,7 +365,7 @@ acf_add_local_field_group( array(
             'label'         => 'Hero Headline',
             'name'          => 'pricing_hero_headline',
             'type'          => 'text',
-            'default_value' => 'Transparent, All-Inclusive Pricing',
+            'default_value' => 'One retainer. No surprises.',
         ),
         array(
             'key'           => 'field_pricing_hero_subheadline',
@@ -373,7 +373,7 @@ acf_add_local_field_group( array(
             'name'          => 'pricing_hero_subheadline',
             'type'          => 'textarea',
             'rows'          => 2,
-            'default_value' => 'No retainer games. No surprise invoices. One subscription that covers everything your growth engine needs.',
+            'default_value' => 'Everything your content operation needs — research, writing, publishing, and reporting — in a single flat monthly number. No project fees. No hourly billing. No scope creep conversations.',
         ),
         array(
             'key'        => 'field_pricing_tiers',
