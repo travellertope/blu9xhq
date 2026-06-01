@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { format, parseISO } from "date-fns";
 import { CalendarDays, Mail, Phone, Building2, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,10 +27,11 @@ async function fetchClient(id: string): Promise<{
   communications: BluuCommunication[];
 } | null> {
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const cookie = headers().get("cookie") ?? "";
   try {
     const [clientRes, commRes] = await Promise.all([
-      fetch(`${base}/api/admin/clients/${id}`,                                          { cache: "no-store" }),
-      fetch(`${base}/api/admin/communications?clientId=${id}&perPage=20&page=1`, { cache: "no-store" }),
+      fetch(`${base}/api/admin/clients/${id}`,                                          { cache: "no-store", headers: { cookie } }),
+      fetch(`${base}/api/admin/communications?clientId=${id}&perPage=20&page=1`, { cache: "no-store", headers: { cookie } }),
     ]);
     if (clientRes.status === 404) return null;
     if (!clientRes.ok) return null;

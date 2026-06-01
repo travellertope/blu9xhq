@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ClientTable } from "@/components/admin/ClientTable";
 import type { WPClientPost } from "@/lib/wp-api";
@@ -21,10 +22,10 @@ async function fetchClients(searchParams: SearchParams) {
   if (searchParams.orderby) params.set("orderby", searchParams.orderby);
   if (searchParams.order)   params.set("order",   searchParams.order);
 
-  // Fetch from our own API route (handles WP auth + decryption)
+  const cookie = headers().get("cookie") ?? "";
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/api/admin/clients?${params.toString()}`,
-    { cache: "no-store" }
+    { cache: "no-store", headers: { cookie } }
   );
 
   if (!res.ok) {
