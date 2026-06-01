@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   Mail, Phone, MessageSquare, Video, Monitor, FileText, Settings,
-  AlertTriangle, CheckCircle2, Clock,
+  AlertTriangle, CheckCircle2, Clock, ChevronDown, ChevronUp,
 } from "lucide-react";
 import type { BluuCommunication, CommChannel, CommMoodSentiment } from "@/types";
 import { toast } from "sonner";
@@ -68,108 +68,160 @@ function EntryCard({ entry }: { entry: BluuCommunication }) {
     ? { symbol: "↑", label: "Outbound", cls: "text-indigo-600" }
     : entry.direction === "inbound"
     ? { symbol: "↓", label: "Inbound",  cls: "text-green-600" }
-    : { symbol: "⚙", label: "System",   cls: "text-slate-500" };
+    : { symbol: "⚙", label: "Internal", cls: "text-slate-500" };
 
   const isFollowUpOverdue = entry.followUpNeeded
     && !entry.followUpCompleted
     && entry.followUpDue
     && new Date(entry.followUpDue).getTime() < Date.now();
 
+  const hasDetails = !!(entry.content || entry.moodReasoning || (entry.redFlags && entry.redFlags.length > 0) || entry.followUpNeeded);
+
   return (
-    <div className={`border-l-4 ${borderClass} bg-white rounded-r-lg border border-l-[4px] border-slate-100 p-4 shadow-sm`}>
-      {/* Header row */}
-      <div className="flex items-center gap-2 mb-1.5 text-xs text-slate-500">
-        <ChannelIcon className="h-3.5 w-3.5 shrink-0" />
-        <span className="font-medium">{CHANNEL_LABELS[entry.channel]}</span>
-        <span className={`font-medium ${directionLabel.cls}`}>
-          {directionLabel.symbol} {directionLabel.label}
-        </span>
-        <span className="ml-auto shrink-0">
-          {format(parseISO(entry.occurredAt || entry.date), "d MMM yyyy, HH:mm")}
-        </span>
-      </div>
+    <div className={`border-l-4 ${borderClass} bg-white rounded-r-lg border border-l-[4px] border-slate-100 shadow-sm overflow-hidden`}>
+      {/* Clickable header */}
+      <button
+        type="button"
+        onClick={() => hasDetails && setExpanded(e => !e)}
+        className={`w-full text-left px-4 pt-3 pb-3 ${hasDetails ? "cursor-pointer hover:bg-slate-50" : "cursor-default"} transition-colors`}
+      >
+        <div className="flex items-center gap-2 mb-1.5 text-xs text-slate-500">
+          <ChannelIcon className="h-3.5 w-3.5 shrink-0" />
+          <span className="font-medium">{CHANNEL_LABELS[entry.channel]}</span>
+          <span className={`font-medium ${directionLabel.cls}`}>
+            {directionLabel.symbol} {directionLabel.label}
+          </span>
 
-      {/* Subject */}
-      <p className="font-semibold text-slate-900 text-sm mb-2">{entry.subject}</p>
+          {/* Mood pill — visible collapsed */}
+          {entry.mood && !expanded && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+              {MOOD_EMOJI[entry.mood]} {MOOD_LABEL[entry.mood]}
+            </span>
+          )}
 
-      {/* Content with expand toggle */}
-      {entry.content && (
-        <div className="mb-2">
-          <p className={`text-sm text-slate-600 whitespace-pre-wrap ${expanded ? "" : "line-clamp-3"}`}>
+          {/* Follow-up indicator — visible collapsed */}
+          {entry.followUpNeeded && !entry.followUpCompleted && !expanded && (
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ${
+              isFollowUpOverdue ? "bg-red-100 text-red-700" : "bg-amber-50 text-amber-700"
+            }`}>
+              <Clock className="h-3 w-3" />
+              {isFollowUpOverdue ? "Follow-up overdue" : "Follow-up pending"}
+            </span>
+          )}
+
+          <span className="ml-auto shrink-0 text-slate-400">
+            {format(parseISO(entry.occurredAt || entry.date), "d MMM yyyy, HH:mm")}
+          </span>
+
+          {hasDetails && (
+            <span className="text-slate-400 shrink-0">
+              {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+            </span>
+          )}
+        </div>
+
+        {/* Subject */}
+        <p className="font-semibold text-slate-900 text-sm">
+          {entry.subject || <span className="italic text-slate-400">No subject</span>}
+        </p>
+
+        {/* Content preview when collapsed */}
+        {!expanded && entry.content && (
+          <p className="text-xs text-slate-500 mt-1 line-clamp-2">
             {entry.content}
           </p>
-          {entry.content.length > 200 && (
-            <button
-              onClick={() => setExpanded(e => !e)}
-              className="text-xs text-indigo-600 hover:underline mt-1"
-            >
-              {expanded ? "Show less" : "Show more"}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Mood badge */}
-      {entry.mood && (
-        <div className="mb-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
-            {MOOD_EMOJI[entry.mood]} {MOOD_LABEL[entry.mood]}
-          </span>
-          {entry.moodSource === "ai_accepted" && entry.moodReasoning && (
-            <p className="text-xs italic text-slate-400 mt-1">{entry.moodReasoning}</p>
-          )}
-        </div>
-      )}
-
-      {/* Red flags */}
-      {entry.redFlags && entry.redFlags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {entry.redFlags.map((flag, i) => (
-            <span key={i} className="inline-flex items-center gap-0.5 rounded-full bg-red-50 px-2 py-0.5 text-xs text-red-600">
-              <AlertTriangle className="h-3 w-3" /> {flag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {/* Follow-up badge */}
-      {entry.followUpNeeded && (
-        <div className="mb-2">
-          {entry.followUpCompleted ? (
-            <span className="inline-flex items-center gap-1 text-xs text-slate-400 line-through">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-500 no-underline" />
-              Follow-up completed
-            </span>
-          ) : isFollowUpOverdue ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-700">
-              <Clock className="h-3 w-3" />
-              OVERDUE — due {entry.followUpDue ? format(parseISO(entry.followUpDue), "d MMM") : ""}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-              <Clock className="h-3 w-3" />
-              Follow-up due {entry.followUpDue ? format(parseISO(entry.followUpDue), "d MMM") : ""}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Footer: logged by + email status */}
-      <div className="flex items-center gap-3 mt-2 pt-2 border-t border-slate-50 text-xs text-slate-400">
-        {entry.type === "manual" && entry.loggedBy > 0 && (
-          <span>Logged by user #{entry.loggedBy}</span>
         )}
-        {entry.emailStatus && (
-          <span className={`capitalize px-1.5 py-0.5 rounded text-xs font-medium ${
-            entry.emailStatus === "bounced" ? "bg-red-50 text-red-600" :
-            entry.emailStatus === "replied" ? "bg-green-50 text-green-600" :
-            entry.emailStatus === "opened"  ? "bg-blue-50 text-blue-600" :
-            "bg-slate-100 text-slate-600"
-          }`}>
-            {entry.emailStatus}
-          </span>
-        )}
-      </div>
+      </button>
+
+      {/* Expanded detail panel */}
+      {expanded && (
+        <div className="px-4 pb-4 border-t border-slate-50 space-y-3 pt-3">
+
+          {/* Full content */}
+          {entry.content && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Content</p>
+              <div className="bg-slate-50 rounded-md p-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+                {entry.content}
+              </div>
+            </div>
+          )}
+
+          {/* Mood + reasoning */}
+          {entry.mood && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Sentiment</p>
+              <div className="flex flex-col gap-1">
+                <span className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                  {MOOD_EMOJI[entry.mood]} {MOOD_LABEL[entry.mood]}
+                  {entry.moodSource === "ai_accepted" && (
+                    <span className="text-xs text-slate-400 font-normal">· AI-detected</span>
+                  )}
+                  {entry.moodSource === "ai_overridden" && (
+                    <span className="text-xs text-slate-400 font-normal">· Manually overridden</span>
+                  )}
+                </span>
+                {entry.moodReasoning && (
+                  <p className="text-xs text-slate-500 italic">{entry.moodReasoning}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Red flags */}
+          {entry.redFlags && entry.redFlags.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Red Flags</p>
+              <div className="flex flex-wrap gap-1.5">
+                {entry.redFlags.map((flag, i) => (
+                  <span key={i} className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-1 text-xs text-red-600 font-medium">
+                    <AlertTriangle className="h-3 w-3" /> {flag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Follow-up */}
+          {entry.followUpNeeded && (
+            <div>
+              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Follow-up</p>
+              {entry.followUpCompleted ? (
+                <span className="inline-flex items-center gap-1 text-sm text-green-600">
+                  <CheckCircle2 className="h-4 w-4" /> Completed
+                </span>
+              ) : isFollowUpOverdue ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-1 text-xs font-medium text-red-700">
+                  <Clock className="h-3.5 w-3.5" />
+                  OVERDUE — due {entry.followUpDue ? format(parseISO(entry.followUpDue), "d MMM yyyy") : ""}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                  <Clock className="h-3.5 w-3.5" />
+                  Due {entry.followUpDue ? format(parseISO(entry.followUpDue), "d MMM yyyy") : ""}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Footer meta */}
+          <div className="flex items-center gap-3 pt-1 text-xs text-slate-400 border-t border-slate-50">
+            {entry.type === "manual" && entry.loggedBy > 0 && (
+              <span>Logged by user #{entry.loggedBy}</span>
+            )}
+            {entry.emailStatus && (
+              <span className={`capitalize px-1.5 py-0.5 rounded text-xs font-medium ${
+                entry.emailStatus === "bounced" ? "bg-red-50 text-red-600" :
+                entry.emailStatus === "replied" ? "bg-green-50 text-green-600" :
+                entry.emailStatus === "opened"  ? "bg-blue-50 text-blue-600" :
+                "bg-slate-100 text-slate-600"
+              }`}>
+                {entry.emailStatus}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -192,7 +244,7 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
   const [dateTo,     setDateTo]     = useState("");
   const isFirstLoad = useRef(true);
 
-  const buildUrl = useCallback((p: number, _append?: boolean) => {
+  const buildUrl = useCallback((p: number) => {
     const sp = new URLSearchParams({ clientId: String(clientId), page: String(p), perPage: "20" });
     if (tab !== "all")  sp.set("type", tab);
     if (moodFilter)     sp.set("mood", moodFilter);
@@ -204,7 +256,7 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
   const load = useCallback(async (p: number, append = false) => {
     setLoading(true);
     try {
-      const res  = await fetch(buildUrl(p, append));
+      const res  = await fetch(buildUrl(p));
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to load");
       const newEntries: BluuCommunication[] = data.entries ?? [];
@@ -230,11 +282,10 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
     if (!initialEntries) load(1, false);
   }, []);
 
-  // Exposed method for optimistic prepend (used by LogCommunicationModal via callback)
+  // Optimistic prepend — used by LogCommunicationModal via window callback
   function prependEntry(entry: BluuCommunication) {
     setEntries(prev => [entry, ...prev]);
   }
-  // Attach to window for cross-component communication (simple approach)
   useEffect(() => {
     (window as any)[`__prependComm_${clientId}`] = prependEntry;
     return () => { delete (window as any)[`__prependComm_${clientId}`]; };
@@ -260,7 +311,6 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
     <div>
       {/* Filter bar */}
       <div className="flex flex-wrap gap-3 mb-4">
-        {/* Tab buttons */}
         <div className="flex border rounded-lg overflow-hidden text-sm">
           {tabs.map(t => (
             <button
@@ -275,7 +325,6 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
           ))}
         </div>
 
-        {/* Mood dropdown */}
         <select
           value={moodFilter}
           onChange={e => setMoodFilter(e.target.value)}
@@ -284,7 +333,6 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
           {moods.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
         </select>
 
-        {/* Date range */}
         <input
           type="date"
           value={dateFrom}
@@ -308,7 +356,7 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
         )}
       </div>
 
-      {/* Timeline entries */}
+      {/* Timeline */}
       {loading && entries.length === 0 ? (
         <div className="py-12 text-center text-slate-400 text-sm">Loading…</div>
       ) : entries.length === 0 ? (
@@ -320,14 +368,13 @@ export function CommunicationTimeline({ clientId, initialEntries }: Communicatio
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {entries.map(entry => (
             <EntryCard key={entry.id} entry={entry} />
           ))}
         </div>
       )}
 
-      {/* Load more */}
       {hasMore && (
         <div className="mt-4 text-center">
           <button
