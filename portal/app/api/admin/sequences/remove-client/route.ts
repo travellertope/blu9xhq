@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { removeFromSequence } from "@/lib/loops";
+import { updateEnrollment } from "@/lib/wp-api";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { z } from "zod";
 
 const bodySchema = z.object({
-  clientId:        z.number().int().positive(),
-  sequenceLoopsId: z.string().min(1),
-  clientEmail:     z.string().email(),
+  clientId:     z.number().int().positive(),
+  enrollmentId: z.number().int().positive(),
 });
 
 // ─── POST /api/admin/sequences/remove-client ──────────────────────────────────
@@ -29,13 +28,19 @@ export async function POST(req: NextRequest) {
   const actor = session.user as Record<string, unknown>;
 
   try {
-    await removeFromSequence(d.clientEmail, d.sequenceLoopsId);
+    await updateEnrollment(d.enrollmentId, {
+      acf: {
+        enr_status:      "exited",
+        enr_exited_at:   new Date().toISOString(),
+        enr_exit_reason: "manual",
+      },
+    });
 
     logAuditEvent({
       action:        AUDIT_ACTIONS.CLIENT_REMOVED_FROM_SEQUENCE,
       actorName:     (actor.name as string) ?? "Unknown",
       actorWpUserId: actor.wpUserId as number,
-      detail:        `Removed from sequence ${d.sequenceLoopsId}`,
+      detail:        `Exited enrollment #${d.enrollmentId}`,
       clientId:      d.clientId,
     }).catch(console.error);
 

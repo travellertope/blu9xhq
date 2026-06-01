@@ -8,23 +8,24 @@ import { Loader2 } from "lucide-react";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
 
 interface Enrollment {
-  sequenceId: string;
+  enrollmentId: number;
+  sequenceId:   number;
   sequenceName: string;
-  loopsId: string;
-  enrolledAt: string;
+  currentStep:  number;
+  totalSteps:   number;
+  enrolledAt:   string;
 }
 
 interface WPSequence {
-  id: string;
+  id:    number;
   title: string;
   acf: {
-    seq_loops_id?: string;
     is_active: boolean;
   };
 }
 
 interface ClientSequencesProps {
-  clientId: number;
+  clientId:    number;
   clientEmail: string;
 }
 
@@ -34,7 +35,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
   const [loading, setLoading] = useState(true);
   const [enrolling, setEnrolling] = useState(false);
   const [selectedSequenceId, setSelectedSequenceId] = useState("");
-  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   const loadEnrollments = useCallback(async () => {
     try {
@@ -70,15 +71,14 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
   }, [clientId]);
 
   async function handleRemove(enrollment: Enrollment) {
-    setRemovingId(enrollment.loopsId);
+    setRemovingId(enrollment.enrollmentId);
     try {
       const res = await fetch("/api/admin/sequences/remove-client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientId,
-          sequenceLoopsId: enrollment.loopsId,
-          clientEmail,
+          enrollmentId: enrollment.enrollmentId,
         }),
       });
       const data = await res.json();
@@ -94,11 +94,8 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
 
   async function handleEnrol() {
     if (!selectedSequenceId) return;
-    const seq = sequences.find((s) => s.id === selectedSequenceId);
-    if (!seq?.acf?.seq_loops_id) {
-      toast.error("Selected sequence is not synced to Loops yet");
-      return;
-    }
+    const seq = sequences.find((s) => String(s.id) === selectedSequenceId);
+    if (!seq) return;
     setEnrolling(true);
     try {
       const res = await fetch("/api/admin/sequences/enrol-client", {
@@ -106,7 +103,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientId,
-          sequenceLoopsId: seq.acf.seq_loops_id,
+          sequenceId: seq.id,
           clientEmail,
         }),
       });
@@ -122,11 +119,8 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
     }
   }
 
-  // Sequences not already enrolled
-  const enrolledLoopsIds = new Set(enrollments.map((e) => e.loopsId));
-  const availableSequences = sequences.filter(
-    (s) => s.acf?.seq_loops_id && !enrolledLoopsIds.has(s.acf.seq_loops_id)
-  );
+  const enrolledSequenceIds = new Set(enrollments.map((e) => e.sequenceId));
+  const availableSequences = sequences.filter((s) => !enrolledSequenceIds.has(s.id));
 
   return (
     <div className="space-y-6">
@@ -147,26 +141,34 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
           <div className="space-y-2">
             {enrollments.map((enrollment) => (
               <div
-                key={enrollment.loopsId}
+                key={enrollment.enrollmentId}
                 className="flex items-center justify-between rounded-lg border bg-white px-4 py-3"
               >
                 <div>
                   <p className="text-sm font-medium text-gray-900">
                     {enrollment.sequenceName}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Enrolled:{" "}
-                    {enrollment.enrolledAt
-                      ? format(parseISO(enrollment.enrolledAt), "MMM d, yyyy")
-                      : "—"}
-                  </p>
+                  <div className="flex items-center gap-3 mt-0.5">
+                    <p className="text-xs text-gray-500">
+                      Enrolled:{" "}
+                      {enrollment.enrolledAt
+                        ? format(parseISO(enrollment.enrolledAt), "MMM d, yyyy")
+                        : "—"}
+                    </p>
+                    {enrollment.totalSteps > 0 && (
+                      <p className="text-xs text-indigo-600 font-medium">
+                        Step {Math.min(enrollment.currentStep + 1, enrollment.totalSteps)}{" "}
+                        of {enrollment.totalSteps}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => handleRemove(enrollment)}
-                  disabled={removingId === enrollment.loopsId}
+                  disabled={removingId === enrollment.enrollmentId}
                   className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 transition-colors"
                 >
-                  {removingId === enrollment.loopsId ? (
+                  {removingId === enrollment.enrollmentId ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
                   ) : null}
                   Remove
@@ -200,7 +202,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
               >
                 <option value="">Select a sequence…</option>
                 {availableSequences.map((seq) => (
-                  <option key={seq.id} value={seq.id}>
+                  <option key={seq.id} value={String(seq.id)}>
                     {seq.title}
                   </option>
                 ))}

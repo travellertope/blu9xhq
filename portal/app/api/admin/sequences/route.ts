@@ -15,21 +15,24 @@ function transformSequence(post: WPSequencePost) {
     id:           post.id,
     title:        post.title.rendered,
     trigger:      a.trigger,
+    description:  a.description,
     steps:        (a.steps ?? []).map((s) => ({
       stepNumber:      s.step_number,
       delayDays:       s.delay_days,
+      subject:         s.subject,
+      bodyHtml:        s.body_html,
       emailTemplateId: s.email_template_id,
     })),
     isActive:      isTruthy(a.is_active),
-    loopsId:       a.seq_loops_id,
-    loopsSyncedAt: a.seq_loops_synced_at,
   };
 }
 
 const stepSchema = z.object({
   stepNumber:      z.number().int().positive(),
   delayDays:       z.number().int().min(0),
-  emailTemplateId: z.number().int().positive(),
+  subject:         z.string().optional(),
+  bodyHtml:        z.string().optional(),
+  emailTemplateId: z.number().int().positive().optional(),
 });
 
 const postSchema = z.object({
@@ -88,7 +91,9 @@ export async function POST(req: NextRequest) {
         steps:              d.steps.map((s) => ({
           step_number:       s.stepNumber,
           delay_days:        s.delayDays,
-          email_template_id: s.emailTemplateId,
+          ...(s.subject         !== undefined ? { subject:           s.subject         } : {}),
+          ...(s.bodyHtml        !== undefined ? { body_html:         s.bodyHtml        } : {}),
+          ...(s.emailTemplateId !== undefined ? { email_template_id: s.emailTemplateId } : {}),
         })),
         is_active:          d.isActive ? "1" : "0",
       },

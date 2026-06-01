@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Plus, X, RefreshCw, Eye } from "lucide-react";
+import { Loader2, Plus, X, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -228,13 +228,9 @@ export function SequenceEditorClient({ initialData }: SequenceEditorClientProps)
 
   const [steps, setSteps] = useState<SequenceStep[]>(initSteps);
 
-  // Saving & syncing
+  // Saving
   const [saving, setSaving] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [savedId, setSavedId] = useState<string | undefined>(initialData?.id);
-  const [loopsId, setLoopsId] = useState<string | undefined>(
-    initialData?.acf?.seq_loops_id
-  );
 
   // Preview
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -298,7 +294,7 @@ export function SequenceEditorClient({ initialData }: SequenceEditorClientProps)
     setSaving(true);
     try {
       const payload = {
-        name,
+        title: name,
         description,
         trigger,
         triggerDelayDays: trigger !== "manual" ? triggerDelayDays : 0,
@@ -338,27 +334,6 @@ export function SequenceEditorClient({ initialData }: SequenceEditorClientProps)
       toast.error(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
-    }
-  }
-
-  // ── Sync to Loops ──
-
-  async function handleSync() {
-    if (!savedId) {
-      toast.error("Save the sequence first before syncing");
-      return;
-    }
-    setSyncing(true);
-    try {
-      const res = await fetch(`/api/admin/sequences/${savedId}/sync`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Sync failed");
-      setLoopsId(data.loopsId ?? data.seq_loops_id ?? loopsId);
-      toast.success("Synced to Loops successfully");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Sync failed");
-    } finally {
-      setSyncing(false);
     }
   }
 
@@ -497,31 +472,6 @@ export function SequenceEditorClient({ initialData }: SequenceEditorClientProps)
                 />
               </div>
 
-              {/* Loops sync */}
-              <div className="border-t pt-4 space-y-2">
-                <Label className="text-xs text-gray-500 uppercase tracking-wide">Loops Sync</Label>
-                <p className="text-sm text-gray-600">
-                  {loopsId ? (
-                    <span className="text-green-700 font-medium">Synced: {loopsId}</span>
-                  ) : (
-                    <span className="text-amber-600">Not synced yet</span>
-                  )}
-                </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleSync}
-                  disabled={!savedId || syncing}
-                  className="w-full"
-                >
-                  {syncing ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                  ) : (
-                    <RefreshCw className="h-4 w-4 mr-1.5" />
-                  )}
-                  {savedId ? "Sync to Loops" : "Save first to sync"}
-                </Button>
-              </div>
 
             </CardContent>
           </Card>

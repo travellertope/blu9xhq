@@ -113,7 +113,7 @@ function FileCard({ file, onDownload, onDelete }: FileCardProps) {
 
       <div className="flex flex-wrap gap-1.5">
         <span className={`inline-flex text-xs px-2 py-0.5 rounded-full font-medium ${catStyle}`}>
-          {file.category.replace("_", " ")}
+          {file.category?.replace(/_/g, " ") ?? "—"}
         </span>
         <span
           className={`inline-flex text-xs px-2 py-0.5 rounded-full font-medium ${

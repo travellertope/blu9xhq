@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { wpRestList, listSequences, type WPCommunicationPost } from "@/lib/wp-api";
+import { listEnrollments, getSequence } from "@/lib/wp-api";
 
 // ─── GET /api/admin/sequences/client-enrollments ─────────────────────────────
 
@@ -19,77 +19,33 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Fetch audit log comms for this client where channel=system
-    const { items } = await wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
+    const { items } = await listEnrollments({
       per_page:   100,
-      status:     "publish",
-      meta_key:   "comm_client",
+      meta_key:   "enr_client_id",
       meta_value: clientId,
-      orderby:    "date",
-      order:      "asc",
     });
 
-    // Filter for system-channel posts that record enrol/remove actions
-    const relevant = items.filter((p) => {
-      const subj: string = p.acf?.comm_subject ?? "";
-      return (
-        p.acf?.comm_channel === "system" &&
-        (subj.includes("client_enrolled_in_sequence") ||
-          subj.includes("client_removed_from_sequence"))
-      );
-    });
+    const active = items.filter((e) => e.acf.enr_status === "active");
 
-    // Build enrollment state per loopsId: last action wins
-    // Subject format from logAuditEvent: "<action> by <actorName>"
-    // Detail format: "Enrolled in sequence <loopsId>" / "Removed from sequence <loopsId>"
-    type EnrollEntry = {
-      loopsId: string;
-      action: "enrolled" | "removed";
-      occurredAt: string;
-      postDate: string;
-    };
-
-    const entries: EnrollEntry[] = relevant.map((p) => {
-      const detail: string = p.acf?.comm_content ?? "";
-      const subject: string = p.acf?.comm_subject ?? "";
-      const isEnrol = subject.includes("client_enrolled_in_sequence");
-      // Extract loopsId from detail: "Enrolled in sequence <loopsId>" or "Removed from sequence <loopsId>"
-      const match = detail.match(/sequence\s+(\S+)$/i);
-      const loopsId = match ? match[1] : "";
-      return {
-        loopsId,
-        action: isEnrol ? "enrolled" : "removed",
-        occurredAt: p.acf?.comm_occurred_at ?? p.date,
-        postDate: p.date,
-      };
-    });
-
-    // Build last-action map per loopsId
-    const stateMap = new Map<string, EnrollEntry>();
-    for (const e of entries) {
-      if (!e.loopsId) continue;
-      stateMap.set(e.loopsId, e);
-    }
-
-    // Fetch all sequences from WP to resolve names
-    const { items: allSequences } = await listSequences();
-    const sequenceByLoopsId = new Map(
-      allSequences
-        .filter((s) => s.acf.seq_loops_id)
-        .map((s) => [s.acf.seq_loops_id!, s])
-    );
-
-    const enrollments = Array.from(stateMap.entries())
-      .filter(([, e]) => e.action === "enrolled")
-      .map(([loopsId, e]) => {
-        const seq = sequenceByLoopsId.get(loopsId);
+    const enrollments = await Promise.all(
+      active.map(async (e) => {
+        let sequenceName = `Sequence #${e.acf.enr_sequence_id}`;
+        let totalSteps = 0;
+        try {
+          const seq = await getSequence(e.acf.enr_sequence_id);
+          sequenceName = seq.title.rendered;
+          totalSteps = seq.acf.steps?.length ?? 0;
+        } catch { /* sequence may have been deleted */ }
         return {
-          sequenceId:   seq?.id ?? null,
-          sequenceName: seq?.title.rendered ?? loopsId,
-          loopsId,
-          enrolledAt:   e.occurredAt,
+          enrollmentId: e.id,
+          sequenceId:   e.acf.enr_sequence_id,
+          sequenceName,
+          currentStep:  e.acf.enr_current_step,
+          totalSteps,
+          enrolledAt:   e.acf.enr_enrolled_at,
         };
-      });
+      })
+    );
 
     return NextResponse.json({ enrollments });
   } catch (err: unknown) {
