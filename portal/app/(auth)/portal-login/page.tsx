@@ -69,14 +69,18 @@ function PortalLoginForm() {
     setForgotLoading(true);
     setForgotError(null);
     try {
-      await fetch("/api/portal/auth/forgot-password", {
+      const res = await fetch("/api/portal/auth/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? "Something went wrong");
+      }
       setForgotSent(true);
-    } catch {
-      setForgotError("Something went wrong. Please try again.");
+    } catch (err) {
+      setForgotError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setForgotLoading(false);
     }
@@ -90,14 +94,18 @@ function PortalLoginForm() {
     setInviteLoading(true);
     setInviteError(null);
     try {
-      await fetch("/api/portal/auth/resend-invite", {
+      const res = await fetch("/api/portal/auth/resend-invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: inviteEmail }),
       });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error((body as { error?: string }).error ?? "Something went wrong");
+      }
       setInviteSent(true);
-    } catch {
-      setInviteError("Something went wrong. Please try again.");
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setInviteLoading(false);
     }

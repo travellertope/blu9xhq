@@ -63,7 +63,7 @@ export default function NewTicketPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit ticket");
 
-      toast.success(`Ticket ${data.ticketNumber} submitted — we'll be in touch shortly`);
+      toast.success(data.ticketNumber ? `Ticket ${data.ticketNumber} submitted — we'll be in touch shortly` : "Ticket submitted — we'll be in touch shortly");
       router.push(`/portal/tickets/${data.id}`);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit ticket");

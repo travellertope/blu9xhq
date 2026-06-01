@@ -168,7 +168,7 @@ const TEMPLATES = [
   {
     title: "Monthly Check-in",
     acf: {
-      type: "check_in",
+      type: "general",
       subject: "Quick check-in from BluuHQ",
       body_html: `
 <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1e293b">
@@ -215,26 +215,33 @@ async function main() {
     (existing as Array<{ title: { rendered: string } }>).map((t) => t.title.rendered)
   );
 
+  const existingMap = new Map(
+    (existing as Array<{ id: number; title: { rendered: string } }>).map((t) => [t.title.rendered, t.id])
+  );
+
   let created = 0;
-  let skipped = 0;
+  let updated = 0;
 
   for (const template of TEMPLATES) {
-    if (existingTitles.has(template.title)) {
-      console.log(`  ⟳  Skipping "${template.title}" (already exists)`);
-      skipped++;
-      continue;
+    const existingId = existingMap.get(template.title);
+    if (existingId) {
+      await wpFetch(`/wp/v2/bluu_email_template/${existingId}`, {
+        method: "POST",
+        body: JSON.stringify({ status: "publish", acf: template.acf }),
+      });
+      console.log(`  ↻  Updated  "${template.title}"`);
+      updated++;
+    } else {
+      await wpFetch("/wp/v2/bluu_email_template", {
+        method: "POST",
+        body: JSON.stringify({ title: template.title, status: "publish", acf: template.acf }),
+      });
+      console.log(`  ✓  Created  "${template.title}"`);
+      created++;
     }
-
-    await wpFetch("/wp/v2/bluu_email_template", {
-      method: "POST",
-      body: JSON.stringify({ title: template.title, status: "publish", acf: template.acf }),
-    });
-
-    console.log(`  ✓  Created "${template.title}"`);
-    created++;
   }
 
-  console.log(`\nDone! Created: ${created}, Skipped: ${skipped}\n`);
+  console.log(`\nDone! Created: ${created}, Updated: ${updated}\n`);
 }
 
 main().catch((err) => {

@@ -324,13 +324,20 @@ function SubscriptionCard({
 export default function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<SubscriptionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"active" | "all">("active");
 
   useEffect(() => {
     fetch("/api/portal/subscriptions")
-      .then((r) => r.json() as Promise<SubscriptionsData>)
+      .then(async (r) => {
+        if (!r.ok) throw new Error(`Failed to load subscriptions (${r.status})`);
+        return r.json() as Promise<SubscriptionsData>;
+      })
       .then((d) => setSubscriptions(d.subscriptions ?? []))
-      .catch((err) => console.error("[subscriptions] fetch error:", err))
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : "Failed to load subscriptions";
+        setError(msg);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -381,7 +388,11 @@ export default function SubscriptionsPage() {
       </div>
 
       {/* Content */}
-      {loading ? (
+      {error ? (
+        <div className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      ) : loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div
