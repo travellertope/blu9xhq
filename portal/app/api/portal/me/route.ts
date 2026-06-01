@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, listSubscriptionsByClient, listInvoices, wpRestFetch } from "@/lib/wp-api";
+import {resolveClientPost, listSubscriptionsByClient, listInvoices, wpRestFetch} from "@/lib/wp-api";
 import type { WPUser } from "@/lib/wp-api";
 
 export async function GET(req: NextRequest) {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
   try {
     let clientPostId = sessionClientId;
     if (!clientPostId) {
-      const found = await findClientByWpUserId(wpUserId).catch(() => null);
+      const found = await resolveClientPost(sessionClientId, wpUserId).catch(() => null);
       if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
       clientPostId = found.id;
     }

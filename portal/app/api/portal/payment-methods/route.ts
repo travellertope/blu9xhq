@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { wpRestFetch, findClientByWpUserId, listSubscriptionsByClient } from "@/lib/wp-api";
+import {wpRestFetch, resolveClientPost, listSubscriptionsByClient} from "@/lib/wp-api";
 import { listPaymentMethods, createStripeCustomer } from "@/lib/stripe";
 import { listPaystackCards } from "@/lib/paystack";
 import type { WPUser } from "@/lib/wp-api";
@@ -31,13 +31,14 @@ export async function GET(req: NextRequest) {
     wpUserId?: number;
     email?: string | null;
     name?: string | null;
-    clientId?: string;
+    clientId?: number | string;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const subs = await listSubscriptionsByClient(clientPost.id);

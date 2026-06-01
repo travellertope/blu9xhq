@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, listInvoices, getSubscription } from "@/lib/wp-api";
+import {resolveClientPost, listInvoices, getSubscription} from "@/lib/wp-api";
 
 export async function GET(req: NextRequest) {
   const auth = await requireClientSession(req);
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
   try {
     let clientPostId = sessionClientId;
     if (!clientPostId) {
-      const found = await findClientByWpUserId(wpUserId!).catch(() => null);
+      const found = await resolveClientPost(sessionClientId, wpUserId).catch(() => null);
       if (!found) return NextResponse.json({ invoices: [] });
       clientPostId = found.id;
     }

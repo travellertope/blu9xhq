@@ -75,18 +75,23 @@ export async function POST(req: NextRequest) {
       to: d.email,
       subject: "You've been invited to the BluuHQ team workspace",
       html: `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-          <h2>Welcome to BluuHQ, ${d.firstName}!</h2>
-          <p>You've been added to the BluuHQ CRM as <strong>${d.role.replace("_", " ")}</strong>.</p>
-          <p>Use the credentials below to sign in for the first time, then update your password in your profile.</p>
-          <table style="width:100%;border-collapse:collapse;margin:16px 0">
-            <tr><td style="padding:8px 0;color:#64748b">Email</td><td style="font-family:monospace">${d.email}</td></tr>
-            <tr><td style="padding:8px 0;color:#64748b">Temporary Password</td><td style="font-family:monospace">${tempPassword}</td></tr>
-          </table>
-          <a href="${loginUrl}" style="background:#1875F2;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
-            Sign in to BluuHQ
-          </a>
-          <p style="color:#94a3b8;font-size:12px;margin-top:24px">Please change your password after signing in.</p>
+        <div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#fff">
+          <div style="padding:20px 32px;border-bottom:4px solid #1875F2">
+            <img src="https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png" alt="BluuHQ" height="32" style="display:block">
+          </div>
+          <div style="padding:32px">
+            <h2 style="color:#1e293b;margin:0 0 20px">Welcome to BluuHQ, ${d.firstName}!</h2>
+            <p>You've been added to the BluuHQ CRM as <strong>${d.role.replace("_", " ")}</strong>.</p>
+            <p>Use the credentials below to sign in for the first time, then update your password in your profile.</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0">
+              <tr><td style="padding:8px 0;color:#64748b">Email</td><td style="font-family:monospace">${d.email}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b">Temporary Password</td><td style="font-family:monospace">${tempPassword}</td></tr>
+            </table>
+            <a href="${loginUrl}" style="background:#1875F2;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
+              Sign in to BluuHQ
+            </a>
+            <p style="color:#94a3b8;font-size:12px;margin-top:24px">Please change your password after signing in.</p>
+          </div>
         </div>
       `,
       tags: [{ name: "type", value: "team_invite" }],

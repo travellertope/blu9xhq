@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, wpRestFetch } from "@/lib/wp-api";
+import {resolveClientPost, wpRestFetch} from "@/lib/wp-api";
 import { r2SignedUrl } from "@/lib/r2";
 import type { WPFilePost } from "@/lib/wp-api";
 
@@ -12,15 +12,16 @@ export async function GET(
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   const fileId = parseInt(params.id, 10);
   if (!fileId) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const file = await wpRestFetch<WPFilePost>("/wp/v2/bluu_file/" + fileId);

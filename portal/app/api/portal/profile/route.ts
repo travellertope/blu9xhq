@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { wpRestFetch, findClientByWpUserId } from "@/lib/wp-api";
+import {wpRestFetch, resolveClientPost} from "@/lib/wp-api";
 import { syncContact } from "@/lib/loops";
 import type { WPUser } from "@/lib/wp-api";
 
@@ -9,14 +9,15 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number; email?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; email?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
     const [wpUser, clientPost] = await Promise.all([
       wpRestFetch<WPUser>("/wp/v2/users/" + wpUserId),
-      findClientByWpUserId(wpUserId),
+      resolveClientPost(sessionClientId, wpUserId),
     ]);
 
     const meta = wpUser.meta as Record<string, unknown>;
@@ -53,8 +54,9 @@ export async function PATCH(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number; email?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; email?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   let body: { firstName?: string; lastName?: string; phone?: string; billingAddress?: Record<string, string> };
@@ -86,7 +88,7 @@ export async function PATCH(req: NextRequest) {
       body: JSON.stringify(payload),
     });
 
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (clientPost) {
       void syncContact({
         id: clientPost.id,

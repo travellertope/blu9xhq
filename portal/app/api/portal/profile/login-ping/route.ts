@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, wpRestFetch } from "@/lib/wp-api";
+import {resolveClientPost, wpRestFetch} from "@/lib/wp-api";
 import { syncContact } from "@/lib/loops";
 
 export async function PATCH(req: NextRequest) {
@@ -10,9 +10,11 @@ export async function PATCH(req: NextRequest) {
 
   const user = session.user as {
     wpUserId?: number;
+    clientId?: number | string;
     name?: string | null;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
 
   if (!wpUserId) {
     return NextResponse.json({ ok: true });
@@ -26,7 +28,7 @@ export async function PATCH(req: NextRequest) {
       method: "POST",
       body: JSON.stringify({ meta: { portal_last_login: now } }),
     }).catch((err) => console.error("[login-ping] updateWPUser failed:", err)),
-    findClientByWpUserId(wpUserId)
+    resolveClientPost(sessionClientId, wpUserId)
       .then((clientPost) => {
         if (!clientPost) return;
         return syncContact({

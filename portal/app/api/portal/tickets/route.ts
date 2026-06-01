@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import {
-  findClientByWpUserId,
-  listTickets,
+  resolveClientPost, listTickets,
   createTicket,
   createTicketStatusLog,
 } from "@/lib/wp-api";
@@ -21,12 +20,13 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ tickets: [] });
 
     const { searchParams } = new URL(req.url);
@@ -60,8 +60,9 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number; email?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; email?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   let body: {
@@ -92,7 +93,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const ticketNumber = await generateTicketNumber();

@@ -179,3 +179,26 @@ function bluuhq_register_post_meta_keys(): void {
         register_post_meta( 'bluu_communication', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
     }
 }
+
+// ─── Enable meta_key / meta_value filtering via REST API ─────────────────────
+// By default WP REST API does not pass meta_key/meta_value to WP_Query.
+// These filters wire them through so ?meta_key=X&meta_value=Y works.
+
+foreach ( [
+    'bluu_client',
+    'bluu_subscription',
+    'bluu_invoice',
+    'bluu_file',
+    'bluu_communication',
+] as $_bluuhq_cpt ) {
+    add_filter( "rest_{$_bluuhq_cpt}_query", function ( array $args, WP_REST_Request $request ): array {
+        $meta_key   = $request->get_param( 'meta_key' );
+        $meta_value = $request->get_param( 'meta_value' );
+        if ( $meta_key !== null && $meta_value !== null ) {
+            $args['meta_key']     = sanitize_key( $meta_key );
+            $args['meta_value']   = $meta_value;
+            $args['meta_compare'] = '=';
+        }
+        return $args;
+    }, 10, 2 );
+}

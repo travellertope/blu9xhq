@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  findClientByWpUserId,
-  updateSubscription,
-  wpRestFetch,
-  getServicePost,
-} from "@/lib/wp-api";
+import {resolveClientPost, updateSubscription, wpRestFetch, getServicePost} from "@/lib/wp-api";
 import type { WPSubscriptionPost } from "@/lib/wp-api";
 import { sendCancellationRequested } from "@/lib/resend";
 import { logAuditEvent } from "@/lib/auditLog";
@@ -20,12 +15,14 @@ export async function PATCH(
 
   const user = session.user as {
     wpUserId?: number;
+    clientId?: number | string;
     name?: string | null;
     email?: string | null;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
 
-  if (!wpUserId) {
+  if (!wpUserId && !sessionClientId) {
     return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
   }
 
@@ -52,10 +49,14 @@ export async function PATCH(
   }
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
-    if (!clientPost) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    let clientPostId: number | undefined = sessionClientId;
+    if (!clientPostId) {
+      const found = await resolveClientPost(sessionClientId, wpUserId).catch(() => null);
+      if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+      clientPostId = found.id;
     }
+    if (!clientPostId) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    const clientPost = { id: clientPostId as number };
 
     // Fetch the subscription and verify ownership
     const sub = await wpRestFetch<WPSubscriptionPost>(
@@ -79,13 +80,15 @@ export async function PATCH(
     });
 
     // Log audit event (fire and forget)
-    logAuditEvent({
-      action: "subscription_cancellation_requested",
-      actorName: user.name ?? "Client",
-      actorWpUserId: wpUserId,
-      detail: `Reason: ${reason}${typeof note === "string" && note ? ` | Note: ${note}` : ""}`,
-      clientId: clientPost.id,
-    }).catch((err) => console.error("[cancel] auditLog failed:", err));
+    if (wpUserId) {
+      logAuditEvent({
+        action: "subscription_cancellation_requested",
+        actorName: user.name ?? "Client",
+        actorWpUserId: wpUserId,
+        detail: `Reason: ${reason}${typeof note === "string" && note ? ` | Note: ${note}` : ""}`,
+        clientId: clientPost.id,
+      }).catch((err) => console.error("[cancel] auditLog failed:", err));
+    }
 
     // Create communication entry (fire and forget)
     wpRestFetch("/wp/v2/bluu_communication", {
@@ -108,7 +111,7 @@ export async function PATCH(
 
     // Send admin email (fire and forget) — fetch service name for a useful subject line
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
-    const clientName = clientPost.acf.contact_name || user.name || "Client";
+    const clientName = user.name || "Client";
     const appUrl     = process.env.NEXT_PUBLIC_APP_URL ?? "";
     getServicePost(sub.acf.service_id)
       .then((svc) => svc.title.rendered.replace(/<[^>]+>/g, ""))

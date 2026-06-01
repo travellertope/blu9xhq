@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, wpRestFetch } from "@/lib/wp-api";
+import {resolveClientPost, wpRestFetch} from "@/lib/wp-api";
 import type { WPSubscriptionPost } from "@/lib/wp-api";
 import { decrypt } from "@/lib/encryption";
 import { logAuditEvent } from "@/lib/auditLog";
@@ -26,8 +26,9 @@ export async function POST(req: NextRequest) {
   if (result instanceof NextResponse) return result;
   const { session } = result;
 
-  const user = session.user as { wpUserId?: number; name?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; name?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
 
   if (!wpUserId) {
     return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }

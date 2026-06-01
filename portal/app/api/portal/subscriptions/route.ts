@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  findClientByWpUserId,
-  listSubscriptionsByClient,
-  getServicePost,
-  listClientFiles,
-} from "@/lib/wp-api";
+import {resolveClientPost, listSubscriptionsByClient, getServicePost, listClientFiles} from "@/lib/wp-api";
 
 interface ActionButton {
   label: string;
@@ -29,8 +24,8 @@ export async function GET(req: NextRequest) {
     // Prefer clientId already in the JWT — avoids a WP meta query
     let clientPostId = sessionClientId;
     if (!clientPostId) {
-      const clientPost = await findClientByWpUserId(wpUserId!).catch((err) => {
-        console.error("[portal/subscriptions] findClientByWpUserId failed:", err);
+      const clientPost = await resolveClientPost(sessionClientId, wpUserId).catch((err) => {
+        console.error("[portal/subscriptions] resolveClientPost failed:", err);
         return null;
       });
       if (!clientPost) {

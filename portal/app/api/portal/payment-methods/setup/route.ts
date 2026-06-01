@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { wpRestFetch, findClientByWpUserId } from "@/lib/wp-api";
+import {wpRestFetch, resolveClientPost} from "@/lib/wp-api";
 import { createSetupIntent, listPaymentMethods, createStripeCustomer } from "@/lib/stripe";
 import type { WPUser } from "@/lib/wp-api";
 
@@ -11,14 +11,16 @@ export async function GET(req: NextRequest) {
 
   const user = session.user as {
     wpUserId?: number;
+    clientId?: number | string;
     email?: string | null;
     name?: string | null;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const wpUser = await wpRestFetch<WPUser>(`/wp/v2/users/${wpUserId}`);

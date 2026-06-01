@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, createFilePost } from "@/lib/wp-api";
+import {resolveClientPost, createFilePost} from "@/lib/wp-api";
 import { uploadFile, ALLOWED_MIME_TYPES } from "@/lib/r2";
 import { sendClientFileUploaded } from "@/lib/resend";
 import crypto from "crypto";
@@ -13,8 +13,9 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number; name?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; name?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (!ALLOWED.has(file.type)) return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
     if (file.size > MAX_SIZE) return NextResponse.json({ error: "File exceeds 50MB limit" }, { status: 400 });
 
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const sanitised = file.name.toLowerCase().replace(/[^a-z0-9.]/g, "-").replace(/-+/g, "-");

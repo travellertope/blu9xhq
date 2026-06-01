@@ -39,16 +39,21 @@ export async function POST(req: NextRequest) {
     await sendEmailHtml({
       to: email,
       subject: "Your BluuHQ portal access link",
-      html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-        <h2 style="color:#1e293b">Sign in to your BluuHQ portal</h2>
-        <p>Hi ${user.name},</p>
-        <p>Click the button below to sign in instantly — no password needed. This link is valid for 1 hour.</p>
-        <p style="margin:24px 0">
-          <a href="${link}" style="background:#1875F2;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">
-            Open My Portal
-          </a>
-        </p>
-        <p style="color:#64748b;font-size:13px">If you didn't request this, you can safely ignore it. This link can only be used once.</p>
+      html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#fff">
+        <div style="padding:20px 32px;border-bottom:4px solid #1875F2">
+          <img src="https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png" alt="BluuHQ" height="32" style="display:block">
+        </div>
+        <div style="padding:32px">
+          <h2 style="color:#1e293b;margin:0 0 20px">Sign in to your BluuHQ portal</h2>
+          <p>Hi ${user.name},</p>
+          <p>Click the button below to sign in instantly — no password needed. This link is valid for 1 hour.</p>
+          <p style="margin:24px 0">
+            <a href="${link}" style="background:#1875F2;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">
+              Open My Portal
+            </a>
+          </p>
+          <p style="color:#64748b;font-size:13px">If you didn't request this, you can safely ignore it. This link can only be used once.</p>
+        </div>
       </div>`,
       text: `Sign in to your BluuHQ portal:\n${link}\n\nExpires in 1 hour. One-time use only.`,
       tags: [{ name: "type", value: "portal_magic_link" }],

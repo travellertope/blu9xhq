@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId } from "@/lib/wp-api";
+import {resolveClientPost} from "@/lib/wp-api";
 import { initializePaystackTransaction } from "@/lib/paystack";
 import crypto from "crypto";
 
@@ -11,13 +11,15 @@ export async function POST(req: NextRequest) {
 
   const user = session.user as {
     wpUserId?: number;
+    clientId?: number | string;
     email?: string | null;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const email = user.email ?? clientPost.acf.portal_email;

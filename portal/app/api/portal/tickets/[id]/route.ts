@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import {
-  findClientByWpUserId,
-  getTicket,
+  resolveClientPost, getTicket,
   listTicketReplies,
   listTicketAttachments,
 } from "@/lib/wp-api";
@@ -16,8 +15,9 @@ export async function GET(
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   const ticketId = parseInt(params.id, 10);
@@ -25,7 +25,7 @@ export async function GET(
 
   try {
     const [clientPost, ticket] = await Promise.all([
-      findClientByWpUserId(wpUserId),
+      resolveClientPost(sessionClientId, wpUserId),
       getTicket(ticketId),
     ]);
 
