@@ -49,7 +49,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
   return (
     <header className="border-b bg-white sticky top-0 z-40 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex h-14 items-center justify-between gap-4">
+        <div className="flex h-10 sm:h-12 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/portal" className="shrink-0">
             <Image src="/logo.png" alt="BluuHQ" width={100} height={28} priority className="object-contain" />
@@ -103,13 +103,13 @@ export default function PortalNav({ firstName }: PortalNavProps) {
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="sm:hidden border-t bg-white px-4 py-3 space-y-1">
+        <div className="sm:hidden border-t bg-white px-4 py-2 space-y-0.5">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
-              className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              className={`flex items-center justify-between px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive(link.href)
                   ? "bg-blue-50 text-[#1461CE]"
                   : "text-slate-700 hover:bg-slate-50"
@@ -123,7 +123,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
               )}
             </Link>
           ))}
-          <div className="pt-2 border-t mt-2 flex items-center justify-between">
+          <div className="pt-1.5 border-t mt-1.5 flex items-center justify-between">
             <span className="text-sm text-slate-500">Hi, {firstName}</span>
             <Button
               variant="ghost"
