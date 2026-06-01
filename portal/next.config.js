@@ -33,7 +33,7 @@ const nextConfig = {
     return [
       {
         source: "/",
-        destination: "/admin",
+        destination: "/portal-login",
         permanent: false,
       },
     ];
