@@ -203,3 +203,12 @@ export async function sendTicketSlaBreached(
   const { default: T, getSubject } = await import("./emails/TicketSlaBreached");
   return sendEmail({ to: adminEmail, subject: getSubject(props.ticketNumber, props.breachType), template: React.createElement(T, props) });
 }
+
+export function sendSequenceEmail(params: {
+  to: string;
+  subject: string;
+  html: string;
+  tags?: { name: string; value: string }[];
+}): Promise<string | null> {
+  return sendEmailHtml(params);
+}

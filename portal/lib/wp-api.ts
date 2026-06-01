@@ -392,9 +392,11 @@ export function deleteEmailTemplate(postId: number): Promise<void> {
 // ─── bluu_sequence types & helpers ────────────────────────────────────────────
 
 export interface WPSequenceStepACF {
-  step_number:       number;
-  delay_days:        number;
-  email_template_id: number;
+  step_number:        number;
+  delay_days:         number;
+  subject?:           string;
+  body_html?:         string;
+  email_template_id?: number;
 }
 
 export interface WPSequenceACF {
@@ -763,5 +765,61 @@ export function createCommunication(params: {
   return wpRestFetch<WPCommunicationPost>("/wp/v2/bluu_communication", {
     method: "POST",
     body: JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+// ─── bluu_seq_enrollment CPT types & helpers ─────────────────────────────────
+
+export interface WPEnrollmentACF {
+  enr_client_id:    number;
+  enr_sequence_id:  number;
+  enr_status:       string;   // active | completed | exited | paused
+  enr_current_step: number;   // 0-indexed
+  enr_enrolled_at:  string;
+  enr_next_send_at: string;
+  enr_exited_at?:   string;
+  enr_exit_reason?: string;
+  enr_client_email: string;
+}
+
+export interface WPEnrollmentPost {
+  id:   number;
+  date: string;
+  acf:  WPEnrollmentACF;
+}
+
+export function createEnrollment(params: {
+  title: string;
+  acf: WPEnrollmentACF;
+}): Promise<WPEnrollmentPost> {
+  return wpRestFetch<WPEnrollmentPost>("/wp/v2/bluu_seq_enrollment", {
+    method: "POST",
+    body: JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
+export function getEnrollment(postId: number): Promise<WPEnrollmentPost> {
+  return wpRestFetch<WPEnrollmentPost>(`/wp/v2/bluu_seq_enrollment/${postId}`);
+}
+
+export function updateEnrollment(
+  postId: number,
+  params: { acf: Partial<WPEnrollmentACF> }
+): Promise<WPEnrollmentPost> {
+  return wpRestFetch<WPEnrollmentPost>(`/wp/v2/bluu_seq_enrollment/${postId}`, {
+    method: "POST",
+    body: JSON.stringify({ acf: params.acf }),
+  });
+}
+
+export function listEnrollments(
+  params: Record<string, string | number> = {}
+): Promise<WPListResult<WPEnrollmentPost>> {
+  return wpRestList<WPEnrollmentPost>("/wp/v2/bluu_seq_enrollment", {
+    per_page: 100,
+    status:   "publish",
+    orderby:  "date",
+    order:    "desc",
+    ...params,
   });
 }

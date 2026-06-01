@@ -12,24 +12,27 @@ function isTruthy(v: boolean | string | number | undefined): boolean {
 function transformSequence(post: WPSequencePost) {
   const a = post.acf;
   return {
-    id:           post.id,
-    title:        post.title.rendered,
-    trigger:      a.trigger,
-    steps:        (a.steps ?? []).map((s) => ({
+    id:          post.id,
+    title:       post.title.rendered,
+    trigger:     a.trigger,
+    description: a.description,
+    steps:       (a.steps ?? []).map((s) => ({
       stepNumber:      s.step_number,
       delayDays:       s.delay_days,
+      subject:         s.subject,
+      bodyHtml:        s.body_html,
       emailTemplateId: s.email_template_id,
     })),
-    isActive:      isTruthy(a.is_active),
-    loopsId:       a.seq_loops_id,
-    loopsSyncedAt: a.seq_loops_synced_at,
+    isActive:    isTruthy(a.is_active),
   };
 }
 
 const stepSchema = z.object({
   stepNumber:      z.number().int().positive(),
   delayDays:       z.number().int().min(0),
-  emailTemplateId: z.number().int().positive(),
+  subject:         z.string().optional(),
+  bodyHtml:        z.string().optional(),
+  emailTemplateId: z.number().int().positive().optional(),
 });
 
 const patchSchema = z.object({
@@ -40,7 +43,6 @@ const patchSchema = z.object({
   exitConditions:   z.array(z.string()).optional(),
   steps:            z.array(stepSchema).optional(),
   isActive:         z.boolean().optional(),
-  loopsId:          z.string().optional(),
 });
 
 // ─── GET /api/admin/sequences/[id] ───────────────────────────────────────────
@@ -97,19 +99,20 @@ export async function PATCH(
     const post = await updateSequence(id, {
       ...(d.title ? { title: d.title } : {}),
       acf: {
-        ...(d.trigger           !== undefined ? { trigger:            d.trigger }                        : {}),
-        ...(d.description       !== undefined ? { description:        d.description }                   : {}),
-        ...(d.triggerDelayDays  !== undefined ? { trigger_delay_days: d.triggerDelayDays }              : {}),
-        ...(d.exitConditions    !== undefined ? { exit_conditions:    JSON.stringify(d.exitConditions) } : {}),
-        ...(d.steps             !== undefined ? {
+        ...(d.trigger          !== undefined ? { trigger:            d.trigger }                        : {}),
+        ...(d.description      !== undefined ? { description:        d.description }                   : {}),
+        ...(d.triggerDelayDays !== undefined ? { trigger_delay_days: d.triggerDelayDays }              : {}),
+        ...(d.exitConditions   !== undefined ? { exit_conditions:    JSON.stringify(d.exitConditions) } : {}),
+        ...(d.steps !== undefined ? {
           steps: d.steps.map((s) => ({
             step_number:       s.stepNumber,
             delay_days:        s.delayDays,
-            email_template_id: s.emailTemplateId,
+            ...(s.subject         !== undefined ? { subject:           s.subject         } : {}),
+            ...(s.bodyHtml        !== undefined ? { body_html:         s.bodyHtml        } : {}),
+            ...(s.emailTemplateId !== undefined ? { email_template_id: s.emailTemplateId } : {}),
           })),
         } : {}),
         ...(d.isActive !== undefined ? { is_active: d.isActive ? "1" : "0" } : {}),
-        ...(d.loopsId  !== undefined ? { seq_loops_id: d.loopsId }            : {}),
       },
     });
     return NextResponse.json({ sequence: transformSequence(post) });
