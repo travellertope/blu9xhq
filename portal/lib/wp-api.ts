@@ -126,6 +126,24 @@ export function getClientPost(postId: number): Promise<WPClientPost> {
   return wpRestFetch<WPClientPost>(`/wp/v2/bluu_client/${postId}`);
 }
 
+/**
+ * Resolve the client CPT post for the current portal session.
+ * Uses a direct ID fetch when sessionClientId is available (no meta query),
+ * falls back to meta-query lookup only when the session is missing it.
+ */
+export async function resolveClientPost(
+  sessionClientId: number | undefined,
+  wpUserId: number | undefined
+): Promise<WPClientPost | null> {
+  if (sessionClientId) {
+    return getClientPost(sessionClientId).catch(() => null);
+  }
+  if (wpUserId) {
+    return findClientByWpUserId(wpUserId).catch(() => null);
+  }
+  return null;
+}
+
 export function createClientPost(params: {
   title: string;
   acf: Partial<WPClientACF>;
