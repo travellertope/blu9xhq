@@ -28,23 +28,17 @@ export async function sendEmail({
   template: React.ReactElement;
   replyTo?: string;
 }): Promise<{ messageId: string | null }> {
-  try {
-    const { data, error } = await getResend().emails.send({
-      from: fromAddress(),
-      to: [to],
-      subject,
-      react: template,
-      replyTo: replyTo ?? DEFAULT_REPLY_TO(),
-    });
-    if (error) {
-      console.error("[resend] send error:", error);
-      return { messageId: null };
-    }
-    return { messageId: data?.id ?? null };
-  } catch (err) {
-    console.error("[resend] unexpected error:", err);
-    return { messageId: null };
+  const { data, error } = await getResend().emails.send({
+    from: fromAddress(),
+    to: [to],
+    subject,
+    react: template,
+    replyTo: replyTo ?? DEFAULT_REPLY_TO(),
+  });
+  if (error) {
+    throw new Error(`Resend error: ${error.message ?? JSON.stringify(error)}`);
   }
+  return { messageId: data?.id ?? null };
 }
 
 // Backward-compatible HTML path for existing routes
@@ -56,22 +50,19 @@ export async function sendEmailHtml(params: {
   replyTo?: string;
   tags?: { name: string; value: string }[];
 }): Promise<string | null> {
-  try {
-    const { data, error } = await getResend().emails.send({
-      from: fromAddress(),
-      to: Array.isArray(params.to) ? params.to : [params.to],
-      subject: params.subject,
-      html: params.html,
-      text: params.text,
-      replyTo: params.replyTo ?? DEFAULT_REPLY_TO(),
-      tags: params.tags,
-    });
-    if (error) { console.error("[resend] sendEmailHtml error:", error); return null; }
-    return data?.id ?? null;
-  } catch (err) {
-    console.error("[resend] sendEmailHtml unexpected error:", err);
-    return null;
+  const { data, error } = await getResend().emails.send({
+    from: fromAddress(),
+    to: Array.isArray(params.to) ? params.to : [params.to],
+    subject: params.subject,
+    html: params.html,
+    text: params.text,
+    replyTo: params.replyTo ?? DEFAULT_REPLY_TO(),
+    tags: params.tags,
+  });
+  if (error) {
+    throw new Error(`Resend error: ${error.message ?? JSON.stringify(error)}`);
   }
+  return data?.id ?? null;
 }
 
 // ─── Convenience functions ────────────────────────────────────────────────────
