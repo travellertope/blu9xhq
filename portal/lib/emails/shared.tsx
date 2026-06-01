@@ -1,9 +1,12 @@
-import { Section, Text, Hr, Container } from "@react-email/components";
+import { Section, Text, Hr, Container, Img } from "@react-email/components";
 import React from "react";
 
 const PRIMARY = "#1875F2";
 const BODY_TEXT = "#1E293B";
 const SLATE_400 = "#94A3B8";
+
+const LOGO_URL =
+  "https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png";
 
 export const containerStyle: React.CSSProperties = {
   maxWidth: "560px",
@@ -13,15 +16,9 @@ export const containerStyle: React.CSSProperties = {
 };
 
 export const headerStyle: React.CSSProperties = {
-  backgroundColor: PRIMARY,
-  padding: "24px 32px",
-};
-
-export const headerTextStyle: React.CSSProperties = {
-  color: "#ffffff",
-  fontSize: "20px",
-  fontWeight: "700",
-  margin: 0,
+  backgroundColor: "#ffffff",
+  padding: "20px 32px",
+  borderBottom: `4px solid ${PRIMARY}`,
 };
 
 export const bodyStyle: React.CSSProperties = {
@@ -72,7 +69,12 @@ export function EmailLayout({
     <Container style={containerStyle}>
       {/* Header */}
       <Section style={headerStyle}>
-        <Text style={headerTextStyle}>BluuHQ</Text>
+        <Img
+          src={LOGO_URL}
+          alt="BluuHQ"
+          height={32}
+          style={{ display: "block" }}
+        />
       </Section>
 
       {/* Body */}
