@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession, requirePermission } from "@/lib/apiPermissions";
 import { listAllSubscriptions, createSubscription, getClientPost, getServicePost } from "@/lib/wp-api";
+import { sendNewService } from "@/lib/resend";
 import { z } from "zod";
 
 const postSchema = z.object({
@@ -113,6 +114,18 @@ export async function POST(req: NextRequest) {
         notes:             d.notes,
       },
     });
+
+    // Notify client of new service (fire and forget)
+    const clientEmail = client?.acf?.portal_email ?? client?.acf?.contact_email;
+    const clientName  = client?.acf?.contact_name || client?.title?.rendered || `Client #${d.clientId}`;
+    const portalUrl   = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/subscriptions`;
+    if (clientEmail && d.status === "active") {
+      void sendNewService(clientEmail, {
+        clientName,
+        serviceName: serviceLabel,
+        portalUrl,
+      }).catch((err) => console.error("[subscriptions] sendNewService failed:", err));
+    }
 
     return NextResponse.json({ subscription: post }, { status: 201 });
   } catch (err) {

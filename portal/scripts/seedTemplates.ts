@@ -211,13 +211,20 @@ async function main() {
 
   // Fetch existing templates
   const existing = await wpFetch("/wp/v2/bluu_email_template?per_page=100&status=publish");
-  const existingTitles = new Set(
-    (existing as Array<{ title: { rendered: string } }>).map((t) => t.title.rendered)
-  );
+  const existingList = existing as Array<{ id: number; title: { rendered: string }; acf?: Record<string, string> }>;
 
-  const existingMap = new Map(
-    (existing as Array<{ id: number; title: { rendered: string } }>).map((t) => [t.title.rendered, t.id])
-  );
+  console.log(`  Found ${existingList.length} existing template(s) in WordPress\n`);
+
+  // Check if ACF fields are visible — if body_html is missing on existing records,
+  // the plugin's show_in_rest fix hasn't been activated yet.
+  if (existingList.length > 0 && existingList[0].acf === undefined) {
+    console.error("  ✗  ACF fields are NOT exposed via REST API.");
+    console.error("     → Make sure you have installed the latest plugin zip in WordPress admin.");
+    console.error("     → WordPress Admin → Plugins → Deactivate → Delete → Upload new zip → Activate\n");
+    process.exit(1);
+  }
+
+  const existingMap = new Map(existingList.map((t) => [t.title.rendered, t.id]));
 
   let created = 0;
   let updated = 0;
@@ -225,18 +232,20 @@ async function main() {
   for (const template of TEMPLATES) {
     const existingId = existingMap.get(template.title);
     if (existingId) {
-      await wpFetch(`/wp/v2/bluu_email_template/${existingId}`, {
+      const result = await wpFetch(`/wp/v2/bluu_email_template/${existingId}`, {
         method: "POST",
         body: JSON.stringify({ status: "publish", acf: template.acf }),
-      });
-      console.log(`  ↻  Updated  "${template.title}"`);
+      }) as { acf?: Record<string, string> };
+      const saved = result?.acf?.body_html?.length > 0;
+      console.log(`  ↻  Updated  "${template.title}" — ACF saved: ${saved ? "✓ yes" : "✗ NO (check plugin)"}`);
       updated++;
     } else {
-      await wpFetch("/wp/v2/bluu_email_template", {
+      const result = await wpFetch("/wp/v2/bluu_email_template", {
         method: "POST",
         body: JSON.stringify({ title: template.title, status: "publish", acf: template.acf }),
-      });
-      console.log(`  ✓  Created  "${template.title}"`);
+      }) as { acf?: Record<string, string> };
+      const saved = result?.acf?.body_html?.length > 0;
+      console.log(`  ✓  Created  "${template.title}" — ACF saved: ${saved ? "✓ yes" : "✗ NO (check plugin)"}`);
       created++;
     }
   }

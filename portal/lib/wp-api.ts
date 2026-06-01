@@ -783,13 +783,15 @@ export function createCommunication(params: {
 export interface WPEnrollmentACF {
   enr_client_id:    number;
   enr_sequence_id:  number;
-  enr_status:       string;   // active | completed | exited | paused
+  enr_status:       string;   // active | paused | completed | exited
   enr_current_step: number;   // 0-indexed
   enr_enrolled_at:  string;
   enr_next_send_at: string;
   enr_exited_at?:   string;
   enr_exit_reason?: string;
+  enr_paused_at?:   string;
   enr_client_email: string;
+  enr_client_name?: string;
 }
 
 export interface WPEnrollmentPost {

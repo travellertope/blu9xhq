@@ -4,9 +4,10 @@ import {
   findClientByWpUserId,
   updateSubscription,
   wpRestFetch,
+  getServicePost,
 } from "@/lib/wp-api";
 import type { WPSubscriptionPost } from "@/lib/wp-api";
-import { sendEmailHtml } from "@/lib/resend";
+import { sendCancellationRequested } from "@/lib/resend";
 import { logAuditEvent } from "@/lib/auditLog";
 
 export async function PATCH(
@@ -105,25 +106,23 @@ export async function PATCH(
       }),
     }).catch((err) => console.error("[cancel] comm post failed:", err));
 
-    // Send admin email (fire and forget)
+    // Send admin email (fire and forget) — fetch service name for a useful subject line
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
-    sendEmailHtml({
-      to: adminEmail,
-      subject: `Cancellation request — Subscription #${subscriptionId}`,
-      html: `
-        <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-          <h2>Cancellation Request Received</h2>
-          <p><strong>Client:</strong> ${user.name ?? "Unknown"} (${user.email ?? ""})</p>
-          <p><strong>Subscription ID:</strong> ${subscriptionId}</p>
-          <p><strong>Reason:</strong> ${reason}</p>
-          ${typeof note === "string" && note ? `<p><strong>Note:</strong> ${note}</p>` : ""}
-          <p><strong>Requested at:</strong> ${now}</p>
-          <p>Please review in the admin dashboard and process the cancellation.</p>
-        </div>
-      `,
-      text: `Cancellation Request\n\nClient: ${user.name ?? "Unknown"} (${user.email ?? ""})\nSubscription ID: ${subscriptionId}\nReason: ${reason}\nRequested at: ${now}`,
-      tags: [{ name: "type", value: "cancellation_request" }],
-    }).catch((err) => console.error("[cancel] email failed:", err));
+    const clientName = clientPost.acf.contact_name || user.name || "Client";
+    const appUrl     = process.env.NEXT_PUBLIC_APP_URL ?? "";
+    getServicePost(sub.acf.service_id)
+      .then((svc) => svc.title.rendered.replace(/<[^>]+>/g, ""))
+      .catch(() => `Subscription #${subscriptionId}`)
+      .then((serviceName) =>
+        sendCancellationRequested(adminEmail, {
+          clientName,
+          serviceName,
+          reason,
+          note: typeof note === "string" && note ? note : undefined,
+          reviewUrl: `${appUrl}/admin/clients/${clientPost.id}`,
+        })
+      )
+      .catch((err) => console.error("[cancel] sendCancellationRequested failed:", err));
 
     return NextResponse.json({ ok: true });
   } catch (err) {

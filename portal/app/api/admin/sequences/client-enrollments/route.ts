@@ -25,10 +25,13 @@ export async function GET(req: NextRequest) {
       meta_value: clientId,
     });
 
-    const active = items.filter((e) => e.acf.enr_status === "active");
+    // Show active and paused enrollments (not completed/exited)
+    const visible = items.filter((e) =>
+      e.acf.enr_status === "active" || e.acf.enr_status === "paused"
+    );
 
     const enrollments = await Promise.all(
-      active.map(async (e) => {
+      visible.map(async (e) => {
         let sequenceName = `Sequence #${e.acf.enr_sequence_id}`;
         let totalSteps = 0;
         try {
@@ -40,9 +43,11 @@ export async function GET(req: NextRequest) {
           enrollmentId: e.id,
           sequenceId:   e.acf.enr_sequence_id,
           sequenceName,
+          status:       e.acf.enr_status as "active" | "paused",
           currentStep:  e.acf.enr_current_step,
           totalSteps,
           enrolledAt:   e.acf.enr_enrolled_at,
+          pausedAt:     e.acf.enr_paused_at ?? null,
         };
       })
     );

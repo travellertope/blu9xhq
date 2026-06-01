@@ -25,7 +25,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const user = await findWPClientByEmail(email);
-    if (!user) return NextResponse.json({ ok: true });
+    if (!user) {
+      console.warn("[resend-invite] no bluu_client WP user found for:", email);
+      return NextResponse.json({ ok: true });
+    }
 
     const token = generateMagicToken();
     await storeMagicToken(user.id, token);
