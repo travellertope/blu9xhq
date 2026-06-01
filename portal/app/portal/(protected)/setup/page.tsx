@@ -95,7 +95,7 @@ export default function SetupPage() {
       const res = await fetch("/api/portal/profile/password", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ newPassword: password }),
       });
       if (!res.ok) {
         const d = (await res.json().catch(() => ({}))) as { error?: string };
