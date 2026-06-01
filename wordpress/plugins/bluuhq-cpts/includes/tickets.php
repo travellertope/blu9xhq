@@ -19,6 +19,8 @@ function bluuhq_register_ticket_cpts(): void {
         'supports'           => [ 'title', 'custom-fields' ],
         'has_archive'        => false,
         'rewrite'            => false,
+        'capability_type'    => 'post',
+        'map_meta_cap'       => true,
     ];
 
     register_post_type( 'bluu_ticket', array_merge( $defaults, [
