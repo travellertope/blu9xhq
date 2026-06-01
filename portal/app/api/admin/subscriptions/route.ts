@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
 // ─── POST /api/admin/subscriptions ────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const auth = await requirePermission(req, "manage_subscriptions");
+  const auth = await requirePermission(req, "assign_subscriptions");
   if (auth instanceof NextResponse) return auth;
 
   const body = await req.json().catch(() => ({}));
