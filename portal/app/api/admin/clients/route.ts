@@ -24,13 +24,14 @@ export async function GET(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(req.url);
-  const page = parseInt(searchParams.get("page") ?? "1", 10);
-  const search = searchParams.get("search") ?? undefined;
+  const page    = parseInt(searchParams.get("page")     ?? "1",  10);
+  const perPage = Math.min(parseInt(searchParams.get("per_page") ?? "20", 10), 100);
+  const search  = searchParams.get("search") ?? undefined;
   const orderby = searchParams.get("orderby") ?? "date";
-  const order = (searchParams.get("order") ?? "desc") as "asc" | "desc";
+  const order   = (searchParams.get("order") ?? "desc") as "asc" | "desc";
 
   try {
-    const result = await listClientPosts({ page, per_page: 20, search, orderby, order });
+    const result = await listClientPosts({ page, per_page: perPage, search, orderby, order });
     return NextResponse.json({
       clients: result.items,
       total: result.total,

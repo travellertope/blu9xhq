@@ -66,15 +66,16 @@ export default function NewSubscriptionPage() {
         name: c.acf?.company_name || c.acf?.contact_name || c.title?.rendered || `Client #${c.id}`,
       }));
       const serviceList: Service[] = (sd.services ?? sd.items ?? []).map((s: any) => ({
-        id:          s.id,
-        name:        s.title?.rendered?.replace(/<[^>]+>/g, "") || `Service #${s.id}`,
-        basePrice:   s.acf?.base_price,
-        currency:    s.acf?.currency,
-        billingCycle: s.acf?.billing_cycle,
+        id:           s.id,
+        // services route returns transformed data (s.name); raw WP posts have s.title.rendered
+        name:         s.name || s.title?.rendered?.replace(/<[^>]+>/g, "") || `Service #${s.id}`,
+        basePrice:    s.basePrice  ?? s.acf?.base_price,
+        currency:     s.currency   ?? s.acf?.currency,
+        billingCycle: s.billingCycle ?? s.acf?.billing_cycle,
       }));
       setClients(clientList);
       setServices(serviceList);
-    }).catch(() => toast.error("Failed to load data")).finally(() => setLoading(false));
+    }).catch((err) => toast.error(err?.message ?? "Failed to load clients/services")).finally(() => setLoading(false));
   }, []);
 
   function onServiceChange(id: string) {
