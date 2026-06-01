@@ -4,7 +4,7 @@ import { updateEnrollment, wpRestFetch } from "@/lib/wp-api";
 import type { WPEnrollmentPost } from "@/lib/wp-api";
 
 function htmlPage(heading: string, body: string, isError = false): NextResponse {
-  const color = isError ? "#DC2626" : "#4F46E5";
+  const color = isError ? "#DC2626" : "#1875F2";
   return new NextResponse(
     `<!DOCTYPE html>
 <html lang="en">

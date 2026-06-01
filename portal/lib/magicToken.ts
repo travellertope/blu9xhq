@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "crypto";
-import { wpRestList, wpRestFetch } from "@/lib/wp-api";
+import { wpRestList } from "@/lib/wp-api";
 import type { WPUser } from "@/lib/wp-api";
 
 // ─── HMAC stateless magic-link tokens ────────────────────────────────────────
