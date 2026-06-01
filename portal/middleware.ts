@@ -23,6 +23,10 @@ export async function middleware(req: NextRequest) {
 
   // ── Client portal routes ────────────────────────────────────────────────────
   if (pathname.startsWith("/portal")) {
+    // /portal/verify is the magic-link / password-reset landing page — it must
+    // be reachable without a session so it can call signIn() to create one.
+    if (pathname === "/portal/verify") return NextResponse.next();
+
     if (!token) {
       return NextResponse.redirect(new URL("/portal-login", req.url));
     }
