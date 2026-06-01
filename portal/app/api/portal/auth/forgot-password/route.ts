@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmailHtml } from "@/lib/resend";
-import { generateMagicToken, findWPClientByEmail, storeMagicToken } from "@/lib/magicToken";
+import { generateMagicToken, findWPClientByEmail } from "@/lib/magicToken";
 
 export async function POST(req: NextRequest) {
   let email = "";
@@ -17,8 +17,7 @@ export async function POST(req: NextRequest) {
     const user = await findWPClientByEmail(email);
     if (!user) return NextResponse.json({ ok: true });
 
-    const token = generateMagicToken();
-    await storeMagicToken(user.id, token);
+    const token = generateMagicToken(email);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
     const link = `${appUrl}/portal/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
