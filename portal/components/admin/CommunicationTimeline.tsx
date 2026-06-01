@@ -11,6 +11,10 @@ import { format, parseISO } from "date-fns";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, " ").replace(/\s{2,}/g, " ").trim();
+}
+
 const MOOD_BORDER: Record<CommMoodSentiment, string> = {
   positive:  "border-l-green-500",
   neutral:   "border-l-slate-300",
@@ -128,7 +132,7 @@ function EntryCard({ entry }: { entry: BluuCommunication }) {
         {/* Content preview when collapsed */}
         {!expanded && entry.content && (
           <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-            {entry.content}
+            {entry.channel === "email" ? stripHtml(entry.content) : entry.content}
           </p>
         )}
       </button>
@@ -141,9 +145,16 @@ function EntryCard({ entry }: { entry: BluuCommunication }) {
           {entry.content && (
             <div>
               <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Content</p>
-              <div className="bg-slate-50 rounded-md p-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
-                {entry.content}
-              </div>
+              {entry.channel === "email" ? (
+                <div
+                  className="bg-slate-50 rounded-md p-3 text-sm text-slate-700 leading-relaxed max-h-80 overflow-y-auto prose prose-sm prose-slate max-w-none"
+                  dangerouslySetInnerHTML={{ __html: entry.content }}
+                />
+              ) : (
+                <div className="bg-slate-50 rounded-md p-3 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed max-h-80 overflow-y-auto">
+                  {entry.content}
+                </div>
+              )}
             </div>
           )}
 
