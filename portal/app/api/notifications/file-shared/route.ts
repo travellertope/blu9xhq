@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClientPost, wpRestFetch } from "@/lib/wp-api";
+import { getClientPost, getUserByEmail, wpRestFetch } from "@/lib/wp-api";
 import { sendFileShared } from "@/lib/resend";
-import type { WPUser, WPFilePost } from "@/lib/wp-api";
+import type { WPFilePost } from "@/lib/wp-api";
 
 export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -26,9 +26,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File is not shared" }, { status: 400 });
     }
 
-    const wpUser = await wpRestFetch<WPUser[]>("/wp/v2/users?search=" + encodeURIComponent(clientPost.acf.portal_email ?? "")).then(u => u?.[0] ?? null);
-    const prefs: string[] = Array.isArray(wpUser?.meta?.notification_preferences) ? wpUser!.meta.notification_preferences as string[] : [];
-    if (prefs.length > 0 && !prefs.includes("new_files")) {
+    const wpUser = await getUserByEmail(clientPost.acf.portal_email ?? "").catch(() => null);
+    const prefs: string[] = Array.isArray(wpUser?.meta?.notification_preferences)
+      ? wpUser!.meta.notification_preferences as string[]
+      : ["invoice_reminders", "new_files", "service_updates"];
+    if (!prefs.includes("new_files")) {
       return NextResponse.json({ messageId: null, skipped: true });
     }
 

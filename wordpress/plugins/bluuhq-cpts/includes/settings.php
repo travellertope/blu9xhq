@@ -68,7 +68,7 @@ function bluuhq_register_settings(): void {
             'type'         => 'array',
             'description'  => 'Enabled notification types for this portal client',
             'single'       => true,
-            'default'      => [],
+            'default'      => [ 'invoice_reminders', 'new_files', 'service_updates' ],
             'show_in_rest' => [
                 'schema' => [
                     'type'  => 'array',
