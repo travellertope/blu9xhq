@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { findClientByWpUserId, listInvoices, updateInvoice } from "@/lib/wp-api";
+import {resolveClientPost, listInvoices, updateInvoice} from "@/lib/wp-api";
 import { verifyPaystackTransaction } from "@/lib/paystack";
 import { sendEmailHtml } from "@/lib/resend";
 
@@ -9,15 +9,16 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number; email?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; email?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   const reference = req.nextUrl.searchParams.get("reference");
   if (!reference) return NextResponse.json({ error: "reference required" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const tx = await verifyPaystackTransaction(reference);

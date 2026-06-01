@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { wpRestFetch, findClientByWpUserId } from "@/lib/wp-api";
+import {wpRestFetch, resolveClientPost} from "@/lib/wp-api";
 import { syncContact } from "@/lib/loops";
 
 export async function PATCH(req: NextRequest) {
@@ -8,8 +8,9 @@ export async function PATCH(req: NextRequest) {
   if (result instanceof NextResponse) return result;
   const { session } = result;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) {
     return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
   }
@@ -28,7 +29,7 @@ export async function PATCH(req: NextRequest) {
       }),
     });
 
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (clientPost) {
       void syncContact({
         id: clientPost.id,

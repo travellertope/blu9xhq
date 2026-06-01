@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  findClientByWpUserId,
-  updateSubscription,
-  wpRestFetch,
-  getServicePost,
-} from "@/lib/wp-api";
+import {resolveClientPost, updateSubscription, wpRestFetch, getServicePost} from "@/lib/wp-api";
 import type { WPSubscriptionPost } from "@/lib/wp-api";
 import { sendCancellationRequested } from "@/lib/resend";
 import { logAuditEvent } from "@/lib/auditLog";
@@ -56,7 +51,7 @@ export async function PATCH(
   try {
     let clientPostId: number | undefined = sessionClientId;
     if (!clientPostId) {
-      const found = await findClientByWpUserId(wpUserId!).catch(() => null);
+      const found = await resolveClientPost(sessionClientId, wpUserId).catch(() => null);
       if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
       clientPostId = found.id;
     }

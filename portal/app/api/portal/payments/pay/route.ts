@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import { wpRestFetch, findClientByWpUserId, getInvoice, updateInvoice, getSubscription } from "@/lib/wp-api";
+import {wpRestFetch, resolveClientPost, getInvoice, updateInvoice, getSubscription} from "@/lib/wp-api";
 import { createPaymentIntent, listPaymentMethods } from "@/lib/stripe";
 import { chargePaystackCard } from "@/lib/paystack";
 import { sendEmailHtml } from "@/lib/resend";
@@ -29,10 +29,12 @@ export async function POST(req: NextRequest) {
 
   const user = session.user as {
     wpUserId?: number;
+    clientId?: number | string;
     email?: string | null;
     name?: string | null;
   };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
   if (!checkRateLimit(wpUserId)) {
@@ -50,7 +52,7 @@ export async function POST(req: NextRequest) {
   if (!invoiceId) return NextResponse.json({ error: "invoiceId required" }, { status: 400 });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
+    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
     if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
     const invoice = await getInvoice(invoiceId);
