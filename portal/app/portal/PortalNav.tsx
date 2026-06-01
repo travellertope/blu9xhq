@@ -63,7 +63,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
                 href={link.href}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
                   isActive(link.href)
-                    ? "bg-indigo-50 text-indigo-700"
+                    ? "bg-blue-50 text-[#1461CE]"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
@@ -111,7 +111,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center justify-between px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                 isActive(link.href)
-                  ? "bg-indigo-50 text-indigo-700"
+                  ? "bg-blue-50 text-[#1461CE]"
                   : "text-slate-700 hover:bg-slate-50"
               }`}
             >

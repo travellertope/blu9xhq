@@ -273,7 +273,7 @@ function SubscriptionCard({
           </span>
           <Link
             href={`/portal/files?subscription=${sub.id}`}
-            className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
+            className="text-[#1875F2] hover:text-[#1461CE] text-xs font-medium"
           >
             View Files
           </Link>
@@ -369,7 +369,7 @@ export default function SubscriptionsPage() {
           onClick={() => setFilter("active")}
           className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
             filter === "active"
-              ? "bg-indigo-600 text-white"
+              ? "bg-[#1875F2] text-white"
               : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
           }`}
         >
@@ -379,7 +379,7 @@ export default function SubscriptionsPage() {
           onClick={() => setFilter("all")}
           className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
             filter === "all"
-              ? "bg-indigo-600 text-white"
+              ? "bg-[#1875F2] text-white"
               : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
           }`}
         >

@@ -91,7 +91,7 @@ function AddStripeCardForm({
         <button
           onClick={handleSave}
           disabled={saving || !stripe}
-          className="flex-1 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 rounded-md py-2 transition-colors"
+          className="flex-1 text-sm font-medium text-white bg-[#1875F2] hover:bg-[#1461CE] disabled:opacity-50 rounded-md py-2 transition-colors"
         >
           {saving ? "Saving…" : "Save Card"}
         </button>
@@ -218,7 +218,7 @@ export default function PaymentMethodsPage() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {card.isDefault ? (
-                    <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
+                    <span className="text-xs bg-blue-100 text-[#1461CE] px-2 py-0.5 rounded-full font-medium flex items-center gap-1">
                       <CheckCircle size={10} />
                       Default
                     </span>
@@ -226,7 +226,7 @@ export default function PaymentMethodsPage() {
                     <button
                       onClick={() => handleSetDefault(id)}
                       disabled={actionLoading === id}
-                      className="text-xs text-slate-500 hover:text-indigo-600 px-2 py-1 rounded border border-slate-200 hover:border-indigo-300 transition-colors disabled:opacity-50"
+                      className="text-xs text-slate-500 hover:text-[#1875F2] px-2 py-1 rounded border border-slate-200 hover:border-blue-300 transition-colors disabled:opacity-50"
                     >
                       <Star size={12} className="inline mr-1" />
                       Set Default
@@ -258,7 +258,7 @@ export default function PaymentMethodsPage() {
         !showAddForm && (
           <button
             onClick={gateway === "stripe" ? handleAddStripe : handleAddPaystack}
-            className="w-full inline-flex items-center justify-center gap-2 border border-indigo-200 text-indigo-600 hover:bg-indigo-50 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
+            className="w-full inline-flex items-center justify-center gap-2 border border-blue-200 text-[#1875F2] hover:bg-blue-50 rounded-xl px-4 py-3 text-sm font-medium transition-colors"
           >
             <Plus size={16} />
             Add New Payment Method

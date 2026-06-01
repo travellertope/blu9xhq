@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
             <tr><td style="padding:8px 0;color:#64748b">Email</td><td style="font-family:monospace">${d.email}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b">Temporary Password</td><td style="font-family:monospace">${tempPassword}</td></tr>
           </table>
-          <a href="${loginUrl}" style="background:#4f46e5;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
+          <a href="${loginUrl}" style="background:#1875F2;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
             Sign in to BluuHQ
           </a>
           <p style="color:#94a3b8;font-size:12px;margin-top:24px">Please change your password after signing in.</p>

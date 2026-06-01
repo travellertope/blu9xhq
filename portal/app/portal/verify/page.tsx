@@ -40,7 +40,7 @@ function VerifyContent() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAFAF9]">
         <div className="text-center space-y-4">
-          <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="h-10 w-10 border-4 border-[#1875F2] border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-slate-600 font-medium">Verifying your link…</p>
         </div>
       </div>
@@ -60,7 +60,7 @@ function VerifyContent() {
           </p>
           <Link
             href="/portal-login"
-            className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-6 py-2 text-sm font-medium transition-colors"
+            className="inline-block bg-[#1875F2] hover:bg-[#1461CE] text-white rounded-md px-6 py-2 text-sm font-medium transition-colors"
           >
             Back to Login
           </Link>
@@ -72,7 +72,7 @@ function VerifyContent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FAFAF9]">
       <div className="text-center space-y-4">
-        <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="h-10 w-10 border-4 border-[#1875F2] border-t-transparent rounded-full animate-spin mx-auto" />
         <p className="text-slate-600 font-medium">Signing you in…</p>
       </div>
     </div>
@@ -84,7 +84,7 @@ export default function VerifyPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#FAFAF9]">
-          <div className="h-10 w-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+          <div className="h-10 w-10 border-4 border-[#1875F2] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >
