@@ -402,6 +402,7 @@ endif;
 function bluu_industries_data() {
     return array(
         array(
+            'key'  => 'tech-saas',
             'name' => 'Tech &amp; SaaS',
             'url'  => '/industries/tech-saas',
             'subs' => array(
@@ -418,6 +419,7 @@ function bluu_industries_data() {
             ),
         ),
         array(
+            'key'  => 'agencies-consultants',
             'name' => 'Agencies &amp; Consultants',
             'url'  => '/industries/agencies-consultants',
             'subs' => array(
@@ -438,6 +440,7 @@ function bluu_industries_data() {
             ),
         ),
         array(
+            'key'  => 'ecommerce-dtc',
             'name' => 'E-commerce &amp; DTC',
             'url'  => '/industries/ecommerce-dtc',
             'subs' => array(
@@ -453,6 +456,7 @@ function bluu_industries_data() {
             ),
         ),
         array(
+            'key'  => 'professional-services',
             'name' => 'Professional Services',
             'url'  => '/industries/professional-services',
             'subs' => array(
@@ -472,28 +476,57 @@ function bluu_industries_data() {
 
 // ── Desktop industries mega panel HTML ────────────────────────────────────────
 function bluu_industries_mega_panel() {
-    $html = '<div class="mega-panel mega-panel--industries"><div class="mega-panel__inner"><div class="mega-panel__body">';
-    foreach ( bluu_industries_data() as $ind ) {
-        $html .= '<div class="mega-ind-col">';
-        $html .= '<a href="' . esc_url( home_url( $ind['url'] ) ) . '" class="mega-ind-col__head">' . $ind['name'] . '</a>';
-        if ( ! empty( $ind['subs'] ) ) {
-            $html .= '<div class="mega-ind-section"><span class="mega-ind-section__label">Sub-industries</span><div class="mega-pill-grid">';
-            foreach ( $ind['subs'] as $s ) {
-                $html .= '<a href="' . esc_url( home_url( $s[1] ) ) . '" class="mega-pill">' . $s[0] . '</a>';
-            }
-            $html .= '</div></div>';
-        }
-        if ( ! empty( $ind['ucs'] ) ) {
-            $html .= '<div class="mega-ind-section mega-ind-section--uc"><span class="mega-ind-section__label">Use cases</span><div class="mega-pill-grid">';
-            foreach ( $ind['ucs'] as $u ) {
-                $html .= '<a href="' . esc_url( home_url( $u[1] ) ) . '" class="mega-pill mega-pill--uc">' . $u[0] . '</a>';
-            }
-            $html .= '</div></div>';
-        }
-        $html .= '</div>';
+    $industries = bluu_industries_data();
+
+    // Left sidebar buttons
+    $left = '<nav class="mega-ind-left" aria-label="Industries">';
+    $first = true;
+    foreach ( $industries as $ind ) {
+        $key    = $ind['key'];
+        $active = $first ? ' is-active' : '';
+        $left  .= '<button class="mega-ind-btn' . $active . '" data-panel="' . esc_attr( $key ) . '" type="button">';
+        $left  .= '<span>' . $ind['name'] . '</span>';
+        $left  .= '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+        $left  .= '</button>';
+        $first  = false;
     }
-    $html .= '</div></div></div>';
-    return $html;
+    $left .= '<a href="' . esc_url( home_url( '/industries' ) ) . '" class="mega-ind-all-link">All industries →</a>';
+    $left .= '</nav>';
+
+    // Right panels
+    $panels = '<div class="mega-ind-panels">';
+    $first  = true;
+    foreach ( $industries as $ind ) {
+        $key    = $ind['key'];
+        $active = $first ? ' is-active' : '';
+        $panels .= '<div class="mega-ind-panel' . $active . '" id="mega-ind-panel-' . esc_attr( $key ) . '">';
+
+        if ( ! empty( $ind['subs'] ) ) {
+            $panels .= '<p class="mega-ind-section-label">Sub-industries</p><div class="mega-chip-grid">';
+            foreach ( $ind['subs'] as $s ) {
+                $panels .= '<a href="' . esc_url( home_url( $s[1] ) ) . '" class="mega-chip">' . $s[0] . '</a>';
+            }
+            $panels .= '</div>';
+        }
+
+        if ( ! empty( $ind['ucs'] ) ) {
+            $panels .= '<p class="mega-ind-section-label mega-ind-section-label--uc">Use cases</p><div class="mega-use-grid">';
+            foreach ( $ind['ucs'] as $u ) {
+                $panels .= '<a href="' . esc_url( home_url( $u[1] ) ) . '" class="mega-use-card">';
+                $panels .= '<span>' . $u[0] . '</span>';
+                $panels .= '</a>';
+            }
+            $panels .= '</div>';
+        }
+
+        $panels .= '</div>';
+        $first   = false;
+    }
+    $panels .= '</div>';
+
+    return '<div class="mega-panel mega-panel--left-nav"><div class="mega-panel__inner"><div class="mega-ind-wrap">'
+        . $left . $panels
+        . '</div></div></div>';
 }
 
 // ── Mobile industries accordion HTML ──────────────────────────────────────────
