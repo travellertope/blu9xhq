@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
         <p>Hi ${user.name},</p>
         <p>We received a request to reset your BluuHQ portal password. Click the button below to sign in and set a new password.</p>
         <p style="margin:24px 0">
-          <a href="${link}" style="background:#4f46e5;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">
+          <a href="${link}" style="background:#1875F2;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">
             Reset Password
           </a>
         </p>

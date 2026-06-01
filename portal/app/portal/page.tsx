@@ -123,7 +123,7 @@ export default function ClientPortalDashboard() {
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Link href="/portal/subscriptions">
-          <Card className="hover:border-indigo-300 transition-colors cursor-pointer">
+          <Card className="hover:border-blue-300 transition-colors cursor-pointer">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-slate-500">Active Services</CardTitle>
             </CardHeader>
@@ -162,7 +162,7 @@ export default function ClientPortalDashboard() {
         </Card>
 
         <Link href="/portal/invoices">
-          <Card className="hover:border-indigo-300 transition-colors cursor-pointer">
+          <Card className="hover:border-blue-300 transition-colors cursor-pointer">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-slate-500">Invoices</CardTitle>
             </CardHeader>
@@ -183,7 +183,7 @@ export default function ClientPortalDashboard() {
             <h2 className="text-lg font-semibold text-slate-800">Your Services</h2>
             <Link
               href="/portal/subscriptions"
-              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium"
+              className="text-sm text-[#1875F2] hover:text-[#1461CE] font-medium"
             >
               View all
             </Link>
@@ -195,7 +195,7 @@ export default function ClientPortalDashboard() {
                 href={`/portal/subscriptions#subscription-${sub.id}`}
                 className="block"
               >
-                <Card className="hover:border-indigo-200 hover:shadow-sm transition-all">
+                <Card className="hover:border-blue-200 hover:shadow-sm transition-all">
                   <CardContent className="pt-4 pb-4">
                     <div className="flex items-start justify-between gap-2">
                       <p className="font-medium text-slate-800 text-sm leading-snug">
@@ -232,7 +232,7 @@ export default function ClientPortalDashboard() {
             </div>
             <Link
               href="/portal/files"
-              className="text-sm font-semibold text-indigo-600 hover:text-indigo-800"
+              className="text-sm font-semibold text-[#1875F2] hover:text-[#1461CE]"
             >
               View Files
             </Link>
@@ -248,7 +248,7 @@ export default function ClientPortalDashboard() {
             Reach out to your account manager at{" "}
             <a
               href="mailto:hello@bluuhq.com"
-              className="text-indigo-600 hover:text-indigo-800 underline underline-offset-2"
+              className="text-[#1875F2] hover:text-[#1461CE] underline underline-offset-2"
             >
               hello@bluuhq.com
             </a>

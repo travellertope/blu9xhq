@@ -141,7 +141,7 @@ function PortalLoginForm() {
                 <input
                   {...register("email")}
                   type="email"
-                  className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1875F2] focus:border-transparent"
                   autoComplete="email"
                 />
                 {errors.email && (
@@ -153,7 +153,7 @@ function PortalLoginForm() {
                 <input
                   {...register("password")}
                   type="password"
-                  className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1875F2] focus:border-transparent"
                   autoComplete="current-password"
                 />
                 {errors.password && (
@@ -163,7 +163,7 @@ function PortalLoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
+                className="w-full bg-[#1875F2] hover:bg-[#1461CE] text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
               >
                 {loading ? "Signing in…" : "Sign in"}
               </button>
@@ -177,7 +177,7 @@ function PortalLoginForm() {
                   setShowResendInvite(false);
                   setError(null);
                 }}
-                className="text-sm text-slate-500 hover:text-indigo-600 transition-colors text-left"
+                className="text-sm text-slate-500 hover:text-[#1875F2] transition-colors text-left"
               >
                 Forgot your password?
               </button>
@@ -188,7 +188,7 @@ function PortalLoginForm() {
                   setShowForgotPassword(false);
                   setError(null);
                 }}
-                className="text-sm text-slate-500 hover:text-indigo-600 transition-colors text-left"
+                className="text-sm text-slate-500 hover:text-[#1875F2] transition-colors text-left"
               >
                 Never set a password? Get a sign-in link instead.
               </button>
@@ -216,7 +216,7 @@ function PortalLoginForm() {
                     type="email"
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
-                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1875F2]"
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
@@ -225,7 +225,7 @@ function PortalLoginForm() {
                   type="button"
                   onClick={handleForgotPassword}
                   disabled={forgotLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE] text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
                 >
                   {forgotLoading ? "Sending…" : "Send Reset Email"}
                 </button>
@@ -240,7 +240,7 @@ function PortalLoginForm() {
                 setForgotError(null);
                 setForgotEmail("");
               }}
-              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+              className="text-sm text-slate-500 hover:text-[#1875F2] transition-colors"
             >
               Back to sign in
             </button>
@@ -271,7 +271,7 @@ function PortalLoginForm() {
                     type="email"
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
-                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1875F2]"
                     placeholder="you@example.com"
                     autoComplete="email"
                   />
@@ -280,7 +280,7 @@ function PortalLoginForm() {
                   type="button"
                   onClick={handleResendInvite}
                   disabled={inviteLoading}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE] text-white rounded-md px-4 py-2 text-sm font-medium disabled:opacity-50 transition-colors"
                 >
                   {inviteLoading ? "Sending…" : "Send Sign-in Link"}
                 </button>
@@ -294,7 +294,7 @@ function PortalLoginForm() {
                 setInviteError(null);
                 setInviteEmail("");
               }}
-              className="text-sm text-slate-500 hover:text-indigo-600 transition-colors"
+              className="text-sm text-slate-500 hover:text-[#1875F2] transition-colors"
             >
               Back to sign in
             </button>
@@ -306,7 +306,7 @@ function PortalLoginForm() {
           Need help?{" "}
           <a
             href="mailto:hello@bluuhq.com"
-            className="text-slate-500 hover:text-indigo-600 underline underline-offset-2"
+            className="text-slate-500 hover:text-[#1875F2] underline underline-offset-2"
           >
             Email hello@bluuhq.com
           </a>

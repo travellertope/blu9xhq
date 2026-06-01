@@ -175,7 +175,7 @@ export default function SetupPage() {
                   n < step
                     ? "bg-green-500 text-white"
                     : n === step
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-[#1875F2] text-white"
                     : "bg-slate-200 text-slate-400"
                 }`}
               >
@@ -233,7 +233,7 @@ export default function SetupPage() {
                   )}
                 </div>
                 <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE]"
                   onClick={handlePasswordStep}
                   disabled={loading || !password || !confirmPassword}
                 >
@@ -282,7 +282,7 @@ export default function SetupPage() {
                   />
                 </div>
                 <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE]"
                   onClick={handleProfileStep}
                   disabled={loading || !firstName.trim()}
                 >
@@ -313,7 +313,7 @@ export default function SetupPage() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="border rounded-lg p-3 hover:border-indigo-300 hover:bg-indigo-50 transition-colors"
+                      className="border rounded-lg p-3 hover:border-blue-300 hover:bg-blue-50 transition-colors"
                     >
                       <p className="font-medium text-sm text-slate-800">{item.label}</p>
                       <p className="text-xs text-slate-500 mt-0.5">{item.desc}</p>
@@ -321,7 +321,7 @@ export default function SetupPage() {
                   ))}
                 </div>
                 <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE]"
                   onClick={handleComplete}
                   disabled={loading}
                 >

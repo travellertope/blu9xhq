@@ -96,7 +96,7 @@ function StripeNewCardForm({
       <button
         onClick={handlePay}
         disabled={paying || !stripe}
-        className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
+        className="w-full bg-[#1875F2] hover:bg-[#1461CE] disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
       >
         {paying ? "Processing…" : "Pay " + formatAmount(currency, amount) + " Now"}
       </button>
@@ -183,13 +183,13 @@ function BankTransferSection({ invoiceId }: { invoiceId: number }) {
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.webp"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+              className="mt-1 block w-full text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-[#1461CE] hover:file:bg-blue-100"
             />
           </label>
           <button
             onClick={handleSubmitProof}
             disabled={!file || uploading}
-            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors"
+            className="inline-flex items-center gap-2 bg-[#1875F2] hover:bg-[#1461CE] disabled:opacity-50 text-white rounded-md px-4 py-2 text-sm font-medium transition-colors"
           >
             <Upload size={14} />
             {uploading ? "Uploading…" : "Submit Proof"}
@@ -324,7 +324,7 @@ export default function InvoiceDetailPage() {
     return (
       <div className="text-center py-16">
         <p className="text-slate-500">Invoice not found.</p>
-        <Link href="/portal/invoices" className="text-indigo-600 text-sm mt-2 inline-block">Back to invoices</Link>
+        <Link href="/portal/invoices" className="text-[#1875F2] text-sm mt-2 inline-block">Back to invoices</Link>
       </div>
     );
   }
@@ -343,7 +343,7 @@ export default function InvoiceDetailPage() {
         </div>
         <div className="ml-auto flex gap-2">
           {invoice.pdfKey && (
-            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 border border-slate-200 rounded-md px-3 py-1.5 transition-colors">
+            <button onClick={handleDownload} className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-[#1875F2] border border-slate-200 rounded-md px-3 py-1.5 transition-colors">
               <Download size={14} />
               PDF
             </button>
@@ -447,7 +447,7 @@ export default function InvoiceDetailPage() {
                       key={card.id}
                       className={"flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors " +
                         (selectedCardId === card.id && !useNewCard
-                          ? "border-indigo-400 bg-indigo-50"
+                          ? "border-indigo-400 bg-blue-50"
                           : "border-slate-200 hover:border-slate-300")}
                     >
                       <input
@@ -455,7 +455,7 @@ export default function InvoiceDetailPage() {
                         name="card"
                         checked={selectedCardId === card.id && !useNewCard}
                         onChange={() => { setSelectedCardId(card.id ?? null); setUseNewCard(false); }}
-                        className="text-indigo-600"
+                        className="text-[#1875F2]"
                       />
                       <div className="flex-1 text-sm">
                         <span className="capitalize font-medium text-slate-700">{card.brand}</span>
@@ -465,20 +465,20 @@ export default function InvoiceDetailPage() {
                         </span>
                       </div>
                       {card.isDefault && (
-                        <span className="text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">Default</span>
+                        <span className="text-xs bg-blue-100 text-[#1461CE] px-2 py-0.5 rounded-full font-medium">Default</span>
                       )}
                     </label>
                   ))}
                   <label
                     className={"flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors " +
-                      (useNewCard ? "border-indigo-400 bg-indigo-50" : "border-slate-200 hover:border-slate-300")}
+                      (useNewCard ? "border-indigo-400 bg-blue-50" : "border-slate-200 hover:border-slate-300")}
                   >
                     <input
                       type="radio"
                       name="card"
                       checked={useNewCard}
                       onChange={() => setUseNewCard(true)}
-                      className="text-indigo-600"
+                      className="text-[#1875F2]"
                     />
                     <span className="text-sm text-slate-700">Pay with a new card</span>
                   </label>
@@ -502,7 +502,7 @@ export default function InvoiceDetailPage() {
                 <button
                   onClick={handlePayWithSavedCard}
                   disabled={!selectedCardId || paying}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE] disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
                 >
                   {paying ? "Processing…" : "Pay " + formatAmount(invoice.currency, invoice.total) + " Now"}
                 </button>
@@ -520,7 +520,7 @@ export default function InvoiceDetailPage() {
                       key={card.authorizationCode}
                       className={"flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors " +
                         (selectedCardId === card.authorizationCode && !useNewCard
-                          ? "border-indigo-400 bg-indigo-50"
+                          ? "border-indigo-400 bg-blue-50"
                           : "border-slate-200 hover:border-slate-300")}
                     >
                       <input
@@ -528,7 +528,7 @@ export default function InvoiceDetailPage() {
                         name="card"
                         checked={selectedCardId === card.authorizationCode && !useNewCard}
                         onChange={() => { setSelectedCardId(card.authorizationCode ?? null); setUseNewCard(false); }}
-                        className="text-indigo-600"
+                        className="text-[#1875F2]"
                       />
                       <div className="flex-1 text-sm">
                         <span className="capitalize font-medium text-slate-700">{card.cardType}</span>
@@ -538,14 +538,14 @@ export default function InvoiceDetailPage() {
                   ))}
                   <label
                     className={"flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors " +
-                      (useNewCard ? "border-indigo-400 bg-indigo-50" : "border-slate-200 hover:border-slate-300")}
+                      (useNewCard ? "border-indigo-400 bg-blue-50" : "border-slate-200 hover:border-slate-300")}
                   >
                     <input
                       type="radio"
                       name="card"
                       checked={useNewCard}
                       onChange={() => setUseNewCard(true)}
-                      className="text-indigo-600"
+                      className="text-[#1875F2]"
                     />
                     <span className="text-sm text-slate-700">Add and pay with Paystack</span>
                   </label>
@@ -555,7 +555,7 @@ export default function InvoiceDetailPage() {
               {(savedCards.length === 0 || useNewCard) ? (
                 <button
                   onClick={handlePaystackRedirect}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE] text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
                 >
                   Pay with Paystack →
                 </button>
@@ -563,7 +563,7 @@ export default function InvoiceDetailPage() {
                 <button
                   onClick={handlePayWithSavedCard}
                   disabled={!selectedCardId || paying}
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="w-full bg-[#1875F2] hover:bg-[#1461CE] disabled:opacity-50 text-white rounded-md px-4 py-2.5 text-sm font-medium transition-colors"
                 >
                   {paying ? "Processing…" : "Pay " + formatAmount(invoice.currency, invoice.total) + " Now"}
                 </button>
