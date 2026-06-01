@@ -69,10 +69,29 @@ export async function sendEmailHtml(params: {
 
 export async function sendPortalInvite(
   to: string,
-  props: import("./emails/PortalInvite").PortalInviteProps
+  props: { clientName: string; loginUrl: string }
 ) {
-  const { default: T, subject } = await import("./emails/PortalInvite");
-  return sendEmail({ to, subject, template: React.createElement(T, props) });
+  const { clientName, loginUrl } = props;
+  return sendEmailHtml({
+    to,
+    subject: "You've been invited to your BluuHQ client portal",
+    html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;background:#fff">
+      <div style="background:#4F46E5;padding:24px 32px">
+        <p style="color:#fff;font-size:20px;font-weight:700;margin:0">BluuHQ</p>
+      </div>
+      <div style="padding:32px">
+        <p style="font-size:18px;font-weight:600;color:#1E293B;margin:0 0 20px">Welcome, ${clientName}!</p>
+        <p style="color:#1E293B;font-size:15px;line-height:1.6;margin:0 0 16px">You've been invited to your BluuHQ client portal — a secure space where you can view your invoices, shared files, and service updates.</p>
+        <p style="color:#1E293B;font-size:15px;line-height:1.6;margin:0 0 24px">Click the button below to access your portal:</p>
+        <a href="${loginUrl}" style="display:inline-block;background:#4F46E5;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;font-size:14px">Access Your Portal</a>
+        <p style="color:#64748B;font-size:13px;margin:24px 0 0">If you didn't expect this email, you can safely ignore it.</p>
+      </div>
+      <hr style="border-color:#E2E8F0;margin:0">
+      <div style="padding:16px 32px;background:#F8FAFC">
+        <p style="color:#94A3B8;font-size:12px;margin:0;line-height:1.5">BluuHQ &middot; hello@bluuhq.com<br>You received this email because you are a BluuHQ client.</p>
+      </div>
+    </div>`,
+  });
 }
 
 export async function sendTeamInvite(
