@@ -190,6 +190,9 @@ foreach ( [
     'bluu_invoice',
     'bluu_file',
     'bluu_communication',
+    'bluu_ticket',
+    'bluu_ticket_reply',
+    'bluu_ticket_attachment',
 ] as $_bluuhq_cpt ) {
     add_filter( "rest_{$_bluuhq_cpt}_query", function ( array $args, WP_REST_Request $request ): array {
         $meta_key   = $request->get_param( 'meta_key' );

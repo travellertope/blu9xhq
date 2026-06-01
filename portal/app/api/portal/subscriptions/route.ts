@@ -41,17 +41,25 @@ export async function GET(req: NextRequest) {
       return { items: [], total: 0, totalPages: 0 };
     });
 
+    // Fetch each unique service once, then reuse across subscriptions
+    const uniqueServiceIds = Array.from(
+      new Set(subsResult.items.map((s) => s.acf.service_id).filter(Boolean) as number[])
+    );
+    const serviceMap = new Map<number, Awaited<ReturnType<typeof getServicePost>> | null>(
+      await Promise.all(
+        uniqueServiceIds.map(async (id) => [id, await getServicePost(id).catch(() => null)] as const)
+      )
+    );
+
     const subscriptions = await Promise.all(
       subsResult.items.map(async (sub) => {
-        const [service, filesResult] = await Promise.all([
-          sub.acf.service_id
-            ? getServicePost(sub.acf.service_id).catch(() => null)
-            : Promise.resolve(null),
+        const [filesResult] = await Promise.all([
           listClientFiles(clientPost.id, {
             meta_key: "file_subscription_id",
             meta_value: sub.id,
           }).catch(() => ({ items: [] })),
         ]);
+        const service = sub.acf.service_id ? (serviceMap.get(sub.acf.service_id) ?? null) : null;
 
         let actionButtons: ActionButton[] = [];
         try {
