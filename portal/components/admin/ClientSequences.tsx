@@ -4,16 +4,18 @@ import { useState, useEffect, useCallback } from "react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { Loader2, Pause, Play } from "lucide-react";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
 
 interface Enrollment {
   enrollmentId: number;
   sequenceId:   number;
   sequenceName: string;
+  status:       "active" | "paused";
   currentStep:  number;
   totalSteps:   number;
   enrolledAt:   string;
+  pausedAt:     string | null;
 }
 
 interface WPSequence {
@@ -30,12 +32,13 @@ interface ClientSequencesProps {
 }
 
 export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps) {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
-  const [sequences, setSequences] = useState<WPSequence[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [enrolling, setEnrolling] = useState(false);
+  const [enrollments, setEnrollments]         = useState<Enrollment[]>([]);
+  const [sequences, setSequences]             = useState<WPSequence[]>([]);
+  const [loading, setLoading]                 = useState(true);
+  const [enrolling, setEnrolling]             = useState(false);
   const [selectedSequenceId, setSelectedSequenceId] = useState("");
-  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [removingId, setRemovingId]           = useState<number | null>(null);
+  const [togglingId, setTogglingId]           = useState<number | null>(null);
 
   const loadEnrollments = useCallback(async () => {
     try {
@@ -56,7 +59,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
           fetch("/api/admin/sequences"),
         ]);
         const enrollData = await enrollRes.json();
-        const seqData = await seqRes.json();
+        const seqData    = await seqRes.json();
 
         setEnrollments(enrollData.enrollments ?? []);
         const allSequences: WPSequence[] = seqData.sequences ?? seqData ?? [];
@@ -76,10 +79,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
       const res = await fetch("/api/admin/sequences/remove-client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientId,
-          enrollmentId: enrollment.enrollmentId,
-        }),
+        body: JSON.stringify({ clientId, enrollmentId: enrollment.enrollmentId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to remove");
@@ -92,6 +92,39 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
     }
   }
 
+  async function handleTogglePause(enrollment: Enrollment) {
+    const action = enrollment.status === "active" ? "pause" : "resume";
+    setTogglingId(enrollment.enrollmentId);
+    try {
+      const res = await fetch(
+        `/api/admin/sequences/pause-resume/${enrollment.enrollmentId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action }),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed");
+      toast.success(
+        action === "pause"
+          ? `Paused "${enrollment.sequenceName}"`
+          : `Resumed "${enrollment.sequenceName}"`
+      );
+      setEnrollments((prev) =>
+        prev.map((e) =>
+          e.enrollmentId === enrollment.enrollmentId
+            ? { ...e, status: action === "pause" ? "paused" : "active" }
+            : e
+        )
+      );
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed");
+    } finally {
+      setTogglingId(null);
+    }
+  }
+
   async function handleEnrol() {
     if (!selectedSequenceId) return;
     const seq = sequences.find((s) => String(s.id) === selectedSequenceId);
@@ -101,11 +134,7 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
       const res = await fetch("/api/admin/sequences/enrol-client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          clientId,
-          sequenceId: seq.id,
-          clientEmail,
-        }),
+        body: JSON.stringify({ clientId, sequenceId: seq.id, clientEmail }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to enrol");
@@ -120,13 +149,13 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
   }
 
   const enrolledSequenceIds = new Set(enrollments.map((e) => e.sequenceId));
-  const availableSequences = sequences.filter((s) => !enrolledSequenceIds.has(s.id));
+  const availableSequences  = sequences.filter((s) => !enrolledSequenceIds.has(s.id));
 
   return (
     <div className="space-y-6">
-      {/* Active Enrollments */}
+      {/* Enrollments */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900 mb-3">Active Enrollments</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-3">Enrollments</h3>
 
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
@@ -145,9 +174,16 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
                 className="flex items-center justify-between rounded-lg border bg-white px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    {enrollment.sequenceName}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-gray-900">
+                      {enrollment.sequenceName}
+                    </p>
+                    {enrollment.status === "paused" && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                        Paused
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-3 mt-0.5">
                     <p className="text-xs text-gray-500">
                       Enrolled:{" "}
@@ -161,18 +197,46 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
                         of {enrollment.totalSteps}
                       </p>
                     )}
+                    {enrollment.status === "paused" && enrollment.pausedAt && (
+                      <p className="text-xs text-amber-600">
+                        Paused {format(parseISO(enrollment.pausedAt), "MMM d")}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <button
-                  onClick={() => handleRemove(enrollment)}
-                  disabled={removingId === enrollment.enrollmentId}
-                  className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 transition-colors"
-                >
-                  {removingId === enrollment.enrollmentId ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : null}
-                  Remove
-                </button>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleTogglePause(enrollment)}
+                    disabled={togglingId === enrollment.enrollmentId}
+                    title={enrollment.status === "active" ? "Pause sequence" : "Resume sequence"}
+                    className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-50 transition-colors ${
+                      enrollment.status === "active"
+                        ? "border-amber-200 bg-white text-amber-600 hover:bg-amber-50"
+                        : "border-green-200 bg-white text-green-600 hover:bg-green-50"
+                    }`}
+                  >
+                    {togglingId === enrollment.enrollmentId ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : enrollment.status === "active" ? (
+                      <Pause className="h-3 w-3" />
+                    ) : (
+                      <Play className="h-3 w-3" />
+                    )}
+                    {enrollment.status === "active" ? "Pause" : "Resume"}
+                  </button>
+
+                  <button
+                    onClick={() => handleRemove(enrollment)}
+                    disabled={removingId === enrollment.enrollmentId}
+                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 transition-colors"
+                  >
+                    {removingId === enrollment.enrollmentId ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : null}
+                    Remove
+                  </button>
+                </div>
               </div>
             ))}
           </div>

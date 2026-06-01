@@ -207,7 +207,14 @@ export function sendSequenceEmail(params: {
   to: string;
   subject: string;
   html: string;
+  pauseUrl?: string;
   tags?: { name: string; value: string }[];
 }): Promise<string | null> {
-  return sendEmailHtml(params);
+  const pauseFooter = params.pauseUrl
+    ? `<div style="margin-top:40px;padding-top:16px;border-top:1px solid #E2E8F0;font-family:sans-serif;font-size:12px;color:#94A3B8;text-align:center">
+        Not interested in these emails?&nbsp;
+        <a href="${params.pauseUrl}" style="color:#94A3B8;text-decoration:underline">Click here to pause this sequence</a>
+       </div>`
+    : "";
+  return sendEmailHtml({ ...params, html: params.html + pauseFooter });
 }

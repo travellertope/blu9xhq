@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { listEnrollments, getSequence, updateEnrollment } from "@/lib/wp-api";
 import { sendSequenceEmail } from "@/lib/resend";
+import { generatePauseToken } from "@/lib/sequencePauseToken";
 
 export const runtime = "nodejs";
 
@@ -43,11 +44,15 @@ export async function GET(req: NextRequest) {
         }
 
         if (step.subject && step.body_html) {
+          const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "";
+          const token   = generatePauseToken(enrollment.id);
+          const pauseUrl = `${appUrl}/api/sequences/pause?token=${token}`;
           await sendSequenceEmail({
-            to:      enrollment.acf.enr_client_email,
-            subject: step.subject,
-            html:    step.body_html,
-            tags:    [{ name: "sequence_id", value: String(enrollment.acf.enr_sequence_id) }],
+            to:       enrollment.acf.enr_client_email,
+            subject:  step.subject,
+            html:     step.body_html,
+            pauseUrl,
+            tags:     [{ name: "sequence_id", value: String(enrollment.acf.enr_sequence_id) }],
           });
           results.sent++;
         }
