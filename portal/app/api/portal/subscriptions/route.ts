@@ -17,20 +17,34 @@ export async function GET(req: NextRequest) {
   if (result instanceof NextResponse) return result;
   const { session } = result;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
 
-  if (!wpUserId) {
+  if (!wpUserId && !sessionClientId) {
     return NextResponse.json({ subscriptions: [] });
   }
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
-    if (!clientPost) {
-      return NextResponse.json({ subscriptions: [] });
+    // Prefer clientId already in the JWT — avoids a WP meta query
+    let clientPostId = sessionClientId;
+    if (!clientPostId) {
+      const clientPost = await findClientByWpUserId(wpUserId!).catch((err) => {
+        console.error("[portal/subscriptions] findClientByWpUserId failed:", err);
+        return null;
+      });
+      if (!clientPost) {
+        return NextResponse.json({ subscriptions: [] });
+      }
+      clientPostId = clientPost.id;
     }
+    // Shim so the rest of the code can keep using clientPost.id
+    const clientPost = { id: clientPostId };
 
-    const subsResult = await listSubscriptionsByClient(clientPost.id);
+    const subsResult = await listSubscriptionsByClient(clientPost.id).catch((err) => {
+      console.error("[portal/subscriptions] listSubscriptionsByClient failed:", err);
+      return { items: [], total: 0, totalPages: 0 };
+    });
 
     const subscriptions = await Promise.all(
       subsResult.items.map(async (sub) => {

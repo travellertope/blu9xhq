@@ -7,13 +7,19 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
-  if (!wpUserId) return NextResponse.json({ invoices: [] });
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
+  if (!wpUserId && !sessionClientId) return NextResponse.json({ invoices: [] });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
-    if (!clientPost) return NextResponse.json({ invoices: [] });
+    let clientPostId = sessionClientId;
+    if (!clientPostId) {
+      const found = await findClientByWpUserId(wpUserId!).catch(() => null);
+      if (!found) return NextResponse.json({ invoices: [] });
+      clientPostId = found.id;
+    }
+    const clientPost = { id: clientPostId };
 
     const { items } = await listInvoices({ clientId: clientPost.id, per_page: 100 });
 

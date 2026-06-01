@@ -7,13 +7,19 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
 
-  const user = session.user as { wpUserId?: number };
+  const user = session.user as { wpUserId?: number; clientId?: number | string };
   const wpUserId = user.wpUserId;
-  if (!wpUserId) return NextResponse.json({ sharedByBluuHQ: [], sharedByClient: [] });
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
+  if (!wpUserId && !sessionClientId) return NextResponse.json({ sharedByBluuHQ: [], sharedByClient: [] });
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
-    if (!clientPost) return NextResponse.json({ sharedByBluuHQ: [], sharedByClient: [] });
+    let clientPostId = sessionClientId;
+    if (!clientPostId) {
+      const found = await findClientByWpUserId(wpUserId!).catch(() => null);
+      if (!found) return NextResponse.json({ sharedByBluuHQ: [], sharedByClient: [] });
+      clientPostId = found.id;
+    }
+    const clientPost = { id: clientPostId };
 
     const { items } = await listClientFiles(clientPost.id);
     const shared = items.filter((f) => f.acf.file_visibility === "shared");

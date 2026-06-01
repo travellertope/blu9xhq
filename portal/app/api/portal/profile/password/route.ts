@@ -39,10 +39,12 @@ export async function PATCH(req: NextRequest) {
   const wpUserId = user.wpUserId;
   if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
 
-  let body: { currentPassword?: string; newPassword?: string };
+  let body: { currentPassword?: string; newPassword?: string; password?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
 
-  const { currentPassword, newPassword } = body;
+  const { currentPassword } = body;
+  // Accept either field name — setup page used to send "password", now sends "newPassword"
+  const newPassword = body.newPassword ?? body.password;
   if (typeof newPassword !== "string" || newPassword.length < 8) {
     return NextResponse.json({ error: "New password must be at least 8 characters" }, { status: 400 });
   }
