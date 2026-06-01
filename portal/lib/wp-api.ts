@@ -273,6 +273,16 @@ export function listAllSubscriptions(params: { per_page?: number; page?: number 
 }
 
 // Update subscription ACF fields (for cancellation)
+export function createSubscription(params: {
+  title: string;
+  acf: Partial<WPSubscriptionACF>;
+}): Promise<WPSubscriptionPost> {
+  return wpRestFetch("/wp/v2/bluu_subscription", {
+    method: "POST",
+    body: JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+  });
+}
+
 export function updateSubscription(postId: number, params: { acf: Partial<WPSubscriptionACF> }): Promise<WPSubscriptionPost> {
   return wpRestFetch(`/wp/v2/bluu_subscription/${postId}`, {
     method: "POST",

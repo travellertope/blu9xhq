@@ -1,6 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSession } from "@/lib/apiPermissions";
-import { listAllSubscriptions, getClientPost, getServicePost } from "@/lib/wp-api";
+import { requireSession, requirePermission } from "@/lib/apiPermissions";
+import { listAllSubscriptions, createSubscription, getClientPost, getServicePost } from "@/lib/wp-api";
+import { z } from "zod";
+
+const postSchema = z.object({
+  clientId:       z.number().int().positive(),
+  serviceId:      z.number().int().positive(),
+  status:         z.enum(["active", "paused", "cancelled", "pending"]).default("active"),
+  amount:         z.number().min(0),
+  currency:       z.string().min(1),
+  billingCycle:   z.enum(["monthly", "quarterly", "annual", "one_time"]),
+  startDate:      z.string().optional(),
+  nextBillingDate: z.string().optional(),
+  notes:          z.string().optional(),
+});
 
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
@@ -58,5 +71,52 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     console.error("[GET /api/admin/subscriptions]", err);
     return NextResponse.json({ error: "Failed to load subscriptions" }, { status: 500 });
+  }
+}
+
+// ─── POST /api/admin/subscriptions ────────────────────────────────────────────
+
+export async function POST(req: NextRequest) {
+  const auth = await requirePermission(req, "manage_subscriptions");
+  if (auth instanceof NextResponse) return auth;
+
+  const body = await req.json().catch(() => ({}));
+  const parsed = postSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: parsed.error.flatten() },
+      { status: 422 }
+    );
+  }
+  const d = parsed.data;
+
+  try {
+    const [client, service] = await Promise.all([
+      getClientPost(d.clientId).catch(() => null),
+      getServicePost(d.serviceId).catch(() => null),
+    ]);
+
+    const clientLabel  = client?.acf?.company_name || client?.acf?.contact_name || `Client #${d.clientId}`;
+    const serviceLabel = service?.title?.rendered?.replace(/<[^>]+>/g, "") || `Service #${d.serviceId}`;
+
+    const post = await createSubscription({
+      title: `${clientLabel} — ${serviceLabel}`,
+      acf: {
+        client_id:         d.clientId,
+        service_id:        d.serviceId,
+        status:            d.status,
+        amount:            d.amount,
+        currency:          d.currency,
+        billing_cycle:     d.billingCycle,
+        start_date:        d.startDate,
+        next_billing_date: d.nextBillingDate,
+        notes:             d.notes,
+      },
+    });
+
+    return NextResponse.json({ subscription: post }, { status: 201 });
+  } catch (err) {
+    console.error("[POST /api/admin/subscriptions]", err);
+    return NextResponse.json({ error: "Failed to create subscription" }, { status: 500 });
   }
 }
