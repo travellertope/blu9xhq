@@ -17,6 +17,12 @@ export async function GET(req: NextRequest) {
       const clientId = parseInt(clientIdStr, 10);
       if (isNaN(clientId)) return NextResponse.json({ error: "Invalid clientId" }, { status: 400 });
       ({ items, total, totalPages } = await listClientFiles(clientId));
+      // Defensive post-filter: guards against WP meta_key query being ignored
+      // when ACF show_in_rest is not configured. Once configured, this strictly
+      // enforces that only files belonging to this client are returned.
+      items = items.filter(
+        p => !p.acf?.file_client || Number(p.acf.file_client) === clientId
+      );
     } else {
       ({ items, total, totalPages } = await listAllFiles({ per_page: 50, page }));
     }

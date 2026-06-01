@@ -101,7 +101,11 @@ export async function GET(req: NextRequest) {
         if (p >= result.totalPages) break;
         p++;
       }
-      raw = all;
+      // Defensive post-filter: guards against WP meta_key query being ignored
+      // when ACF show_in_rest is not configured.
+      raw = all.filter(
+        p => !p.acf?.comm_client || Number(p.acf.comm_client) === clientId
+      );
     } else {
       return NextResponse.json({ error: "clientId is required" }, { status: 400 });
     }
