@@ -43,9 +43,6 @@ export async function PATCH(req: NextRequest) {
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
 
   const { currentPassword, newPassword } = body;
-  if (typeof currentPassword !== "string" || !currentPassword) {
-    return NextResponse.json({ error: "currentPassword is required" }, { status: 400 });
-  }
   if (typeof newPassword !== "string" || newPassword.length < 8) {
     return NextResponse.json({ error: "New password must be at least 8 characters" }, { status: 400 });
   }
@@ -53,10 +50,14 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Password is too weak — use a mix of letters, numbers, and symbols" }, { status: 400 });
   }
 
-  const email = user.email ?? "";
-  const valid = await verifyCurrentPassword(email, currentPassword);
-  if (!valid) {
-    return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+  // currentPassword is required when changing an existing password (profile page),
+  // but omitted during first-time setup where the client has no password yet.
+  if (currentPassword) {
+    const email = user.email ?? "";
+    const valid = await verifyCurrentPassword(email, currentPassword);
+    if (!valid) {
+      return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+    }
   }
 
   try {
