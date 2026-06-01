@@ -11,15 +11,25 @@ function authHeader(): string {
   return `Basic ${Buffer.from(`${WP_APP_USERNAME}:${WP_APP_PASSWORD}`).toString("base64")}`;
 }
 
-export async function wpRestFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+type FetchOptions = RequestInit & {
+  /** Seconds to cache via Next.js Data Cache. Omit for no-store (default). */
+  revalidate?: number;
+};
+
+export async function wpRestFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
+  const { revalidate, ...fetchOptions } = options;
+  const cacheConfig: RequestInit = revalidate !== undefined
+    ? { next: { revalidate } }
+    : { cache: "no-store" };
+
   const res = await fetch(`${WORDPRESS_URL}/wp-json${path}`, {
-    ...options,
+    ...fetchOptions,
     headers: {
       "Content-Type": "application/json",
       Authorization: authHeader(),
-      ...(options.headers ?? {}),
+      ...(fetchOptions.headers ?? {}),
     },
-    cache: "no-store",
+    ...cacheConfig,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
@@ -201,7 +211,7 @@ export interface WPServicePost {
 }
 
 export function getServicePost(postId: number): Promise<WPServicePost> {
-  return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`);
+  return wpRestFetch<WPServicePost>(`/wp/v2/bluu_service/${postId}`, { revalidate: 300 });
 }
 
 export function listServices(params: Record<string, string | number> = {}): Promise<WPListResult<WPServicePost>> {
@@ -249,7 +259,7 @@ export interface WPSubscriptionPost {
 }
 
 export function getSubscription(postId: number): Promise<WPSubscriptionPost> {
-  return wpRestFetch<WPSubscriptionPost>(`/wp/v2/bluu_subscription/${postId}`);
+  return wpRestFetch<WPSubscriptionPost>(`/wp/v2/bluu_subscription/${postId}`, { revalidate: 60 });
 }
 
 /** @deprecated Use listSubscriptionsByClient for portal use */
