@@ -8,22 +8,26 @@ export async function GET(req: NextRequest) {
   if (result instanceof NextResponse) return result;
   const { session } = result;
 
-  const user = session.user as { wpUserId?: number; name?: string | null; email?: string | null };
+  const user = session.user as { wpUserId?: number; clientId?: number | string; name?: string | null; email?: string | null };
   const wpUserId = user.wpUserId;
+  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
 
   if (!wpUserId) {
     return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
   }
 
   try {
-    const clientPost = await findClientByWpUserId(wpUserId);
-    if (!clientPost) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    let clientPostId = sessionClientId;
+    if (!clientPostId) {
+      const found = await findClientByWpUserId(wpUserId).catch(() => null);
+      if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+      clientPostId = found.id;
     }
+    const clientPost = { id: clientPostId, acf: { contact_name: user.name ?? "", portal_email: user.email ?? "" } };
 
     const [subsResult, invoicesResult, wpUser] = await Promise.all([
-      listSubscriptionsByClient(clientPost.id),
-      listInvoices({ clientId: clientPost.id }),
+      listSubscriptionsByClient(clientPost.id).catch(() => ({ items: [] })),
+      listInvoices({ clientId: clientPost.id }).catch(() => ({ items: [] })),
       wpRestFetch<WPUser>(`/wp/v2/users/${wpUserId}`).catch(() => null),
     ]);
 
