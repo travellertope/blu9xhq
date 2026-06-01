@@ -121,3 +121,61 @@ function bluuhq_register_cpts(): void {
         register_post_type( $slug, array_merge( $shared, $args ) );
     }
 }
+
+// ─── Register meta keys for REST API filtering ───────────────────────────────
+// WP REST ?meta_key=X&meta_value=Y filtering only works for registered meta.
+
+add_action( 'init', 'bluuhq_register_post_meta_keys', 20 );
+function bluuhq_register_post_meta_keys(): void {
+
+    // bluu_client
+    foreach ( [
+        'contact_name', 'contact_email', 'contact_phone', 'company_name',
+        'company_website', 'industry', 'portal_email', 'status', 'health_status',
+        'tags', 'notes',
+    ] as $key ) {
+        register_post_meta( 'bluu_client', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'wp_user_id', 'active_subscription_count' ] as $key ) {
+        register_post_meta( 'bluu_client', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+
+    // bluu_subscription
+    foreach ( [ 'status', 'currency', 'billing_cycle', 'start_date', 'next_billing_date', 'end_date', 'notes' ] as $key ) {
+        register_post_meta( 'bluu_subscription', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'client_id', 'service_id', 'wp_user_id' ] as $key ) {
+        register_post_meta( 'bluu_subscription', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+    register_post_meta( 'bluu_subscription', 'amount', [ 'show_in_rest' => true, 'single' => true, 'type' => 'number' ] );
+
+    // bluu_invoice
+    foreach ( [ 'inv_number', 'inv_status', 'inv_currency', 'inv_issued_date', 'inv_due_date', 'inv_notes' ] as $key ) {
+        register_post_meta( 'bluu_invoice', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'inv_client', 'inv_subscription' ] as $key ) {
+        register_post_meta( 'bluu_invoice', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+    register_post_meta( 'bluu_invoice', 'inv_total', [ 'show_in_rest' => true, 'single' => true, 'type' => 'number' ] );
+
+    // bluu_file
+    foreach ( [ 'file_category', 'file_visibility', 'file_mime_type', 'file_r2_key', 'file_public_url', 'file_original_name', 'file_description' ] as $key ) {
+        register_post_meta( 'bluu_file', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'file_client', 'file_subscription_id', 'file_uploaded_by', 'file_size' ] as $key ) {
+        register_post_meta( 'bluu_file', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+
+    // bluu_communication
+    foreach ( [ 'comm_type', 'comm_direction', 'comm_channel', 'comm_subject', 'comm_content',
+                'comm_occurred_at', 'comm_mood', 'comm_mood_source', 'comm_mood_reasoning',
+                'comm_red_flags', 'comm_email_status', 'comm_follow_up_due' ] as $key ) {
+        register_post_meta( 'bluu_communication', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'comm_client', 'comm_logged_by' ] as $key ) {
+        register_post_meta( 'bluu_communication', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+    foreach ( [ 'comm_follow_up_needed', 'comm_follow_up_completed' ] as $key ) {
+        register_post_meta( 'bluu_communication', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+}

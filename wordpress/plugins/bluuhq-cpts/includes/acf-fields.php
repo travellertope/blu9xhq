@@ -29,9 +29,10 @@ function bluuhq_register_acf_fields(): void {
 
 function bluuhq_acf_user_meta(): void {
     acf_add_local_field_group( [
-        'key'      => 'group_bluuhq_user_meta',
-        'title'    => 'BluuHQ Team Settings',
-        'fields'   => [
+        'key'          => 'group_bluuhq_user_meta',
+        'title'        => 'BluuHQ Team Settings',
+        'show_in_rest' => true,
+        'fields'       => [
             [
                 'key'           => 'field_bluuhq_user_role',
                 'label'         => 'BluuHQ Role',
@@ -78,6 +79,7 @@ function bluuhq_acf_client(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_client',
         'title'            => 'Client Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'clientDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_client' ] ] ],
@@ -138,6 +140,7 @@ function bluuhq_acf_service(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_service',
         'title'            => 'Service Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'serviceDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_service' ] ] ],
@@ -182,6 +185,7 @@ function bluuhq_acf_subscription(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_subscription',
         'title'            => 'Subscription Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'subscriptionDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_subscription' ] ] ],
@@ -244,6 +248,7 @@ function bluuhq_acf_invoice(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_invoice',
         'title'            => 'Invoice Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'invoiceDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_invoice' ] ] ],
@@ -304,6 +309,7 @@ function bluuhq_acf_file(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_file',
         'title'            => 'File Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'fileDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_file' ] ] ],
@@ -352,6 +358,7 @@ function bluuhq_acf_communication(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_communication',
         'title'            => 'Communication Log',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'communicationLog',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_communication' ] ] ],
@@ -414,6 +421,7 @@ function bluuhq_acf_sequence(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_sequence',
         'title'            => 'Sequence Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'sequenceDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_sequence' ] ] ],
@@ -463,6 +471,7 @@ function bluuhq_acf_email_template(): void {
     acf_add_local_field_group( [
         'key'              => 'group_bluuhq_email_template',
         'title'            => 'Email Template Details',
+        'show_in_rest'     => true,
         'show_in_graphql'  => 1,
         'graphql_field_name' => 'emailTemplateDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_email_template' ] ] ],
