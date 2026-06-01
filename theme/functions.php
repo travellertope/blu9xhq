@@ -486,11 +486,9 @@ function bluu_industries_mega_panel() {
         $active = $first ? ' is-active' : '';
         $left  .= '<button class="mega-ind-btn' . $active . '" data-panel="' . esc_attr( $key ) . '" type="button">';
         $left  .= '<span>' . $ind['name'] . '</span>';
-        $left  .= '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
         $left  .= '</button>';
         $first  = false;
     }
-    $left .= '<a href="' . esc_url( home_url( '/industries' ) ) . '" class="mega-ind-all-link">All industries →</a>';
     $left .= '</nav>';
 
     // Right panels
@@ -524,8 +522,12 @@ function bluu_industries_mega_panel() {
     }
     $panels .= '</div>';
 
+    $left_col = '<div class="mega-ind-left-col">' . $left
+        . '<a href="' . esc_url( home_url( '/industries' ) ) . '" class="mega-ind-all-link">View all industries →</a>'
+        . '</div>';
+
     return '<div class="mega-panel mega-panel--left-nav"><div class="mega-panel__inner"><div class="mega-ind-wrap">'
-        . $left . $panels
+        . $left_col . $panels
         . '</div></div></div>';
 }
 

@@ -5560,15 +5560,21 @@ a.contact-info__value:hover {
 .mega-panel--left-nav .mega-panel__inner { padding: 0; }
 .mega-ind-wrap { display: flex; min-height: 300px; }
 
-.mega-ind-left {
+.mega-ind-left-col {
     width: 200px;
     flex-shrink: 0;
     border-right: 1px solid var(--md-outline-variant);
-    padding: var(--space-4) var(--space-3);
+    background: var(--md-surface-variant);
+    display: flex;
+    flex-direction: column;
+}
+
+.mega-ind-left {
+    flex: 1;
+    padding: var(--space-4) var(--space-3) var(--space-2);
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
-    background: var(--md-surface-variant);
 }
 
 .mega-ind-btn {
@@ -5605,14 +5611,19 @@ a.contact-info__value:hover {
 .mega-ind-btn.is-active::after { opacity: 1; }
 
 .mega-ind-all-link {
-    margin-top: auto;
-    padding: 8px 12px;
+    display: block;
+    padding: 10px 12px;
     font-size: var(--font-size-xs);
+    font-weight: 500;
     color: var(--md-accent);
     text-decoration: none;
     border-top: 1px solid var(--md-outline-variant);
+    background: var(--md-surface-variant);
 }
-.mega-ind-all-link:hover { text-decoration: underline; }
+.mega-ind-all-link:hover {
+    background: var(--md-surface);
+    text-decoration: underline;
+}
 
 .mega-ind-panels { flex: 1; padding: var(--space-6) var(--space-7); overflow: hidden; }
 
