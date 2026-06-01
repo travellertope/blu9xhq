@@ -34,7 +34,7 @@ export default function TicketReply({
           </Text>
           <Section style={{
             backgroundColor: "#F8FAFC",
-            borderLeft: "3px solid #4F46E5",
+            borderLeft: "3px solid #1875F2",
             padding: "12px 16px",
             borderRadius: "0 6px 6px 0",
             marginBottom: 20,

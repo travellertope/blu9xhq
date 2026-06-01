@@ -1,7 +1,7 @@
 import { Section, Text, Hr, Container } from "@react-email/components";
 import React from "react";
 
-const PRIMARY = "#4F46E5";
+const PRIMARY = "#1875F2";
 const BODY_TEXT = "#1E293B";
 const SLATE_400 = "#94A3B8";
 

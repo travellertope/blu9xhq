@@ -43,7 +43,7 @@ export default function InvoiceReady({ clientName, invoiceNumber, amount, curren
           <Button href={payUrl} style={buttonStyle}>Pay Now</Button>
           <Text style={{ ...bodyTextStyle, marginTop: "20px", fontSize: "13px", color: "#64748B" }}>
             You can also view all your invoices and payment history in your{" "}
-            <a href={payUrl} style={{ color: "#4F46E5" }}>client portal</a>.
+            <a href={payUrl} style={{ color: "#1875F2" }}>client portal</a>.
           </Text>
         </EmailLayout>
       </Body>
