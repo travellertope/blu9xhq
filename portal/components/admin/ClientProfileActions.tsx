@@ -14,9 +14,12 @@ interface ClientProfileActionsProps {
   clientId: string;
   clientIdNum: number;
   currentHealth?: string;
+  clientEmail?: string;
+  clientName?: string;
+  companyName?: string;
 }
 
-export function ClientProfileActions({ clientId, clientIdNum, currentHealth }: ClientProfileActionsProps) {
+export function ClientProfileActions({ clientId, clientIdNum, currentHealth, clientEmail, clientName, companyName }: ClientProfileActionsProps) {
   const [healthOpen,    setHealthOpen]    = useState(false);
   const [logOpen,       setLogOpen]       = useState(false);
   const [emailOpen,     setEmailOpen]     = useState(false);
@@ -122,7 +125,11 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth }: C
       <EmailComposer
         open={emailOpen}
         onClose={() => setEmailOpen(false)}
+        onSent={handleCommSaved}
         clientId={clientIdNum}
+        clientEmail={clientEmail}
+        clientName={clientName}
+        companyName={companyName}
       />
     </div>
   );

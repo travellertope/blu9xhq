@@ -5,6 +5,7 @@ import {
   listClientPosts,
   listClientSubscriptions,
   listFollowUpCommunications,
+  listServices,
   wpRestList,
   type WPCommunicationPost,
   type WPSubscriptionPost,
@@ -56,6 +57,8 @@ export async function GET(req: NextRequest) {
     upcomingRenewalsResult,
     followUpsResult,
     recentActivityResult,
+    servicesResult,
+    sequencesResult,
     cancellationQueueResult,
   ] = await Promise.all([
     // Outstanding (sent)
@@ -91,12 +94,17 @@ export async function GET(req: NextRequest) {
       order: "desc",
     }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
 
-    // Cancellation queue — subscriptions with cancellation_requested
+    // Services count (for setup checklist)
+    listServices({ per_page: 1 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+
+    // Sequences count (for setup checklist)
+    wpRestList("/wp/v2/bluu_sequence", { per_page: 1, status: "publish" }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+
+    // Cancellation queue — subscriptions where client has requested cancellation
+    // Filter client-side by sub_cancellation_requested_at being non-empty
     wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
-      per_page: 10,
+      per_page: 50,
       status: "publish",
-      meta_key: "status",
-      meta_value: "cancellation_requested",
     }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
   ]);
 
@@ -117,7 +125,8 @@ export async function GET(req: NextRequest) {
       const cycle = s.acf?.billing_cycle ?? "monthly";
       if (cycle === "monthly") return sum + amount;
       if (cycle === "quarterly") return sum + amount / 3;
-      if (cycle === "annually") return sum + amount / 12;
+      if (cycle === "annually" || cycle === "annual") return sum + amount / 12;
+      if (cycle === "one_time") return sum; // one-time doesn't contribute to MRR
       return sum + amount;
     }, 0);
 
@@ -187,22 +196,26 @@ export async function GET(req: NextRequest) {
     lastReminderSent: inv.acf?.inv_last_reminder_sent,
   }));
 
-  // Cancellation queue
-  const cancellationQueue = (cancellationQueueResult.items as any[]).map((s: any) => ({
-    id: s.id,
-    title: s.title?.rendered,
-    clientId: s.acf?.client_id,
-    status: s.acf?.status,
-  }));
+  // Cancellation queue — subscriptions where sub_cancellation_requested_at is set
+  const cancellationQueue = (cancellationQueueResult.items as any[])
+    .filter((s: any) => !!s.acf?.sub_cancellation_requested_at)
+    .slice(0, 10)
+    .map((s: any) => ({
+      id: s.id,
+      title: s.title?.rendered,
+      clientId: s.acf?.client_id,
+      status: s.acf?.status,
+      cancelledAt: s.acf?.sub_cancellation_requested_at,
+    }));
 
   // Setup checklist
   const setupChecklist = {
-    hasClient: clientsResult.total > 0,
-    hasService: false, // would need to query bluu_service
+    hasClient:      clientsResult.total > 0,
+    hasService:     servicesResult.total > 0,
     hasBankDetails: !!(process.env.BANK_DETAILS),
-    hasStripe: !!(process.env.STRIPE_SECRET_KEY),
-    hasPaystack: !!(process.env.PAYSTACK_SECRET_KEY),
-    hasSequence: false, // would need to query bluu_sequence
+    hasStripe:      !!(process.env.STRIPE_SECRET_KEY),
+    hasPaystack:    !!(process.env.PAYSTACK_SECRET_KEY),
+    hasSequence:    sequencesResult.total > 0,
     hasPortalInvite: !!(process.env.NEXT_PUBLIC_APP_URL),
   };
 

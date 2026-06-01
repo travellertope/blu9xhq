@@ -28,6 +28,7 @@ import type { EmailTemplate } from "@/types";
 export interface EmailComposerProps {
   open: boolean;
   onClose: () => void;
+  onSent?: (entry: Record<string, unknown>) => void;
   clientId?: number;
   clientEmail?: string;
   clientName?: string;
@@ -45,6 +46,7 @@ function substituteVars(text: string, vars: Record<string, string>): string {
 export function EmailComposer({
   open,
   onClose,
+  onSent,
   clientId,
   clientEmail,
   clientName,
@@ -119,6 +121,7 @@ export function EmailComposer({
       if (!res.ok) throw new Error(data.error ?? "Failed to send email");
 
       toast.success("Email sent successfully");
+      if (data.entry && onSent) onSent(data.entry);
       onClose();
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
@@ -143,19 +146,24 @@ export function EmailComposer({
         />
       </div>
 
-      {/* To */}
-      <div className="space-y-1.5">
-        <Label htmlFor="ec-to">To</Label>
-        <Input
-          id="ec-to"
-          type="email"
-          placeholder="client@example.com"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-          readOnly={!!clientEmail}
-          className={clientEmail ? "bg-slate-50 text-slate-500" : ""}
-        />
-      </div>
+      {/* To — locked when sending from a client profile; editable in standalone composer */}
+      {clientEmail ? (
+        <div className="space-y-1.5">
+          <Label>To</Label>
+          <p className="text-sm text-slate-700 rounded-md border bg-slate-50 px-3 py-2">{clientEmail}</p>
+        </div>
+      ) : (
+        <div className="space-y-1.5">
+          <Label htmlFor="ec-to">To</Label>
+          <Input
+            id="ec-to"
+            type="email"
+            placeholder="client@example.com"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+          />
+        </div>
+      )}
 
       {/* Template picker */}
       <div className="space-y-1.5">

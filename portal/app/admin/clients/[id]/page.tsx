@@ -110,6 +110,9 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
           clientId={params.id}
           clientIdNum={clientIdNum}
           currentHealth={acf.health_status}
+          clientEmail={acf.portal_email || acf.contact_email || undefined}
+          clientName={clientName}
+          companyName={acf.company_name}
         />
       </div>
 

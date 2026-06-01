@@ -65,7 +65,7 @@ function FollowUpsPage() {
     try {
       const [fuRes, clientRes] = await Promise.all([
         fetch("/api/admin/communications?followUpOnly=true"),
-        fetch("/api/admin/clients?perPage=200"),
+        fetch("/api/admin/clients?per_page=100"),
       ]);
       const fuData     = await fuRes.json();
       const clientData = await clientRes.json();

@@ -86,14 +86,14 @@ function bluuhq_acf_client(): void {
         'fields'           => [
 
             // ── Contact info ──────────────────────────────────────────────
-            [ 'key' => 'field_bluuhq_client_contact_name',  'name' => 'contact_name',  'label' => 'Contact Name',  'type' => 'text',  'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_client_contact_name',  'name' => 'contact_name',  'label' => 'Contact Name',  'type' => 'text',  'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_client_contact_email', 'name' => 'contact_email', 'label' => 'Contact Email (encrypted)', 'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true,
               'instructions' => 'Stored AES-256 encrypted. Do not enter plaintext — use the portal to set this.' ],
             [ 'key' => 'field_bluuhq_client_contact_phone', 'name' => 'contact_phone', 'label' => 'Contact Phone (encrypted)', 'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true,
               'instructions' => 'Stored AES-256 encrypted. Do not enter plaintext — use the portal to set this.' ],
 
             // ── Company info ──────────────────────────────────────────────
-            [ 'key' => 'field_bluuhq_client_company_name',    'name' => 'company_name',    'label' => 'Company Name',    'type' => 'text', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_client_company_name',    'name' => 'company_name',    'label' => 'Company Name',    'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_client_company_website', 'name' => 'company_website', 'label' => 'Company Website', 'type' => 'url',  'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_client_industry',        'name' => 'industry',        'label' => 'Industry',        'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true ],
 
@@ -105,7 +105,7 @@ function bluuhq_acf_client(): void {
             // ── Status & health ───────────────────────────────────────────
             [
                 'key' => 'field_bluuhq_client_status', 'name' => 'status', 'label' => 'Status',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true,
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true,
                 'choices' => [ 'active' => 'Active', 'onboarding' => 'Onboarding', 'inactive' => 'Inactive', 'churned' => 'Churned' ],
                 'default_value' => 'active', 'return_format' => 'value',
             ],
@@ -170,7 +170,7 @@ function bluuhq_acf_service(): void {
             [
                 'key' => 'field_bluuhq_service_billing_cycle', 'name' => 'billing_cycle', 'label' => 'Billing Cycle',
                 'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'monthly',
-                'choices' => [ 'one_time' => 'One-time', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annually' => 'Annually' ],
+                'choices' => [ 'one_time' => 'One-time', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annual' => 'Annual' ],
             ],
             [ 'key' => 'field_bluuhq_service_deliverables', 'name' => 'deliverables', 'label' => 'Deliverables', 'type' => 'textarea', 'rows' => 4, 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_service_is_active',    'name' => 'is_active',    'label' => 'Is Active',    'type' => 'true_false', 'default_value' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
@@ -190,13 +190,13 @@ function bluuhq_acf_subscription(): void {
         'graphql_field_name' => 'subscriptionDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_subscription' ] ] ],
         'fields'           => [
-            [ 'key' => 'field_bluuhq_sub_client_id',  'name' => 'client_id',  'label' => 'Client',  'type' => 'number', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true,
+            [ 'key' => 'field_bluuhq_sub_client_id',  'name' => 'client_id',  'label' => 'Client',  'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true,
               'instructions' => 'Enter the bluu_client post ID.' ],
             [ 'key' => 'field_bluuhq_sub_service_id', 'name' => 'service_id', 'label' => 'Service', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true,
               'instructions' => 'Enter the bluu_service post ID.' ],
             [
                 'key' => 'field_bluuhq_sub_status', 'name' => 'status', 'label' => 'Status',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'active',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'active',
                 'choices' => [ 'active' => 'Active', 'trialing' => 'Trialing', 'paused' => 'Paused', 'past_due' => 'Past Due', 'cancelled' => 'Cancelled' ],
             ],
             [ 'key' => 'field_bluuhq_sub_amount',   'name' => 'amount',   'label' => 'Amount',   'type' => 'number', 'min' => 0, 'step' => '0.01', 'show_in_graphql' => 1, 'show_in_rest' => true ],
@@ -204,7 +204,7 @@ function bluuhq_acf_subscription(): void {
             [
                 'key' => 'field_bluuhq_sub_billing_cycle', 'name' => 'billing_cycle', 'label' => 'Billing Cycle',
                 'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'monthly',
-                'choices' => [ 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annually' => 'Annually' ],
+                'choices' => [ 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annual' => 'Annual' ],
             ],
             [ 'key' => 'field_bluuhq_sub_next_billing_date',      'name' => 'next_billing_date',      'label' => 'Next Billing Date',      'type' => 'date_picker', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d', 'display_format' => 'd/m/Y' ],
             [ 'key' => 'field_bluuhq_sub_start_date',             'name' => 'start_date',             'label' => 'Start Date',             'type' => 'date_picker', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d', 'display_format' => 'd/m/Y' ],
@@ -254,9 +254,9 @@ function bluuhq_acf_invoice(): void {
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_invoice' ] ] ],
         'fields'           => [
             // ── Identifiers ───────────────────────────────────────────────
-            [ 'key' => 'field_bluuhq_inv_number',       'name' => 'inv_number',       'label' => 'Invoice Number',  'type' => 'text',   'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true,
+            [ 'key' => 'field_bluuhq_inv_number',       'name' => 'inv_number',       'label' => 'Invoice Number',  'type' => 'text',   'show_in_graphql' => 1, 'show_in_rest' => true,
               'instructions' => 'Auto-generated by the portal (e.g. BLU-2024-0001). Do not edit.' ],
-            [ 'key' => 'field_bluuhq_inv_client',       'name' => 'inv_client',       'label' => 'Client (Post ID)', 'type' => 'number', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_inv_client',       'name' => 'inv_client',       'label' => 'Client (Post ID)', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_inv_subscription', 'name' => 'inv_subscription', 'label' => 'Subscription ID', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
 
             // ── Line items stored as JSON ─────────────────────────────────
@@ -271,7 +271,7 @@ function bluuhq_acf_invoice(): void {
             // ── Status ────────────────────────────────────────────────────
             [
                 'key' => 'field_bluuhq_inv_status', 'name' => 'inv_status', 'label' => 'Status',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'draft',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'draft',
                 'choices' => [ 'draft' => 'Draft', 'sent' => 'Sent', 'paid' => 'Paid', 'overdue' => 'Overdue', 'void' => 'Void' ],
             ],
 
@@ -315,7 +315,7 @@ function bluuhq_acf_file(): void {
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_file' ] ] ],
         'fields'           => [
             // ── Ownership ─────────────────────────────────────────────────
-            [ 'key' => 'field_bluuhq_file_client',          'name' => 'file_client',          'label' => 'Client (Post ID)',     'type' => 'number', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_file_client',          'name' => 'file_client',          'label' => 'Client (Post ID)',     'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_file_subscription_id', 'name' => 'file_subscription_id', 'label' => 'Subscription (Post ID)', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_file_uploaded_by',     'name' => 'file_uploaded_by',     'label' => 'Uploaded By (WP User ID)', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
 
@@ -365,17 +365,17 @@ function bluuhq_acf_communication(): void {
         'fields'           => [
 
             // ── Core fields ───────────────────────────────────────────────
-            [ 'key' => 'field_bluuhq_comm_client',      'name' => 'comm_client',      'label' => 'Client (Post ID)',   'type' => 'number', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
-            [ 'key' => 'field_bluuhq_comm_logged_by',   'name' => 'comm_logged_by',   'label' => 'Logged By (User ID)', 'type' => 'number', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
-            [ 'key' => 'field_bluuhq_comm_occurred_at', 'name' => 'comm_occurred_at', 'label' => 'Occurred At',        'type' => 'date_time_picker', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d H:i:s', 'display_format' => 'd/m/Y H:i' ],
+            [ 'key' => 'field_bluuhq_comm_client',      'name' => 'comm_client',      'label' => 'Client (Post ID)',   'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_comm_logged_by',   'name' => 'comm_logged_by',   'label' => 'Logged By (User ID)', 'type' => 'number', 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_comm_occurred_at', 'name' => 'comm_occurred_at', 'label' => 'Occurred At',        'type' => 'date_time_picker', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d H:i:s', 'display_format' => 'd/m/Y H:i' ],
             [
                 'key' => 'field_bluuhq_comm_direction', 'name' => 'comm_direction', 'label' => 'Direction',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
                 'choices' => [ 'inbound' => 'Inbound', 'outbound' => 'Outbound', 'internal' => 'Internal (System)' ],
             ],
             [
                 'key' => 'field_bluuhq_comm_channel', 'name' => 'comm_channel', 'label' => 'Channel',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
                 'choices' => [ 'email' => 'Email', 'phone' => 'Phone', 'meeting' => 'Meeting', 'chat' => 'Chat', 'note' => 'Internal Note', 'system' => 'System / Audit' ],
             ],
             [ 'key' => 'field_bluuhq_comm_type',    'name' => 'comm_type',    'label' => 'Type',    'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true ],
@@ -428,7 +428,7 @@ function bluuhq_acf_sequence(): void {
         'fields'           => [
             [
                 'key' => 'field_bluuhq_seq_trigger', 'name' => 'trigger', 'label' => 'Trigger',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
                 'choices' => [
                     'client_onboarding'      => 'Client Onboarding',
                     'invoice_sent'           => 'Invoice Sent',
@@ -476,12 +476,12 @@ function bluuhq_acf_email_template(): void {
         'graphql_field_name' => 'emailTemplateDetails',
         'location'         => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_email_template' ] ] ],
         'fields'           => [
-            [ 'key' => 'field_bluuhq_et_subject',    'name' => 'subject',    'label' => 'Subject Line', 'type' => 'text', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
+            [ 'key' => 'field_bluuhq_et_subject',    'name' => 'subject',    'label' => 'Subject Line', 'type' => 'text', 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_et_body_html',  'name' => 'body_html',  'label' => 'Body (HTML)',  'type' => 'wysiwyg', 'tabs' => 'all', 'toolbar' => 'full', 'media_upload' => 0, 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_et_body_text',  'name' => 'body_text',  'label' => 'Body (Plain Text fallback)', 'type' => 'textarea', 'rows' => 8, 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [
                 'key' => 'field_bluuhq_et_type', 'name' => 'type', 'label' => 'Template Type',
-                'type' => 'select', 'required' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
+                'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value',
                 'choices' => [
                     'onboarding'   => 'Onboarding',
                     'invoice'      => 'Invoice',

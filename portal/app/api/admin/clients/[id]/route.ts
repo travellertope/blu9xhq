@@ -140,7 +140,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     acfUpdate.contact_email = encrypt(d.email);
     acfUpdate.portal_email  = d.email;
   }
-  if (d.portalEmail !== undefined) acfUpdate.portal_email   = d.portalEmail;
+  if (d.portalEmail)               acfUpdate.portal_email   = d.portalEmail;
   if (d.phone !== undefined)       acfUpdate.contact_phone  = d.phone ? encrypt(d.phone) : "";
   if (d.company)                   acfUpdate.company_name   = d.company;
   if (d.website  !== undefined)    acfUpdate.company_website = d.website;

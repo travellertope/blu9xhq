@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { sendEmailHtml } from "@/lib/resend";
-import { wpRestFetch } from "@/lib/wp-api";
+import { wpRestFetch, type WPCommunicationPost } from "@/lib/wp-api";
 import { z } from "zod";
 
 const bodySchema = z.object({
@@ -37,28 +37,51 @@ export async function POST(req: NextRequest) {
       html:    d.htmlBody,
     });
 
-    // Fire-and-forget: log a bluu_communication record for the sent email
-    wpRestFetch("/wp/v2/bluu_communication", {
-      method: "POST",
-      body: JSON.stringify({
-        title:  d.subject.slice(0, 200),
-        status: "publish",
-        acf: {
-          comm_type:            "email_crm",
-          comm_channel:         "email",
-          comm_direction:       "outbound",
-          comm_subject:         d.subject,
-          comm_content:         d.htmlBody,
-          comm_occurred_at:     new Date().toISOString(),
-          ...(d.clientId ? { comm_client: d.clientId } : {}),
-          comm_logged_by:       actor.wpUserId as number,
-          comm_resend_email_id: messageId,
-          comm_email_status:    "sent",
-        },
-      }),
-    }).catch(console.error);
+    // Log a bluu_communication record and return it so the UI can prepend it to the timeline
+    const now = new Date().toISOString();
+    let entry: Record<string, unknown> | null = null;
+    try {
+      const commPost = await wpRestFetch<WPCommunicationPost>("/wp/v2/bluu_communication", {
+        method: "POST",
+        body: JSON.stringify({
+          title:  d.subject.slice(0, 200),
+          status: "publish",
+          acf: {
+            comm_type:         "manual",
+            comm_channel:      "email",
+            comm_direction:    "outbound",
+            comm_subject:      d.subject,
+            comm_content:      d.htmlBody,
+            comm_occurred_at:  now,
+            ...(d.clientId ? { comm_client: d.clientId } : {}),
+            comm_logged_by:    actor.wpUserId as number,
+            comm_email_status: "sent",
+          },
+        }),
+      });
+      entry = {
+        id:             commPost.id,
+        date:           commPost.date,
+        clientId:       d.clientId ?? 0,
+        type:           "manual",
+        direction:      "outbound",
+        channel:        "email",
+        subject:        d.subject,
+        content:        d.htmlBody,
+        occurredAt:     commPost.acf?.comm_occurred_at || now,
+        loggedBy:       (actor.wpUserId as number) ?? 0,
+        mood:           undefined,
+        moodSource:     undefined,
+        redFlags:       [],
+        followUpNeeded: false,
+        followUpCompleted: false,
+        emailStatus:    "sent",
+      };
+    } catch (logErr) {
+      console.error("[email send] failed to log communication:", logErr);
+    }
 
-    return NextResponse.json({ success: true, messageId });
+    return NextResponse.json({ success: true, messageId, entry });
   } catch (err: unknown) {
     console.error("[POST /api/admin/email/send]", err);
     return NextResponse.json(
