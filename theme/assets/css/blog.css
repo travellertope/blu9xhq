@@ -499,7 +499,6 @@
 .bluu-post-content tbody td:first-child {
     font-weight: 600;
     color: var(--md-on-surface);
-    white-space: nowrap;
 }
 .bluu-post-content tfoot td,
 .bluu-post-content tfoot th {
@@ -526,9 +525,6 @@
         display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-    }
-    .bluu-post-content tbody td:first-child {
-        white-space: normal;
     }
 }
 
