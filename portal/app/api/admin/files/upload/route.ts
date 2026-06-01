@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
 import { ALLOWED_MIME_TYPES, uploadFile, generateFileKey } from "@/lib/r2";
 import { createFilePost, getClientPost } from "@/lib/wp-api";
-import { sendEmailHtml } from "@/lib/resend";
+import { sendFileShared } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
@@ -75,31 +75,20 @@ export async function POST(req: NextRequest) {
 
     // If shared, send notification email to client
     if (visibility === "shared") {
-      try {
-        const clientPost = await getClientPost(clientId);
-        const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
-        const clientName  = clientPost.acf.contact_name || clientPost.title.rendered;
-        if (clientEmail) {
-          await sendEmailHtml({
-            to:      clientEmail,
-            subject: "A new file has been shared with you",
-            html: `
-              <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-                <h2>New file shared</h2>
-                <p>Hi ${clientName},</p>
-                <p>A new file has been shared with you on your client portal:</p>
-                <p style="background:#f8fafc;padding:12px 16px;border-radius:6px;font-weight:600">${name}</p>
-                <p>Log in to your portal to view and download it.</p>
-                <p style="color:#64748b;font-size:13px">Category: ${category}</p>
-              </div>
-            `,
-            text: `Hi ${clientName},\n\nA new file has been shared with you: ${name}\n\nLog in to your portal to view it.`,
-            tags: [{ name: "type", value: "file_shared" }],
+      void getClientPost(clientId)
+        .then((clientPost) => {
+          const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
+          const clientName  = clientPost.acf.contact_name || clientPost.title.rendered;
+          if (!clientEmail) return;
+          return sendFileShared(clientEmail, {
+            clientName,
+            fileName:     name,
+            fileCategory: category,
+            sharedBy:     user.name ?? "BluuHQ",
+            portalUrl:    `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/files`,
           });
-        }
-      } catch (emailErr) {
-        console.error("[upload] Failed to send file notification email:", emailErr);
-      }
+        })
+        .catch((err) => console.error("[upload] sendFileShared failed:", err));
     }
 
     await logAuditEvent({

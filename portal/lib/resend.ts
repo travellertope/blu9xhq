@@ -155,6 +155,14 @@ export async function sendCancellationConfirmed(
   return sendEmail({ to, subject: getSubject(), template: React.createElement(T, props) });
 }
 
+export async function sendNewTicketAdmin(
+  adminEmail: string,
+  props: import("./emails/NewTicket").NewTicketProps
+) {
+  const { default: T, getSubject } = await import("./emails/NewTicket");
+  return sendEmail({ to: adminEmail, subject: getSubject(props.ticketNumber, props.clientName), template: React.createElement(T, props) });
+}
+
 export async function sendCredentialRevealed(
   adminEmail: string,
   props: import("./emails/CredentialRevealed").CredentialRevealedProps

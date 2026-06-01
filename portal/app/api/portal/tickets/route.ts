@@ -13,7 +13,7 @@ import {
   isValidCategory,
   isValidPriority,
 } from "@/lib/ticket-utils";
-import { sendTicketCreated } from "@/lib/resend";
+import { sendTicketCreated, sendNewTicketAdmin } from "@/lib/resend";
 
 // GET /api/portal/tickets — list client's own tickets
 export async function GET(req: NextRequest) {
@@ -135,9 +135,10 @@ export async function POST(req: NextRequest) {
       direction: "inbound",
     });
 
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
+
     // Email confirmation to client
     const email = clientPost.acf.portal_email;
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
     if (email) {
       void sendTicketCreated(email, {
         clientName: clientPost.acf.contact_name,
@@ -148,6 +149,19 @@ export async function POST(req: NextRequest) {
         ticketUrl: `${appUrl}/portal/tickets/${ticket.id}`,
       }).catch(console.error);
     }
+
+    // Notify admin
+    const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
+    void sendNewTicketAdmin(adminEmail, {
+      clientName:    clientPost.acf.contact_name || clientPost.title.rendered,
+      clientCompany: clientPost.acf.company_name,
+      ticketNumber,
+      subject,
+      category: category.replace(/_/g, " "),
+      priority,
+      description,
+      reviewUrl: `${appUrl}/admin/tickets/${ticket.id}`,
+    }).catch(console.error);
 
     return NextResponse.json({
       id: ticket.id,
