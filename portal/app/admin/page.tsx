@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SetupChecklist } from "@/components/admin/SetupChecklist";
@@ -73,8 +74,8 @@ export default async function AdminDashboardPage() {
   const hideMetrics = role === "support_staff" || role === "viewer";
 
   const base = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-  // Note: server component — we pass the cookies via headers in real Next.js via headers()
-  const data = await getDashboardData(base, null);
+  const cookie = headers().get("cookie") ?? "";
+  const data = await getDashboardData(base, cookie);
 
   const metrics = data?.metrics;
   const setupChecklist = data?.setupChecklist;
