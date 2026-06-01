@@ -84,15 +84,24 @@ export async function GET(req: NextRequest) {
       raw = result.items;
     } else if (clientIdStr) {
       const clientId = parseInt(clientIdStr, 10);
-      const result = await wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
-        per_page: 200,
-        status:   "publish",
-        meta_key:   "comm_client",
-        meta_value: clientId,
-        orderby:    "date",
-        order:      "desc",
-      });
-      raw = result.items;
+      // WP REST API caps per_page at 100 — fetch all pages
+      const all: WPCommunicationPost[] = [];
+      let p = 1;
+      while (true) {
+        const result = await wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
+          per_page:   100,
+          page:       p,
+          status:     "publish",
+          meta_key:   "comm_client",
+          meta_value: clientId,
+          orderby:    "date",
+          order:      "desc",
+        });
+        all.push(...result.items);
+        if (p >= result.totalPages) break;
+        p++;
+      }
+      raw = all;
     } else {
       return NextResponse.json({ error: "clientId is required" }, { status: 400 });
     }
