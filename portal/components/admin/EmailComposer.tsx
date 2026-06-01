@@ -23,12 +23,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { EmailTemplate } from "@/types";
+import type { EmailTemplate, BluuCommunication } from "@/types";
 
 export interface EmailComposerProps {
   open: boolean;
   onClose: () => void;
-  onSent?: (entry: Record<string, unknown>) => void;
+  onSent?: (entry: BluuCommunication) => void;
   clientId?: number;
   clientEmail?: string;
   clientName?: string;
@@ -121,7 +121,7 @@ export function EmailComposer({
       if (!res.ok) throw new Error(data.error ?? "Failed to send email");
 
       toast.success("Email sent successfully");
-      if (data.entry && onSent) onSent(data.entry);
+      if (data.entry && onSent) onSent(data.entry as BluuCommunication);
       onClose();
     } catch (err: any) {
       toast.error(err.message ?? "Something went wrong");
