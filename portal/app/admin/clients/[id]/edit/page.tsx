@@ -3,15 +3,6 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { ClientForm } from "@/components/admin/ClientForm";
-import { decrypt } from "@/lib/encryption";
-
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  return { title: `Edit Client #${params.id}` };
-}
-
-function tryDecrypt(value: string): string {
-  try { return decrypt(value); } catch { return value; }
-}
 
 async function fetchClientForEdit(id: string) {
   const base   = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
