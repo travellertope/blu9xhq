@@ -57,9 +57,10 @@ function bluuhq_register_ticket_field_groups(): void {
 
     // ── bluu_ticket fields ──
     acf_add_local_field_group([
-        'key'      => 'group_bluu_ticket',
-        'title'    => 'Ticket Fields',
-        'location' => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket' ] ]],
+        'key'          => 'group_bluu_ticket',
+        'title'        => 'Ticket Fields',
+        'show_in_rest' => true,
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket' ] ]],
         'fields'   => [
             bluuhq_acf_text( 'tkt_number',            'Ticket Number' ),
             bluuhq_acf_num(  'tkt_client',            'Client Post ID' ),
@@ -80,9 +81,10 @@ function bluuhq_register_ticket_field_groups(): void {
 
     // ── bluu_ticket_reply fields ──
     acf_add_local_field_group([
-        'key'      => 'group_bluu_ticket_reply',
-        'title'    => 'Ticket Reply Fields',
-        'location' => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_reply' ] ]],
+        'key'          => 'group_bluu_ticket_reply',
+        'title'        => 'Ticket Reply Fields',
+        'show_in_rest' => true,
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_reply' ] ]],
         'fields'   => [
             bluuhq_acf_num(  'reply_ticket_id',   'Ticket Post ID' ),
             bluuhq_acf_num(  'reply_author_id',   'Author WP User ID' ),
@@ -93,9 +95,10 @@ function bluuhq_register_ticket_field_groups(): void {
 
     // ── bluu_ticket_status_log fields ──
     acf_add_local_field_group([
-        'key'      => 'group_bluu_ticket_status_log',
-        'title'    => 'Ticket Status Log Fields',
-        'location' => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_status_log' ] ]],
+        'key'          => 'group_bluu_ticket_status_log',
+        'title'        => 'Ticket Status Log Fields',
+        'show_in_rest' => true,
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_status_log' ] ]],
         'fields'   => [
             bluuhq_acf_num(  'log_ticket_id',   'Ticket Post ID' ),
             bluuhq_acf_num(  'log_changed_by',  'Changed By (WP User ID)' ),
@@ -108,9 +111,10 @@ function bluuhq_register_ticket_field_groups(): void {
 
     // ── bluu_ticket_attachment fields ──
     acf_add_local_field_group([
-        'key'      => 'group_bluu_ticket_attachment',
-        'title'    => 'Ticket Attachment Fields',
-        'location' => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_attachment' ] ]],
+        'key'          => 'group_bluu_ticket_attachment',
+        'title'        => 'Ticket Attachment Fields',
+        'show_in_rest' => true,
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_attachment' ] ]],
         'fields'   => [
             bluuhq_acf_num(  'att_ticket_id',    'Ticket Post ID' ),
             bluuhq_acf_num(  'att_reply_id',     'Reply Post ID' ),
@@ -144,4 +148,35 @@ function bluuhq_acf_num( string $name, string $label ): array {
         'type'         => 'number',
         'show_in_rest' => true,
     ];
+}
+
+// ── Register meta keys for REST API filtering ─────────────────────────────────
+
+add_action( 'init', 'bluuhq_register_ticket_meta_keys', 20 );
+function bluuhq_register_ticket_meta_keys(): void {
+    // bluu_ticket
+    foreach ( [ 'tkt_number', 'tkt_category', 'tkt_priority', 'tkt_status',
+                'tkt_sla_response_target', 'tkt_sla_resolve_target', 'tkt_sla_alerted_at',
+                'tkt_first_response_at', 'tkt_resolved_at', 'tkt_closed_at' ] as $key ) {
+        register_post_meta( 'bluu_ticket', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'tkt_client', 'tkt_submitted_by', 'tkt_assigned_to', 'tkt_retainer_id' ] as $key ) {
+        register_post_meta( 'bluu_ticket', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+
+    // bluu_ticket_reply
+    foreach ( [ 'reply_body', 'reply_type' ] as $key ) {
+        register_post_meta( 'bluu_ticket_reply', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'reply_ticket_id', 'reply_author_id' ] as $key ) {
+        register_post_meta( 'bluu_ticket_reply', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
+
+    // bluu_ticket_attachment
+    foreach ( [ 'att_file_name', 'att_file_url', 'att_file_type' ] as $key ) {
+        register_post_meta( 'bluu_ticket_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'att_ticket_id', 'att_reply_id', 'att_uploaded_by', 'att_file_size_kb' ] as $key ) {
+        register_post_meta( 'bluu_ticket_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+    }
 }

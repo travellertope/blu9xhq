@@ -34,9 +34,10 @@ add_action( 'acf/init', 'bluuhq_acf_enrollment' );
 function bluuhq_acf_enrollment(): void {
     if ( ! function_exists( 'acf_add_local_field_group' ) ) return;
     acf_add_local_field_group( [
-        'key'      => 'group_bluuhq_enrollment',
-        'title'    => 'Enrollment Details',
-        'location' => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_seq_enrollment' ] ] ],
+        'key'          => 'group_bluuhq_enrollment',
+        'title'        => 'Enrollment Details',
+        'show_in_rest' => true,
+        'location'     => [ [ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_seq_enrollment' ] ] ],
         'fields'   => [
             [ 'key' => 'field_enr_sequence_id',   'name' => 'enr_sequence_id',   'label' => 'Sequence',       'type' => 'number', 'show_in_rest' => true ],
             [ 'key' => 'field_enr_client_id',     'name' => 'enr_client_id',     'label' => 'Client',         'type' => 'number', 'show_in_rest' => true ],
