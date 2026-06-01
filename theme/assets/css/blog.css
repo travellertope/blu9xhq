@@ -447,6 +447,92 @@
 .bluu-post-content img:hover {
     filter: grayscale(0%);
 }
+
+/* ── Post content tables ─────────────────────────────────────────────────────── */
+.bluu-post-content table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    margin: var(--space-8) 0;
+    background: var(--md-surface);
+    border: 1px solid var(--md-outline-variant);
+}
+.bluu-post-content table + table {
+    margin-top: var(--space-6);
+}
+.bluu-post-content thead {
+    background: var(--md-primary);
+}
+.bluu-post-content thead th {
+    padding: 12px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #fff;
+    text-align: left;
+    border: none;
+}
+.bluu-post-content tbody tr {
+    border-bottom: 1px solid var(--md-outline-variant);
+    transition: background 0.12s;
+}
+.bluu-post-content tbody tr:last-child {
+    border-bottom: none;
+}
+.bluu-post-content tbody tr:nth-child(even) {
+    background: var(--md-surface-variant);
+}
+.bluu-post-content tbody tr:hover {
+    background: #e8effd;
+}
+.bluu-post-content tbody td {
+    padding: 11px 16px;
+    color: var(--md-on-surface);
+    vertical-align: top;
+    border-right: 1px solid var(--md-outline-variant);
+}
+.bluu-post-content tbody td:last-child {
+    border-right: none;
+}
+.bluu-post-content tbody td:first-child {
+    font-weight: 600;
+    color: var(--md-on-surface);
+    white-space: nowrap;
+}
+.bluu-post-content tfoot td,
+.bluu-post-content tfoot th {
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    color: var(--md-on-surface-variant);
+    border-top: 2px solid var(--md-outline-variant);
+    background: var(--md-surface-variant);
+}
+
+/* Scrollable on small screens */
+.bluu-post-content .wp-block-table,
+.bluu-post-content figure.wp-block-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: var(--space-8) 0;
+}
+.bluu-post-content .wp-block-table table,
+.bluu-post-content figure.wp-block-table table {
+    margin: 0;
+}
+@media (max-width: 640px) {
+    .bluu-post-content table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .bluu-post-content tbody td:first-child {
+        white-space: normal;
+    }
+}
+
+
 .bluu-post-content ul,
 .bluu-post-content ol {
     padding-left: 0;
