@@ -30,13 +30,13 @@ interface FileItem {
   id: number;
   title: string;
   description?: string;
-  category: string;
-  mimeType: string;
-  fileSize: number;
-  visibility: "shared" | "internal";
-  uploadedBy: number;
+  category?: string;
+  mimeType?: string;
+  fileSize?: number;
+  visibility?: "shared" | "internal";
+  uploadedBy?: number;
   date: string;
-  r2Key: string;
+  r2Key?: string;
 }
 
 interface UploadQueueItem {
@@ -68,7 +68,8 @@ const CATEGORY_COLORS: Record<string, string> = {
   general:     "bg-slate-100 text-slate-600",
 };
 
-function getMimeIcon(mimeType: string) {
+function getMimeIcon(mimeType: string | undefined) {
+  if (!mimeType) return { Icon: File, color: "text-slate-400" };
   if (mimeType === "application/pdf") return { Icon: FileText, color: "text-red-500" };
   if (mimeType.includes("word")) return { Icon: FileText, color: "text-blue-500" };
   if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) return { Icon: FileText, color: "text-green-500" };
@@ -78,8 +79,8 @@ function getMimeIcon(mimeType: string) {
   return { Icon: File, color: "text-slate-400" };
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
+function formatFileSize(bytes: number | undefined): string {
+  if (!bytes || isNaN(bytes)) return "—";
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
@@ -93,7 +94,7 @@ interface FileCardProps {
 
 function FileCard({ file, onDownload, onDelete }: FileCardProps) {
   const { Icon, color } = getMimeIcon(file.mimeType);
-  const catStyle = CATEGORY_COLORS[file.category] ?? CATEGORY_COLORS.general;
+  const catStyle = CATEGORY_COLORS[file.category ?? "general"] ?? CATEGORY_COLORS.general;
   const dateStr = file.date ? format(parseISO(file.date), "MMM d, yyyy") : "—";
 
   return (
@@ -516,7 +517,7 @@ export function FileManager({ clientId }: FileManagerProps) {
             <tbody className="divide-y">
               {filteredFiles.map((file) => {
                 const { Icon, color } = getMimeIcon(file.mimeType);
-                const catStyle = CATEGORY_COLORS[file.category] ?? CATEGORY_COLORS.general;
+                const catStyle = CATEGORY_COLORS[file.category ?? "general"] ?? CATEGORY_COLORS.general;
                 return (
                   <tr key={file.id} className="hover:bg-slate-50">
                     <td className="px-4 py-2.5">
@@ -527,7 +528,7 @@ export function FileManager({ clientId }: FileManagerProps) {
                     </td>
                     <td className="px-4 py-2.5">
                       <span className={`inline-flex text-xs px-2 py-0.5 rounded-full font-medium ${catStyle}`}>
-                        {file.category.replace("_", " ")}
+                        {file.category?.replace("_", " ") ?? "—"}
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
