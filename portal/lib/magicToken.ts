@@ -1,72 +1,84 @@
-import { randomBytes } from "crypto";
-import { wpRestFetch, wpRestList } from "@/lib/wp-api";
+import { createHmac, timingSafeEqual } from "crypto";
+import { wpRestList, wpRestFetch } from "@/lib/wp-api";
 import type { WPUser } from "@/lib/wp-api";
+
+// ─── HMAC stateless magic-link tokens ────────────────────────────────────────
+// Token payload: JSON({ email, exp }) signed with NEXTAUTH_SECRET.
+// No WP user meta storage required — the token itself is the source of truth.
+
+function secret(): string {
+  const s = process.env.NEXTAUTH_SECRET;
+  if (!s) throw new Error("NEXTAUTH_SECRET is not set");
+  return s;
+}
 
 const TTL_MS = 60 * 60 * 1000; // 1 hour
 
-export function generateMagicToken(): string {
-  return randomBytes(32).toString("hex");
+export function generateMagicToken(email: string): string {
+  const payload = JSON.stringify({ email, exp: Date.now() + TTL_MS });
+  const sig = createHmac("sha256", secret()).update(payload).digest("hex");
+  return Buffer.from(`${payload}||${sig}`).toString("base64url");
 }
 
-/** Find a bluu_client WP user by exact email match. */
+export function verifyMagicToken(token: string, email: string): boolean {
+  try {
+    const decoded = Buffer.from(token, "base64url").toString("utf8");
+    const sepIdx = decoded.lastIndexOf("||");
+    if (sepIdx === -1) return false;
+
+    const payload = decoded.slice(0, sepIdx);
+    const sig     = decoded.slice(sepIdx + 2);
+
+    const expected = createHmac("sha256", secret()).update(payload).digest("hex");
+    if (sig.length !== expected.length) return false;
+    if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return false;
+
+    const { email: tokenEmail, exp } = JSON.parse(payload) as { email: string; exp: number };
+    if (tokenEmail.toLowerCase() !== email.toLowerCase()) return false;
+    if (Date.now() > exp) return false;
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ─── WP user lookup ───────────────────────────────────────────────────────────
+
+/** Find a bluu_client WP user by exact email or username match. */
 export async function findWPClientByEmail(email: string): Promise<WPUser | null> {
   const result = await wpRestList<WPUser>("/wp/v2/users", {
     search:   email,
     per_page: 10,
-    context:  "edit", // required to include the email field in the response
+    context:  "edit",
   });
+  const lower = email.toLowerCase();
   return (
     result.items.find(
       (u) =>
-        (u.email ?? "").toLowerCase() === email.toLowerCase() &&
+        ((u.email ?? "").toLowerCase() === lower ||
+         (u.username ?? "").toLowerCase() === lower) &&
         u.roles.includes("bluu_client")
     ) ?? null
   );
 }
 
-/** Store a magic-link token on a WP user (1 hour TTL). */
-export async function storeMagicToken(wpUserId: number, token: string): Promise<void> {
-  const expires = new Date(Date.now() + TTL_MS).toISOString();
-  await wpRestFetch(`/wp/v2/users/${wpUserId}`, {
-    method: "POST",
-    body: JSON.stringify({
-      meta: {
-        portal_magic_token: token,
-        portal_magic_token_expires: expires,
-      },
-    }),
-  });
-}
-
 /**
- * Verify a magic token against a WP user's stored token.
- * On success: clears the token (one-time use) and returns the full WPUser.
- * On failure: returns null.
+ * Verify the HMAC token and return the matching WPUser, or null on failure.
+ * No WP meta read/write needed — the token is self-contained.
  */
 export async function verifyAndConsumeMagicToken(
   email: string,
   token: string
 ): Promise<WPUser | null> {
-  const match = await findWPClientByEmail(email);
-  if (!match) return null;
-
-  // Fetch the full user record to read registered meta
-  const user = await wpRestFetch<WPUser>(`/wp/v2/users/${match.id}`).catch(() => null);
-  if (!user) return null;
-
-  const storedToken = String(user.meta.portal_magic_token ?? "");
-  const expiresStr = String(user.meta.portal_magic_token_expires ?? "");
-
-  if (!storedToken || storedToken !== token) return null;
-  if (!expiresStr || Date.now() > new Date(expiresStr).getTime()) return null;
-
-  // Consume — clear the token so it can't be reused
-  wpRestFetch(`/wp/v2/users/${user.id}`, {
-    method: "POST",
-    body: JSON.stringify({
-      meta: { portal_magic_token: "", portal_magic_token_expires: "" },
-    }),
-  }).catch(() => {});
-
+  if (!verifyMagicToken(token, email)) return null;
+  const user = await findWPClientByEmail(email);
+  if (!user || !user.roles.includes("bluu_client")) return null;
   return user;
+}
+
+// Keep storeMagicToken as a no-op shim so existing callers don't break
+// while we migrate — no-op because token state is now in the signed JWT.
+export async function storeMagicToken(_wpUserId: number, _token: string): Promise<void> {
+  // Token is self-validating via HMAC; no storage needed.
 }

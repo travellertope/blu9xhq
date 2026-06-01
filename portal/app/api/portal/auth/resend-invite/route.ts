@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendEmailHtml } from "@/lib/resend";
-import { generateMagicToken, findWPClientByEmail, storeMagicToken } from "@/lib/magicToken";
+import { generateMagicToken, findWPClientByEmail } from "@/lib/magicToken";
 
 // Rate limit: 1 invite per email per hour (in-memory, resets on server restart)
 const inviteLog = new Map<string, number>();
@@ -30,8 +30,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    const token = generateMagicToken();
-    await storeMagicToken(user.id, token);
+    const token = generateMagicToken(email);
     inviteLog.set(email, Date.now());
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
