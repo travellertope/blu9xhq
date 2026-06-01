@@ -27,7 +27,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
         {/* Spacer for mobile top bar rendered inside Sidebar */}
         <div className="lg:hidden h-14 shrink-0" />
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 min-h-0 overflow-auto p-6">
           {children}
         </main>
       </div>

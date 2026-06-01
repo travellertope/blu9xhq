@@ -222,6 +222,7 @@ export function FileManager({ clientId }: FileManagerProps) {
     const pending = uploadQueue.filter((q) => q.status === "pending");
     if (!pending.length) return;
     setUploading(true);
+    let successCount = 0;
 
     for (let i = 0; i < uploadQueue.length; i++) {
       const item = uploadQueue[i];
@@ -258,6 +259,7 @@ export function FileManager({ clientId }: FileManagerProps) {
         }
 
         updateQueueItem(i, { status: "done", progress: 100 });
+        successCount++;
       } catch (e: unknown) {
         clearInterval(interval);
         const msg = e instanceof Error ? e.message : "Unknown error";
@@ -269,10 +271,12 @@ export function FileManager({ clientId }: FileManagerProps) {
     setUploading(false);
     await fetchFiles();
     setUploadQueue((prev) => prev.filter((q) => q.status !== "done"));
-    if (uploadQueue.every((q) => q.status === "done")) {
+    if (successCount > 0 && uploadQueue.every((q) => q.status === "done" || q.status === "error")) {
       setShowUploadPanel(false);
     }
-    toast.success("Files uploaded");
+    if (successCount > 0) {
+      toast.success(successCount === 1 ? "File uploaded" : `${successCount} files uploaded`);
+    }
   };
 
   const handleDownload = async (id: number) => {
