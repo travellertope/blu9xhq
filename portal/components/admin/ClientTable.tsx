@@ -83,11 +83,12 @@ export function ClientTable({ clients, total, totalPages, page }: ClientTablePro
 
   async function handleSendInvite(clientId: number) {
     try {
-      const res = await fetch(`/api/admin/clients/${clientId}/invite`, { method: "POST" });
-      if (!res.ok) throw new Error();
-      toast.success("Portal invite sent");
-    } catch {
-      toast.error("Failed to send invite");
+      const res  = await fetch(`/api/admin/clients/${clientId}/invite`, { method: "POST" });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Failed to send invite");
+      toast.success(`Portal invite sent to ${json.sentTo}`);
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed to send invite");
     }
   }
 

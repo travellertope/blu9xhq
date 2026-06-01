@@ -11,13 +11,14 @@ export function generateMagicToken(): string {
 /** Find a bluu_client WP user by exact email match. */
 export async function findWPClientByEmail(email: string): Promise<WPUser | null> {
   const result = await wpRestList<WPUser>("/wp/v2/users", {
-    search: email,
+    search:   email,
     per_page: 10,
+    context:  "edit", // required to include the email field in the response
   });
   return (
     result.items.find(
       (u) =>
-        u.email.toLowerCase() === email.toLowerCase() &&
+        (u.email ?? "").toLowerCase() === email.toLowerCase() &&
         u.roles.includes("bluu_client")
     ) ?? null
   );
