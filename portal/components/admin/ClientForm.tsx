@@ -21,15 +21,18 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const schema = z.object({
-  firstName:  z.string().min(1, "First name is required"),
-  lastName:   z.string().min(1, "Last name is required"),
-  email:      z.string().email("Enter a valid email"),
-  phone:      z.string().optional(),
-  company:    z.string().min(1, "Company is required"),
-  status:     z.enum(["active", "inactive", "churned", "onboarding"]),
-  tags:       z.array(z.string()),
-  notes:      z.string().optional(),
-  sendInvite: z.boolean(),
+  firstName:   z.string().min(1, "First name is required"),
+  lastName:    z.string().min(1, "Last name is required"),
+  email:       z.string().email("Enter a valid email"),
+  portalEmail: z.string().email("Enter a valid email").optional().or(z.literal("")),
+  phone:       z.string().optional(),
+  company:     z.string().min(1, "Company is required"),
+  website:     z.string().optional(),
+  industry:    z.string().optional(),
+  status:      z.enum(["active", "inactive", "churned", "onboarding"]),
+  tags:        z.array(z.string()),
+  notes:       z.string().optional(),
+  sendInvite:  z.boolean(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -47,15 +50,18 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      phone: "",
-      company: "",
-      status: "onboarding",
-      tags: [],
-      notes: "",
-      sendInvite: false,
+      firstName:   "",
+      lastName:    "",
+      email:       "",
+      portalEmail: "",
+      phone:       "",
+      company:     "",
+      website:     "",
+      industry:    "",
+      status:      "onboarding",
+      tags:        [],
+      notes:       "",
+      sendInvite:  false,
       ...defaultValues,
     },
   });
@@ -143,13 +149,28 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Contact Email</FormLabel>
                   <FormControl><Input type="email" placeholder="jane@company.com" {...field} /></FormControl>
-                  <FormDescription>Used as their portal login email</FormDescription>
+                  <FormDescription>{clientId ? "Stored encrypted." : "Used as their portal login email."}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
+            {clientId && (
+              <FormField
+                control={form.control}
+                name="portalEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Portal Login Email <span className="text-slate-400 font-normal">(optional)</span></FormLabel>
+                    <FormControl><Input type="email" placeholder="Same as contact email if blank" {...field} /></FormControl>
+                    <FormDescription>The email used to log in to the client portal. Defaults to contact email if not set.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             <FormField
               control={form.control}
@@ -174,6 +195,33 @@ export function ClientForm({ defaultValues, clientId }: ClientFormProps) {
                 </FormItem>
               )}
             />
+
+            {clientId && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="website"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Website <span className="text-slate-400 font-normal">(optional)</span></FormLabel>
+                      <FormControl><Input placeholder="https://acmecorp.com" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="industry"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry <span className="text-slate-400 font-normal">(optional)</span></FormLabel>
+                      <FormControl><Input placeholder="e.g. SaaS, Retail" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
 

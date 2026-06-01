@@ -112,8 +112,11 @@ const patchSchema = z.object({
   firstName:    z.string().min(1).optional(),
   lastName:     z.string().min(1).optional(),
   email:        z.string().email().optional(),
+  portalEmail:  z.string().email().optional().or(z.literal("")),
   phone:        z.string().optional(),
   company:      z.string().optional(),
+  website:      z.string().optional(),
+  industry:     z.string().optional(),
   status:       z.enum(["active", "inactive", "churned", "onboarding"]).optional(),
   healthStatus: z.enum(["healthy", "needs_attention", "at_risk"]).optional(),
   healthNote:   z.string().optional(),
@@ -137,9 +140,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     acfUpdate.contact_email = encrypt(d.email);
     acfUpdate.portal_email  = d.email;
   }
-  if (d.phone !== undefined) acfUpdate.contact_phone = d.phone ? encrypt(d.phone) : "";
-  if (d.company)             acfUpdate.company_name  = d.company;
-  if (d.status)              acfUpdate.status        = d.status;
+  if (d.portalEmail !== undefined) acfUpdate.portal_email   = d.portalEmail;
+  if (d.phone !== undefined)       acfUpdate.contact_phone  = d.phone ? encrypt(d.phone) : "";
+  if (d.company)                   acfUpdate.company_name   = d.company;
+  if (d.website  !== undefined)    acfUpdate.company_website = d.website;
+  if (d.industry !== undefined)    acfUpdate.industry       = d.industry;
+  if (d.status)                    acfUpdate.status         = d.status;
   if (d.healthStatus) {
     acfUpdate.health_status       = d.healthStatus;
     acfUpdate.health_overridden_at = new Date().toISOString();
