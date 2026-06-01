@@ -170,7 +170,7 @@ function bluuhq_acf_service(): void {
             [
                 'key' => 'field_bluuhq_service_billing_cycle', 'name' => 'billing_cycle', 'label' => 'Billing Cycle',
                 'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'monthly',
-                'choices' => [ 'one_time' => 'One-time', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annually' => 'Annually' ],
+                'choices' => [ 'one_time' => 'One-time', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annual' => 'Annual' ],
             ],
             [ 'key' => 'field_bluuhq_service_deliverables', 'name' => 'deliverables', 'label' => 'Deliverables', 'type' => 'textarea', 'rows' => 4, 'show_in_graphql' => 1, 'show_in_rest' => true ],
             [ 'key' => 'field_bluuhq_service_is_active',    'name' => 'is_active',    'label' => 'Is Active',    'type' => 'true_false', 'default_value' => 1, 'show_in_graphql' => 1, 'show_in_rest' => true ],
@@ -204,7 +204,7 @@ function bluuhq_acf_subscription(): void {
             [
                 'key' => 'field_bluuhq_sub_billing_cycle', 'name' => 'billing_cycle', 'label' => 'Billing Cycle',
                 'type' => 'select', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'value', 'default_value' => 'monthly',
-                'choices' => [ 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annually' => 'Annually' ],
+                'choices' => [ 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'annual' => 'Annual' ],
             ],
             [ 'key' => 'field_bluuhq_sub_next_billing_date',      'name' => 'next_billing_date',      'label' => 'Next Billing Date',      'type' => 'date_picker', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d', 'display_format' => 'd/m/Y' ],
             [ 'key' => 'field_bluuhq_sub_start_date',             'name' => 'start_date',             'label' => 'Start Date',             'type' => 'date_picker', 'show_in_graphql' => 1, 'show_in_rest' => true, 'return_format' => 'Y-m-d', 'display_format' => 'd/m/Y' ],
