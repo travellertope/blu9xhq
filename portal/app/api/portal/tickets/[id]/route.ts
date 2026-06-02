@@ -45,9 +45,12 @@ export async function GET(
     const replies = repliesResult.items
       .filter((r) => r.acf && r.acf.reply_type === "reply")
       .map((r) => ({
-        id: r.id,
+        id:       r.id,
         authorId: r.acf.reply_author_id,
-        body: r.acf.reply_body,
+        body:     r.content?.raw?.trim()
+                  || r.content?.rendered?.replace(/<[^>]+>/g, "").trim()
+                  || r.acf.reply_body
+                  || "",
         createdAt: r.date,
       }));
 

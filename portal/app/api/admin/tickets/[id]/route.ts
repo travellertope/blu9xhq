@@ -55,11 +55,14 @@ export async function GET(
       replies: repliesResult.items
         .filter((r) => r.acf)
         .map((r) => ({
-          id:         r.id,
-          authorId:   r.acf.reply_author_id,
-          body:       r.acf.reply_body,
-          replyType:  r.acf.reply_type,
-          createdAt:  r.date,
+          id:        r.id,
+          authorId:  r.acf.reply_author_id,
+          body:      r.content?.raw?.trim()
+                     || r.content?.rendered?.replace(/<[^>]+>/g, "").trim()
+                     || r.acf.reply_body
+                     || "",
+          replyType: r.acf.reply_type,
+          createdAt: r.date,
         })),
       attachments: attachmentsResult.items.map((a) => ({
         id:          a.id,

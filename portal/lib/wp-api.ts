@@ -669,9 +669,10 @@ export interface WPTicketReplyACF {
 }
 
 export interface WPTicketReplyPost {
-  id:   number;
-  date: string;
-  acf:  WPTicketReplyACF;
+  id:      number;
+  date:    string;
+  content: { rendered: string; raw?: string };
+  acf:     WPTicketReplyACF;
 }
 
 export interface WPTicketStatusLogACF {
@@ -752,18 +753,24 @@ export function createTicketReply(params: {
 }): Promise<WPTicketReplyPost> {
   return wpRestFetch<WPTicketReplyPost>("/wp/v2/bluu_ticket_reply", {
     method: "POST",
-    body: JSON.stringify({ title: `Reply-${Date.now()}`, status: "publish", acf: params.acf }),
+    body: JSON.stringify({
+      title:   `Reply-${Date.now()}`,
+      content: params.acf.reply_body,
+      status:  "publish",
+      acf:     params.acf,
+    }),
   });
 }
 
 export function listTicketReplies(ticketId: number): Promise<WPListResult<WPTicketReplyPost>> {
   return wpRestList<WPTicketReplyPost>("/wp/v2/bluu_ticket_reply", {
-    per_page: 200,
-    status: "publish",
-    meta_key: "reply_ticket_id",
+    per_page:   200,
+    status:     "publish",
+    meta_key:   "reply_ticket_id",
     meta_value: ticketId,
-    orderby: "date",
-    order: "asc",
+    orderby:    "date",
+    order:      "asc",
+    context:    "edit",
   });
 }
 
