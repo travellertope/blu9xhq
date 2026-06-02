@@ -89,7 +89,7 @@
     /* Layout */
     --container-max:     1280px;
     --container-padding: clamp(16px, 4vw, 48px);
-    --header-height:     80px;
+    --header-height:     60px;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────────────────────── */
@@ -485,7 +485,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 .site-header__logo img,
 .site-header__logo .custom-logo {
-    height: 36px;
+    height: 28px;
     width: auto;
     display: block;
 }
