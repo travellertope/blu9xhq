@@ -178,7 +178,20 @@ export function FileManager({ clientId }: FileManagerProps) {
     const key = `__openFileUpload_${clientId}`;
     (window as any)[key] = () => {
       setShowUploadPanel(true);
-      setTimeout(() => rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      setTimeout(() => {
+        const el = rootRef.current;
+        if (!el) return;
+        let container: HTMLElement | null = el.parentElement;
+        while (container && container !== document.documentElement) {
+          const { overflowY } = window.getComputedStyle(container);
+          if (overflowY === "auto" || overflowY === "scroll") break;
+          container = container.parentElement;
+        }
+        if (container && container !== document.documentElement) {
+          const gap = el.getBoundingClientRect().top - container.getBoundingClientRect().top - 24;
+          container.scrollBy({ top: gap, behavior: "smooth" });
+        }
+      }, 50);
     };
     return () => { delete (window as any)[key]; };
   }, [clientId]);
