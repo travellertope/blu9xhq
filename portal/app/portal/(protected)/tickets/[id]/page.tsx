@@ -24,6 +24,7 @@ interface Attachment {
   fileUrl: string;
   fileType: string;
   fileSizeKb: number;
+  uploadedBy: number;
   replyId?: number;
   createdAt: string;
 }
@@ -140,6 +141,25 @@ export default function PortalTicketDetailPage() {
 
   const isClosed = ticket.status === "closed";
 
+  type TimelineItem =
+    | { kind: "reply"; id: number; authorId: number; body: string; createdAt: string; attachments: Attachment[] }
+    | { kind: "attachment"; id: number; uploadedBy: number; fileName: string; fileUrl: string; fileSizeKb: number; createdAt: string };
+
+  const timeline: TimelineItem[] = [
+    ...ticket.replies.map((r): TimelineItem => ({
+      kind: "reply", ...r,
+      attachments: ticket.attachments.filter((a) => a.replyId === r.id),
+    })),
+    ...ticket.attachments
+      .filter((a) => !a.replyId)
+      .map((a): TimelineItem => ({
+        kind: "attachment",
+        id: a.id, uploadedBy: a.uploadedBy,
+        fileName: a.fileName, fileUrl: a.fileUrl, fileSizeKb: a.fileSizeKb,
+        createdAt: a.createdAt,
+      })),
+  ].sort((x, y) => new Date(x.createdAt).getTime() - new Date(y.createdAt).getTime());
+
   return (
     <div className="space-y-6 max-w-3xl">
       <div className="flex items-center gap-3">
@@ -180,81 +200,73 @@ export default function PortalTicketDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Reply thread */}
+      {/* Unified conversation timeline */}
       <div className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
           Conversation ({ticket.replies.length})
         </h2>
 
-        {ticket.replies.length === 0 ? (
+        {timeline.length === 0 ? (
           <p className="text-sm text-muted-foreground py-4 text-center">
             No replies yet. Our team will respond shortly.
           </p>
         ) : (
-          ticket.replies.map((reply) => {
-            const isMe = reply.authorId === wpUserId;
-            const replyAttachments = ticket.attachments.filter((a) => a.replyId === reply.id);
-            return (
-              <div
-                key={reply.id}
-                className={`rounded-xl border p-4 space-y-2 ${
-                  isMe ? "bg-primary/5 border-primary/20 ml-8" : "bg-card mr-8"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-medium">
-                    {isMe ? "You" : "BluuHQ Team"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(reply.createdAt).toLocaleString("en-GB", {
-                      day: "numeric", month: "short", year: "numeric",
-                      hour: "2-digit", minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-                <p className="text-sm whitespace-pre-wrap">{reply.body}</p>
-                {replyAttachments.length > 0 && (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {replyAttachments.map((a) => (
-                      <a
-                        key={a.id}
-                        href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
-                      >
-                        <Paperclip size={11} />
-                        {a.fileName} <span className="text-muted-foreground">({formatBytes(a.fileSizeKb)})</span>
-                      </a>
-                    ))}
+          timeline.map((item) => {
+            const isMe = (item.kind === "reply" ? item.authorId : item.uploadedBy) === wpUserId;
+            const bubbleClass = `rounded-xl border p-4 space-y-2 ${isMe ? "bg-primary/5 border-primary/20 ml-8" : "bg-card mr-8"}`;
+            const timestamp = new Date(item.createdAt).toLocaleString("en-GB", {
+              day: "numeric", month: "short", year: "numeric",
+              hour: "2-digit", minute: "2-digit",
+            });
+
+            if (item.kind === "reply") {
+              return (
+                <div key={`r-${item.id}`} className={bubbleClass}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-medium">{isMe ? "You" : "BluuHQ Team"}</span>
+                    <span className="text-xs text-muted-foreground">{timestamp}</span>
                   </div>
-                )}
+                  <p className="text-sm whitespace-pre-wrap">{item.body}</p>
+                  {item.attachments.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {item.attachments.map((a) => (
+                        <a
+                          key={a.id}
+                          href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
+                        >
+                          <Paperclip size={11} />
+                          {a.fileName} <span className="text-muted-foreground">({formatBytes(a.fileSizeKb)})</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            }
+
+            return (
+              <div key={`a-${item.id}`} className={bubbleClass}>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-medium">{isMe ? "You" : "BluuHQ Team"}</span>
+                  <span className="text-xs text-muted-foreground">{timestamp}</span>
+                </div>
+                <a
+                  href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(item.fileUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 inline-flex items-center gap-1 transition-colors"
+                >
+                  <Paperclip size={11} />
+                  {item.fileName} <span className="text-muted-foreground">({formatBytes(item.fileSizeKb)})</span>
+                </a>
               </div>
             );
           })
         )}
       </div>
-
-      {/* Attachments not linked to a reply */}
-      {ticket.attachments.filter((a) => !a.replyId).length > 0 && (
-        <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Attachments</h3>
-          <div className="flex flex-wrap gap-2">
-            {ticket.attachments.filter((a) => !a.replyId).map((a) => (
-              <a
-                key={a.id}
-                href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
-              >
-                <Paperclip size={11} />
-                {a.fileName} ({formatBytes(a.fileSizeKb)})
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Reply form */}
       {!isClosed && (
