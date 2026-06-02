@@ -53,8 +53,8 @@ export async function POST(
     }
 
     // Enforce max 10 attachments per ticket
-    const existing = await listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 }));
-    if (existing.items.length >= TICKET_MAX_ATTACHMENTS) {
+    const existing = await listTicketAttachments(ticketId).catch(() => []);
+    if (existing.length >= TICKET_MAX_ATTACHMENTS) {
       return NextResponse.json({ error: "Maximum 10 attachments per ticket" }, { status: 400 });
     }
 

@@ -240,17 +240,126 @@ add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_
 // Same pattern as replies — ensures ACF field values land in wp_postmeta even if
 // ACF's own REST API processing doesn't fire (e.g. older ACF, local field groups).
 add_action( 'rest_after_insert_bluu_ticket_attachment', function ( WP_Post $post, WP_REST_Request $request ): void {
-    $acf = $request->get_param( 'acf' );
-    if ( ! is_array( $acf ) ) return;
+    $acf  = $request->get_param( 'acf' );
+    $meta = $request->get_param( 'meta' );
+
+    // Merge acf + meta params so either source can carry the values
+    $data = [];
+    if ( is_array( $meta ) ) $data = array_merge( $data, $meta );
+    if ( is_array( $acf ) )  $data = array_merge( $data, $acf );
+
+    if ( empty( $data ) ) return;
 
     foreach ( [ 'att_ticket_id', 'att_reply_id', 'att_uploaded_by', 'att_file_size_kb' ] as $key ) {
-        if ( isset( $acf[ $key ] ) && is_numeric( $acf[ $key ] ) ) {
-            update_post_meta( $post->ID, $key, (int) $acf[ $key ] );
+        if ( isset( $data[ $key ] ) && is_numeric( $data[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, (int) $data[ $key ] );
         }
     }
     foreach ( [ 'att_file_name', 'att_file_url', 'att_file_type' ] as $key ) {
-        if ( isset( $acf[ $key ] ) ) {
-            update_post_meta( $post->ID, $key, sanitize_text_field( $acf[ $key ] ) );
+        if ( isset( $data[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, sanitize_text_field( $data[ $key ] ) );
         }
     }
 }, 20, 2 );
+
+// ── Belt-and-suspenders for reply meta too ────────────────────────────────────
+// Re-run meta save on any meta param (in addition to acf param) so the native
+// WP meta write API also lands values into wp_postmeta.
+add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_REST_Request $request ): void {
+    $meta = $request->get_param( 'meta' );
+    if ( ! is_array( $meta ) ) return;
+
+    if ( isset( $meta['reply_ticket_id'] ) && is_numeric( $meta['reply_ticket_id'] ) ) {
+        update_post_meta( $post->ID, 'reply_ticket_id', (int) $meta['reply_ticket_id'] );
+    }
+    if ( isset( $meta['reply_author_id'] ) && is_numeric( $meta['reply_author_id'] ) ) {
+        update_post_meta( $post->ID, 'reply_author_id', (int) $meta['reply_author_id'] );
+    }
+    if ( isset( $meta['reply_body'] ) ) {
+        update_post_meta( $post->ID, 'reply_body', sanitize_textarea_field( $meta['reply_body'] ) );
+    }
+    if ( isset( $meta['reply_type'] ) ) {
+        update_post_meta( $post->ID, 'reply_type', sanitize_text_field( $meta['reply_type'] ) );
+    }
+}, 20, 2 );
+
+// ── Custom REST endpoints — direct DB reads that bypass WP REST meta issues ───
+
+add_action( 'rest_api_init', function(): void {
+    register_rest_route( 'bluuhq/v1', '/ticket-replies', [
+        'methods'             => 'GET',
+        'callback'            => 'bluuhq_get_ticket_replies',
+        'permission_callback' => fn() => is_user_logged_in(),
+        'args'                => [
+            'ticket_id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
+        ],
+    ]);
+    register_rest_route( 'bluuhq/v1', '/ticket-attachments', [
+        'methods'             => 'GET',
+        'callback'            => 'bluuhq_get_ticket_attachments',
+        'permission_callback' => fn() => is_user_logged_in(),
+        'args'                => [
+            'ticket_id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
+        ],
+    ]);
+});
+
+function bluuhq_get_ticket_replies( WP_REST_Request $request ): WP_REST_Response {
+    global $wpdb;
+    $ticket_id = (int) $request->get_param( 'ticket_id' );
+    $post_ids  = $wpdb->get_col( $wpdb->prepare(
+        "SELECT p.ID FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE p.post_type = 'bluu_ticket_reply' AND p.post_status = 'publish'
+           AND pm.meta_key = 'reply_ticket_id' AND pm.meta_value = %d
+         ORDER BY p.post_date ASC",
+        $ticket_id
+    ) );
+    $replies = [];
+    foreach ( $post_ids as $post_id ) {
+        $post = get_post( $post_id );
+        if ( ! $post ) continue;
+        $body = get_post_meta( $post_id, 'reply_body', true );
+        if ( ! $body ) $body = wp_strip_all_tags( $post->post_content );
+        $replies[] = [
+            'id'              => (int) $post_id,
+            'reply_ticket_id' => (int) get_post_meta( $post_id, 'reply_ticket_id', true ),
+            'reply_author_id' => (int) get_post_meta( $post_id, 'reply_author_id', true ),
+            'reply_body'      => $body ?: '',
+            'reply_type'      => get_post_meta( $post_id, 'reply_type', true ) ?: 'reply',
+            'date'            => $post->post_date,
+        ];
+    }
+    return rest_ensure_response( $replies );
+}
+
+function bluuhq_get_ticket_attachments( WP_REST_Request $request ): WP_REST_Response {
+    global $wpdb;
+    $ticket_id = (int) $request->get_param( 'ticket_id' );
+    $post_ids  = $wpdb->get_col( $wpdb->prepare(
+        "SELECT p.ID FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE p.post_type = 'bluu_ticket_attachment' AND p.post_status = 'publish'
+           AND pm.meta_key = 'att_ticket_id' AND pm.meta_value = %d
+         ORDER BY p.post_date ASC",
+        $ticket_id
+    ) );
+    $attachments = [];
+    foreach ( $post_ids as $post_id ) {
+        $post         = get_post( $post_id );
+        if ( ! $post ) continue;
+        $reply_id_raw = get_post_meta( $post_id, 'att_reply_id', true );
+        $attachments[] = [
+            'id'               => (int) $post_id,
+            'att_ticket_id'    => (int) get_post_meta( $post_id, 'att_ticket_id', true ),
+            'att_reply_id'     => $reply_id_raw !== '' ? (int) $reply_id_raw : null,
+            'att_uploaded_by'  => (int) get_post_meta( $post_id, 'att_uploaded_by', true ),
+            'att_file_name'    => (string) get_post_meta( $post_id, 'att_file_name', true ),
+            'att_file_url'     => (string) get_post_meta( $post_id, 'att_file_url', true ),
+            'att_file_type'    => (string) get_post_meta( $post_id, 'att_file_type', true ),
+            'att_file_size_kb' => (int) get_post_meta( $post_id, 'att_file_size_kb', true ),
+            'date'             => $post->post_date,
+        ];
+    }
+    return rest_ensure_response( $attachments );
+}
