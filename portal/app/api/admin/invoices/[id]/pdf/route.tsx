@@ -1,10 +1,12 @@
 export const runtime = "nodejs";
 
+import fs from "fs";
+import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
 import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
 import { uploadToR2 } from "@/lib/r2";
-import { type DocumentProps, Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import { type DocumentProps, Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React, { type ReactElement, type JSXElementConstructor } from "react";
 
 const styles = StyleSheet.create({
@@ -18,6 +20,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 32,
+  },
+  logoImage: {
+    width: 100,
+    objectFit: "contain",
   },
   brandName: {
     fontSize: 20,
@@ -133,6 +139,7 @@ interface InvoicePDFProps {
   total: number;
   currency: string;
   notes?: string;
+  logoSrc?: string;
 }
 
 function InvoicePDF({
@@ -145,13 +152,17 @@ function InvoicePDF({
   total,
   currency,
   notes,
+  logoSrc,
 }: InvoicePDFProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.brandName}>BluuHQ</Text>
+          {logoSrc
+            ? <Image src={logoSrc} style={styles.logoImage} />
+            : <Text style={styles.brandName}>BluuHQ</Text>
+          }
           <Text style={styles.invoiceLabel}>TAX INVOICE</Text>
         </View>
 
@@ -225,8 +236,21 @@ export async function POST(
   }
 
   try {
-    const [invoice, ] = await Promise.all([getInvoice(postId)]);
+    const [invoice, clientPostResult] = await Promise.all([
+      getInvoice(postId),
+      // logo loaded in parallel — no await needed before createElement
+      Promise.resolve((() => {
+        try {
+          const logoPath = path.join(process.cwd(), "public", "logo.png");
+          if (fs.existsSync(logoPath)) {
+            return `data:image/png;base64,${fs.readFileSync(logoPath).toString("base64")}`;
+          }
+        } catch { /* fall through */ }
+        return undefined;
+      })()),
+    ]);
     const clientPost = await getClientPost(invoice.acf.inv_client);
+    const logoSrc = clientPostResult;
 
     let lineItems: LineItem[] = [];
     try {
@@ -245,6 +269,7 @@ export async function POST(
       total: invoice.acf.inv_total,
       currency: invoice.acf.inv_currency,
       notes: invoice.acf.inv_notes,
+      logoSrc,
     }) as unknown as ReactElement<DocumentProps, string | JSXElementConstructor<DocumentProps>>;
 
     const pdfBuffer = await renderToBuffer(pdfElement);
@@ -254,8 +279,8 @@ export async function POST(
 
     await uploadToR2(key, pdfBuffer, "application/pdf");
 
-    const publicUrl = `${process.env.CLOUDFLARE_R2_PUBLIC_URL ?? ""}/${key}`;
-    await updateInvoice(postId, { acf: { inv_pdf_url: publicUrl } });
+    // Store just the R2 object key — download routes generate presigned URLs from it
+    await updateInvoice(postId, { acf: { inv_pdf_url: key } });
 
     return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
