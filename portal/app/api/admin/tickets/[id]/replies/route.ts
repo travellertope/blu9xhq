@@ -37,7 +37,10 @@ export async function POST(
 
   try {
     const ticket = await getTicket(ticketId);
-    if (ticket.acf.tkt_status === "closed") {
+    const acf = ticket.acf as typeof ticket.acf | false;
+    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+
+    if (acf.tkt_status === "closed") {
       return NextResponse.json({ error: "Cannot reply to a closed ticket" }, { status: 400 });
     }
 
@@ -53,10 +56,10 @@ export async function POST(
     // Update ticket state on first team reply
     const acfUpdates: Record<string, string> = {};
     if (replyType === "reply") {
-      if (!ticket.acf.tkt_first_response_at) {
+      if (!acf.tkt_first_response_at) {
         acfUpdates.tkt_first_response_at = new Date().toISOString();
       }
-      if (ticket.acf.tkt_status === "open" || ticket.acf.tkt_status === "in_progress") {
+      if (acf.tkt_status === "open" || acf.tkt_status === "in_progress") {
         acfUpdates.tkt_status = "awaiting_client";
       }
     }
@@ -66,13 +69,13 @@ export async function POST(
 
     // Notify client only for visible replies (not internal notes)
     if (replyType === "reply") {
-      const clientPost = await getClientPost(ticket.acf.tkt_client).catch(() => null);
+      const clientPost = await getClientPost(acf.tkt_client).catch(() => null);
       if (clientPost?.acf.portal_email) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
         const authorName = user.name ?? "BluuHQ Team";
         void sendTicketReply(clientPost.acf.portal_email, {
           recipientName: clientPost.acf.contact_name,
-          ticketNumber:  ticket.acf.tkt_number,
+          ticketNumber:  acf.tkt_number,
           subject:       ticket.title.rendered.replace(/<[^>]+>/g, ""),
           authorName,
           replyPreview:  replyBody.slice(0, 300),
@@ -82,9 +85,9 @@ export async function POST(
         void logTicketToTimeline({
           clientPostId: clientPost.id,
           wpUserId:     actorWpUserId,
-          ticketNumber: ticket.acf.tkt_number,
+          ticketNumber: acf.tkt_number,
           subject:      ticket.title.rendered.replace(/<[^>]+>/g, ""),
-          content:      `[Team reply on ticket ${ticket.acf.tkt_number}]\n\n${replyBody}`,
+          content:      `[Team reply on ticket ${acf.tkt_number}]\n\n${replyBody}`,
           direction:    "outbound",
         });
       }
