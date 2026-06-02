@@ -66,7 +66,7 @@ export function TiptapEditor({
   useEffect(() => {
     if (!editor || content === undefined) return;
     if (content === editor.getHTML()) return;
-    editor.commands.setContent(content, false);
+    editor.commands.setContent(content, { emitUpdate: false });
   }, [editor, content]);
 
   if (!editor) return null;
