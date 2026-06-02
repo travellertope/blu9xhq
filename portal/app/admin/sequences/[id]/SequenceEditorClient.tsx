@@ -322,7 +322,7 @@ export function SequenceEditorClient({ initialData }: SequenceEditorClientProps)
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to save");
 
-      const newId = data.id ?? data.sequenceId ?? savedId;
+      const newId = data.sequence?.id ?? data.id ?? data.sequenceId ?? savedId;
       toast.success(savedId ? "Sequence updated" : "Sequence created");
 
       if (isNew && newId) {

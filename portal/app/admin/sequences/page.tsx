@@ -3,21 +3,18 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Loader2, Plus, Pencil, RefreshCw } from "lucide-react";
+import { Loader2, Plus, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { withPermission } from "@/components/shared/PermissionGuard";
-import { format, parseISO } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface WPSequencePost {
-  id: string;
+  id: number;
   title: string;
   acf: {
     trigger?: string;
     is_active?: boolean;
-    seq_loops_id?: string;
-    seq_loops_synced_at?: string;
     steps?: unknown[];
   };
 }
@@ -50,7 +47,6 @@ function TriggerBadge({ trigger }: { trigger?: string }) {
 function SequencesPage() {
   const [sequences, setSequences] = useState<WPSequencePost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncingId, setSyncingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -67,21 +63,6 @@ function SequencesPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function handleSync(seq: WPSequencePost) {
-    setSyncingId(seq.id);
-    try {
-      const res = await fetch(`/api/admin/sequences/${seq.id}/sync`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Sync failed");
-      toast.success(`"${seq.title}" synced to Loops`);
-      await load();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Sync failed");
-    } finally {
-      setSyncingId(null);
-    }
-  }
-
   const stepCount = (seq: WPSequencePost) =>
     Array.isArray(seq.acf?.steps) ? seq.acf.steps.length : 0;
 
@@ -92,7 +73,7 @@ function SequencesPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sequences</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Manage automated email sequences sent through Loops.
+            Manage automated email sequences.
           </p>
         </div>
         <Button asChild>
@@ -129,15 +110,12 @@ function SequencesPage() {
                 <th className="px-4 py-3 font-medium">Name</th>
                 <th className="px-4 py-3 font-medium">Trigger</th>
                 <th className="px-4 py-3 font-medium">Steps</th>
-                <th className="px-4 py-3 font-medium">Loops Sync</th>
                 <th className="px-4 py-3 font-medium">Active</th>
                 <th className="px-4 py-3 font-medium">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {sequences.map((seq) => {
-                const isSynced = !!seq.acf?.seq_loops_id;
-                const syncedAt = seq.acf?.seq_loops_synced_at;
                 const steps = stepCount(seq);
 
                 return (
@@ -154,20 +132,6 @@ function SequencesPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {isSynced ? (
-                        <span className="text-xs text-green-700 font-medium">
-                          Synced ✓
-                          {syncedAt && (
-                            <span className="text-gray-400 font-normal ml-1">
-                              {format(parseISO(syncedAt), "MMM d")}
-                            </span>
-                          )}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-amber-600 font-medium">Not synced</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
                       <div
                         className={`inline-block h-2.5 w-2.5 rounded-full ${
                           seq.acf?.is_active ? "bg-green-500" : "bg-gray-300"
@@ -176,25 +140,13 @@ function SequencesPage() {
                       />
                     </td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <Link
-                          href={`/admin/sequences/${seq.id}`}
-                          className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
-                        >
-                          <Pencil className="h-3 w-3" />
-                          Edit
-                        </Link>
-                        <button
-                          onClick={() => handleSync(seq)}
-                          disabled={syncingId === seq.id}
-                          className="flex items-center gap-1 text-xs text-gray-600 hover:text-gray-900 font-medium disabled:opacity-40"
-                        >
-                          <RefreshCw
-                            className={`h-3 w-3 ${syncingId === seq.id ? "animate-spin" : ""}`}
-                          />
-                          Sync to Loops
-                        </button>
-                      </div>
+                      <Link
+                        href={`/admin/sequences/${seq.id}`}
+                        className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 font-medium"
+                      >
+                        <Pencil className="h-3 w-3" />
+                        Edit
+                      </Link>
                     </td>
                   </tr>
                 );
