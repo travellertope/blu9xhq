@@ -192,7 +192,7 @@ foreach ( [
     'bluu_communication',
     'bluu_ticket',
     'bluu_ticket_reply',
-    'bluu_ticket_attachment',
+    'bluu_tkt_attachment',
     'bluu_seq_enrollment',
     'bluu_sequence',
 ] as $_bluuhq_cpt ) {

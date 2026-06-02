@@ -1,7 +1,7 @@
 <?php
 /**
  * Support Ticket CPTs and ACF field groups.
- * Registers: bluu_ticket, bluu_ticket_reply, bluu_ticket_status_log, bluu_ticket_attachment
+ * Registers: bluu_ticket, bluu_ticket_reply, bluu_tkt_status_log, bluu_tkt_attachment
  * Does NOT modify any existing CPTs.
  */
 
@@ -38,15 +38,15 @@ function bluuhq_register_ticket_cpts(): void {
         'supports'           => [ 'title', 'editor', 'excerpt', 'custom-fields' ],
     ]));
 
-    register_post_type( 'bluu_ticket_status_log', array_merge( $defaults, [
+    register_post_type( 'bluu_tkt_status_log', array_merge( $defaults, [
         'label'              => 'Ticket Status Log',
-        'rest_base'          => 'bluu_ticket_status_log',
+        'rest_base'          => 'bluu_tkt_status_log',
         'show_in_graphql'    => false,
     ]));
 
-    register_post_type( 'bluu_ticket_attachment', array_merge( $defaults, [
+    register_post_type( 'bluu_tkt_attachment', array_merge( $defaults, [
         'label'              => 'Ticket Attachment',
-        'rest_base'          => 'bluu_ticket_attachment',
+        'rest_base'          => 'bluu_tkt_attachment',
         'show_in_graphql'    => false,
     ]));
 }
@@ -96,12 +96,12 @@ function bluuhq_register_ticket_field_groups(): void {
         ],
     ]);
 
-    // ── bluu_ticket_status_log fields ──
+    // ── bluu_tkt_status_log fields ──
     acf_add_local_field_group([
-        'key'          => 'group_bluu_ticket_status_log',
+        'key'          => 'group_bluu_tkt_status_log',
         'title'        => 'Ticket Status Log Fields',
         'show_in_rest' => true,
-        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_status_log' ] ]],
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_tkt_status_log' ] ]],
         'fields'   => [
             bluuhq_acf_num(  'log_ticket_id',   'Ticket Post ID' ),
             bluuhq_acf_num(  'log_changed_by',  'Changed By (WP User ID)' ),
@@ -112,12 +112,12 @@ function bluuhq_register_ticket_field_groups(): void {
         ],
     ]);
 
-    // ── bluu_ticket_attachment fields ──
+    // ── bluu_tkt_attachment fields ──
     acf_add_local_field_group([
-        'key'          => 'group_bluu_ticket_attachment',
+        'key'          => 'group_bluu_tkt_attachment',
         'title'        => 'Ticket Attachment Fields',
         'show_in_rest' => true,
-        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_attachment' ] ]],
+        'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_tkt_attachment' ] ]],
         'fields'   => [
             bluuhq_acf_num(  'att_ticket_id',    'Ticket Post ID' ),
             bluuhq_acf_num(  'att_reply_id',     'Reply Post ID' ),
@@ -186,12 +186,12 @@ function bluuhq_register_ticket_meta_keys(): void {
         register_post_meta( 'bluu_ticket_reply', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
     }
 
-    // bluu_ticket_attachment
+    // bluu_tkt_attachment
     foreach ( [ 'att_file_name', 'att_file_url', 'att_file_type' ] as $key ) {
-        register_post_meta( 'bluu_ticket_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+        register_post_meta( 'bluu_tkt_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
     }
     foreach ( [ 'att_ticket_id', 'att_reply_id', 'att_uploaded_by', 'att_file_size_kb' ] as $key ) {
-        register_post_meta( 'bluu_ticket_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
+        register_post_meta( 'bluu_tkt_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
     }
 }
 
@@ -200,7 +200,7 @@ function bluuhq_register_ticket_meta_keys(): void {
 // the WP REST API for custom post types. This maps them to a real WP_Query meta_query.
 
 add_filter( 'rest_bluu_ticket_reply_query',      'bluuhq_ticket_meta_query_filter', 10, 2 );
-add_filter( 'rest_bluu_ticket_attachment_query', 'bluuhq_ticket_meta_query_filter', 10, 2 );
+add_filter( 'rest_bluu_tkt_attachment_query', 'bluuhq_ticket_meta_query_filter', 10, 2 );
 add_filter( 'rest_bluu_ticket_query',            'bluuhq_ticket_meta_query_filter', 10, 2 );
 
 function bluuhq_ticket_meta_query_filter( array $args, WP_REST_Request $request ): array {
@@ -262,10 +262,10 @@ add_action( 'rest_after_insert_bluu_ticket', function ( WP_Post $post, WP_REST_R
     }
 }, 20, 2 );
 
-// ── Belt-and-suspenders: save bluu_ticket_attachment meta via update_post_meta ──
+// ── Belt-and-suspenders: save bluu_tkt_attachment meta via update_post_meta ──
 // Same pattern as replies — ensures ACF field values land in wp_postmeta even if
 // ACF's own REST API processing doesn't fire (e.g. older ACF, local field groups).
-add_action( 'rest_after_insert_bluu_ticket_attachment', function ( WP_Post $post, WP_REST_Request $request ): void {
+add_action( 'rest_after_insert_bluu_tkt_attachment', function ( WP_Post $post, WP_REST_Request $request ): void {
     $acf  = $request->get_param( 'acf' );
     $meta = $request->get_param( 'meta' );
 
@@ -393,7 +393,7 @@ function bluuhq_get_ticket_attachments( WP_REST_Request $request ): WP_REST_Resp
     $post_ids  = $wpdb->get_col( $wpdb->prepare(
         "SELECT p.ID FROM {$wpdb->posts} p
          INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-         WHERE p.post_type = 'bluu_ticket_attachment' AND p.post_status = 'publish'
+         WHERE p.post_type = 'bluu_tkt_attachment' AND p.post_status = 'publish'
            AND pm.meta_key = 'att_ticket_id' AND pm.meta_value = %d
          ORDER BY p.post_date ASC",
         $ticket_id
@@ -434,7 +434,7 @@ function bluuhq_create_ticket_attachment( WP_REST_Request $request ): WP_REST_Re
     $author_id = get_current_user_id() ?: 1;
 
     $post_id = wp_insert_post( [
-        'post_type'   => 'bluu_ticket_attachment',
+        'post_type'   => 'bluu_tkt_attachment',
         'post_status' => 'publish',
         'post_title'  => sanitize_text_field( $file_name ),
         'post_author' => $author_id,
@@ -484,7 +484,7 @@ function bluuhq_delete_ticket( WP_REST_Request $request ): WP_REST_Response {
     $att_ids = $wpdb->get_col( $wpdb->prepare(
         "SELECT p.ID FROM {$wpdb->posts} p
          INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-         WHERE p.post_type = 'bluu_ticket_attachment'
+         WHERE p.post_type = 'bluu_tkt_attachment'
            AND pm.meta_key = 'att_ticket_id' AND pm.meta_value = %d",
         $ticket_id
     ) );
@@ -492,7 +492,7 @@ function bluuhq_delete_ticket( WP_REST_Request $request ): WP_REST_Response {
     $log_ids = $wpdb->get_col( $wpdb->prepare(
         "SELECT p.ID FROM {$wpdb->posts} p
          INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
-         WHERE p.post_type = 'bluu_ticket_status_log'
+         WHERE p.post_type = 'bluu_tkt_status_log'
            AND pm.meta_key = 'log_ticket_id' AND pm.meta_value = %d",
         $ticket_id
     ) );
