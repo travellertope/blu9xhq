@@ -54,6 +54,7 @@ export async function GET(
       fileUrl:    a.att_file_url,
       fileType:   a.att_file_type,
       fileSizeKb: a.att_file_size_kb,
+      uploadedBy: a.att_uploaded_by,
       replyId:    a.att_reply_id,
       createdAt:  a.date,
     }));

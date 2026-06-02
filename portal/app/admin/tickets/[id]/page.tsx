@@ -40,6 +40,7 @@ interface Attachment {
   fileUrl: string;
   fileType: string;
   fileSizeKb: number;
+  uploadedBy: number;
   replyId?: number;
   createdAt: string;
 }
@@ -57,6 +58,7 @@ interface TicketDetail {
   priority: string;
   status: string;
   assignedTo?: number;
+  submittedBy: number;
   firstResponseAt: string | null;
   resolvedAt: string | null;
   slaResponseTarget: string | null;
@@ -265,6 +267,12 @@ export default function AdminTicketDetailPage() {
     );
   }
 
+  const resolveAuthorName = (authorId: number): string => {
+    if (ticket && authorId === ticket.submittedBy) return ticket.clientName || "Client";
+    const member = teamMembers.find((m) => m.id === authorId);
+    return member?.name ?? `User #${authorId}`;
+  };
+
   const hasChanges =
     editStatus !== ticket.status ||
     editPriority !== ticket.priority ||
@@ -327,92 +335,115 @@ export default function AdminTicketDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Reply thread */}
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Conversation ({ticket.replies.length})
-            </h2>
+          {/* Unified conversation timeline */}
+          {(() => {
+            type TimelineItem =
+              | { kind: "reply"; id: number; authorId: number; replyType: "reply" | "internal_note"; body: string; createdAt: string; attachments: Attachment[] }
+              | { kind: "attachment"; id: number; uploadedBy: number; fileName: string; fileUrl: string; fileSizeKb: number; createdAt: string };
 
-            {ticket.replies.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No replies yet.
-              </p>
-            ) : (
-              ticket.replies.map((reply) => {
-                const isInternal = reply.replyType === "internal_note";
-                const replyAttachments = ticket.attachments.filter((a) => a.replyId === reply.id);
-                return (
-                  <div
-                    key={reply.id}
-                    className={`rounded-xl border p-4 space-y-2 ${
-                      isInternal
-                        ? "bg-amber-50 border-amber-200"
-                        : "bg-card"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        {isInternal && (
-                          <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
-                            <Lock size={10} />
-                            Internal note
+            const timeline: TimelineItem[] = [
+              ...ticket.replies.map((r): TimelineItem => ({
+                kind: "reply", ...r,
+                attachments: ticket.attachments.filter((a) => a.replyId === r.id),
+              })),
+              ...ticket.attachments
+                .filter((a) => !a.replyId)
+                .map((a): TimelineItem => ({
+                  kind: "attachment",
+                  id: a.id, uploadedBy: a.uploadedBy,
+                  fileName: a.fileName, fileUrl: a.fileUrl, fileSizeKb: a.fileSizeKb,
+                  createdAt: a.createdAt,
+                })),
+            ].sort((x, y) => new Date(x.createdAt).getTime() - new Date(y.createdAt).getTime());
+
+            return (
+              <div className="space-y-3">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                  Conversation ({ticket.replies.length})
+                </h2>
+
+                {timeline.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">No replies yet.</p>
+                ) : (
+                  timeline.map((item) => {
+                    if (item.kind === "reply") {
+                      const isInternal = item.replyType === "internal_note";
+                      return (
+                        <div
+                          key={`r-${item.id}`}
+                          className={`rounded-xl border p-4 space-y-2 ${isInternal ? "bg-amber-50 border-amber-200" : "bg-card"}`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              {isInternal && (
+                                <span className="flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
+                                  <Lock size={10} />
+                                  Internal note
+                                </span>
+                              )}
+                              <span className="text-xs font-medium text-muted-foreground">
+                                {resolveAuthorName(item.authorId)}
+                              </span>
+                            </div>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(item.createdAt).toLocaleString("en-GB", {
+                                day: "numeric", month: "short", year: "numeric",
+                                hour: "2-digit", minute: "2-digit",
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{item.body}</p>
+                          {item.attachments.length > 0 && (
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              {item.attachments.map((a) => (
+                                <a
+                                  key={a.id}
+                                  href={`/api/admin/tickets/${ticket.id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
+                                >
+                                  <Paperclip size={11} />
+                                  {a.fileName}{" "}
+                                  <span className="text-muted-foreground">({formatBytes(a.fileSizeKb)})</span>
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div key={`a-${item.id}`} className="rounded-xl border p-4 space-y-2 bg-card">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-medium text-muted-foreground">
+                            {resolveAuthorName(item.uploadedBy)}
                           </span>
-                        )}
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {reply.authorName ?? `User #${reply.authorId}`}
-                        </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(item.createdAt).toLocaleString("en-GB", {
+                              day: "numeric", month: "short", year: "numeric",
+                              hour: "2-digit", minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <a
+                          href={`/api/admin/tickets/${ticket.id}/attachments/download?key=${encodeURIComponent(item.fileUrl)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 inline-flex items-center gap-1 transition-colors"
+                        >
+                          <Paperclip size={11} />
+                          {item.fileName}{" "}
+                          <span className="text-muted-foreground">({formatBytes(item.fileSizeKb)})</span>
+                        </a>
                       </div>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(reply.createdAt).toLocaleString("en-GB", {
-                          day: "numeric", month: "short", year: "numeric",
-                          hour: "2-digit", minute: "2-digit",
-                        })}
-                      </span>
-                    </div>
-                    <p className="text-sm whitespace-pre-wrap">{reply.body}</p>
-                    {replyAttachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2 pt-1">
-                        {replyAttachments.map((a) => (
-                          <a
-                            key={a.id}
-                            href={`/api/admin/tickets/${ticket.id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
-                          >
-                            <Paperclip size={11} />
-                            {a.fileName}{" "}
-                            <span className="text-muted-foreground">({formatBytes(a.fileSizeKb)})</span>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Attachments not linked to a reply */}
-          {ticket.attachments.filter((a) => !a.replyId).length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Attachments</h3>
-              <div className="flex flex-wrap gap-2">
-                {ticket.attachments.filter((a) => !a.replyId).map((a) => (
-                  <a
-                    key={a.id}
-                    href={`/api/admin/tickets/${ticket.id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
-                  >
-                    <Paperclip size={11} />
-                    {a.fileName} ({formatBytes(a.fileSizeKb)})
-                  </a>
-                ))}
+                    );
+                  })
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Reply / note form */}
           <Card>
