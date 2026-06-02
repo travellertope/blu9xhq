@@ -11,19 +11,21 @@ function isTruthy(v: boolean | string | number | undefined): boolean {
 
 function transformSequence(post: WPSequencePost) {
   const a = post.acf;
+  let exitConditions: string[] = [];
+  try { exitConditions = JSON.parse(a.exit_conditions ?? "[]") ?? []; } catch { /* ignore */ }
   return {
-    id:          post.id,
-    title:       post.title.rendered,
-    trigger:     a.trigger,
-    description: a.description,
-    steps:       (a.steps ?? []).map((s) => ({
-      stepNumber:      s.step_number,
-      delayDays:       s.delay_days,
-      subject:         s.subject,
-      bodyHtml:        s.body_html,
-      emailTemplateId: s.email_template_id,
-    })),
-    isActive:    isTruthy(a.is_active),
+    id:    post.id,
+    title: post.title.rendered,
+    acf: {
+      trigger:             a.trigger,
+      description:         a.description,
+      trigger_delay_days:  a.trigger_delay_days ?? 0,
+      exit_conditions:     exitConditions,
+      is_active:           isTruthy(a.is_active),
+      seq_loops_id:        a.seq_loops_id,
+      seq_loops_synced_at: a.seq_loops_synced_at,
+      steps:               a.steps ?? [],
+    },
   };
 }
 

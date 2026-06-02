@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {resolveClientPost, listSubscriptionsByClient, getServicePost, listClientFiles} from "@/lib/wp-api";
+import {resolveClientPost, listSubscriptionsByClient, getServicePost, listClientFiles, type WPFilePost} from "@/lib/wp-api";
 
 interface ActionButton {
   label: string;
@@ -41,24 +41,21 @@ export async function GET(req: NextRequest) {
       return { items: [], total: 0, totalPages: 0 };
     });
 
-    // Fetch each unique service once, then reuse across subscriptions
+    // Fetch services (deduplicated) and all client files in parallel — one call each
     const uniqueServiceIds = Array.from(
       new Set(subsResult.items.map((s) => s.acf.service_id).filter(Boolean) as number[])
     );
-    const serviceMap = new Map<number, Awaited<ReturnType<typeof getServicePost>> | null>(
-      await Promise.all(
+    const [serviceEntries, allFilesResult] = await Promise.all([
+      Promise.all(
         uniqueServiceIds.map(async (id) => [id, await getServicePost(id).catch(() => null)] as const)
-      )
-    );
+      ),
+      listClientFiles(clientPost.id).catch(() => ({ items: [] as WPFilePost[] })),
+    ]);
+    const serviceMap = new Map<number, Awaited<ReturnType<typeof getServicePost>> | null>(serviceEntries);
+    const allFiles = allFilesResult.items;
 
-    const subscriptions = await Promise.all(
-      subsResult.items.map(async (sub) => {
-        const [filesResult] = await Promise.all([
-          listClientFiles(clientPost.id, {
-            meta_key: "file_subscription_id",
-            meta_value: sub.id,
-          }).catch(() => ({ items: [] })),
-        ]);
+    const subscriptions = subsResult.items.map((sub) => {
+        const filesCount = allFiles.filter((f) => f.acf.file_subscription_id === sub.id).length;
         const service = sub.acf.service_id ? (serviceMap.get(sub.acf.service_id) ?? null) : null;
 
         let actionButtons: ActionButton[] = [];
@@ -92,7 +89,7 @@ export async function GET(req: NextRequest) {
           cancellationRequestedAt: sub.acf.sub_cancellation_requested_at ?? null,
           actionButtons,
           sensitiveFieldLabels,
-          filesCount: filesResult.items.length,
+          filesCount,
           service: service
             ? {
                 id: service.id,
@@ -102,8 +99,7 @@ export async function GET(req: NextRequest) {
               }
             : null,
         };
-      })
-    );
+      });
 
     return NextResponse.json({ subscriptions });
   } catch (err) {

@@ -1,8 +1,3 @@
 {
-  "framework": "nextjs",
-  "crons": [
-    { "path": "/api/cron/check-overdue",     "schedule": "0 9 * * *" },
-    { "path": "/api/cron/sla-check",         "schedule": "0 8 * * *" },
-    { "path": "/api/cron/process-sequences", "schedule": "0 7 * * *" }
-  ]
+  "framework": "nextjs"
 }

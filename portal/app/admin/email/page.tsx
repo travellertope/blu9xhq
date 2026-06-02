@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Loader2, Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, ExternalLink, Search, ChevronLeft, ChevronRight, Mail } from "lucide-react";
 import {
   Tabs,
   TabsContent,
@@ -448,20 +448,170 @@ function SequencesTab() {
 
 // ─── Sent Log tab ─────────────────────────────────────────────────────────────
 
-function SentLogTab() {
+interface SentLogEntry {
+  id: number;
+  sentAt: string;
+  clientId: number;
+  clientName: string;
+  subject: string;
+  preview: string;
+  emailStatus: string;
+  loggedBy: number;
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    sent:     "bg-green-100 text-green-700",
+    failed:   "bg-red-100 text-red-700",
+    bounced:  "bg-orange-100 text-orange-700",
+    delivered:"bg-blue-100 text-blue-700",
+  };
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Sent Log</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-gray-500 leading-relaxed">
-          Sent Log is coming in a future batch. Use the{" "}
-          <strong>Communication Timeline</strong> on each client profile to view
-          sent emails — filter by <code className="text-xs bg-gray-100 px-1 rounded">channel=email</code> to see email history.
-        </p>
-      </CardContent>
-    </Card>
+    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${map[status] ?? "bg-gray-100 text-gray-600"}`}>
+      {status}
+    </span>
+  );
+}
+
+function SentLogTab() {
+  const [entries, setEntries] = useState<SentLogEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function load(p: number, q: string) {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ page: String(p), perPage: "20" });
+      if (q) params.set("search", q);
+      const res  = await fetch(`/api/admin/email/sent-log?${params}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to load");
+      setEntries(data.entries ?? []);
+      setTotalPages(data.totalPages ?? 1);
+      setTotal(data.total ?? 0);
+      setPage(data.page ?? p);
+    } catch {
+      toast.error("Failed to load sent log");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => { load(1, ""); }, []);
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => load(1, value), 400);
+  }
+
+  function goToPage(p: number) {
+    if (p < 1 || p > totalPages) return;
+    load(p, search);
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="relative w-64">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+          <input
+            type="search"
+            placeholder="Search by subject…"
+            value={search}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            className="w-full rounded-md border border-gray-200 bg-white pl-8 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <p className="text-xs text-gray-400">{total} email{total !== 1 ? "s" : ""} sent</p>
+      </div>
+
+      <div className="rounded-lg border bg-white overflow-hidden">
+        {loading ? (
+          <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Loading…
+          </div>
+        ) : entries.length === 0 ? (
+          <div className="py-16 text-center text-sm text-gray-400 space-y-2">
+            <Mail className="h-8 w-8 mx-auto text-gray-300" />
+            <p>{search ? "No emails match your search." : "No emails sent yet."}</p>
+          </div>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b bg-gray-50 text-left text-xs text-gray-500">
+                <th className="px-4 py-3 font-medium">Date</th>
+                <th className="px-4 py-3 font-medium">Client</th>
+                <th className="px-4 py-3 font-medium">Subject / Preview</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {entries.map((e) => (
+                <tr key={e.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
+                    {new Date(e.sentAt).toLocaleString("en-GB", {
+                      day: "numeric", month: "short", year: "numeric",
+                      hour: "2-digit", minute: "2-digit",
+                    })}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {e.clientId ? (
+                      <Link
+                        href={`/admin/clients/${e.clientId}`}
+                        className="text-indigo-600 hover:text-indigo-800 font-medium text-xs"
+                      >
+                        {e.clientName}
+                      </Link>
+                    ) : (
+                      <span className="text-xs text-gray-400">—</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 max-w-xs">
+                    <p className="font-medium text-gray-900 truncate">{e.subject}</p>
+                    {e.preview && (
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{e.preview}</p>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <StatusBadge status={e.emailStatus} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm text-gray-500">
+          <span className="text-xs">Page {page} of {totalPages}</span>
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToPage(page - 1)}
+              disabled={page <= 1 || loading}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => goToPage(page + 1)}
+              disabled={page >= totalPages || loading}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

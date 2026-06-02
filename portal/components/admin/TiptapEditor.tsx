@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Bold,
   Italic,
@@ -59,6 +59,15 @@ export function TiptapEditor({
       onChange?.(editor.getHTML());
     },
   });
+
+  // Sync external content changes (e.g. template selection) into the editor.
+  // The getHTML() guard prevents cursor-jumping on every keystroke when the
+  // parent echos the same HTML back down as the `content` prop.
+  useEffect(() => {
+    if (!editor || content === undefined) return;
+    if (content === editor.getHTML()) return;
+    editor.commands.setContent(content, false);
+  }, [editor, content]);
 
   if (!editor) return null;
 

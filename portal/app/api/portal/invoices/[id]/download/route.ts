@@ -28,9 +28,17 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const pdfKey = invoice.acf.inv_pdf_url;
+    let pdfKey = invoice.acf.inv_pdf_url;
     if (!pdfKey) {
       return NextResponse.json({ error: "PDF not yet generated" }, { status: 404 });
+    }
+    // Legacy: inv_pdf_url was stored as a full public URL — extract the object key
+    if (pdfKey.startsWith("http")) {
+      try {
+        pdfKey = new URL(pdfKey).pathname.replace(/^\//, "");
+      } catch {
+        return NextResponse.json({ error: "Invalid PDF URL stored" }, { status: 500 });
+      }
     }
 
     const signedUrl = await r2SignedUrl(pdfKey, 60);
