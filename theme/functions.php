@@ -159,12 +159,63 @@ function bluu_preconnect_fonts() {
 }
 add_action( 'wp_head', 'bluu_preconnect_fonts', 1 );
 
+// ── SEO: per-page title via ACF ────────────────────────────────────────────────
+function bluu_document_title_parts( $parts ) {
+    if ( ! function_exists( 'get_field' ) ) {
+        return $parts;
+    }
+    if ( ! is_singular( 'page' ) ) {
+        return $parts;
+    }
+
+    $template = get_post_meta( get_the_ID(), '_wp_page_template', true );
+    $field_map = array(
+        'page-industry.php'    => 'ind_seo_title',
+        'page-subindustry.php' => 'si_seo_title',
+        'page-usecase.php'     => 'uc_seo_title',
+        'page-industries.php'  => 'hub_seo_title',
+    );
+
+    if ( isset( $field_map[ $template ] ) ) {
+        $custom = get_field( $field_map[ $template ] );
+        if ( $custom ) {
+            $parts['title'] = $custom;
+            unset( $parts['tagline'] );
+        }
+    }
+
+    return $parts;
+}
+add_filter( 'document_title_parts', 'bluu_document_title_parts', 10 );
+
 // ── SEO Meta Tags ──────────────────────────────────────────────────────────────
 function bluu_seo_meta_tags() {
-    if ( ! function_exists( 'yoast_head' ) && ! class_exists( 'RankMath\RankMath' ) ) {
-        $description = get_bloginfo( 'description' ) ?: 'Bluu Interactive runs your complete content operation — research, writing, publishing, and reporting — all content built to SEO and AI crawl standard.';
-        echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+    if ( function_exists( 'yoast_head' ) || class_exists( 'RankMath\RankMath' ) ) {
+        return;
+    }
 
+    $description = '';
+
+    if ( is_singular( 'page' ) && function_exists( 'get_field' ) ) {
+        $template = get_post_meta( get_the_ID(), '_wp_page_template', true );
+        $field_map = array(
+            'page-industry.php'    => 'ind_meta_description',
+            'page-subindustry.php' => 'si_meta_description',
+            'page-usecase.php'     => 'uc_meta_description',
+            'page-industries.php'  => 'hub_meta_description',
+        );
+        if ( isset( $field_map[ $template ] ) ) {
+            $description = get_field( $field_map[ $template ] );
+        }
+    }
+
+    if ( ! $description ) {
+        $description = get_bloginfo( 'description' ) ?: 'Bluu Interactive runs your complete content operation — research, writing, publishing, and reporting — all content built to SEO and AI crawl standard.';
+    }
+
+    echo '<meta name="description" content="' . esc_attr( $description ) . '">' . "\n";
+
+    if ( ! is_singular( 'page' ) || ! get_post_meta( get_the_ID(), '_wp_page_template', true ) ) {
         $schema = array(
             '@context'        => 'https://schema.org',
             '@type'           => 'Organization',
