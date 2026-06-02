@@ -7,9 +7,11 @@ import {
   listTicketReplies,
   listTicketAttachments,
   createTicketStatusLog,
+  deleteWPTicket,
   type TicketReplyItem,
   type TicketAttachmentItem,
 } from "@/lib/wp-api";
+import { deleteFromR2 } from "@/lib/r2";
 import { sendTicketStatusChanged } from "@/lib/resend";
 import { isValidStatus, isValidPriority, logTicketToTimeline } from "@/lib/ticket-utils";
 
@@ -171,5 +173,27 @@ export async function PATCH(
   } catch (err) {
     console.error("[PATCH /api/admin/tickets/[id]]", err);
     return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
+  }
+}
+
+// DELETE /api/admin/tickets/[id] — delete ticket, all replies, attachments, and R2 files
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const auth = await requireSession(req);
+  if (auth instanceof NextResponse) return auth;
+
+  const ticketId = parseInt(params.id, 10);
+  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+
+  try {
+    const { att_file_urls } = await deleteWPTicket(ticketId);
+    // Delete R2 files concurrently, best-effort (don't fail if one is missing)
+    await Promise.allSettled(att_file_urls.filter(Boolean).map((key) => deleteFromR2(key)));
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[DELETE /api/admin/tickets/[id]]", err);
+    return NextResponse.json({ error: "Failed to delete ticket" }, { status: 500 });
   }
 }
