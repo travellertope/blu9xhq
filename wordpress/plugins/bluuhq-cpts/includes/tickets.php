@@ -419,6 +419,8 @@ function bluuhq_get_ticket_attachments( WP_REST_Request $request ): WP_REST_Resp
 }
 
 function bluuhq_create_ticket_attachment( WP_REST_Request $request ): WP_REST_Response {
+    global $wpdb;
+
     $ticket_id   = (int) $request->get_param( 'att_ticket_id' );
     $reply_id    = (int) $request->get_param( 'att_reply_id' );
     $uploaded_by = (int) $request->get_param( 'att_uploaded_by' );
@@ -427,14 +429,21 @@ function bluuhq_create_ticket_attachment( WP_REST_Request $request ): WP_REST_Re
     $file_type   = (string) $request->get_param( 'att_file_type' );
     $file_size   = (int) $request->get_param( 'att_file_size_kb' );
 
+    // Use the authenticated user as author; fall back to user 1 so wp_insert_post
+    // never receives author=0, which can silently fail on hardened setups.
+    $author_id = get_current_user_id() ?: 1;
+
     $post_id = wp_insert_post( [
         'post_type'   => 'bluu_ticket_attachment',
         'post_status' => 'publish',
-        'post_title'  => $file_name,
+        'post_title'  => sanitize_text_field( $file_name ),
+        'post_author' => $author_id,
     ], true );
 
     if ( is_wp_error( $post_id ) ) {
-        return new WP_REST_Response( [ 'error' => $post_id->get_error_message() ], 500 );
+        // Include the raw DB error so callers can diagnose the root cause
+        $db_err = $wpdb->last_error ? ' | DB: ' . $wpdb->last_error : '';
+        return new WP_REST_Response( [ 'error' => $post_id->get_error_message() . $db_err ], 500 );
     }
 
     update_post_meta( $post_id, 'att_ticket_id',    $ticket_id );
