@@ -76,7 +76,7 @@ export function EmailComposer({
       .then((data) => {
         const list: EmailTemplate[] = Array.isArray(data)
           ? data
-          : (data.data ?? []);
+          : (data.templates ?? data.data ?? []);
         setTemplates(list);
       })
       .catch(() => {
@@ -87,7 +87,7 @@ export function EmailComposer({
 
   function handleTemplateSelect(id: string) {
     setTemplateId(id);
-    const template = templates.find((t) => t.id === id);
+    const template = templates.find((t) => String(t.id) === id);
     if (!template) return;
 
     const vars: Record<string, string> = {
@@ -178,7 +178,7 @@ export function EmailComposer({
           </SelectTrigger>
           <SelectContent>
             {templates.map((t) => (
-              <SelectItem key={t.id} value={t.id}>
+              <SelectItem key={t.id} value={String(t.id)}>
                 {t.title}
               </SelectItem>
             ))}
