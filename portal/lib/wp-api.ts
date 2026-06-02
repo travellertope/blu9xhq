@@ -46,15 +46,19 @@ export interface WPListResult<T> {
 
 export async function wpRestList<T>(
   path: string,
-  params: Record<string, string | number> = {}
+  params: Record<string, string | number> = {},
+  options: { revalidate?: number } = {}
 ): Promise<WPListResult<T>> {
   const qs = new URLSearchParams(
     Object.entries(params).map(([k, v]) => [k, String(v)])
   ).toString();
   const url = `${WORDPRESS_URL}/wp-json${path}${qs ? `?${qs}` : ""}`;
+  const cacheConfig: RequestInit = options.revalidate !== undefined
+    ? { next: { revalidate: options.revalidate } }
+    : { cache: "no-store" };
   const res = await fetch(url, {
     headers: { Authorization: authHeader() },
-    cache: "no-store",
+    ...cacheConfig,
   });
   if (!res.ok) {
     const text = await res.text().catch(() => res.statusText);
@@ -133,7 +137,7 @@ export interface WPClientPost {
 }
 
 export function getClientPost(postId: number): Promise<WPClientPost> {
-  return wpRestFetch<WPClientPost>(`/wp/v2/bluu_client/${postId}`);
+  return wpRestFetch<WPClientPost>(`/wp/v2/bluu_client/${postId}`, { revalidate: 30 });
 }
 
 /**
@@ -221,7 +225,7 @@ export function listServices(params: Record<string, string | number> = {}): Prom
     orderby: "title",
     order: "asc",
     ...params,
-  });
+  }, { revalidate: 600 });
 }
 
 // ─── bluu_subscription CPT types & helpers ───────────────────────────────────
@@ -287,7 +291,7 @@ export function listSubscriptionsByClient(clientPostId: number): Promise<WPListR
     status: "publish",
     meta_key: "client_id",
     meta_value: clientPostId,
-  });
+  }, { revalidate: 30 });
 }
 
 export function listAllSubscriptions(params: { per_page?: number; page?: number } = {}): Promise<WPListResult<WPSubscriptionPost>> {
@@ -520,7 +524,7 @@ export function listClientFiles(
     orderby:    "date",
     order:      "desc",
     ...params,
-  });
+  }, { revalidate: 60 });
 }
 
 export function listAllFiles(params: { per_page?: number; page?: number } = {}): Promise<WPListResult<WPFilePost>> {
