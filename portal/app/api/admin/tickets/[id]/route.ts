@@ -54,36 +54,43 @@ export async function GET(
       createdAt:            ticket.date,
       replies: repliesResult.items
         .map((r) => {
-          const acf = r.acf || null;
+          const acf  = r.acf  || null;
+          const meta = r.meta || null;
           const body =
             r.content?.raw?.trim() ||
             r.content?.rendered?.replace(/<[^>]+>/g, "").trim() ||
-            acf?.reply_body ||
+            meta?.reply_body ||
+            acf?.reply_body  ||
             "";
           const replyType =
-            acf?.reply_type ||
+            acf?.reply_type  ||
+            meta?.reply_type ||
             r.excerpt?.raw?.trim() ||
             r.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim() ||
             "reply";
           return {
             id:        r.id,
-            authorId:  acf?.reply_author_id ?? 0,
+            authorId:  acf?.reply_author_id ?? meta?.reply_author_id ?? 0,
             body,
             replyType,
             createdAt: r.date,
           };
         })
         .filter((r) => r.body),
-      attachments: attachmentsResult.items.map((a) => ({
-        id:          a.id,
-        fileName:    a.acf && a.acf.att_file_name,
-        fileUrl:     a.acf && a.acf.att_file_url,
-        fileType:    a.acf && a.acf.att_file_type,
-        fileSizeKb:  a.acf && a.acf.att_file_size_kb,
-        uploadedBy:  a.acf && a.acf.att_uploaded_by,
-        replyId:     (a.acf && a.acf.att_reply_id) ?? null,
-        createdAt:   a.date,
-      })),
+      attachments: attachmentsResult.items.map((a) => {
+        const acf  = a.acf  || null;
+        const meta = a.meta || null;
+        return {
+          id:          a.id,
+          fileName:    acf?.att_file_name    || meta?.att_file_name    || "",
+          fileUrl:     acf?.att_file_url     || meta?.att_file_url     || "",
+          fileType:    acf?.att_file_type    || meta?.att_file_type    || "",
+          fileSizeKb:  acf?.att_file_size_kb || meta?.att_file_size_kb || 0,
+          uploadedBy:  acf?.att_uploaded_by  || meta?.att_uploaded_by  || 0,
+          replyId:     acf?.att_reply_id     ?? meta?.att_reply_id     ?? null,
+          createdAt:   a.date,
+        };
+      }),
     });
   } catch (err) {
     console.error("[GET /api/admin/tickets/[id]]", err);

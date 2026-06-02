@@ -673,6 +673,12 @@ export interface WPTicketReplyPost {
   date:    string;
   content: { rendered: string; raw?: string };
   excerpt: { rendered: string; raw?: string };
+  meta?: {
+    reply_ticket_id?: number;
+    reply_author_id?: number;
+    reply_body?:      string;
+    reply_type?:      string;
+  };
   acf:     WPTicketReplyACF | false;
 }
 
@@ -703,7 +709,16 @@ export interface WPTicketAttachmentACF {
 export interface WPTicketAttachmentPost {
   id:   number;
   date: string;
-  acf:  WPTicketAttachmentACF;
+  meta?: {
+    att_ticket_id?:    number;
+    att_reply_id?:     number;
+    att_uploaded_by?:  number;
+    att_file_name?:    string;
+    att_file_url?:     string;
+    att_file_type?:    string;
+    att_file_size_kb?: number;
+  };
+  acf:  WPTicketAttachmentACF | false;
 }
 
 export function createTicket(params: {

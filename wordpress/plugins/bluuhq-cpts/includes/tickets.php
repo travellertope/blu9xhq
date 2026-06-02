@@ -35,6 +35,7 @@ function bluuhq_register_ticket_cpts(): void {
         'rest_base'          => 'bluu_ticket_reply',
         'graphql_single_name' => 'ticketReply',
         'graphql_plural_name' => 'ticketReplies',
+        'supports'           => [ 'title', 'editor', 'excerpt', 'custom-fields' ],
     ]));
 
     register_post_type( 'bluu_ticket_status_log', array_merge( $defaults, [
@@ -194,6 +195,26 @@ function bluuhq_register_ticket_meta_keys(): void {
     }
 }
 
+// ── REST API meta query filters ───────────────────────────────────────────────
+// Without these, ?meta_key=X&meta_value=Y query params are silently ignored by
+// the WP REST API for custom post types. This maps them to a real WP_Query meta_query.
+
+add_filter( 'rest_bluu_ticket_reply_query',      'bluuhq_ticket_meta_query_filter', 10, 2 );
+add_filter( 'rest_bluu_ticket_attachment_query', 'bluuhq_ticket_meta_query_filter', 10, 2 );
+
+function bluuhq_ticket_meta_query_filter( array $args, WP_REST_Request $request ): array {
+    $meta_key   = $request->get_param( 'meta_key' );
+    $meta_value = $request->get_param( 'meta_value' );
+    if ( $meta_key && $meta_value !== null && $meta_value !== '' ) {
+        $args['meta_query'] = [[
+            'key'     => sanitize_key( $meta_key ),
+            'value'   => $meta_value,
+            'compare' => '=',
+        ]];
+    }
+    return $args;
+}
+
 // ── Belt-and-suspenders: save bluu_ticket_reply meta via native update_post_meta ──
 // Runs at priority 20 (after ACF at ~10) so our values win if ACF failed to save.
 // This guarantees reply_ticket_id is always in wp_postmeta so the REST meta query works.
@@ -212,5 +233,24 @@ add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_
     }
     if ( isset( $acf['reply_type'] ) ) {
         update_post_meta( $post->ID, 'reply_type', sanitize_text_field( $acf['reply_type'] ) );
+    }
+}, 20, 2 );
+
+// ── Belt-and-suspenders: save bluu_ticket_attachment meta via update_post_meta ──
+// Same pattern as replies — ensures ACF field values land in wp_postmeta even if
+// ACF's own REST API processing doesn't fire (e.g. older ACF, local field groups).
+add_action( 'rest_after_insert_bluu_ticket_attachment', function ( WP_Post $post, WP_REST_Request $request ): void {
+    $acf = $request->get_param( 'acf' );
+    if ( ! is_array( $acf ) ) return;
+
+    foreach ( [ 'att_ticket_id', 'att_reply_id', 'att_uploaded_by', 'att_file_size_kb' ] as $key ) {
+        if ( isset( $acf[ $key ] ) && is_numeric( $acf[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, (int) $acf[ $key ] );
+        }
+    }
+    foreach ( [ 'att_file_name', 'att_file_url', 'att_file_type' ] as $key ) {
+        if ( isset( $acf[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, sanitize_text_field( $acf[ $key ] ) );
+        }
     }
 }, 20, 2 );
