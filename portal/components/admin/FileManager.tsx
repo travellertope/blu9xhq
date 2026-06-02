@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -169,6 +169,19 @@ export function FileManager({ clientId }: FileManagerProps) {
   const [showUploadPanel, setShowUploadPanel] = useState(false);
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const [uploading, setUploading] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const uploadQueueRef = useRef(uploadQueue);
+  uploadQueueRef.current = uploadQueue;
+
+  // Register window bridge so ClientProfileActions "Add File" button can trigger the upload panel
+  useEffect(() => {
+    const key = `__openFileUpload_${clientId}`;
+    (window as any)[key] = () => {
+      setShowUploadPanel(true);
+      setTimeout(() => rootRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    };
+    return () => { delete (window as any)[key]; };
+  }, [clientId]);
 
   const fetchFiles = useCallback(async () => {
     setLoading(true);
@@ -219,13 +232,14 @@ export function FileManager({ clientId }: FileManagerProps) {
   };
 
   const uploadAll = async () => {
-    const pending = uploadQueue.filter((q) => q.status === "pending");
+    const currentQueue = uploadQueueRef.current;
+    const pending = currentQueue.filter((q) => q.status === "pending");
     if (!pending.length) return;
     setUploading(true);
     let successCount = 0;
 
-    for (let i = 0; i < uploadQueue.length; i++) {
-      const item = uploadQueue[i];
+    for (let i = 0; i < currentQueue.length; i++) {
+      const item = currentQueue[i];
       if (item.status !== "pending") continue;
 
       updateQueueItem(i, { status: "uploading", progress: 0 });
@@ -270,10 +284,13 @@ export function FileManager({ clientId }: FileManagerProps) {
 
     setUploading(false);
     await fetchFiles();
-    setUploadQueue((prev) => prev.filter((q) => q.status !== "done"));
-    if (successCount > 0 && uploadQueue.every((q) => q.status === "done" || q.status === "error")) {
-      setShowUploadPanel(false);
-    }
+    setUploadQueue((prev) => {
+      const remaining = prev.filter((q) => q.status !== "done");
+      if (successCount > 0 && remaining.every((q) => q.status === "error")) {
+        setShowUploadPanel(false);
+      }
+      return remaining;
+    });
     if (successCount > 0) {
       toast.success(successCount === 1 ? "File uploaded" : `${successCount} files uploaded`);
     }
@@ -307,7 +324,7 @@ export function FileManager({ clientId }: FileManagerProps) {
     : files.filter((f) => f.category === filterCategory);
 
   return (
-    <div className="space-y-4">
+    <div ref={rootRef} className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <Select value={filterCategory} onValueChange={setFilterCategory}>

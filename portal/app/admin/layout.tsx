@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const bluuhqRole = user?.bluuhqRole ?? "super_admin";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="fixed inset-0 flex overflow-hidden bg-slate-50">
       <Sidebar userName={userName} bluuhqRole={bluuhqRole} />
 
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">

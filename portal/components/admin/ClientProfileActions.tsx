@@ -79,7 +79,10 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth, cli
         variant="outline"
         size="sm"
         className="gap-1.5"
-        onClick={() => toast.info("File upload — built in Batch 6")}
+        onClick={() => {
+          const fn = (window as any)[`__openFileUpload_${clientIdNum}`];
+          if (typeof fn === "function") fn();
+        }}
       >
         <FolderUp className="h-3.5 w-3.5" />
         Add File

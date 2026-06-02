@@ -3,6 +3,7 @@ import { requireClientSession } from "@/lib/apiPermissions";
 import {
   resolveClientPost, listTickets,
   createTicket,
+  createTicketReply,
   createTicketStatusLog,
 } from "@/lib/wp-api";
 import {
@@ -113,6 +114,16 @@ export async function POST(req: NextRequest) {
         ...(body.retainerId ? { tkt_retainer_id: body.retainerId } : {}),
       },
     });
+
+    // Store initial description as first reply so it appears in the thread
+    await createTicketReply({
+      acf: {
+        reply_ticket_id: ticket.id,
+        reply_author_id: wpUserId,
+        reply_body:      description,
+        reply_type:      "reply",
+      },
+    }).catch((e) => console.error("[createTicket] Failed to store initial reply:", e));
 
     // Log initial status to audit trail
     await createTicketStatusLog({
