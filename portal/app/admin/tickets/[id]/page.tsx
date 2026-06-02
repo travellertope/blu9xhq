@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
-  ArrowLeft, Loader2, Send, Paperclip, Lock, AlertTriangle, Clock,
+  ArrowLeft, Loader2, Send, Paperclip, Lock, AlertTriangle, Clock, Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -110,8 +110,10 @@ const PRIORITIES = ["urgent", "high", "normal", "low"];
 
 export default function AdminTicketDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
 
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
@@ -221,6 +223,23 @@ export default function AdminTicketDetailPage() {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const deleteTicket = async () => {
+    if (!confirm("Delete this ticket? This will permanently remove all replies, attachments, and uploaded files. This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/tickets/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const d = await res.json();
+        throw new Error(d.error ?? "Failed to delete");
+      }
+      toast.success("Ticket deleted");
+      router.push("/admin/tickets");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete ticket");
+      setDeleting(false);
     }
   };
 
@@ -548,6 +567,20 @@ export default function AdminTicketDetailPage() {
               >
                 {saving ? <Loader2 size={14} className="animate-spin mr-1.5" /> : null}
                 Save changes
+              </Button>
+              <Button
+                className="w-full"
+                size="sm"
+                variant="destructive"
+                onClick={deleteTicket}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <Loader2 size={14} className="animate-spin mr-1.5" />
+                ) : (
+                  <Trash2 size={14} className="mr-1.5" />
+                )}
+                Delete ticket
               </Button>
             </CardContent>
           </Card>

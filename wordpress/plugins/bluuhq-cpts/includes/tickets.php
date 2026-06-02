@@ -283,9 +283,10 @@ add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_
     }
 }, 20, 2 );
 
-// ── Custom REST endpoints — direct DB reads that bypass WP REST meta issues ───
+// ── Custom REST endpoints — direct DB reads/writes that bypass WP REST meta issues ──
 
 add_action( 'rest_api_init', function(): void {
+
     register_rest_route( 'bluuhq/v1', '/ticket-replies', [
         'methods'             => 'GET',
         'callback'            => 'bluuhq_get_ticket_replies',
@@ -294,14 +295,41 @@ add_action( 'rest_api_init', function(): void {
             'ticket_id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
         ],
     ]);
+
     register_rest_route( 'bluuhq/v1', '/ticket-attachments', [
-        'methods'             => 'GET',
-        'callback'            => 'bluuhq_get_ticket_attachments',
-        'permission_callback' => fn() => is_user_logged_in(),
-        'args'                => [
-            'ticket_id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
+        [
+            'methods'             => 'GET',
+            'callback'            => 'bluuhq_get_ticket_attachments',
+            'permission_callback' => fn() => is_user_logged_in(),
+            'args'                => [
+                'ticket_id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
+            ],
+        ],
+        [
+            'methods'             => 'POST',
+            'callback'            => 'bluuhq_create_ticket_attachment',
+            'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+            'args'                => [
+                'att_ticket_id'    => [ 'required' => true,  'sanitize_callback' => 'absint' ],
+                'att_uploaded_by'  => [ 'required' => true,  'sanitize_callback' => 'absint' ],
+                'att_file_name'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+                'att_file_url'     => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+                'att_file_type'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+                'att_file_size_kb' => [ 'required' => true,  'sanitize_callback' => 'absint' ],
+                'att_reply_id'     => [ 'required' => false, 'sanitize_callback' => 'absint' ],
+            ],
         ],
     ]);
+
+    register_rest_route( 'bluuhq/v1', '/tickets/(?P<id>\d+)', [
+        'methods'             => 'DELETE',
+        'callback'            => 'bluuhq_delete_ticket',
+        'permission_callback' => fn() => current_user_can( 'delete_posts' ),
+        'args'                => [
+            'id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
+        ],
+    ]);
+
 });
 
 function bluuhq_get_ticket_replies( WP_REST_Request $request ): WP_REST_Response {
@@ -362,4 +390,95 @@ function bluuhq_get_ticket_attachments( WP_REST_Request $request ): WP_REST_Resp
         ];
     }
     return rest_ensure_response( $attachments );
+}
+
+function bluuhq_create_ticket_attachment( WP_REST_Request $request ): WP_REST_Response {
+    $ticket_id   = (int) $request->get_param( 'att_ticket_id' );
+    $reply_id    = (int) $request->get_param( 'att_reply_id' );
+    $uploaded_by = (int) $request->get_param( 'att_uploaded_by' );
+    $file_name   = (string) $request->get_param( 'att_file_name' );
+    $file_url    = (string) $request->get_param( 'att_file_url' );
+    $file_type   = (string) $request->get_param( 'att_file_type' );
+    $file_size   = (int) $request->get_param( 'att_file_size_kb' );
+
+    $post_id = wp_insert_post( [
+        'post_type'   => 'bluu_ticket_attachment',
+        'post_status' => 'publish',
+        'post_title'  => $file_name,
+    ], true );
+
+    if ( is_wp_error( $post_id ) ) {
+        return new WP_REST_Response( [ 'error' => $post_id->get_error_message() ], 500 );
+    }
+
+    update_post_meta( $post_id, 'att_ticket_id',    $ticket_id );
+    update_post_meta( $post_id, 'att_reply_id',     $reply_id );
+    update_post_meta( $post_id, 'att_uploaded_by',  $uploaded_by );
+    update_post_meta( $post_id, 'att_file_name',    $file_name );
+    update_post_meta( $post_id, 'att_file_url',     $file_url );
+    update_post_meta( $post_id, 'att_file_type',    $file_type );
+    update_post_meta( $post_id, 'att_file_size_kb', $file_size );
+
+    $post = get_post( $post_id );
+    return new WP_REST_Response( [
+        'id'               => $post_id,
+        'att_ticket_id'    => $ticket_id,
+        'att_reply_id'     => $reply_id ?: null,
+        'att_uploaded_by'  => $uploaded_by,
+        'att_file_name'    => $file_name,
+        'att_file_url'     => $file_url,
+        'att_file_type'    => $file_type,
+        'att_file_size_kb' => $file_size,
+        'date'             => $post ? $post->post_date : current_time( 'mysql' ),
+    ], 201 );
+}
+
+function bluuhq_delete_ticket( WP_REST_Request $request ): WP_REST_Response {
+    global $wpdb;
+    $ticket_id = (int) $request->get_param( 'id' );
+
+    // Collect related post IDs and R2 file keys before deleting anything
+    $reply_ids = $wpdb->get_col( $wpdb->prepare(
+        "SELECT p.ID FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE p.post_type = 'bluu_ticket_reply'
+           AND pm.meta_key = 'reply_ticket_id' AND pm.meta_value = %d",
+        $ticket_id
+    ) );
+
+    $att_ids = $wpdb->get_col( $wpdb->prepare(
+        "SELECT p.ID FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE p.post_type = 'bluu_ticket_attachment'
+           AND pm.meta_key = 'att_ticket_id' AND pm.meta_value = %d",
+        $ticket_id
+    ) );
+
+    $log_ids = $wpdb->get_col( $wpdb->prepare(
+        "SELECT p.ID FROM {$wpdb->posts} p
+         INNER JOIN {$wpdb->postmeta} pm ON p.ID = pm.post_id
+         WHERE p.post_type = 'bluu_ticket_status_log'
+           AND pm.meta_key = 'log_ticket_id' AND pm.meta_value = %d",
+        $ticket_id
+    ) );
+
+    // Collect R2 keys so the caller can delete them from cloud storage
+    $att_file_urls = [];
+    foreach ( $att_ids as $att_id ) {
+        $url = get_post_meta( (int) $att_id, 'att_file_url', true );
+        if ( $url ) $att_file_urls[] = $url;
+    }
+
+    // Delete all related posts (force = bypass trash)
+    foreach ( array_merge( $reply_ids, $att_ids, $log_ids ) as $pid ) {
+        wp_delete_post( (int) $pid, true );
+    }
+
+    // Delete the ticket itself
+    $deleted = wp_delete_post( $ticket_id, true );
+    if ( ! $deleted ) {
+        return new WP_REST_Response( [ 'error' => 'Failed to delete ticket' ], 500 );
+    }
+
+    return rest_ensure_response( [ 'ok' => true, 'att_file_urls' => $att_file_urls ] );
 }

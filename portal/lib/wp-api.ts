@@ -821,23 +821,24 @@ export interface TicketAttachmentItem {
 
 export function createTicketAttachment(params: {
   acf: WPTicketAttachmentACF;
-}): Promise<WPTicketAttachmentPost> {
-  return wpRestFetch<WPTicketAttachmentPost>("/wp/v2/bluu_ticket_attachment", {
+}): Promise<TicketAttachmentItem> {
+  return wpRestFetch<TicketAttachmentItem>("/bluuhq/v1/ticket-attachments", {
     method: "POST",
     body: JSON.stringify({
-      title:  params.acf.att_file_name,
-      status: "publish",
-      acf:    params.acf,
-      meta: {
-        att_ticket_id:    params.acf.att_ticket_id,
-        att_reply_id:     params.acf.att_reply_id ?? 0,
-        att_uploaded_by:  params.acf.att_uploaded_by,
-        att_file_name:    params.acf.att_file_name,
-        att_file_url:     params.acf.att_file_url,
-        att_file_type:    params.acf.att_file_type,
-        att_file_size_kb: params.acf.att_file_size_kb,
-      },
+      att_ticket_id:    params.acf.att_ticket_id,
+      att_reply_id:     params.acf.att_reply_id ?? 0,
+      att_uploaded_by:  params.acf.att_uploaded_by,
+      att_file_name:    params.acf.att_file_name,
+      att_file_url:     params.acf.att_file_url,
+      att_file_type:    params.acf.att_file_type,
+      att_file_size_kb: params.acf.att_file_size_kb,
     }),
+  });
+}
+
+export function deleteWPTicket(ticketId: number): Promise<{ ok: boolean; att_file_urls: string[] }> {
+  return wpRestFetch<{ ok: boolean; att_file_urls: string[] }>(`/bluuhq/v1/tickets/${ticketId}`, {
+    method: "DELETE",
   });
 }
 
