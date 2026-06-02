@@ -338,9 +338,9 @@ add_action( 'rest_api_init', function(): void {
             'args'                => [
                 'att_ticket_id'    => [ 'required' => true,  'sanitize_callback' => 'absint' ],
                 'att_uploaded_by'  => [ 'required' => true,  'sanitize_callback' => 'absint' ],
-                'att_file_name'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
-                'att_file_url'     => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
-                'att_file_type'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field' ],
+                'att_file_name'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => '__return_true' ],
+                'att_file_url'     => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => '__return_true' ],
+                'att_file_type'    => [ 'required' => true,  'sanitize_callback' => 'sanitize_text_field', 'validate_callback' => '__return_true' ],
                 'att_file_size_kb' => [ 'required' => true,  'sanitize_callback' => 'absint' ],
                 'att_reply_id'     => [ 'required' => false, 'sanitize_callback' => 'absint' ],
             ],
