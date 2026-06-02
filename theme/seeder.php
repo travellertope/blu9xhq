@@ -91,13 +91,15 @@ function bluu_run_seeder() {
         return $post_id;
     };
 
-    // ── Helper: set ACF SEO fields on a known post ID ────────────────────────
-    $set_seo = function( $post_id, $seo_title, $meta_desc, $title_field, $desc_field ) use ( &$seo_updated ) {
-        if ( ! $post_id || ! function_exists( 'update_field' ) ) {
+    // ── Helper: set Rank Math SEO fields on a known post ID ─────────────────
+    // Rank Math stores its title/description in standard post meta — no plugin
+    // function calls needed, update_post_meta is sufficient and always available.
+    $set_seo = function( $post_id, $seo_title, $meta_desc ) use ( &$seo_updated ) {
+        if ( ! $post_id ) {
             return;
         }
-        update_field( $title_field, $seo_title, $post_id );
-        update_field( $desc_field,  $meta_desc, $post_id );
+        update_post_meta( $post_id, 'rank_math_title',       $seo_title );
+        update_post_meta( $post_id, 'rank_math_description', $meta_desc );
         $seo_updated++;
     };
 
@@ -108,8 +110,7 @@ function bluu_run_seeder() {
     $hub_id = $ensure( 'Industries', 'industries', 'page-industries.php', 0 );
     $set_seo( $hub_id,
         'Content Operations by Industry | Bluu Interactive',
-        'Bluu Interactive runs fully managed content retainers for SaaS startups, agencies, e-commerce brands, and professional services firms. See which industry fits.',
-        'hub_seo_title', 'hub_meta_description'
+        'Bluu Interactive runs fully managed content retainers for SaaS startups, agencies, e-commerce brands, and professional services firms. See which industry fits.'
     );
 
     // =========================================================================
@@ -148,7 +149,7 @@ function bluu_run_seeder() {
     foreach ( $industries as $ind ) {
         $id = $ensure( $ind['title'], $ind['slug'], 'page-industry.php', $hub_id );
         $industry_ids[ $ind['slug'] ] = $id;
-        $set_seo( $id, $ind['seo'], $ind['desc'], 'ind_seo_title', 'ind_meta_description' );
+        $set_seo( $id, $ind['seo'], $ind['desc'] );
     }
 
     // =========================================================================
@@ -283,7 +284,7 @@ function bluu_run_seeder() {
         $parent = $industry_ids[ $industry_slug ] ?? 0;
         foreach ( $pages as $page ) {
             $id = $ensure( $page['title'], $page['slug'], 'page-subindustry.php', $parent );
-            $set_seo( $id, $page['seo'], $page['desc'], 'si_seo_title', 'si_meta_description' );
+            $set_seo( $id, $page['seo'], $page['desc'] );
         }
     }
 
@@ -407,7 +408,7 @@ function bluu_run_seeder() {
         $parent = $industry_ids[ $industry_slug ] ?? 0;
         foreach ( $pages as $page ) {
             $id = $ensure( $page['title'], $page['slug'], 'page-usecase.php', $parent );
-            $set_seo( $id, $page['seo'], $page['desc'], 'uc_seo_title', 'uc_meta_description' );
+            $set_seo( $id, $page['seo'], $page['desc'] );
         }
     }
 
