@@ -88,10 +88,10 @@ function bluuhq_register_ticket_field_groups(): void {
         'show_in_rest' => true,
         'location'     => [[ [ 'param' => 'post_type', 'operator' => '==', 'value' => 'bluu_ticket_reply' ] ]],
         'fields'   => [
-            bluuhq_acf_num(  'reply_ticket_id',   'Ticket Post ID' ),
-            bluuhq_acf_num(  'reply_author_id',   'Author WP User ID' ),
-            bluuhq_acf_text( 'reply_body',        'Body' ),
-            bluuhq_acf_text( 'reply_type',        'Reply Type', 'reply' ),
+            bluuhq_acf_num(      'reply_ticket_id',   'Ticket Post ID' ),
+            bluuhq_acf_num(      'reply_author_id',   'Author WP User ID' ),
+            bluuhq_acf_textarea( 'reply_body',        'Body' ),
+            bluuhq_acf_text(     'reply_type',        'Reply Type', 'reply' ),
         ],
     ]);
 
@@ -142,6 +142,17 @@ function bluuhq_acf_text( string $name, string $label, string $default = '' ): a
     ];
 }
 
+function bluuhq_acf_textarea( string $name, string $label ): array {
+    return [
+        'key'          => 'field_' . $name,
+        'name'         => $name,
+        'label'        => $label,
+        'type'         => 'textarea',
+        'rows'         => 5,
+        'show_in_rest' => true,
+    ];
+}
+
 function bluuhq_acf_num( string $name, string $label ): array {
     return [
         'key'          => 'field_' . $name,
@@ -182,3 +193,24 @@ function bluuhq_register_ticket_meta_keys(): void {
         register_post_meta( 'bluu_ticket_attachment', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'integer' ] );
     }
 }
+
+// ── Belt-and-suspenders: save bluu_ticket_reply meta via native update_post_meta ──
+// Runs at priority 20 (after ACF at ~10) so our values win if ACF failed to save.
+// This guarantees reply_ticket_id is always in wp_postmeta so the REST meta query works.
+add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_REST_Request $request ): void {
+    $acf = $request->get_param( 'acf' );
+    if ( ! is_array( $acf ) ) return;
+
+    if ( isset( $acf['reply_ticket_id'] ) && is_numeric( $acf['reply_ticket_id'] ) ) {
+        update_post_meta( $post->ID, 'reply_ticket_id', (int) $acf['reply_ticket_id'] );
+    }
+    if ( isset( $acf['reply_author_id'] ) && is_numeric( $acf['reply_author_id'] ) ) {
+        update_post_meta( $post->ID, 'reply_author_id', (int) $acf['reply_author_id'] );
+    }
+    if ( isset( $acf['reply_body'] ) ) {
+        update_post_meta( $post->ID, 'reply_body', sanitize_textarea_field( $acf['reply_body'] ) );
+    }
+    if ( isset( $acf['reply_type'] ) ) {
+        update_post_meta( $post->ID, 'reply_type', sanitize_text_field( $acf['reply_type'] ) );
+    }
+}, 20, 2 );

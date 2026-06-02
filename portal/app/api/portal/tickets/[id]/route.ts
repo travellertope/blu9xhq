@@ -43,7 +43,7 @@ export async function GET(
 
     // Filter out internal_note replies for client view
     const replies = repliesResult.items
-      .filter((r) => r.acf.reply_type === "reply")
+      .filter((r) => r.acf && r.acf.reply_type === "reply")
       .map((r) => ({
         id: r.id,
         authorId: r.acf.reply_author_id,

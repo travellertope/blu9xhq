@@ -52,13 +52,15 @@ export async function GET(
       resolvedAt:           acf.tkt_resolved_at ?? null,
       closedAt:             acf.tkt_closed_at ?? null,
       createdAt:            ticket.date,
-      replies: repliesResult.items.map((r) => ({
-        id:         r.id,
-        authorId:   r.acf.reply_author_id,
-        body:       r.acf.reply_body,
-        replyType:  r.acf.reply_type,
-        createdAt:  r.date,
-      })),
+      replies: repliesResult.items
+        .filter((r) => r.acf)
+        .map((r) => ({
+          id:         r.id,
+          authorId:   r.acf.reply_author_id,
+          body:       r.acf.reply_body,
+          replyType:  r.acf.reply_type,
+          createdAt:  r.date,
+        })),
       attachments: attachmentsResult.items.map((a) => ({
         id:          a.id,
         fileName:    a.acf.att_file_name,
