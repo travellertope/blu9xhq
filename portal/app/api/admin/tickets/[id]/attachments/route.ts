@@ -58,27 +58,22 @@ export async function POST(
     const buffer = Buffer.from(await file.arrayBuffer());
     await uploadToR2(key, buffer, file.type);
 
-    let attachmentId = 0;
-    try {
-      const attachment = await createTicketAttachment({
-        acf: {
-          att_ticket_id:    ticketId,
-          ...(replyId ? { att_reply_id: replyId } : {}),
-          att_uploaded_by:  actorWpUserId,
-          att_file_name:    file.name,
-          att_file_url:     key,
-          att_file_type:    file.type,
-          att_file_size_kb: Math.ceil(file.size / 1024),
-        },
-      });
-      attachmentId = attachment.id;
-    } catch (wpErr) {
-      console.error("[POST /api/admin/tickets/[id]/attachments] WP record failed:", wpErr);
-    }
+    const attachment = await createTicketAttachment({
+      acf: {
+        att_ticket_id:    ticketId,
+        ...(replyId ? { att_reply_id: replyId } : {}),
+        att_uploaded_by:  actorWpUserId,
+        att_file_name:    file.name,
+        att_file_url:     key,
+        att_file_type:    file.type,
+        att_file_size_kb: Math.ceil(file.size / 1024),
+      },
+    });
 
-    return NextResponse.json({ id: attachmentId, fileName: file.name }, { status: 201 });
+    return NextResponse.json({ id: attachment.id, fileName: file.name }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/tickets/[id]/attachments]", err);
-    return NextResponse.json({ error: "Failed to upload attachment" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Failed to upload attachment";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

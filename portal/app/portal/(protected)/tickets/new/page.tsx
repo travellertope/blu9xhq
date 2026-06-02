@@ -63,14 +63,20 @@ export default function NewTicketPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit ticket");
 
-      // Upload attachment if provided (best-effort — don't block ticket creation)
+      // Upload attachment if provided
       if (attachmentFile) {
         const fd = new FormData();
         fd.append("file", attachmentFile);
-        await fetch(`/api/portal/tickets/${data.id}/attachments`, {
+        const attRes = await fetch(`/api/portal/tickets/${data.id}/attachments`, {
           method: "POST",
           body: fd,
-        }).catch(() => undefined);
+        }).catch(() => null);
+        if (!attRes || !attRes.ok) {
+          const attData = attRes ? await attRes.json().catch(() => null) : null;
+          toast.warning(`Ticket submitted but file upload failed: ${attData?.error ?? "unknown error"}`);
+          window.location.href = `/portal/tickets/${data.id}`;
+          return;
+        }
       }
 
       toast.success(data.ticketNumber ? `Ticket ${data.ticketNumber} submitted — we'll be in touch shortly` : "Ticket submitted — we'll be in touch shortly");
