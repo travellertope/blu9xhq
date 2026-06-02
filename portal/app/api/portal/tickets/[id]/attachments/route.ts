@@ -33,6 +33,9 @@ export async function POST(
   try { formData = await req.formData(); } catch { return NextResponse.json({ error: "Invalid form data" }, { status: 400 }); }
 
   const file = formData.get("file") as File | null;
+  const replyIdStr = formData.get("replyId") as string | null;
+  const replyId = replyIdStr ? parseInt(replyIdStr, 10) : undefined;
+
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
   if (!TICKET_ALLOWED_MIME_TYPES.has(file.type)) {
@@ -69,6 +72,7 @@ export async function POST(
     const attachment = await createTicketAttachment({
       acf: {
         att_ticket_id:    ticketId,
+        ...(replyId ? { att_reply_id: replyId } : {}),
         att_uploaded_by:  wpUserId,
         att_file_name:    file.name,
         att_file_url:     key,

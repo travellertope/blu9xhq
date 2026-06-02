@@ -132,7 +132,7 @@ export default function AdminTicketDetailPage() {
   const [sending, setSending] = useState(false);
 
   // Attachment
-  const [uploading, setUploading] = useState(false);
+  const [stagedFile, setStagedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(() =>
@@ -197,35 +197,27 @@ export default function AdminTicketDetailPage() {
         const d = await res.json();
         throw new Error(d.error ?? "Failed to send");
       }
+      const { id: replyId } = await res.json();
       setReplyBody("");
+
+      if (stagedFile) {
+        const fd = new FormData();
+        fd.append("file", stagedFile);
+        fd.append("replyId", String(replyId));
+        const attRes = await fetch(`/api/admin/tickets/${id}/attachments`, { method: "POST", body: fd });
+        setStagedFile(null);
+        if (!attRes.ok) {
+          const d = await attRes.json();
+          toast.warning(`Reply sent, but file upload failed: ${d.error ?? "Unknown error"}`);
+        }
+      }
+
       toast.success(replyType === "internal_note" ? "Internal note added" : "Reply sent");
       load();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send");
     } finally {
       setSending(false);
-    }
-  };
-
-  const uploadAttachment = async (file: File) => {
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`/api/admin/tickets/${id}/attachments`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d.error ?? "Upload failed");
-      }
-      toast.success(`${file.name} attached`);
-      load();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
     }
   };
 
@@ -493,6 +485,20 @@ export default function AdminTicketDetailPage() {
                   className={`resize-none ${replyType === "internal_note" ? "border-amber-300 bg-amber-50/50" : ""}`}
                   disabled={sending}
                 />
+                {stagedFile && (
+                  <div className="flex items-center gap-1.5 text-xs bg-muted rounded px-2 py-1 w-fit">
+                    <Paperclip size={11} />
+                    <span className="max-w-[200px] truncate">{stagedFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setStagedFile(null)}
+                      className="ml-1 text-muted-foreground hover:text-foreground leading-none"
+                      aria-label="Remove file"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <input
@@ -502,7 +508,7 @@ export default function AdminTicketDetailPage() {
                       accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
                       onChange={(e) => {
                         const f = e.target.files?.[0];
-                        if (f) uploadAttachment(f);
+                        if (f) setStagedFile(f);
                         e.target.value = "";
                       }}
                     />
@@ -511,15 +517,11 @@ export default function AdminTicketDetailPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={uploading}
+                      disabled={sending}
                       className="text-muted-foreground"
                     >
-                      {uploading ? (
-                        <Loader2 size={14} className="animate-spin" />
-                      ) : (
-                        <Paperclip size={14} />
-                      )}
-                      <span className="ml-1.5 text-xs">{uploading ? "Uploading…" : "Attach file"}</span>
+                      <Paperclip size={14} />
+                      <span className="ml-1.5 text-xs">Attach file</span>
                     </Button>
                   </div>
                   <Button
