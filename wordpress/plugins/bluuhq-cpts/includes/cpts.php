@@ -193,6 +193,8 @@ foreach ( [
     'bluu_ticket',
     'bluu_ticket_reply',
     'bluu_ticket_attachment',
+    'bluu_seq_enrollment',
+    'bluu_sequence',
 ] as $_bluuhq_cpt ) {
     add_filter( "rest_{$_bluuhq_cpt}_query", function ( array $args, WP_REST_Request $request ): array {
         $meta_key   = $request->get_param( 'meta_key' );

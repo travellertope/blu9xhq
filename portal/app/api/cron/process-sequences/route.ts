@@ -27,7 +27,10 @@ export async function GET(req: NextRequest) {
       meta_value: "active",
     });
 
-    const due = items.filter((e) => new Date(e.acf.enr_next_send_at) <= now);
+    // Guard against non-active slipping through if meta filter was previously missing
+    const due = items.filter(
+      (e) => e.acf.enr_status === "active" && new Date(e.acf.enr_next_send_at) <= now,
+    );
     results.checked = due.length;
 
     for (const enrollment of due) {

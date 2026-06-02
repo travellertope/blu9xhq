@@ -17,7 +17,7 @@ function bluuhq_register_enrollment_cpt(): void {
     $int_keys = [ 'enr_sequence_id', 'enr_client_id', 'enr_current_step', 'enr_enrolled_by' ];
     foreach ( [
         'enr_sequence_id', 'enr_client_id', 'enr_client_email', 'enr_client_name',
-        'enr_status', 'enr_exit_reason', 'enr_current_step',
+        'enr_status', 'enr_exit_reason', 'enr_exited_at', 'enr_current_step',
         'enr_enrolled_at', 'enr_last_sent_at', 'enr_next_send_at', 'enr_enrolled_by',
         'enr_paused_at',
     ] as $key ) {
@@ -48,6 +48,7 @@ function bluuhq_acf_enrollment(): void {
               'type' => 'select', 'default_value' => 'active', 'show_in_rest' => true,
               'choices' => [ 'active' => 'Active', 'paused' => 'Paused', 'completed' => 'Completed', 'exited' => 'Exited' ] ],
             [ 'key' => 'field_enr_exit_reason',  'name' => 'enr_exit_reason',  'label' => 'Exit Reason',   'type' => 'text',   'show_in_rest' => true ],
+            [ 'key' => 'field_enr_exited_at',    'name' => 'enr_exited_at',    'label' => 'Exited At',     'type' => 'text',   'show_in_rest' => true ],
             [ 'key' => 'field_enr_paused_at',    'name' => 'enr_paused_at',    'label' => 'Paused At',     'type' => 'text',   'show_in_rest' => true ],
             [ 'key' => 'field_enr_current_step', 'name' => 'enr_current_step', 'label' => 'Current Step',  'type' => 'number', 'default_value' => 0, 'show_in_rest' => true ],
             [ 'key' => 'field_enr_enrolled_at',  'name' => 'enr_enrolled_at',  'label' => 'Enrolled At',   'type' => 'text',   'show_in_rest' => true ],
