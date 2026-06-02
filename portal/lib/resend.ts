@@ -235,5 +235,8 @@ export function sendSequenceEmail(params: {
         <a href="${params.pauseUrl}" style="color:#94A3B8;text-decoration:underline">Click here to pause this sequence</a>
        </div>`
     : "";
-  return sendEmailHtml({ ...params, html: params.html + pauseFooter });
+  // Use SEQUENCE_REPLY_TO (Cloudflare-routed address) when set so replies are
+  // detected via the inbound-email webhook. Falls back to the default reply-to.
+  const replyTo = process.env.SEQUENCE_REPLY_TO ?? undefined;
+  return sendEmailHtml({ ...params, html: params.html + pauseFooter, replyTo });
 }
