@@ -53,25 +53,35 @@ export async function GET(
       closedAt:             acf.tkt_closed_at ?? null,
       createdAt:            ticket.date,
       replies: repliesResult.items
-        .filter((r) => r.acf)
-        .map((r) => ({
-          id:        r.id,
-          authorId:  r.acf.reply_author_id,
-          body:      r.content?.raw?.trim()
-                     || r.content?.rendered?.replace(/<[^>]+>/g, "").trim()
-                     || r.acf.reply_body
-                     || "",
-          replyType: r.acf.reply_type,
-          createdAt: r.date,
-        })),
+        .map((r) => {
+          const acf = r.acf || null;
+          const body =
+            r.content?.raw?.trim() ||
+            r.content?.rendered?.replace(/<[^>]+>/g, "").trim() ||
+            acf?.reply_body ||
+            "";
+          const replyType =
+            acf?.reply_type ||
+            r.excerpt?.raw?.trim() ||
+            r.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim() ||
+            "reply";
+          return {
+            id:        r.id,
+            authorId:  acf?.reply_author_id ?? 0,
+            body,
+            replyType,
+            createdAt: r.date,
+          };
+        })
+        .filter((r) => r.body),
       attachments: attachmentsResult.items.map((a) => ({
         id:          a.id,
-        fileName:    a.acf.att_file_name,
-        fileUrl:     a.acf.att_file_url,
-        fileType:    a.acf.att_file_type,
-        fileSizeKb:  a.acf.att_file_size_kb,
-        uploadedBy:  a.acf.att_uploaded_by,
-        replyId:     a.acf.att_reply_id ?? null,
+        fileName:    a.acf && a.acf.att_file_name,
+        fileUrl:     a.acf && a.acf.att_file_url,
+        fileType:    a.acf && a.acf.att_file_type,
+        fileSizeKb:  a.acf && a.acf.att_file_size_kb,
+        uploadedBy:  a.acf && a.acf.att_uploaded_by,
+        replyId:     (a.acf && a.acf.att_reply_id) ?? null,
         createdAt:   a.date,
       })),
     });

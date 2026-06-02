@@ -43,24 +43,29 @@ export async function GET(
 
     // Filter out internal_note replies for client view
     const replies = repliesResult.items
-      .filter((r) => r.acf && r.acf.reply_type === "reply")
-      .map((r) => ({
-        id:       r.id,
-        authorId: r.acf.reply_author_id,
-        body:     r.content?.raw?.trim()
-                  || r.content?.rendered?.replace(/<[^>]+>/g, "").trim()
-                  || r.acf.reply_body
-                  || "",
-        createdAt: r.date,
-      }));
+      .map((r) => {
+        const acf = r.acf || null;
+        const replyType =
+          acf?.reply_type ||
+          r.excerpt?.raw?.trim() ||
+          r.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim() ||
+          "reply";
+        const body =
+          r.content?.raw?.trim() ||
+          r.content?.rendered?.replace(/<[^>]+>/g, "").trim() ||
+          acf?.reply_body ||
+          "";
+        return { id: r.id, authorId: acf?.reply_author_id ?? 0, body, replyType, createdAt: r.date };
+      })
+      .filter((r) => r.replyType === "reply" && r.body);
 
     const attachments = attachmentsResult.items.map((a) => ({
-      id: a.id,
-      fileName: a.acf.att_file_name,
-      fileType: a.acf.att_file_type,
-      fileSizeKb: a.acf.att_file_size_kb,
-      replyId: a.acf.att_reply_id,
-      createdAt: a.date,
+      id:         a.id,
+      fileName:   a.acf && a.acf.att_file_name,
+      fileType:   a.acf && a.acf.att_file_type,
+      fileSizeKb: a.acf && a.acf.att_file_size_kb,
+      replyId:    a.acf && a.acf.att_reply_id,
+      createdAt:  a.date,
     }));
 
     return NextResponse.json({

@@ -53,7 +53,7 @@ export async function POST(
     }
 
     // Enforce max 10 attachments per ticket
-    const existing = await listTicketAttachments(ticketId);
+    const existing = await listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 }));
     if (existing.items.length >= TICKET_MAX_ATTACHMENTS) {
       return NextResponse.json({ error: "Maximum 10 attachments per ticket" }, { status: 400 });
     }
@@ -65,18 +65,24 @@ export async function POST(
     const buffer = Buffer.from(await file.arrayBuffer());
     await uploadToR2(key, buffer, file.type);
 
-    const attachment = await createTicketAttachment({
-      acf: {
-        att_ticket_id:    ticketId,
-        att_uploaded_by:  wpUserId,
-        att_file_name:    file.name,
-        att_file_url:     key,
-        att_file_type:    file.type,
-        att_file_size_kb: Math.ceil(file.size / 1024),
-      },
-    });
+    let attachmentId = 0;
+    try {
+      const attachment = await createTicketAttachment({
+        acf: {
+          att_ticket_id:    ticketId,
+          att_uploaded_by:  wpUserId,
+          att_file_name:    file.name,
+          att_file_url:     key,
+          att_file_type:    file.type,
+          att_file_size_kb: Math.ceil(file.size / 1024),
+        },
+      });
+      attachmentId = attachment.id;
+    } catch (wpErr) {
+      console.error("[POST /api/portal/tickets/[id]/attachments] WP record failed:", wpErr);
+    }
 
-    return NextResponse.json({ id: attachment.id, fileName: file.name }, { status: 201 });
+    return NextResponse.json({ id: attachmentId, fileName: file.name }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/portal/tickets/[id]/attachments]", err);
     return NextResponse.json({ error: "Failed to upload attachment" }, { status: 500 });

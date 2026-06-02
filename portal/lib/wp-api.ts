@@ -672,7 +672,8 @@ export interface WPTicketReplyPost {
   id:      number;
   date:    string;
   content: { rendered: string; raw?: string };
-  acf:     WPTicketReplyACF;
+  excerpt: { rendered: string; raw?: string };
+  acf:     WPTicketReplyACF | false;
 }
 
 export interface WPTicketStatusLogACF {
@@ -756,6 +757,7 @@ export function createTicketReply(params: {
     body: JSON.stringify({
       title:   `Reply-${Date.now()}`,
       content: params.acf.reply_body,
+      excerpt: params.acf.reply_type,
       status:  "publish",
       acf:     params.acf,
     }),
