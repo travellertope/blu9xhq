@@ -49,7 +49,8 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     };
 
     const activeSubscriptions = subs.items.filter(
-      (s) => s.acf.client_id === postId && s.acf.status === "active"
+      (s) => s.acf.client_id === postId &&
+        !["cancelled", "expired"].includes(s.acf.status ?? "")
     );
 
     // Transform communications for health score calculation

@@ -11,11 +11,13 @@ interface Enrollment {
   enrollmentId: number;
   sequenceId:   number;
   sequenceName: string;
-  status:       "active" | "paused";
+  status:       "active" | "paused" | "completed" | "exited";
   currentStep:  number;
   totalSteps:   number;
   enrolledAt:   string;
   pausedAt:     string | null;
+  exitedAt:     string | null;
+  exitReason:   string | null;
 }
 
 interface WPSequence {
@@ -148,8 +150,17 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
     }
   }
 
-  const enrolledSequenceIds = new Set(enrollments.map((e) => e.sequenceId));
-  const availableSequences  = sequences.filter((s) => !enrolledSequenceIds.has(s.id));
+  const EXIT_REASON_LABELS: Record<string, string> = {
+    client_replied:          "Client replied",
+    invoice_paid:            "Invoice paid",
+    subscription_cancelled:  "Subscription cancelled",
+    manual:                  "Removed manually",
+  };
+
+  const activeEnrolledIds = new Set(
+    enrollments.filter((e) => e.status === "active" || e.status === "paused").map((e) => e.sequenceId)
+  );
+  const availableSequences = sequences.filter((s) => !activeEnrolledIds.has(s.id));
 
   return (
     <div className="space-y-6">
@@ -168,77 +179,97 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
           </p>
         ) : (
           <div className="space-y-2">
-            {enrollments.map((enrollment) => (
-              <div
-                key={enrollment.enrollmentId}
-                className="flex items-center justify-between rounded-lg border bg-white px-4 py-3"
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-900">
-                      {enrollment.sequenceName}
-                    </p>
-                    {enrollment.status === "paused" && (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
-                        Paused
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-3 mt-0.5">
-                    <p className="text-xs text-gray-500">
-                      Enrolled:{" "}
-                      {enrollment.enrolledAt
-                        ? format(parseISO(enrollment.enrolledAt), "MMM d, yyyy")
-                        : "—"}
-                    </p>
-                    {enrollment.totalSteps > 0 && (
-                      <p className="text-xs text-indigo-600 font-medium">
-                        Step {Math.min(enrollment.currentStep + 1, enrollment.totalSteps)}{" "}
-                        of {enrollment.totalSteps}
+            {enrollments.map((enrollment) => {
+              const isFinished = enrollment.status === "exited" || enrollment.status === "completed";
+              return (
+                <div
+                  key={enrollment.enrollmentId}
+                  className={`flex items-center justify-between rounded-lg border px-4 py-3 ${isFinished ? "bg-gray-50 opacity-75" : "bg-white"}`}
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className={`text-sm font-medium ${isFinished ? "text-gray-500" : "text-gray-900"}`}>
+                        {enrollment.sequenceName}
                       </p>
-                    )}
-                    {enrollment.status === "paused" && enrollment.pausedAt && (
-                      <p className="text-xs text-amber-600">
-                        Paused {format(parseISO(enrollment.pausedAt), "MMM d")}
+                      {enrollment.status === "paused" && (
+                        <span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-700">
+                          Paused
+                        </span>
+                      )}
+                      {enrollment.status === "completed" && (
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-semibold text-green-700">
+                          Completed
+                        </span>
+                      )}
+                      {enrollment.status === "exited" && (
+                        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-600">
+                          Exited — {EXIT_REASON_LABELS[enrollment.exitReason ?? ""] ?? enrollment.exitReason ?? "unknown"}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-0.5">
+                      <p className="text-xs text-gray-500">
+                        Enrolled:{" "}
+                        {enrollment.enrolledAt
+                          ? format(parseISO(enrollment.enrolledAt), "MMM d, yyyy")
+                          : "—"}
                       </p>
-                    )}
+                      {!isFinished && enrollment.totalSteps > 0 && (
+                        <p className="text-xs text-indigo-600 font-medium">
+                          Step {Math.min(enrollment.currentStep + 1, enrollment.totalSteps)}{" "}
+                          of {enrollment.totalSteps}
+                        </p>
+                      )}
+                      {enrollment.status === "paused" && enrollment.pausedAt && (
+                        <p className="text-xs text-amber-600">
+                          Paused {format(parseISO(enrollment.pausedAt), "MMM d")}
+                        </p>
+                      )}
+                      {isFinished && enrollment.exitedAt && (
+                        <p className="text-xs text-gray-400">
+                          {format(parseISO(enrollment.exitedAt), "MMM d, yyyy")}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleTogglePause(enrollment)}
-                    disabled={togglingId === enrollment.enrollmentId}
-                    title={enrollment.status === "active" ? "Pause sequence" : "Resume sequence"}
-                    className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-50 transition-colors ${
-                      enrollment.status === "active"
-                        ? "border-amber-200 bg-white text-amber-600 hover:bg-amber-50"
-                        : "border-green-200 bg-white text-green-600 hover:bg-green-50"
-                    }`}
-                  >
-                    {togglingId === enrollment.enrollmentId ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : enrollment.status === "active" ? (
-                      <Pause className="h-3 w-3" />
-                    ) : (
-                      <Play className="h-3 w-3" />
-                    )}
-                    {enrollment.status === "active" ? "Pause" : "Resume"}
-                  </button>
+                  {!isFinished && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleTogglePause(enrollment)}
+                        disabled={togglingId === enrollment.enrollmentId}
+                        title={enrollment.status === "active" ? "Pause sequence" : "Resume sequence"}
+                        className={`inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium disabled:opacity-50 transition-colors ${
+                          enrollment.status === "active"
+                            ? "border-amber-200 bg-white text-amber-600 hover:bg-amber-50"
+                            : "border-green-200 bg-white text-green-600 hover:bg-green-50"
+                        }`}
+                      >
+                        {togglingId === enrollment.enrollmentId ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : enrollment.status === "active" ? (
+                          <Pause className="h-3 w-3" />
+                        ) : (
+                          <Play className="h-3 w-3" />
+                        )}
+                        {enrollment.status === "active" ? "Pause" : "Resume"}
+                      </button>
 
-                  <button
-                    onClick={() => handleRemove(enrollment)}
-                    disabled={removingId === enrollment.enrollmentId}
-                    className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 transition-colors"
-                  >
-                    {removingId === enrollment.enrollmentId ? (
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                    ) : null}
-                    Remove
-                  </button>
+                      <button
+                        onClick={() => handleRemove(enrollment)}
+                        disabled={removingId === enrollment.enrollmentId}
+                        className="inline-flex items-center gap-1 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-red-600 hover:bg-red-50 hover:border-red-200 disabled:opacity-50 transition-colors"
+                      >
+                        {removingId === enrollment.enrollmentId ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : null}
+                        Remove
+                      </button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

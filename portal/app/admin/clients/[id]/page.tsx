@@ -12,6 +12,7 @@ import { CommunicationTimeline } from "@/components/admin/CommunicationTimeline"
 import { MoodTrendChart } from "@/components/admin/MoodTrendChart";
 import { FollowUpBadge } from "@/components/admin/FollowUpBadge";
 import { ClientSequences } from "@/components/admin/ClientSequences";
+import { ClientSubscriptions } from "@/components/admin/ClientSubscriptions";
 import { FileManager } from "@/components/admin/FileManager";
 import type { WPClientPost, WPSubscriptionPost } from "@/lib/wp-api";
 import type { BluuCommunication } from "@/types";
@@ -181,7 +182,7 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
           <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-3">
               <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wide">
-                Active Services ({subscriptionCount})
+                Services ({subscriptionCount})
               </CardTitle>
               <Button asChild size="sm" variant="outline">
                 <a href={`/admin/subscriptions/new?clientId=${params.id}`}>
@@ -190,41 +191,10 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
               </Button>
             </CardHeader>
             <CardContent>
-              {subscriptions.length === 0 ? (
-                <div className="py-6 text-center text-slate-400">
-                  <p className="text-sm">No services assigned yet</p>
-                  <p className="text-xs mt-1">
-                    <a href={`/admin/subscriptions/new?clientId=${params.id}`} className="text-indigo-600 hover:underline">
-                      Assign a service →
-                    </a>
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {subscriptions.map((sub) => (
-                    <div
-                      key={sub.id}
-                      className="flex items-center justify-between rounded-lg border px-4 py-3"
-                    >
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{sub.title.rendered}</p>
-                        <p className="text-xs text-slate-500">
-                          {sub.acf.currency} {sub.acf.amount?.toLocaleString()} /{" "}
-                          {sub.acf.billing_cycle?.replace("_", " ")}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <ClientStatusBadge status={sub.acf.status} />
-                        {sub.acf.next_billing_date && (
-                          <p className="text-xs text-slate-400 mt-1">
-                            Next: {format(parseISO(sub.acf.next_billing_date), "MMM d")}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <ClientSubscriptions
+                clientId={clientIdNum}
+                initialSubscriptions={subscriptions}
+              />
             </CardContent>
           </Card>
 
