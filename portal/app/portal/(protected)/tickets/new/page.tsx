@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Paperclip, X } from "lucide-react";
@@ -35,7 +34,6 @@ const PRIORITIES = [
 ];
 
 export default function NewTicketPage() {
-  const router = useRouter();
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("other");
@@ -76,7 +74,7 @@ export default function NewTicketPage() {
       }
 
       toast.success(data.ticketNumber ? `Ticket ${data.ticketNumber} submitted — we'll be in touch shortly` : "Ticket submitted — we'll be in touch shortly");
-      router.push(`/portal/tickets/${data.id}`);
+      window.location.href = `/portal/tickets/${data.id}`;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to submit ticket");
     } finally {

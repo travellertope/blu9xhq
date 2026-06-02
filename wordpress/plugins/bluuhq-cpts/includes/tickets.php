@@ -201,6 +201,7 @@ function bluuhq_register_ticket_meta_keys(): void {
 
 add_filter( 'rest_bluu_ticket_reply_query',      'bluuhq_ticket_meta_query_filter', 10, 2 );
 add_filter( 'rest_bluu_ticket_attachment_query', 'bluuhq_ticket_meta_query_filter', 10, 2 );
+add_filter( 'rest_bluu_ticket_query',            'bluuhq_ticket_meta_query_filter', 10, 2 );
 
 function bluuhq_ticket_meta_query_filter( array $args, WP_REST_Request $request ): array {
     $meta_key   = $request->get_param( 'meta_key' );
@@ -233,6 +234,31 @@ add_action( 'rest_after_insert_bluu_ticket_reply', function ( WP_Post $post, WP_
     }
     if ( isset( $acf['reply_type'] ) ) {
         update_post_meta( $post->ID, 'reply_type', sanitize_text_field( $acf['reply_type'] ) );
+    }
+}, 20, 2 );
+
+// ── Belt-and-suspenders: save bluu_ticket meta so tkt_client is queryable ────
+add_action( 'rest_after_insert_bluu_ticket', function ( WP_Post $post, WP_REST_Request $request ): void {
+    $acf  = $request->get_param( 'acf' );
+    $meta = $request->get_param( 'meta' );
+
+    $data = [];
+    if ( is_array( $meta ) ) $data = array_merge( $data, $meta );
+    if ( is_array( $acf ) )  $data = array_merge( $data, $acf );
+
+    if ( empty( $data ) ) return;
+
+    foreach ( [ 'tkt_client', 'tkt_submitted_by', 'tkt_assigned_to', 'tkt_retainer_id' ] as $key ) {
+        if ( isset( $data[ $key ] ) && is_numeric( $data[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, (int) $data[ $key ] );
+        }
+    }
+    foreach ( [ 'tkt_number', 'tkt_category', 'tkt_priority', 'tkt_status',
+                'tkt_sla_response_target', 'tkt_sla_resolve_target',
+                'tkt_first_response_at', 'tkt_resolved_at', 'tkt_closed_at' ] as $key ) {
+        if ( isset( $data[ $key ] ) ) {
+            update_post_meta( $post->ID, $key, sanitize_text_field( $data[ $key ] ) );
+        }
     }
 }, 20, 2 );
 

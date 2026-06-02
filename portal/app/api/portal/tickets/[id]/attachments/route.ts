@@ -48,7 +48,8 @@ export async function POST(
       getTicket(ticketId),
     ]);
     if (!clientPost) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    if (ticket.acf.tkt_client !== clientPost.id) {
+    const ticketAcf = ticket.acf as typeof ticket.acf | false;
+    if (ticketAcf && ticketAcf.tkt_client && ticketAcf.tkt_client !== clientPost.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
