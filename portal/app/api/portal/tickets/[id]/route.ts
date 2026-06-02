@@ -4,6 +4,8 @@ import {
   resolveClientPost, getTicket,
   listTicketReplies,
   listTicketAttachments,
+  type TicketReplyItem,
+  type TicketAttachmentItem,
 } from "@/lib/wp-api";
 
 // GET /api/portal/tickets/[id] — get single ticket with thread (no internal notes)
@@ -36,44 +38,24 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const [repliesResult, attachmentsResult] = await Promise.all([
-      listTicketReplies(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
-      listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    const [repliesRaw, attachmentsRaw] = await Promise.all([
+      listTicketReplies(ticketId).catch((): TicketReplyItem[] => []),
+      listTicketAttachments(ticketId).catch((): TicketAttachmentItem[] => []),
     ]);
 
     // Filter out internal_note replies for client view
-    const replies = repliesResult.items
-      .map((r) => {
-        const acf  = r.acf  || null;
-        const meta = r.meta || null;
-        const replyType =
-          acf?.reply_type  ||
-          meta?.reply_type ||
-          r.excerpt?.raw?.trim() ||
-          r.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim() ||
-          "reply";
-        const body =
-          r.content?.raw?.trim() ||
-          r.content?.rendered?.replace(/<[^>]+>/g, "").trim() ||
-          meta?.reply_body ||
-          acf?.reply_body  ||
-          "";
-        return { id: r.id, authorId: acf?.reply_author_id ?? meta?.reply_author_id ?? 0, body, replyType, createdAt: r.date };
-      })
-      .filter((r) => r.replyType === "reply" && r.body);
+    const replies = repliesRaw
+      .filter((r) => r.reply_type === "reply" && r.reply_body)
+      .map((r) => ({ id: r.id, authorId: r.reply_author_id, body: r.reply_body, replyType: r.reply_type, createdAt: r.date }));
 
-    const attachments = attachmentsResult.items.map((a) => {
-      const acf  = a.acf  || null;
-      const meta = a.meta || null;
-      return {
-        id:         a.id,
-        fileName:   acf?.att_file_name    || meta?.att_file_name    || "",
-        fileType:   acf?.att_file_type    || meta?.att_file_type    || "",
-        fileSizeKb: acf?.att_file_size_kb || meta?.att_file_size_kb || 0,
-        replyId:    acf?.att_reply_id     ?? meta?.att_reply_id     ?? null,
-        createdAt:  a.date,
-      };
-    });
+    const attachments = attachmentsRaw.map((a) => ({
+      id:         a.id,
+      fileName:   a.att_file_name,
+      fileType:   a.att_file_type,
+      fileSizeKb: a.att_file_size_kb,
+      replyId:    a.att_reply_id,
+      createdAt:  a.date,
+    }));
 
     return NextResponse.json({
       id: ticket.id,

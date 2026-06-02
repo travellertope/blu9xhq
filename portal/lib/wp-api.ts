@@ -764,6 +764,15 @@ export function listTickets(params: {
   return wpRestList<WPTicketPost>("/wp/v2/bluu_ticket", query);
 }
 
+export interface TicketReplyItem {
+  id:              number;
+  reply_ticket_id: number;
+  reply_author_id: number;
+  reply_body:      string;
+  reply_type:      string;
+  date:            string;
+}
+
 export function createTicketReply(params: {
   acf: WPTicketReplyACF;
 }): Promise<WPTicketReplyPost> {
@@ -775,20 +784,18 @@ export function createTicketReply(params: {
       excerpt: params.acf.reply_type,
       status:  "publish",
       acf:     params.acf,
+      meta: {
+        reply_ticket_id: params.acf.reply_ticket_id,
+        reply_author_id: params.acf.reply_author_id,
+        reply_body:      params.acf.reply_body,
+        reply_type:      params.acf.reply_type,
+      },
     }),
   });
 }
 
-export function listTicketReplies(ticketId: number): Promise<WPListResult<WPTicketReplyPost>> {
-  return wpRestList<WPTicketReplyPost>("/wp/v2/bluu_ticket_reply", {
-    per_page:   200,
-    status:     "publish",
-    meta_key:   "reply_ticket_id",
-    meta_value: ticketId,
-    orderby:    "date",
-    order:      "asc",
-    context:    "edit",
-  });
+export function listTicketReplies(ticketId: number): Promise<TicketReplyItem[]> {
+  return wpRestFetch<TicketReplyItem[]>(`/bluuhq/v1/ticket-replies?ticket_id=${ticketId}`);
 }
 
 export function createTicketStatusLog(params: {
@@ -800,24 +807,42 @@ export function createTicketStatusLog(params: {
   });
 }
 
+export interface TicketAttachmentItem {
+  id:               number;
+  att_ticket_id:    number;
+  att_reply_id:     number | null;
+  att_uploaded_by:  number;
+  att_file_name:    string;
+  att_file_url:     string;
+  att_file_type:    string;
+  att_file_size_kb: number;
+  date:             string;
+}
+
 export function createTicketAttachment(params: {
   acf: WPTicketAttachmentACF;
 }): Promise<WPTicketAttachmentPost> {
   return wpRestFetch<WPTicketAttachmentPost>("/wp/v2/bluu_ticket_attachment", {
     method: "POST",
-    body: JSON.stringify({ title: params.acf.att_file_name, status: "publish", acf: params.acf }),
+    body: JSON.stringify({
+      title:  params.acf.att_file_name,
+      status: "publish",
+      acf:    params.acf,
+      meta: {
+        att_ticket_id:    params.acf.att_ticket_id,
+        att_reply_id:     params.acf.att_reply_id ?? 0,
+        att_uploaded_by:  params.acf.att_uploaded_by,
+        att_file_name:    params.acf.att_file_name,
+        att_file_url:     params.acf.att_file_url,
+        att_file_type:    params.acf.att_file_type,
+        att_file_size_kb: params.acf.att_file_size_kb,
+      },
+    }),
   });
 }
 
-export function listTicketAttachments(ticketId: number): Promise<WPListResult<WPTicketAttachmentPost>> {
-  return wpRestList<WPTicketAttachmentPost>("/wp/v2/bluu_ticket_attachment", {
-    per_page: 20,
-    status: "publish",
-    meta_key: "att_ticket_id",
-    meta_value: ticketId,
-    orderby: "date",
-    order: "asc",
-  });
+export function listTicketAttachments(ticketId: number): Promise<TicketAttachmentItem[]> {
+  return wpRestFetch<TicketAttachmentItem[]>(`/bluuhq/v1/ticket-attachments?ticket_id=${ticketId}`);
 }
 
 export function createCommunication(params: {

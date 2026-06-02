@@ -7,6 +7,8 @@ import {
   listTicketReplies,
   listTicketAttachments,
   createTicketStatusLog,
+  type TicketReplyItem,
+  type TicketAttachmentItem,
 } from "@/lib/wp-api";
 import { sendTicketStatusChanged } from "@/lib/resend";
 import { isValidStatus, isValidPriority, logTicketToTimeline } from "@/lib/ticket-utils";
@@ -27,9 +29,9 @@ export async function GET(
     const acf = ticket.acf as typeof ticket.acf | false;
     if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
 
-    const [repliesResult, attachmentsResult, clientPost] = await Promise.all([
-      listTicketReplies(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
-      listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    const [repliesRaw, attachmentsRaw, clientPost] = await Promise.all([
+      listTicketReplies(ticketId).catch((): TicketReplyItem[] => []),
+      listTicketAttachments(ticketId).catch((): TicketAttachmentItem[] => []),
       getClientPost(acf.tkt_client).catch(() => null),
     ]);
 
@@ -52,45 +54,25 @@ export async function GET(
       resolvedAt:           acf.tkt_resolved_at ?? null,
       closedAt:             acf.tkt_closed_at ?? null,
       createdAt:            ticket.date,
-      replies: repliesResult.items
-        .map((r) => {
-          const acf  = r.acf  || null;
-          const meta = r.meta || null;
-          const body =
-            r.content?.raw?.trim() ||
-            r.content?.rendered?.replace(/<[^>]+>/g, "").trim() ||
-            meta?.reply_body ||
-            acf?.reply_body  ||
-            "";
-          const replyType =
-            acf?.reply_type  ||
-            meta?.reply_type ||
-            r.excerpt?.raw?.trim() ||
-            r.excerpt?.rendered?.replace(/<[^>]+>/g, "").trim() ||
-            "reply";
-          return {
-            id:        r.id,
-            authorId:  acf?.reply_author_id ?? meta?.reply_author_id ?? 0,
-            body,
-            replyType,
-            createdAt: r.date,
-          };
-        })
-        .filter((r) => r.body),
-      attachments: attachmentsResult.items.map((a) => {
-        const acf  = a.acf  || null;
-        const meta = a.meta || null;
-        return {
-          id:          a.id,
-          fileName:    acf?.att_file_name    || meta?.att_file_name    || "",
-          fileUrl:     acf?.att_file_url     || meta?.att_file_url     || "",
-          fileType:    acf?.att_file_type    || meta?.att_file_type    || "",
-          fileSizeKb:  acf?.att_file_size_kb || meta?.att_file_size_kb || 0,
-          uploadedBy:  acf?.att_uploaded_by  || meta?.att_uploaded_by  || 0,
-          replyId:     acf?.att_reply_id     ?? meta?.att_reply_id     ?? null,
-          createdAt:   a.date,
-        };
-      }),
+      replies: repliesRaw
+        .filter((r) => r.reply_body)
+        .map((r) => ({
+          id:        r.id,
+          authorId:  r.reply_author_id,
+          body:      r.reply_body,
+          replyType: r.reply_type,
+          createdAt: r.date,
+        })),
+      attachments: attachmentsRaw.map((a) => ({
+        id:          a.id,
+        fileName:    a.att_file_name,
+        fileUrl:     a.att_file_url,
+        fileType:    a.att_file_type,
+        fileSizeKb:  a.att_file_size_kb,
+        uploadedBy:  a.att_uploaded_by,
+        replyId:     a.att_reply_id,
+        createdAt:   a.date,
+      })),
     });
   } catch (err) {
     console.error("[GET /api/admin/tickets/[id]]", err);
