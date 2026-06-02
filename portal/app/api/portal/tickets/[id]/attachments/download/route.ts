@@ -6,7 +6,7 @@ import { getPresignedDownloadUrl } from "@/lib/r2";
 // Generates a short-lived presigned R2 URL and redirects to it.
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params: _params }: { params: { id: string } }
 ) {
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
