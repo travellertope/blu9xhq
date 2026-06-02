@@ -727,7 +727,22 @@ export function createTicket(params: {
 }): Promise<WPTicketPost> {
   return wpRestFetch<WPTicketPost>("/wp/v2/bluu_ticket", {
     method: "POST",
-    body: JSON.stringify({ title: params.title, status: "publish", acf: params.acf }),
+    body: JSON.stringify({
+      title:  params.title,
+      status: "publish",
+      acf:    params.acf,
+      meta: {
+        tkt_number:              params.acf.tkt_number,
+        tkt_client:              params.acf.tkt_client,
+        tkt_submitted_by:        params.acf.tkt_submitted_by,
+        tkt_category:            params.acf.tkt_category,
+        tkt_priority:            params.acf.tkt_priority,
+        tkt_status:              params.acf.tkt_status,
+        tkt_sla_response_target: params.acf.tkt_sla_response_target,
+        tkt_sla_resolve_target:  params.acf.tkt_sla_resolve_target,
+        ...(params.acf.tkt_retainer_id ? { tkt_retainer_id: params.acf.tkt_retainer_id } : {}),
+      },
+    }),
   });
 }
 
