@@ -3,6 +3,7 @@ import { requirePermission } from "@/lib/apiPermissions";
 import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
+import { exitEnrollmentsForClient } from "@/lib/sequenceExits";
 
 export async function POST(
   req: NextRequest,
@@ -88,6 +89,9 @@ export async function POST(
     } catch (emailErr) {
       console.error("[mark-paid] Failed to send receipt email:", emailErr);
     }
+
+    // Exit sequences with invoice_paid condition (fire and forget)
+    void exitEnrollmentsForClient(clientId, "invoice_paid").catch(console.error);
 
     await logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,
