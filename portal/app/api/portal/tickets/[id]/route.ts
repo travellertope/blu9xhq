@@ -51,6 +51,7 @@ export async function GET(
     const attachments = attachmentsRaw.map((a) => ({
       id:         a.id,
       fileName:   a.att_file_name,
+      fileUrl:    a.att_file_url,
       fileType:   a.att_file_type,
       fileSizeKb: a.att_file_size_kb,
       replyId:    a.att_reply_id,

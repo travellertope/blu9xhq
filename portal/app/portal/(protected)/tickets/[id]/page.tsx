@@ -21,6 +21,7 @@ interface Reply {
 interface Attachment {
   id: number;
   fileName: string;
+  fileUrl: string;
   fileType: string;
   fileSizeKb: number;
   replyId?: number;
@@ -215,13 +216,16 @@ export default function PortalTicketDetailPage() {
                 {replyAttachments.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-1">
                     {replyAttachments.map((a) => (
-                      <span
+                      <a
                         key={a.id}
-                        className="text-xs bg-muted rounded px-2 py-1 flex items-center gap-1"
+                        href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
                       >
                         <Paperclip size={11} />
                         {a.fileName} <span className="text-muted-foreground">({formatBytes(a.fileSizeKb)})</span>
-                      </span>
+                      </a>
                     ))}
                   </div>
                 )}
@@ -237,10 +241,16 @@ export default function PortalTicketDetailPage() {
           <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Attachments</h3>
           <div className="flex flex-wrap gap-2">
             {ticket.attachments.filter((a) => !a.replyId).map((a) => (
-              <span key={a.id} className="text-xs bg-muted rounded px-2 py-1 flex items-center gap-1">
+              <a
+                key={a.id}
+                href={`/api/portal/tickets/${id}/attachments/download?key=${encodeURIComponent(a.fileUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs bg-muted hover:bg-muted/70 rounded px-2 py-1 flex items-center gap-1 transition-colors"
+              >
                 <Paperclip size={11} />
                 {a.fileName} ({formatBytes(a.fileSizeKb)})
-              </span>
+              </a>
             ))}
           </div>
         </div>
