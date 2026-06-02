@@ -523,6 +523,19 @@ acf_add_local_field_group( array(
 ) );
 
 // ── INDUSTRIES PAGE ────────────────────────────────────────────────────────────
+
+// Hub: SEO & Meta
+acf_add_local_field_group( array(
+    'key'    => 'group_hub_meta',
+    'title'  => 'Industries Hub: SEO & Meta',
+    'fields' => array(
+        array( 'key' => 'field_hub_seo_title',        'label' => 'SEO Title',        'name' => 'hub_seo_title',        'type' => 'text',     'maxlength' => 60 ),
+        array( 'key' => 'field_hub_meta_description', 'label' => 'Meta Description', 'name' => 'hub_meta_description', 'type' => 'textarea', 'maxlength' => 155, 'rows' => 3 ),
+    ),
+    'location'   => array( array( array( 'param' => 'page_template', 'operator' => '==', 'value' => 'page-industries.php' ) ) ),
+    'menu_order' => 5, 'active' => true,
+) );
+
 acf_add_local_field_group( array(
     'key'    => 'group_industries',
     'title'  => 'Industries Page Fields',
