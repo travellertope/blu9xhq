@@ -308,7 +308,7 @@ add_action( 'rest_api_init', function(): void {
         [
             'methods'             => 'POST',
             'callback'            => 'bluuhq_create_ticket_attachment',
-            'permission_callback' => fn() => current_user_can( 'edit_posts' ),
+            'permission_callback' => fn() => is_user_logged_in(),
             'args'                => [
                 'att_ticket_id'    => [ 'required' => true,  'sanitize_callback' => 'absint' ],
                 'att_uploaded_by'  => [ 'required' => true,  'sanitize_callback' => 'absint' ],
@@ -324,7 +324,7 @@ add_action( 'rest_api_init', function(): void {
     register_rest_route( 'bluuhq/v1', '/tickets/(?P<id>\d+)', [
         'methods'             => 'DELETE',
         'callback'            => 'bluuhq_delete_ticket',
-        'permission_callback' => fn() => current_user_can( 'delete_posts' ),
+        'permission_callback' => fn() => is_user_logged_in(),
         'args'                => [
             'id' => [ 'required' => true, 'sanitize_callback' => 'absint' ],
         ],
