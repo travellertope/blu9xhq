@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getInvoice, getClientPost, wpRestFetch } from "@/lib/wp-api";
+import { getInvoice, getClientPost, getUserByEmail } from "@/lib/wp-api";
 import { sendInvoiceReady } from "@/lib/resend";
 import { updateInvoice } from "@/lib/wp-api";
-import type { WPUser } from "@/lib/wp-api";
 
 export async function POST(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -23,11 +22,11 @@ export async function POST(req: NextRequest) {
     const email = clientPost.acf.portal_email;
     if (!email) return NextResponse.json({ error: "No client email" }, { status: 400 });
 
-    const wpUsers = await wpRestFetch<WPUser[]>("/wp/v2/users?search=" + encodeURIComponent(email)).catch(() => [] as WPUser[]);
-    const prefs: string[] = Array.isArray(wpUsers?.[0]?.meta?.notification_preferences)
-      ? wpUsers[0].meta.notification_preferences as string[]
-      : [];
-    if (prefs.length > 0 && !prefs.includes("invoice_reminders")) {
+    const wpUser = await getUserByEmail(email).catch(() => null);
+    const prefs: string[] = Array.isArray(wpUser?.meta?.notification_preferences)
+      ? wpUser!.meta.notification_preferences as string[]
+      : ["invoice_reminders", "new_files", "service_updates"];
+    if (!prefs.includes("invoice_reminders")) {
       return NextResponse.json({ skipped: true, reason: "notifications disabled" });
     }
 

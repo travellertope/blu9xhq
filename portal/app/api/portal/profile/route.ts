@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const [wpUser, clientPost] = await Promise.all([
-      wpRestFetch<WPUser>("/wp/v2/users/" + wpUserId),
+      wpRestFetch<WPUser>("/wp/v2/users/" + wpUserId + "?context=edit"),
       resolveClientPost(sessionClientId, wpUserId),
     ]);
 

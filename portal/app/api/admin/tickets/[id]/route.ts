@@ -24,36 +24,39 @@ export async function GET(
 
   try {
     const ticket = await getTicket(ticketId);
+    const acf = ticket.acf as typeof ticket.acf | false;
+    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+
     const [repliesResult, attachmentsResult, clientPost] = await Promise.all([
-      listTicketReplies(ticketId),
-      listTicketAttachments(ticketId),
-      getClientPost(ticket.acf.tkt_client).catch(() => null),
+      listTicketReplies(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      getClientPost(acf.tkt_client).catch(() => null),
     ]);
 
     return NextResponse.json({
       id: ticket.id,
-      ticketNumber:         ticket.acf.tkt_number,
+      ticketNumber:         acf.tkt_number,
       subject:              ticket.title.rendered.replace(/<[^>]+>/g, ""),
-      clientId:             ticket.acf.tkt_client,
+      clientId:             acf.tkt_client,
       clientName:           clientPost ? (clientPost.acf.company_name || clientPost.acf.contact_name) : null,
       clientEmail:          clientPost?.acf.portal_email ?? null,
-      submittedBy:          ticket.acf.tkt_submitted_by,
-      assignedTo:           ticket.acf.tkt_assigned_to ?? null,
-      category:             ticket.acf.tkt_category,
-      priority:             ticket.acf.tkt_priority,
-      status:               ticket.acf.tkt_status,
-      retainerId:           ticket.acf.tkt_retainer_id ?? null,
-      slaResponseTarget:    ticket.acf.tkt_sla_response_target,
-      slaResolveTarget:     ticket.acf.tkt_sla_resolve_target,
-      firstResponseAt:      ticket.acf.tkt_first_response_at ?? null,
-      resolvedAt:           ticket.acf.tkt_resolved_at ?? null,
-      closedAt:             ticket.acf.tkt_closed_at ?? null,
+      submittedBy:          acf.tkt_submitted_by,
+      assignedTo:           acf.tkt_assigned_to ?? null,
+      category:             acf.tkt_category,
+      priority:             acf.tkt_priority,
+      status:               acf.tkt_status,
+      retainerId:           acf.tkt_retainer_id ?? null,
+      slaResponseTarget:    acf.tkt_sla_response_target,
+      slaResolveTarget:     acf.tkt_sla_resolve_target,
+      firstResponseAt:      acf.tkt_first_response_at ?? null,
+      resolvedAt:           acf.tkt_resolved_at ?? null,
+      closedAt:             acf.tkt_closed_at ?? null,
       createdAt:            ticket.date,
       replies: repliesResult.items.map((r) => ({
         id:         r.id,
         authorId:   r.acf.reply_author_id,
         body:       r.acf.reply_body,
-        replyType:  r.acf.reply_type, // includes 'internal_note' for admin
+        replyType:  r.acf.reply_type,
         createdAt:  r.date,
       })),
       attachments: attachmentsResult.items.map((a) => ({
@@ -100,10 +103,13 @@ export async function PATCH(
 
   try {
     const ticket = await getTicket(ticketId);
-    const clientPost = await getClientPost(ticket.acf.tkt_client).catch(() => null);
+    const acf = ticket.acf as typeof ticket.acf | false;
+    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+
+    const clientPost = await getClientPost(acf.tkt_client).catch(() => null);
 
     const acfUpdates: Record<string, string | number> = {};
-    const prevStatus = ticket.acf.tkt_status;
+    const prevStatus = acf.tkt_status;
 
     if (body.status && body.status !== prevStatus) {
       acfUpdates.tkt_status = body.status;
@@ -137,7 +143,7 @@ export async function PATCH(
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
         void sendTicketStatusChanged(clientPost.acf.portal_email, {
           clientName:  clientPost.acf.contact_name,
-          ticketNumber: ticket.acf.tkt_number,
+          ticketNumber: acf.tkt_number,
           subject:     ticket.title.rendered.replace(/<[^>]+>/g, ""),
           fromStatus:  prevStatus,
           toStatus:    body.status,
@@ -149,7 +155,7 @@ export async function PATCH(
         void logTicketToTimeline({
           clientPostId: clientPost.id,
           wpUserId:     actorWpUserId ?? 0,
-          ticketNumber: ticket.acf.tkt_number,
+          ticketNumber: acf.tkt_number,
           subject:      ticket.title.rendered.replace(/<[^>]+>/g, ""),
           content:      `Ticket status updated: ${prevStatus} → ${body.status}${body.note ? `\n\n${body.note}` : ""}`,
           direction:    "outbound",

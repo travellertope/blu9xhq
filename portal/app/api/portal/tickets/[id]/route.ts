@@ -31,14 +31,14 @@ export async function GET(
 
     if (!clientPost) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Ownership check — ticket must belong to this client
-    if (ticket.acf.tkt_client !== clientPost.id) {
+    const acf = ticket.acf as typeof ticket.acf | false;
+    if (!acf || acf.tkt_client !== clientPost.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     const [repliesResult, attachmentsResult] = await Promise.all([
-      listTicketReplies(ticketId),
-      listTicketAttachments(ticketId),
+      listTicketReplies(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      listTicketAttachments(ticketId).catch(() => ({ items: [], total: 0, totalPages: 1 })),
     ]);
 
     // Filter out internal_note replies for client view
@@ -62,13 +62,13 @@ export async function GET(
 
     return NextResponse.json({
       id: ticket.id,
-      ticketNumber: ticket.acf.tkt_number,
+      ticketNumber: acf.tkt_number,
       subject: ticket.title.rendered.replace(/<[^>]+>/g, ""),
-      category: ticket.acf.tkt_category,
-      priority: ticket.acf.tkt_priority,
-      status: ticket.acf.tkt_status,
-      firstResponseAt: ticket.acf.tkt_first_response_at ?? null,
-      resolvedAt: ticket.acf.tkt_resolved_at ?? null,
+      category: acf.tkt_category,
+      priority: acf.tkt_priority,
+      status: acf.tkt_status,
+      firstResponseAt: acf.tkt_first_response_at ?? null,
+      resolvedAt: acf.tkt_resolved_at ?? null,
       createdAt: ticket.date,
       replies,
       attachments,
