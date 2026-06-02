@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,7 +40,9 @@ export default function NewTicketPage() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("other");
   const [priority, setPriority] = useState("normal");
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,6 +64,16 @@ export default function NewTicketPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to submit ticket");
+
+      // Upload attachment if provided (best-effort — don't block ticket creation)
+      if (attachmentFile) {
+        const fd = new FormData();
+        fd.append("file", attachmentFile);
+        await fetch(`/api/portal/tickets/${data.id}/attachments`, {
+          method: "POST",
+          body: fd,
+        }).catch(() => undefined);
+      }
 
       toast.success(data.ticketNumber ? `Ticket ${data.ticketNumber} submitted — we'll be in touch shortly` : "Ticket submitted — we'll be in touch shortly");
       router.push(`/portal/tickets/${data.id}`);
@@ -157,6 +169,47 @@ export default function NewTicketPage() {
               </p>
             </div>
 
+            <div className="space-y-1.5">
+              <Label>
+                Attachment <span className="text-muted-foreground font-normal">(optional)</span>
+              </Label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx"
+                onChange={(e) => {
+                  setAttachmentFile(e.target.files?.[0] ?? null);
+                  e.target.value = "";
+                }}
+              />
+              <div className="flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={saving}
+                  className="shrink-0"
+                >
+                  <Paperclip size={14} className="mr-1.5" />
+                  {attachmentFile ? "Change file" : "Attach a file"}
+                </Button>
+                {attachmentFile && (
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm truncate text-muted-foreground">{attachmentFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setAttachmentFile(null)}
+                      className="shrink-0 text-muted-foreground hover:text-foreground"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex justify-end gap-3 pt-2">
               <Button type="button" variant="outline" asChild>
                 <Link href="/portal/tickets">Cancel</Link>
@@ -165,7 +218,7 @@ export default function NewTicketPage() {
                 {saving ? (
                   <>
                     <Loader2 size={14} className="mr-1.5 animate-spin" />
-                    Submitting…
+                    {attachmentFile ? "Submitting…" : "Submitting…"}
                   </>
                 ) : (
                   "Submit Ticket"
