@@ -1,48 +1,39 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    AI PRODUCTIVITY ACCELERATOR — LANDING PAGE STYLESHEET
-   Version: 1.0
+   Version: 2.0  (ACF edition — no Gutenberg block classes)
 
    HOW TO CUSTOMISE:
-   Every design token lives in the :root block below.
-   Change colours, fonts, spacing, and image URLs without touching
-   anything else in this file.
-
-   FILE DEPENDENCIES:
-   Google Fonts are loaded via wp_enqueue_style in functions.php (not @import).
-   See functions-snippet.php for the WordPress enqueue hook.
-
-   UNSPLASH IMAGES:
-   Replace the photo IDs in --img-* variables with your own choices.
-   Browse at unsplash.com — use the direct image URL format shown.
-   All three IDs below are real photos; verify them at unsplash.com/photos/{ID}
+   Edit the :root block below. All colours, fonts, spacing, and the
+   background image URLs live there. Nothing else needs to change for
+   a basic restyle.
 ═══════════════════════════════════════════════════════════════════════════ */
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   1. THEME VARIABLES  ← edit this block to restyle everything
+   1. THEME VARIABLES  ← edit here
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
   /* ── Colours ──────────────────────────────────────────────────────── */
   --clr-bg:             #F5F0E8;   /* Warm off-white page background          */
-  --clr-surface:        #FFFFFF;   /* Card / section surfaces                 */
-  --clr-dark:           #1B1F2E;   /* Deep navy — dark sections & headings    */
-  --clr-dark-alt:       #252A3D;   /* Lighter navy variant — footer etc.      */
+  --clr-surface:        #FFFFFF;   /* Card and section surfaces               */
+  --clr-dark:           #1B1F2E;   /* Deep navy — headings, dark sections     */
+  --clr-dark-alt:       #252A3D;   /* Slightly lighter navy — footer          */
   --clr-accent:         #C96B28;   /* Burnt orange — CTAs and highlights      */
-  --clr-accent-hover:   #A8521A;   /* Darker accent for hover states          */
-  --clr-accent-light:   #FEF3EA;   /* Very light accent tint for backgrounds  */
+  --clr-accent-hover:   #A8521A;   /* Darker on hover                         */
+  --clr-accent-light:   #FEF3EA;   /* Light accent tint                       */
   --clr-text:           #2B2F40;   /* Primary body text                       */
-  --clr-muted:          #6B7080;   /* Secondary / muted text                  */
-  --clr-border:         #DDD8CE;   /* Subtle borders and dividers             */
+  --clr-muted:          #6B7080;   /* Muted / secondary text                  */
+  --clr-border:         #DDD8CE;   /* Dividers and card borders               */
 
   /* ── Typography ───────────────────────────────────────────────────── */
   --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --font-body:    'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body:    'DM Sans', system-ui, -apple-system, sans-serif;
 
   /* ── Spacing ──────────────────────────────────────────────────────── */
-  --space-section:     100px;                  /* Section vertical padding           */
-  --space-section-sm:   60px;                  /* Section padding on mobile          */
-  --max-width:        1200px;                  /* Maximum content width              */
-  --gutter:    clamp(20px, 5vw, 64px);         /* Responsive horizontal page padding */
+  --space-section:    100px;
+  --space-section-sm:  60px;
+  --max-width:        1200px;
+  --gutter:    clamp(20px, 5vw, 64px);
 
   /* ── Shapes & Motion ──────────────────────────────────────────────── */
   --radius-card:  12px;
@@ -52,14 +43,10 @@
   --transition:   0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* ── Background images ────────────────────────────────────────────── */
-  /* Hero: focused professional at a clean laptop workspace             */
-  --img-hero: url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1400&q=80');
-
-  /* Mid-page break: small group on a virtual / collaborative call      */
+  /* Hero: fallback when no image is set in ACF                         */
+  --img-hero:  url('https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=1400&q=80');
+  /* Mid-page break strip                                               */
   --img-break: url('https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=1400&q=80');
-
-  /* Instructor accent: confident professional, speaking or presenting  */
-  --img-instructor-accent: url('https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&q=80');
 }
 
 
@@ -68,11 +55,7 @@
    ─────────────────────────────────────────────────────────────────────────── */
 .landing-page *,
 .landing-page *::before,
-.landing-page *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+.landing-page *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .landing-page {
   background-color: var(--clr-bg);
@@ -84,7 +67,7 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Suppress theme header/sidebar/footer if they somehow render */
+/* Suppress any theme chrome that leaks in */
 .landing-page .site-header,
 .landing-page #site-header,
 .landing-page .site-footer,
@@ -93,11 +76,6 @@
 .landing-page #secondary,
 .landing-page .widget-area,
 .landing-page #comments { display: none !important; }
-
-.landing-main {
-  width: 100%;
-  overflow-x: hidden;
-}
 
 img { max-width: 100%; height: auto; display: block; }
 
@@ -108,8 +86,7 @@ img { max-width: 100%; height: auto; display: block; }
 .landing-page h1,
 .landing-page h2,
 .landing-page h3,
-.landing-page h4,
-.landing-page .wp-block-heading {
+.landing-page h4 {
   font-family: var(--font-display);
   font-weight: 600;
   line-height: 1.1;
@@ -117,23 +94,17 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--clr-dark);
 }
 
-.landing-page h1 { font-size: clamp(2.75rem, 7vw, 5.5rem); }
-.landing-page h2 { font-size: clamp(2rem,   4vw, 3.5rem);  }
+.landing-page h1 { font-size: clamp(2.75rem, 7vw,   5.5rem); }
+.landing-page h2 { font-size: clamp(2rem,    4vw,   3.5rem); }
 .landing-page h3 { font-size: clamp(1.2rem,  2.5vw, 1.6rem); font-weight: 600; }
 
-.landing-page p,
-.landing-page .wp-block-paragraph {
-  font-size: 1.0625rem;
-  max-width: 65ch;
-  color: var(--clr-text);
-}
+.landing-page p { font-size: 1.0625rem; }
 
 .landing-page a { color: var(--clr-accent); }
 .landing-page a:hover { text-decoration: underline; }
 
-/* Eyebrow label — apply "section-eyebrow" class to a Paragraph block */
-.section-eyebrow,
-.landing-page .section-eyebrow {
+/* Eyebrow label — small caps above a heading */
+.section-eyebrow {
   display: block;
   font-family: var(--font-body);
   font-size: 0.8rem;
@@ -144,11 +115,16 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 0.875rem;
 }
 
-/* Intro paragraph — apply "section-intro" class to a Paragraph block */
+/* Supporting intro paragraph */
 .section-intro {
   color: var(--clr-muted);
+  font-size: 1.0625rem;
   max-width: 62ch;
+  margin-top: 0.75rem;
 }
+
+.text-center { text-align: center; }
+.text-center.section-intro { margin-inline: auto; }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -195,9 +171,7 @@ img { max-width: 100%; height: auto; display: block; }
 /* ───────────────────────────────────────────────────────────────────────────
    5. BUTTON SYSTEM
    ─────────────────────────────────────────────────────────────────────────── */
-.btn,
-.landing-page .wp-block-button__link,
-.landing-page .wp-element-button {
+.btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -218,18 +192,14 @@ img { max-width: 100%; height: auto; display: block; }
     box-shadow var(--transition);
 }
 
-/* Default (accent) style */
-.btn--accent,
-.landing-page .wp-block-button__link,
-.landing-page .wp-element-button {
+/* Accent (primary) */
+.btn--accent {
   background-color: var(--clr-accent);
   border-color: var(--clr-accent);
   color: #ffffff !important;
 }
 
-.btn--accent:hover,
-.landing-page .wp-block-button__link:hover,
-.landing-page .wp-element-button:hover {
+.btn--accent:hover {
   background-color: var(--clr-accent-hover);
   border-color: var(--clr-accent-hover);
   transform: translateY(-2px);
@@ -237,53 +207,41 @@ img { max-width: 100%; height: auto; display: block; }
   text-decoration: none !important;
 }
 
-.btn--sm { padding: 10px 20px; font-size: 0.875rem; }
-
-/* Ghost / outline variant — add class "is-style-outline" to Button block */
-.landing-page .wp-block-button.is-style-outline .wp-block-button__link {
+/* Outline / ghost */
+.btn--outline {
   background-color: transparent;
-  color: var(--clr-accent) !important;
-  border-color: var(--clr-accent);
-}
-
-.landing-page .wp-block-button.is-style-outline .wp-block-button__link:hover {
-  background-color: var(--clr-accent);
+  border-color: rgba(255, 255, 255, 0.3);
   color: #ffffff !important;
 }
+
+.btn--outline:hover {
+  background-color: var(--clr-accent);
+  border-color: var(--clr-accent);
+  text-decoration: none !important;
+}
+
+/* Small variant — used in nav */
+.btn--sm { padding: 10px 20px; font-size: 0.875rem; }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
    6. SECTION: HERO
-   Use a Gutenberg Cover block with class "section-hero".
-   Set the background image inside the Cover block itself.
-   The CSS provides a fallback background and overlay enhancement.
+   Background image set inline by PHP from ACF field.
+   Falls back to --img-hero CSS variable when no image is uploaded.
    ─────────────────────────────────────────────────────────────────────────── */
-.section-hero,
-.section-hero.wp-block-cover {
+.section-hero {
+  position: relative;
   min-height: 90vh;
   display: flex;
   align-items: center;
-  /* Fallback background if Cover block image is not set */
-  background-image: var(--img-hero);
+  background-image: var(--img-hero); /* overridden by inline style from PHP */
   background-size: cover;
   background-position: center top;
   padding: var(--space-section) var(--gutter);
 }
 
-/* Enhance the built-in Cover overlay for a richer directional gradient */
-.section-hero.wp-block-cover .wp-block-cover__background,
-.section-hero .wp-block-cover__background {
-  background: linear-gradient(
-    108deg,
-    rgba(27, 31, 46, 0.90) 0%,
-    rgba(27, 31, 46, 0.55) 55%,
-    rgba(27, 31, 46, 0.25) 100%
-  ) !important;
-  opacity: 1 !important;
-}
-
-/* Fallback overlay for plain Group blocks */
-.section-hero:not(.wp-block-cover)::before {
+/* Dark directional overlay */
+.section-hero::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -294,63 +252,49 @@ img { max-width: 100%; height: auto; display: block; }
     rgba(27, 31, 46, 0.25) 100%
   );
   pointer-events: none;
-  z-index: 0;
 }
 
-.section-hero:not(.wp-block-cover) { position: relative; }
-.section-hero:not(.wp-block-cover) > * { position: relative; z-index: 1; }
-
-/* Inner container */
-.section-hero .wp-block-cover__inner-container {
+.section-hero__content {
+  position: relative;
+  z-index: 1;
   max-width: 820px;
-  width: 100%;
-  padding-inline: 0;
 }
 
-/* Headline */
-.section-hero h1,
-.section-hero .wp-block-heading {
+.section-hero h1 {
   font-size: clamp(2.8rem, 7.5vw, 5.75rem);
   color: #ffffff;
   margin-bottom: 1.25rem;
   max-width: 16ch;
 }
 
-/* Italic / highlighted words in the headline */
-.section-hero h1 em,
-.section-hero .wp-block-heading em {
+/* Accent-coloured word: wrap in <em> in the ACF headline field */
+.section-hero h1 em {
   font-style: normal;
   color: var(--clr-accent);
 }
 
-/* Subheadline */
-.section-hero p,
-.section-hero .wp-block-paragraph {
+.section-hero .hero-sub {
   font-size: clamp(1.05rem, 2.2vw, 1.3rem);
   color: rgba(255, 255, 255, 0.82);
   margin-bottom: 2.25rem;
   max-width: 55ch;
 }
 
-.section-hero .wp-block-buttons { margin-top: 0.25rem; }
-
-.section-hero .wp-block-button__link {
+.section-hero .btn {
   padding: 18px 40px;
   font-size: 1.0625rem;
 }
 
-/* Small detail text / date line */
 .section-hero .hero-meta {
-  margin-top: 2rem;
+  margin-top: 1.75rem;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.45);
   letter-spacing: 0.04em;
 }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   7. SECTION: PROBLEM (pain points)
-   Group block → class: section-problem
+   7. SECTION: PROBLEM
    ─────────────────────────────────────────────────────────────────────────── */
 .section-problem {
   background-color: var(--clr-dark);
@@ -358,45 +302,28 @@ img { max-width: 100%; height: auto; display: block; }
   color: #ffffff;
 }
 
-.section-problem > .wp-block-group__inner-container,
-.section-problem > * {
+.section-problem__inner {
   max-width: var(--max-width);
   margin-inline: auto;
-}
-
-.section-problem h2,
-.section-problem .wp-block-heading {
-  color: #ffffff;
   text-align: center;
 }
 
-.section-problem .section-eyebrow { text-align: center; }
+.section-problem h2 { color: #ffffff; }
+.section-problem .section-intro { color: rgba(255, 255, 255, 0.62); margin-inline: auto; }
 
-.section-problem .section-intro {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.62);
-  margin-inline: auto;
-  margin-top: 0.75rem;
-}
-
-.section-problem .wp-block-columns {
-  margin-top: 3.5rem;
+.pain-points-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  align-items: stretch;
+  margin-top: 3.5rem;
+  text-align: left;
 }
 
-.section-problem .wp-block-column {
-  flex-basis: 0;
-  flex-grow: 1;
-}
-
-/* Pain-point card — used via Custom HTML blocks inside each column */
 .pain-point {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-card);
   padding: 2rem 1.75rem;
-  height: 100%;
   transition: background-color var(--transition), border-color var(--transition);
 }
 
@@ -410,7 +337,6 @@ img { max-width: 100%; height: auto; display: block; }
   height: 44px;
   margin-bottom: 1.375rem;
   color: var(--clr-accent);
-  flex-shrink: 0;
 }
 
 .pain-point__title {
@@ -426,65 +352,50 @@ img { max-width: 100%; height: auto; display: block; }
   font-size: 0.9375rem;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.65;
-  max-width: none;
 }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   8. SECTION: MODULES (What You'll Learn)
-   Group block → class: section-modules
-   Each of the 3 columns gets the class "module-card" (via Additional CSS Class)
+   8. SECTION: MODULES
    ─────────────────────────────────────────────────────────────────────────── */
 .section-modules {
   background-color: var(--clr-bg);
   padding: var(--space-section) var(--gutter);
 }
 
-.section-modules > .wp-block-group__inner-container,
-.section-modules > * {
+.section-modules__inner {
   max-width: var(--max-width);
   margin-inline: auto;
-}
-
-.section-modules > .wp-block-group__inner-container > .wp-block-heading,
-.section-modules h2 {
   text-align: center;
 }
 
-.section-modules .section-intro {
-  text-align: center;
-  margin-inline: auto;
-  margin-top: 0.75rem;
-}
-
-.section-modules .wp-block-columns {
-  margin-top: 3.5rem;
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
-  align-items: stretch;
+  margin-top: 3.5rem;
+  text-align: left;
 }
 
-/* Column gets these styles when given the class "module-card" */
-.module-card,
-.section-modules .wp-block-column {
+.module-card {
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-card);
   padding: 2.25rem 2rem;
   box-shadow: var(--shadow-card);
   transition: transform var(--transition), box-shadow var(--transition);
-  flex-basis: 0 !important;
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.module-card:hover,
-.section-modules .wp-block-column:hover {
+.module-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-hover);
 }
 
-/* Module number badge — use a Paragraph block with class "module-card__number" */
 .module-card__number {
   display: inline-block;
+  align-self: flex-start;
   font-size: 0.7375rem;
   font-weight: 700;
   letter-spacing: 0.1em;
@@ -496,32 +407,26 @@ img { max-width: 100%; height: auto; display: block; }
   margin-bottom: 1.25rem;
 }
 
-.module-card h3,
-.section-modules .wp-block-column h3,
-.section-modules .wp-block-column .wp-block-heading {
+.module-card h3 {
   color: var(--clr-dark);
   font-size: 1.4rem;
   margin-bottom: 0.875rem;
 }
 
-.module-card p,
-.section-modules .wp-block-column p,
-.section-modules .wp-block-column .wp-block-paragraph {
+.module-card p {
   color: var(--clr-muted);
   font-size: 0.9375rem;
   margin-bottom: 1.5rem;
-  max-width: none;
+  flex-grow: 1;
 }
 
-/* List of outcomes inside each module card */
-.module-card ul,
-.section-modules .wp-block-column .wp-block-list {
+.module-card ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.module-card ul li,
-.section-modules .wp-block-column .wp-block-list li {
+.module-card ul li {
   display: flex;
   align-items: flex-start;
   gap: 0.625rem;
@@ -532,11 +437,9 @@ img { max-width: 100%; height: auto; display: block; }
   line-height: 1.45;
 }
 
-.module-card ul li:last-child,
-.section-modules .wp-block-column .wp-block-list li:last-child { border-bottom: none; }
+.module-card ul li:last-child { border-bottom: none; }
 
-.module-card ul li::before,
-.section-modules .wp-block-column .wp-block-list li::before {
+.module-card ul li::before {
   content: '→';
   color: var(--clr-accent);
   font-weight: 700;
@@ -547,7 +450,6 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    9. SECTION: WHO IT'S FOR
-   Group block → class: section-for-you
    ─────────────────────────────────────────────────────────────────────────── */
 .section-for-you {
   background-color: var(--clr-accent-light);
@@ -556,29 +458,23 @@ img { max-width: 100%; height: auto; display: block; }
   border-bottom: 1px solid var(--clr-border);
 }
 
-.section-for-you > .wp-block-group__inner-container,
-.section-for-you > * {
+.section-for-you__inner {
   max-width: var(--max-width);
   margin-inline: auto;
 }
 
-.section-for-you h2,
-.section-for-you .wp-block-heading {
-  margin-bottom: 0.625rem;
-}
+.section-for-you h2 { margin-bottom: 0.625rem; }
 
-.section-for-you .section-intro {
-  margin-bottom: 2.75rem;
-}
+.section-for-you .section-intro { margin-bottom: 2.75rem; }
 
-.section-for-you .wp-block-list {
+.for-you-list {
   list-style: none;
   padding: 0;
   columns: 2;
   column-gap: 2rem;
 }
 
-.section-for-you .wp-block-list li {
+.for-you-list li {
   display: flex;
   align-items: flex-start;
   gap: 0.875rem;
@@ -589,23 +485,18 @@ img { max-width: 100%; height: auto; display: block; }
   break-inside: avoid;
 }
 
-.section-for-you .wp-block-list li::before {
-  content: '';
-  display: block;
+.check-icon {
   width: 22px;
   height: 22px;
   min-width: 22px;
+  color: var(--clr-accent);
   margin-top: 2px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C96B28' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-size: contain;
+  flex-shrink: 0;
 }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   10. SECTION: MID-PAGE BREAK (decorative image strip)
-    Group block → class: section-break
-    Optionally place a Quote block inside for a pull-quote effect.
+   10. SECTION: MID-PAGE BREAK
    ─────────────────────────────────────────────────────────────────────────── */
 .section-break {
   position: relative;
@@ -613,7 +504,7 @@ img { max-width: 100%; height: auto; display: block; }
   background-image: var(--img-break);
   background-size: cover;
   background-position: center 40%;
-  background-attachment: fixed; /* parallax — disabled on mobile */
+  background-attachment: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -628,27 +519,22 @@ img { max-width: 100%; height: auto; display: block; }
   background: rgba(27, 31, 46, 0.75);
 }
 
-.section-break > * { position: relative; z-index: 1; }
-
-.section-break .wp-block-quote,
-.section-break blockquote {
-  border: none;
-  padding: 0;
-  max-width: 720px;
-  margin-inline: auto;
+.section-break__inner {
+  position: relative;
+  z-index: 1;
+  max-width: 760px;
 }
 
-.section-break .wp-block-quote p,
+.section-break blockquote { padding: 0; border: none; }
+
 .section-break blockquote p {
   font-family: var(--font-display);
   font-size: clamp(1.5rem, 3.5vw, 2.5rem);
   color: #ffffff;
   font-style: italic;
   line-height: 1.3;
-  max-width: none;
 }
 
-.section-break .wp-block-quote cite,
 .section-break blockquote cite {
   display: block;
   margin-top: 1rem;
@@ -662,10 +548,6 @@ img { max-width: 100%; height: auto; display: block; }
 
 /* ───────────────────────────────────────────────────────────────────────────
    11. SECTION: INSTRUCTOR
-    Group block → class: section-instructor
-    Inside: a 2-column Columns block.
-    Col 1 → Image block (your headshot)
-    Col 2 → text content
    ─────────────────────────────────────────────────────────────────────────── */
 .section-instructor {
   background-color: var(--clr-dark);
@@ -673,28 +555,21 @@ img { max-width: 100%; height: auto; display: block; }
   color: #ffffff;
 }
 
-.section-instructor > .wp-block-group__inner-container,
-.section-instructor > * {
+.section-instructor__inner {
   max-width: var(--max-width);
   margin-inline: auto;
-}
-
-.section-instructor .wp-block-columns {
-  align-items: center;
+  display: grid;
+  grid-template-columns: 380px 1fr;
   gap: 4rem;
+  align-items: center;
 }
 
-/* Photo column */
-.section-instructor .wp-block-column:first-child {
+.section-instructor__image {
   position: relative;
-  max-width: 420px;
-  flex-basis: 380px !important;
-  flex-grow: 0;
-  flex-shrink: 0;
 }
 
-/* Decorative accent border around the photo */
-.section-instructor .wp-block-column:first-child::after {
+/* Decorative accent border behind the photo */
+.section-instructor__image::after {
   content: '';
   position: absolute;
   inset: -14px;
@@ -704,78 +579,59 @@ img { max-width: 100%; height: auto; display: block; }
   pointer-events: none;
 }
 
-.section-instructor .wp-block-image img,
-.section-instructor img {
+.section-instructor__image img {
   width: 100%;
   height: 500px;
   object-fit: cover;
   object-position: top center;
   border-radius: var(--radius-card);
+  display: block;
+  position: relative; /* above the ::after pseudo */
+  z-index: 1;
 }
 
-/* Text column */
-.section-instructor .wp-block-column:last-child {
-  flex: 1;
+/* Placeholder shown when no photo is uploaded in ACF */
+.instructor-photo-placeholder {
+  width: 100%;
+  height: 500px;
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.07);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.section-instructor h2,
-.section-instructor .wp-block-heading {
-  color: #ffffff;
-  margin-bottom: 1rem;
-}
+.section-instructor__text {}
 
-.section-instructor p,
-.section-instructor .wp-block-paragraph {
+.section-instructor__text h2 { color: #ffffff; margin-bottom: 1rem; }
+
+.instructor-bio p {
   color: rgba(255, 255, 255, 0.72);
   font-size: 1.0625rem;
   margin-bottom: 1.125rem;
-  max-width: 56ch;
 }
 
-.section-instructor .wp-block-buttons { margin-top: 0.5rem; }
-
-.section-instructor .wp-block-button__link {
-  background-color: transparent;
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ffffff !important;
-}
-
-.section-instructor .wp-block-button__link:hover {
-  background-color: var(--clr-accent);
-  border-color: var(--clr-accent);
-}
+.section-instructor__text .btn { margin-top: 0.5rem; }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
    12. SECTION: WHAT'S INCLUDED
-    Group block → class: section-included
    ─────────────────────────────────────────────────────────────────────────── */
 .section-included {
   background-color: var(--clr-surface);
   padding: var(--space-section) var(--gutter);
 }
 
-.section-included > .wp-block-group__inner-container,
-.section-included > * {
+.section-included__inner {
   max-width: var(--max-width);
   margin-inline: auto;
-}
-
-.section-included h2,
-.section-included .wp-block-heading {
   text-align: center;
 }
 
-.section-included .section-eyebrow { text-align: center; }
+.section-included .section-intro { margin-bottom: 3rem; }
 
-.section-included .section-intro {
-  text-align: center;
-  margin-inline: auto;
-  margin-top: 0.75rem;
-  margin-bottom: 3rem;
-}
-
-.section-included .wp-block-list {
+.included-list {
   list-style: none;
   padding: 0;
   display: grid;
@@ -783,9 +639,10 @@ img { max-width: 100%; height: auto; display: block; }
   gap: 1rem;
   max-width: 960px;
   margin-inline: auto;
+  text-align: left;
 }
 
-.section-included .wp-block-list li {
+.included-list li {
   display: flex;
   align-items: flex-start;
   gap: 1rem;
@@ -799,7 +656,7 @@ img { max-width: 100%; height: auto; display: block; }
   line-height: 1.45;
 }
 
-.section-included .wp-block-list li::before {
+.included-list li::before {
   content: '';
   display: block;
   width: 28px;
@@ -813,8 +670,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   13. SECTION: PRICING & CTA
-    Group block → class: section-pricing
+   13. SECTION: PRICING
    ─────────────────────────────────────────────────────────────────────────── */
 .section-pricing {
   background-color: var(--clr-dark);
@@ -822,19 +678,13 @@ img { max-width: 100%; height: auto; display: block; }
   text-align: center;
 }
 
-.section-pricing > .wp-block-group__inner-container,
-.section-pricing > * {
+.section-pricing__inner {
   max-width: var(--max-width);
   margin-inline: auto;
 }
 
-.section-pricing h2,
-.section-pricing .wp-block-heading {
-  color: #ffffff;
-  margin-bottom: 1rem;
-}
+.section-pricing h2 { color: #ffffff; margin-bottom: 1rem; }
 
-/* Large price — use a Custom HTML block: <p class="price-display"><sup>£</sup>79</p> */
 .price-display {
   font-family: var(--font-display);
   font-size: clamp(4.5rem, 12vw, 7.5rem);
@@ -843,7 +693,6 @@ img { max-width: 100%; height: auto; display: block; }
   line-height: 0.95;
   margin: 1.5rem 0;
   letter-spacing: -0.04em;
-  max-width: none;
 }
 
 .price-display sup {
@@ -853,7 +702,6 @@ img { max-width: 100%; height: auto; display: block; }
   color: rgba(255, 255, 255, 0.65);
 }
 
-/* Urgency line — use a Custom HTML block: <p class="urgency">Limited to 20 seats</p> */
 .urgency {
   display: inline-flex;
   align-items: center;
@@ -862,7 +710,6 @@ img { max-width: 100%; height: auto; display: block; }
   font-weight: 600;
   color: var(--clr-accent);
   margin-bottom: 1.75rem;
-  max-width: none;
 }
 
 .urgency::before {
@@ -880,84 +727,43 @@ img { max-width: 100%; height: auto; display: block; }
   50%       { opacity: 0.35; transform: scale(1.5); }
 }
 
-.section-pricing p,
-.section-pricing .wp-block-paragraph {
+.section-pricing p {
   color: rgba(255, 255, 255, 0.6);
   margin-inline: auto;
   margin-bottom: 2rem;
 }
 
-.section-pricing .wp-block-buttons { justify-content: center; }
-
-.section-pricing .wp-block-button__link {
+.section-pricing .btn {
   padding: 18px 48px;
   font-size: 1.125rem;
-}
-
-/* Reassurance row below the CTA button */
-.pricing-guarantees {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1.75rem;
-  margin-top: 2.5rem;
-  padding-top: 2.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.guarantee-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.5);
 }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
    14. SECTION: FAQ ACCORDION
-    Group block → class: section-faq
-    Each FAQ must be a Custom HTML block using the .faq-item pattern.
-    See template-ai-landing.php header comment for the full HTML pattern.
    ─────────────────────────────────────────────────────────────────────────── */
 .section-faq {
   background-color: var(--clr-bg);
   padding: var(--space-section) var(--gutter);
 }
 
-.section-faq > .wp-block-group__inner-container,
-.section-faq > * {
+.section-faq__inner {
   max-width: var(--max-width);
   margin-inline: auto;
-}
-
-.section-faq h2,
-.section-faq .wp-block-heading {
   text-align: center;
 }
 
-.section-faq .section-eyebrow { text-align: center; }
+.section-faq .section-intro { margin-bottom: 3rem; }
 
-.section-faq .section-intro {
-  text-align: center;
-  margin-inline: auto;
-  margin-top: 0.75rem;
-  margin-bottom: 3rem;
-}
-
-/* Wrap all .faq-item elements inside a div.faq-list in your Custom HTML */
 .faq-list {
   max-width: 780px;
   margin-inline: auto;
+  text-align: left;
 }
 
-.faq-item {
-  border-bottom: 1px solid var(--clr-border);
-}
-
+.faq-item { border-bottom: 1px solid var(--clr-border); }
 .faq-item:first-child { border-top: 1px solid var(--clr-border); }
 
-/* Question button */
 .faq-question {
   width: 100%;
   background: none;
@@ -979,7 +785,7 @@ img { max-width: 100%; height: auto; display: block; }
 .faq-question:hover { color: var(--clr-accent); }
 .faq-item.is-open .faq-question { color: var(--clr-accent); }
 
-/* Chevron icon via SVG data URI */
+/* Animated chevron */
 .faq-question::after {
   content: '';
   display: block;
@@ -993,22 +799,17 @@ img { max-width: 100%; height: auto; display: block; }
   flex-shrink: 0;
 }
 
-.faq-item.is-open .faq-question::after {
-  transform: rotate(180deg);
-}
+.faq-item.is-open .faq-question::after { transform: rotate(180deg); }
 
-/* Accordion panel — CSS grid trick for smooth height animation */
+/* CSS grid trick — smooth height animation without fixed max-height */
 .faq-answer {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.faq-item.is-open .faq-answer {
-  grid-template-rows: 1fr;
-}
+.faq-item.is-open .faq-answer { grid-template-rows: 1fr; }
 
-/* The inner div must exist for grid trick to work */
 .faq-answer__inner {
   overflow: hidden;
   min-height: 0;
@@ -1019,13 +820,11 @@ img { max-width: 100%; height: auto; display: block; }
   color: var(--clr-muted);
   font-size: 1rem;
   line-height: 1.7;
-  max-width: none;
 }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
    15. SECTION: FOOTER CTA
-    Group block → class: section-footer-cta
    ─────────────────────────────────────────────────────────────────────────── */
 .section-footer-cta {
   background-color: var(--clr-accent);
@@ -1033,37 +832,33 @@ img { max-width: 100%; height: auto; display: block; }
   text-align: center;
 }
 
-.section-footer-cta > .wp-block-group__inner-container,
-.section-footer-cta > * {
+.section-footer-cta__inner {
   max-width: var(--max-width);
   margin-inline: auto;
 }
 
-.section-footer-cta h2,
-.section-footer-cta .wp-block-heading {
+.section-footer-cta h2 {
   color: #ffffff;
   font-size: clamp(2rem, 4.5vw, 3.5rem);
   margin-bottom: 1.125rem;
 }
 
-.section-footer-cta p,
-.section-footer-cta .wp-block-paragraph {
+.section-footer-cta p {
   color: rgba(255, 255, 255, 0.82);
   font-size: 1.125rem;
+  max-width: 56ch;
   margin-inline: auto;
   margin-bottom: 2.25rem;
 }
 
-.section-footer-cta .wp-block-buttons { justify-content: center; }
-
-/* Inverted button — white on accent background */
-.section-footer-cta .wp-block-button__link {
+/* Inverted button on accent background */
+.section-footer-cta .btn {
   background-color: #ffffff;
   border-color: #ffffff;
   color: var(--clr-accent) !important;
 }
 
-.section-footer-cta .wp-block-button__link:hover {
+.section-footer-cta .btn:hover {
   background-color: var(--clr-dark);
   border-color: var(--clr-dark);
   color: #ffffff !important;
@@ -1072,7 +867,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   16. LANDING FOOTER (PHP-rendered)
+   16. LANDING FOOTER
    ─────────────────────────────────────────────────────────────────────────── */
 .landing-footer {
   background-color: var(--clr-dark-alt);
@@ -1092,13 +887,9 @@ img { max-width: 100%; height: auto; display: block; }
 .landing-footer__copy {
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.38);
-  max-width: none;
 }
 
-.landing-footer__links {
-  display: flex;
-  gap: 1.75rem;
-}
+.landing-footer__links { display: flex; gap: 1.75rem; }
 
 .landing-footer__links a {
   font-size: 0.875rem;
@@ -1107,106 +898,55 @@ img { max-width: 100%; height: auto; display: block; }
   transition: color var(--transition);
 }
 
-.landing-footer__links a:hover {
-  color: rgba(255, 255, 255, 0.8);
-  text-decoration: none;
-}
+.landing-footer__links a:hover { color: rgba(255, 255, 255, 0.8); }
 
 
 /* ───────────────────────────────────────────────────────────────────────────
-   17. UTILITIES
-   ─────────────────────────────────────────────────────────────────────────── */
-.landing-page .text-center    { text-align: center; }
-.landing-page .text-accent    { color: var(--clr-accent); }
-.landing-page .text-white     { color: #ffffff; }
-.landing-page .text-muted     { color: var(--clr-muted); }
-.landing-page .mt-0           { margin-top: 0 !important; }
-.landing-page .mb-0           { margin-bottom: 0 !important; }
-
-/* Screen-reader only */
-.sr-only {
-  position: absolute;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-
-/* ───────────────────────────────────────────────────────────────────────────
-   18. RESPONSIVE BREAKPOINTS
+   17. RESPONSIVE
    ─────────────────────────────────────────────────────────────────────────── */
 
 /* Tablet */
 @media (max-width: 900px) {
-  .section-instructor .wp-block-columns {
-    flex-direction: column;
+  .section-instructor__inner {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
   }
 
-  .section-instructor .wp-block-column:first-child {
-    flex-basis: auto !important;
-    max-width: 100%;
-  }
+  .section-instructor__image::after { display: none; }
 
-  .section-instructor .wp-block-image img,
-  .section-instructor img {
-    max-width: 100%;
+  .section-instructor__image img,
+  .instructor-photo-placeholder {
     height: 360px;
-  }
-
-  .section-instructor .wp-block-column:first-child::after {
-    display: none;
+    max-width: 420px;
   }
 }
 
 /* Mobile */
 @media (max-width: 768px) {
-  :root {
-    --space-section: var(--space-section-sm);
-  }
+  :root { --space-section: var(--space-section-sm); }
 
-  /* Nav */
   .landing-nav__wordmark { font-size: 0.9375rem; }
 
-  /* Hero */
-  .section-hero,
-  .section-hero.wp-block-cover {
+  .section-hero {
     min-height: 88vh;
     align-items: flex-end;
     padding-bottom: 4rem;
-    background-attachment: scroll;
   }
 
-  .section-hero .wp-block-cover__inner-container {
-    max-width: 100%;
+  /* Stack 3-column grids */
+  .pain-points-grid,
+  .modules-grid {
+    grid-template-columns: 1fr;
   }
 
-  /* Stack all multi-column layouts */
-  .section-problem .wp-block-columns,
-  .section-modules .wp-block-columns {
-    flex-direction: column;
-  }
+  /* Single-column checklist */
+  .for-you-list { columns: 1; }
 
-  .section-problem .wp-block-column,
-  .section-modules .wp-block-column {
-    width: 100% !important;
-    flex-basis: 100% !important;
-    flex-grow: unset !important;
-  }
-
-  /* For-you list: single column */
-  .section-for-you .wp-block-list { columns: 1; }
-
-  /* Mid-page break: disable parallax */
+  /* Disable parallax for performance */
   .section-break { background-attachment: scroll; }
 
-  /* Pricing price */
+  /* Pricing */
   .price-display { font-size: clamp(3.5rem, 18vw, 5.5rem); }
-
-  /* Pricing guarantees: stack */
-  .pricing-guarantees { flex-direction: column; align-items: center; gap: 0.875rem; }
 
   /* Footer */
   .landing-footer__inner {
@@ -1217,38 +957,23 @@ img { max-width: 100%; height: auto; display: block; }
 
   .landing-footer__links { justify-content: center; gap: 1.25rem; }
 
-  /* Footer CTA section */
   .section-footer-cta { padding: 60px var(--gutter); }
 }
 
 /* Small phones */
 @media (max-width: 480px) {
-  .landing-nav .btn--sm {
-    padding: 9px 14px;
-    font-size: 0.8125rem;
-  }
+  .landing-nav .btn--sm { padding: 9px 14px; font-size: 0.8125rem; }
 
-  .section-hero .wp-block-button__link {
-    padding: 14px 24px;
-    font-size: 0.9375rem;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .section-pricing .wp-block-button__link,
-  .section-footer-cta .wp-block-button__link {
-    width: 100%;
-  }
+  .section-hero .btn,
+  .section-pricing .btn,
+  .section-footer-cta .btn { width: 100%; }
 }
 
-/* Respect reduced motion */
+/* Honour reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
-
   .section-break { background-attachment: scroll; }
 }
