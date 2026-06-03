@@ -892,22 +892,22 @@
         max-width: 100%;
     }
 
-    /* Archive filter bar: stack pills + search vertically */
+    /* Archive filter bar: pills on top row, search drops to second row */
     .bluu-category-filter__bar {
-        flex-direction: column;
-        align-items: stretch;
+        flex-wrap: wrap;
         gap: 0;
+        row-gap: 0;
     }
     .bluu-category-filter__inner {
-        /* min-width:0 prevents the flex child from expanding to pill content
-           width and clipping the first item inside overflow-x:auto */
-        min-width: 0;
-        width: 100%;
+        /* Take full width so search falls onto its own line */
+        flex: 1 1 100%;
         border-bottom: 1px solid var(--md-outline-variant);
+        padding-bottom: var(--space-2);
     }
     .bluu-archive-search__wrap {
+        flex: 1 1 100%;
         width: 100%;
-        padding: var(--space-3) 0;
+        padding: var(--space-2) 0 var(--space-3);
     }
 
     /* Share buttons: row stays, buttons stretch equally */
