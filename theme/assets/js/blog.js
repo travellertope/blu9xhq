@@ -72,17 +72,28 @@
         var bar = document.getElementById('bluu-read-progress');
         if (!bar) { return; }
 
-        var article = document.querySelector('.bluu-post-content');
-        if (!article) { return; }
+        var ticking = false;
 
         function updateProgress() {
-            var docH    = document.documentElement.scrollHeight - window.innerHeight;
+            var docH    = Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight
+            ) - window.innerHeight;
             var scrollY = window.pageYOffset || document.documentElement.scrollTop;
             var pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
             bar.style.width = Math.min(100, Math.max(0, pct)).toFixed(2) + '%';
+            ticking = false;
         }
 
-        window.addEventListener('scroll', updateProgress, { passive: true });
+        function onScroll() {
+            if (!ticking) {
+                requestAnimationFrame(updateProgress);
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll',    onScroll, { passive: true });
+        window.addEventListener('touchmove', onScroll, { passive: true });
         updateProgress();
     }
 
@@ -101,7 +112,8 @@
         if (nativeBtn) {
             if (navigator.share) {
                 nativeBtn.style.display = 'inline-flex';
-                nativeBtn.addEventListener('click', function () {
+                nativeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
                     navigator.share({ title: title, url: url }).catch(function () {});
                 });
             } else {
