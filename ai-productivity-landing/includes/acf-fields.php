@@ -100,9 +100,10 @@ function ai_landing_tab_hero(): array {
 			'key'           => 'field_ailp_hero_cta_url',
 			'label'         => 'CTA Button URL',
 			'name'          => 'hero_cta_url',
-			'type'          => 'url',
+			'type'          => 'text',
 			'default_value' => '#booking',
-			'placeholder'   => 'https://your-booking-url.com',
+			'placeholder'   => '#booking  or  https://your-booking-url.com  or  /checkout',
+			'instructions'  => 'Accepts full URLs, relative paths (/checkout), or anchor links (#booking).',
 		],
 		[
 			'key'           => 'field_ailp_hero_bg',
@@ -418,7 +419,7 @@ function ai_landing_tab_instructor(): array {
 			'key'           => 'field_ailp_inst_link_url',
 			'label'         => 'Link URL (optional)',
 			'name'          => 'instructor_link_url',
-			'type'          => 'url',
+			'type'          => 'text',
 			'default_value' => '',
 			'placeholder'   => 'https://linkedin.com/in/yourprofile',
 		],
@@ -539,8 +540,9 @@ function ai_landing_tab_pricing(): array {
 			'key'           => 'field_ailp_price_cta_url',
 			'label'         => 'CTA Button URL',
 			'name'          => 'pricing_cta_url',
-			'type'          => 'url',
+			'type'          => 'text',
 			'default_value' => '#booking',
+			'placeholder'   => '#booking  or  https://your-booking-url.com',
 		],
 	];
 }
@@ -638,8 +640,9 @@ function ai_landing_tab_footer_cta(): array {
 			'key'           => 'field_ailp_fcta_cta_url',
 			'label'         => 'CTA Button URL',
 			'name'          => 'footer_cta_url',
-			'type'          => 'url',
+			'type'          => 'text',
 			'default_value' => '#booking',
+			'placeholder'   => '#booking  or  https://your-booking-url.com',
 		],
 	];
 }
