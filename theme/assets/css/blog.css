@@ -859,6 +859,60 @@
     .bluu-author-block { flex-direction: column; }
     .bluu-post-nav { flex-direction: column; }
     .bluu-post-nav__item--next { text-align: left; }
+
+    /* Keep content within the viewport on mobile */
+    .bluu-post-main,
+    .bluu-post-content {
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    /* Tables: always scrollable, never burst the layout */
+    .bluu-post-content table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        max-width: 100%;
+    }
+    .bluu-post-content thead th,
+    .bluu-post-content tbody td {
+        white-space: normal;
+        min-width: 120px;
+    }
+
+    /* Gutenberg table block wrapper */
+    .bluu-post-content .wp-block-table,
+    .bluu-post-content figure.wp-block-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        max-width: 100%;
+    }
+
+    /* Archive filter bar: stack pills + search vertically */
+    .bluu-category-filter__bar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-2);
+        padding: var(--space-3) 0;
+    }
+    .bluu-category-filter__inner {
+        padding: 0;
+    }
+    .bluu-archive-search__wrap {
+        width: 100%;
+    }
+
+    /* Share buttons: row stays, buttons stretch equally */
+    .bluu-share {
+        gap: 6px;
+    }
+    .bluu-share__btn {
+        flex: 1;
+        justify-content: center;
+        padding: 9px 10px;
+    }
 }
 
 /* ── Read progress bar ───────────────────────────────────────────────────────── */
@@ -870,7 +924,9 @@
     height: 3px;
     background: var(--md-accent, #185FA5);
     z-index: 10000;
-    will-change: width;
+    /* translateZ forces a GPU compositing layer — fixes iOS Safari fixed-pos repaint */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
     transition: width 0.08s linear;
     pointer-events: none;
 }
