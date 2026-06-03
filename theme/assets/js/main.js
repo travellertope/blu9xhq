@@ -568,15 +568,20 @@
         var wrap = qs( '.mega-ind-wrap' );
         if ( ! wrap ) { return; }
         var btns = wrap.querySelectorAll( '.mega-ind-btn' );
+
+        function activatePanel( btn ) {
+            var key = btn.getAttribute( 'data-panel' );
+            wrap.querySelectorAll( '.mega-ind-btn' ).forEach( function ( b ) { b.classList.remove( 'is-active' ); } );
+            wrap.querySelectorAll( '.mega-ind-panel' ).forEach( function ( p ) { p.classList.remove( 'is-active' ); } );
+            btn.classList.add( 'is-active' );
+            var panel = document.getElementById( 'mega-ind-panel-' + key );
+            if ( panel ) { panel.classList.add( 'is-active' ); }
+        }
+
         btns.forEach( function ( btn ) {
-            btn.addEventListener( 'mouseenter', function () {
-                var key = btn.getAttribute( 'data-panel' );
-                wrap.querySelectorAll( '.mega-ind-btn' ).forEach( function ( b ) { b.classList.remove( 'is-active' ); } );
-                wrap.querySelectorAll( '.mega-ind-panel' ).forEach( function ( p ) { p.classList.remove( 'is-active' ); } );
-                btn.classList.add( 'is-active' );
-                var panel = document.getElementById( 'mega-ind-panel-' + key );
-                if ( panel ) { panel.classList.add( 'is-active' ); }
-            } );
+            btn.addEventListener( 'mouseenter', function () { activatePanel( btn ); } );
+            btn.addEventListener( 'focus',      function () { activatePanel( btn ); } );
+            btn.addEventListener( 'click',      function () { activatePanel( btn ); } );
         } );
     }
 
@@ -615,8 +620,25 @@
         update();
     }
 
+    /* ── Sync --header-height CSS var from actual rendered header ────────────── */
+    function initHeaderHeight() {
+        var header = qs( '.site-header' );
+        if ( ! header ) { return; }
+
+        function sync() {
+            var h = Math.round( header.getBoundingClientRect().height );
+            if ( h > 0 ) {
+                document.documentElement.style.setProperty( '--header-height', h + 'px' );
+            }
+        }
+
+        sync();
+        window.addEventListener( 'resize', sync, { passive: true } );
+    }
+
     /* ── Init ────────────────────────────────────────────────────────────────── */
     document.addEventListener( 'DOMContentLoaded', function () {
+        initHeaderHeight();   // must run first — positions mega panel + mobile nav
         initMobileNav();
         initMegaMenu();
         initIndustriesMegaNav();
