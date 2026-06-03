@@ -74,30 +74,26 @@ get_header();
                         <?php echo esc_html( $cat->name ); ?>
                     </a>
                 <?php endforeach; ?>
+
+                <!-- Search — pinned to the right of the filter bar -->
+                <div class="bluu-archive-search__wrap" role="search">
+                    <svg class="bluu-archive-search__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <input
+                        type="search"
+                        id="bluu-archive-search-input"
+                        class="bluu-archive-search__input"
+                        placeholder="<?php esc_attr_e( 'Search posts…', 'bluu-interactive' ); ?>"
+                        autocomplete="off"
+                        spellcheck="false"
+                        aria-label="<?php esc_attr_e( 'Search posts', 'bluu-interactive' ); ?>"
+                    >
+                    <button id="bluu-archive-search-clear" class="bluu-archive-search__clear" type="button" aria-label="<?php esc_attr_e( 'Clear search', 'bluu-interactive' ); ?>">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
-
-    <!-- ── Real-time search ─────────────────────────────────────────────────────── -->
-    <div class="bluu-archive-search">
-        <div class="container">
-            <div class="bluu-archive-search__wrap">
-                <svg class="bluu-archive-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input
-                    type="search"
-                    id="bluu-archive-search-input"
-                    class="bluu-archive-search__input"
-                    placeholder="<?php esc_attr_e( 'Search posts…', 'bluu-interactive' ); ?>"
-                    autocomplete="off"
-                    spellcheck="false"
-                    aria-label="<?php esc_attr_e( 'Search posts', 'bluu-interactive' ); ?>"
-                >
-                <button id="bluu-archive-search-clear" class="bluu-archive-search__clear" type="button" aria-label="<?php esc_attr_e( 'Clear search', 'bluu-interactive' ); ?>">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- ── Post Grid ─────────────────────────────────────────────────────────── -->
     <section class="bluu-archive-section">

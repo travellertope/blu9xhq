@@ -922,14 +922,11 @@
 }
 
 /* ── Archive real-time search ────────────────────────────────────────────────── */
-.bluu-archive-search {
-    background: var(--md-surface);
-    border-bottom: 1px solid var(--md-outline-variant);
-    padding: var(--space-4) 0;
-}
 .bluu-archive-search__wrap {
     position: relative;
-    max-width: 480px;
+    width: 200px;
+    flex-shrink: 0;
+    margin-left: auto;
 }
 .bluu-archive-search__icon {
     position: absolute;
@@ -941,7 +938,7 @@
 }
 .bluu-archive-search__input {
     width: 100%;
-    padding: 10px 14px 10px 40px;
+    padding: 6px 28px 6px 34px;
     font-size: var(--font-size-sm);
     font-family: inherit;
     color: var(--md-on-surface);
@@ -1017,7 +1014,6 @@
 @media print {
     .bluu-blog-sidebar,
     .bluu-category-filter,
-    .bluu-archive-search,
     .bluu-related-posts,
     .bluu-post-cta,
     .bluu-post-nav,
