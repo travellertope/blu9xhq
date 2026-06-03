@@ -204,6 +204,8 @@
     transition: color var(--transition-fast);
 }
 .bluu-post-card__title a:hover { color: var(--md-accent); }
+/* Search result cards render title as <p>, so drive colour from card hover */
+.bluu-post-card:hover .bluu-post-card__title { color: var(--md-accent); }
 .bluu-post-card__subtitle {
     font-size: var(--font-size-sm);
     color: var(--bluu-blog-meta-color);
@@ -894,14 +896,18 @@
     .bluu-category-filter__bar {
         flex-direction: column;
         align-items: stretch;
-        gap: var(--space-2);
-        padding: var(--space-3) 0;
+        gap: 0;
     }
     .bluu-category-filter__inner {
-        padding: 0;
+        /* min-width:0 prevents the flex child from expanding to pill content
+           width and clipping the first item inside overflow-x:auto */
+        min-width: 0;
+        width: 100%;
+        border-bottom: 1px solid var(--md-outline-variant);
     }
     .bluu-archive-search__wrap {
         width: 100%;
+        padding: var(--space-3) 0;
     }
 
     /* Share buttons: row stays, buttons stretch equally */

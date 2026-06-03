@@ -245,19 +245,30 @@
             }
             var html = '';
             posts.forEach(function (p) {
+                /* Outer element IS the link — no nested <a> anywhere inside */
                 html += '<a href="' + escHtml(p.url) + '" class="bluu-post-card">';
+
+                /* Thumbnail */
+                html += '<div class="bluu-post-card__image-wrap">';
                 if (p.thumb) {
-                    html += '<div class="bluu-post-card__image-wrap"><a href="' + escHtml(p.url) + '"><img src="' + escHtml(p.thumb) + '" alt="' + escHtml(p.title) + '" loading="lazy"></a></div>';
+                    html += '<img src="' + escHtml(p.thumb) + '" alt="' + escHtml(p.title) + '" loading="lazy">';
+                } else {
+                    html += '<div class="bluu-post-card__placeholder"></div>';
                 }
+                html += '</div>';
+
+                /* Body */
                 html += '<div class="bluu-post-card__body">';
                 if (p.cat) { html += '<span class="bluu-post-card__badge">' + escHtml(p.cat) + '</span>'; }
-                html += '<div class="bluu-post-card__title"><a href="' + escHtml(p.url) + '">' + escHtml(p.title) + '</a></div>';
+                html += '<p class="bluu-post-card__title">' + escHtml(p.title) + '</p>';
                 if (p.excerpt) { html += '<p class="bluu-post-card__subtitle">' + escHtml(p.excerpt) + '</p>'; }
                 html += '<div class="bluu-post-card__meta"><span>' + escHtml(p.date) + '</span>';
                 if (p.read_time) { html += '<span class="bluu-post-card__meta-sep">&middot;</span><span>' + escHtml(p.read_time) + '</span>'; }
                 html += '</div>';
                 html += '<span class="bluu-post-card__readmore">Read more &rarr;</span>';
-                html += '</div></a>';
+                html += '</div>';
+
+                html += '</a>';
             });
             if (resultsGrid) { resultsGrid.innerHTML = html; }
         }
