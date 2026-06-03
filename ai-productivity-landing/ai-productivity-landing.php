@@ -5,7 +5,7 @@
  * Description:       Sales page template for the AI Productivity Accelerator class.
  *                    All content is managed through ACF fields — no block editor needed.
  *                    Requires Advanced Custom Fields (free or Pro).
- * Version:           2.2.0
+ * Version:           2.3.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Your Name
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AI_LANDING_VERSION',      '2.2.0' );
+define( 'AI_LANDING_VERSION',      '2.3.0' );
 define( 'AI_LANDING_DIR',          plugin_dir_path( __FILE__ ) );
 define( 'AI_LANDING_URL',          plugin_dir_url( __FILE__ ) );
 define( 'AI_LANDING_TEMPLATE_KEY', 'templates/template-ai-landing.php' );
@@ -37,11 +37,16 @@ add_action( 'admin_notices', function (): void {
 } );
 
 // ─── Helper: is the landing template active? ─────────────────────────────
+// Uses get_queried_object_id() instead of get_the_ID() because get_the_ID()
+// returns 0 before the WordPress loop runs (e.g. in wp_enqueue_scripts),
+// which caused the theme header to bleed through alongside our landing nav.
 function ai_landing_is_active(): bool {
 	static $result = null;
 	if ( null === $result ) {
-		$result = is_page()
-			&& AI_LANDING_TEMPLATE_KEY === get_post_meta( get_the_ID(), '_wp_page_template', true );
+		$id     = get_queried_object_id();
+		$result = $id > 0
+			&& is_page()
+			&& AI_LANDING_TEMPLATE_KEY === get_page_template_slug( $id );
 	}
 	return $result;
 }
@@ -57,13 +62,23 @@ add_filter( 'template_include', function ( string $template ): string {
 	if ( ! is_page() ) {
 		return $template;
 	}
-	$selected = get_post_meta( get_the_ID(), '_wp_page_template', true );
-	if ( $selected !== AI_LANDING_TEMPLATE_KEY ) {
+	$id = get_queried_object_id();
+	if ( ! $id || AI_LANDING_TEMPLATE_KEY !== get_page_template_slug( $id ) ) {
 		return $template;
 	}
 	$plugin_template = AI_LANDING_DIR . AI_LANDING_TEMPLATE_KEY;
 	return file_exists( $plugin_template ) ? $plugin_template : $template;
 } );
+
+// ─── Suppress any theme content injected via wp_body_open ────────────────
+// Some themes hook header markup onto wp_body_open. We fire at PHP_INT_MIN
+// to remove those hooks before they run, only on our landing page.
+add_action( 'wp_body_open', function (): void {
+	if ( ! ai_landing_is_active() ) {
+		return;
+	}
+	remove_all_actions( 'wp_body_open' );
+}, PHP_INT_MIN );
 
 // ─── Enqueue Google Fonts + stylesheet ───────────────────────────────────
 add_action( 'wp_enqueue_scripts', function (): void {

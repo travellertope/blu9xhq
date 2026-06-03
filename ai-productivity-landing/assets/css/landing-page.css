@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    AI PRODUCTIVITY ACCELERATOR — LANDING PAGE STYLESHEET
-   Version: 2.2.0  (ACF edition — no Gutenberg block classes)
+   Version: 2.3.0  (ACF edition — no Gutenberg block classes)
 
    HOW TO CUSTOMISE:
    Edit the :root block below. All colours, fonts, spacing, and the
@@ -67,15 +67,35 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Suppress any theme chrome that leaks in */
+/* Suppress any theme chrome that leaks in — cast a wide net across common
+   theme header/footer class and ID conventions used by popular WP themes */
 .landing-page .site-header,
 .landing-page #site-header,
+.landing-page header.site-header,
+.landing-page .masthead,
+.landing-page #masthead,
+.landing-page .header-main,
+.landing-page #header,
+.landing-page .header,
+.landing-page .main-navigation,
+.landing-page #main-navigation,
+.landing-page .primary-navigation,
+.landing-page .nav-primary,
+.landing-page .navbar,
 .landing-page .site-footer,
 .landing-page #site-footer,
+.landing-page footer.site-footer,
+.landing-page .site-sidebar,
 .landing-page .sidebar,
 .landing-page #secondary,
 .landing-page .widget-area,
 .landing-page #comments { display: none !important; }
+
+/* Nuclear option: hide every direct child of body that isn't ours.
+   This catches any theme-injected markup that doesn't have a predictable class. */
+body.landing-page > *:not(.landing-nav):not(.landing-main):not(.landing-footer):not(script):not(style):not(noscript):not(#wpadminbar):not(link):not(meta) {
+  display: none !important;
+}
 
 img { max-width: 100%; height: auto; display: block; }
 
