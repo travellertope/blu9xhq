@@ -146,6 +146,10 @@ function bluu_enqueue_assets() {
             $version,
             true
         );
+        wp_localize_script( 'bluu-blog-js', 'bluuSearch', array(
+            'ajaxUrl' => esc_url( admin_url( 'admin-ajax.php' ) ),
+            'nonce'   => wp_create_nonce( 'bluu_archive_search' ),
+        ) );
     }
 }
 add_action( 'wp_enqueue_scripts', 'bluu_enqueue_assets' );
@@ -774,6 +778,55 @@ function bluu_faq_category_icon( $icon ) {
     );
     return isset( $icons[ $icon ] ) ? $icons[ $icon ] : $icons['default'];
 }
+
+// ── Archive search AJAX handler ────────────────────────────────────────────────
+function bluu_archive_search_handler() {
+    check_ajax_referer( 'bluu_archive_search', 'nonce' );
+
+    $q = isset( $_POST['q'] ) ? sanitize_text_field( wp_unslash( $_POST['q'] ) ) : '';
+    if ( '' === $q ) {
+        wp_send_json_error( array( 'message' => 'Empty query' ) );
+    }
+
+    $args = array(
+        'post_type'           => 'post',
+        'post_status'         => 'publish',
+        'posts_per_page'      => 24,
+        'no_found_rows'       => false,
+        'ignore_sticky_posts' => true,
+        's'                   => $q,
+        'orderby'             => 'relevance',
+    );
+
+    $query = new WP_Query( $args );
+    $posts = array();
+
+    if ( $query->have_posts() ) {
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $pid      = get_the_ID();
+            $thumb_id = get_post_thumbnail_id( $pid );
+            $cats     = get_the_category( $pid );
+            $posts[]  = array(
+                'url'       => get_permalink( $pid ),
+                'title'     => get_the_title( $pid ),
+                'excerpt'   => wp_trim_words( get_the_excerpt(), 18, '…' ),
+                'date'      => get_the_date( 'j M Y', $pid ),
+                'thumb'     => $thumb_id ? wp_get_attachment_image_url( $thumb_id, 'bluu-card' ) : '',
+                'cat'       => $cats ? $cats[0]->name : '',
+                'read_time' => function_exists( 'bluu_reading_time' ) ? bluu_reading_time( $pid ) : '',
+            );
+        }
+        wp_reset_postdata();
+    }
+
+    wp_send_json_success( array(
+        'posts' => $posts,
+        'total' => (int) $query->found_posts,
+    ) );
+}
+add_action( 'wp_ajax_bluu_archive_search',        'bluu_archive_search_handler' );
+add_action( 'wp_ajax_nopriv_bluu_archive_search', 'bluu_archive_search_handler' );
 
 // ── Include Files ──────────────────────────────────────────────────────────────
 require_once get_template_directory() . '/inc/acf-fields.php';

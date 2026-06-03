@@ -78,12 +78,45 @@ get_header();
         </div>
     </nav>
 
+    <!-- ── Real-time search ─────────────────────────────────────────────────────── -->
+    <div class="bluu-archive-search">
+        <div class="container">
+            <div class="bluu-archive-search__wrap">
+                <svg class="bluu-archive-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input
+                    type="search"
+                    id="bluu-archive-search-input"
+                    class="bluu-archive-search__input"
+                    placeholder="<?php esc_attr_e( 'Search posts…', 'bluu-interactive' ); ?>"
+                    autocomplete="off"
+                    spellcheck="false"
+                    aria-label="<?php esc_attr_e( 'Search posts', 'bluu-interactive' ); ?>"
+                >
+                <button id="bluu-archive-search-clear" class="bluu-archive-search__clear" type="button" aria-label="<?php esc_attr_e( 'Clear search', 'bluu-interactive' ); ?>">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- ── Post Grid ─────────────────────────────────────────────────────────── -->
     <section class="bluu-archive-section">
         <div class="container">
 
+            <!-- Search results (hidden until a query is active) -->
+            <div id="bluu-search-results" class="bluu-search-results">
+                <div id="bluu-search-spinner" class="bluu-search-results__spinner" style="display:none">
+                    <div class="bluu-spinner"></div>
+                </div>
+                <p id="bluu-search-results-meta" class="bluu-search-results__meta"></p>
+                <div id="bluu-search-results-grid" class="bluu-search-results__grid"></div>
+                <p id="bluu-search-empty" class="bluu-search-results__empty" style="display:none">
+                    <?php esc_html_e( 'No posts found for that search. Try different keywords.', 'bluu-interactive' ); ?>
+                </p>
+            </div>
+
             <?php if ( have_posts() ) : ?>
-                <div class="bluu-post-grid">
+                <div class="bluu-post-grid" id="bluu-post-grid">
                     <?php while ( have_posts() ) : the_post(); ?>
                         <?php get_template_part( 'template-parts/blog/blog-card' ); ?>
                     <?php endwhile; ?>
