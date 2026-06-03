@@ -1,129 +1,121 @@
 <?php
 /**
- * Plugin Name:       AI Productivity Accelerator — Landing Page
- * Plugin URI:        #
- * Description:       Sales page template for the AI Productivity Accelerator class.
- *                    All content is managed through ACF fields — no block editor needed.
- *                    Requires Advanced Custom Fields (free or Pro).
- * Version:           2.3.0
+ * Plugin Name: AI Productivity Accelerator — Landing Page
+ * Plugin URI:  #
+ * Description: Standalone sales page for the AI Productivity Accelerator live class. All content managed via ACF fields. No block editor required.
+ * Version:     3.0.0
  * Requires at least: 6.0
- * Requires PHP:      7.4
- * Author:            Your Name
- * License:           GPL-2.0-or-later
- * Text Domain:       ai-landing
+ * Requires PHP: 7.4
+ * Author:      Your Name
+ * License:     GPL-2.0-or-later
+ * Text Domain: ailp
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AI_LANDING_VERSION',      '2.3.0' );
-define( 'AI_LANDING_DIR',          plugin_dir_path( __FILE__ ) );
-define( 'AI_LANDING_URL',          plugin_dir_url( __FILE__ ) );
-define( 'AI_LANDING_TEMPLATE_KEY', 'templates/template-ai-landing.php' );
+define( 'AILP_VERSION', '3.0.0' );
+define( 'AILP_DIR',     plugin_dir_path( __FILE__ ) );
+define( 'AILP_URL',     plugin_dir_url( __FILE__ ) );
+define( 'AILP_TPL',     'templates/template-ai-landing.php' );
 
-// ─── ACF field registration ───────────────────────────────────────────────
-if ( file_exists( AI_LANDING_DIR . 'includes/acf-fields.php' ) ) {
-	require_once AI_LANDING_DIR . 'includes/acf-fields.php';
+// Load ACF field registration
+if ( file_exists( AILP_DIR . 'includes/acf-fields.php' ) ) {
+	require_once AILP_DIR . 'includes/acf-fields.php';
 }
 
-// ─── Admin notice if ACF is missing ──────────────────────────────────────
+// Admin notice when ACF is not active
 add_action( 'admin_notices', function (): void {
 	if ( class_exists( 'ACF' ) ) {
 		return;
 	}
-	echo '<div class="notice notice-error"><p>'
-		. '<strong>AI Productivity Landing Page:</strong> '
-		. 'This plugin requires <a href="https://www.advancedcustomfields.com/" target="_blank">Advanced Custom Fields</a> to be installed and active.'
-		. '</p></div>';
+	echo '<div class="notice notice-info is-dismissible"><p>'
+		. '<strong>AI Productivity Landing Page:</strong> Install '
+		. '<a href="https://wordpress.org/plugins/advanced-custom-fields/" target="_blank">Advanced Custom Fields (free)</a>'
+		. ' to edit page content from the dashboard. The page displays default content without it.</p></div>';
 } );
 
-// ─── Helper: is the landing template active? ─────────────────────────────
-// Uses get_queried_object_id() instead of get_the_ID() because get_the_ID()
-// returns 0 before the WordPress loop runs (e.g. in wp_enqueue_scripts),
-// which caused the theme header to bleed through alongside our landing nav.
-function ai_landing_is_active(): bool {
+/**
+ * Is the landing page template currently active?
+ *
+ * Uses get_queried_object_id() instead of get_the_ID() because get_the_ID()
+ * returns 0 outside the WordPress loop — before wp_enqueue_scripts fires.
+ */
+function ailp_active(): bool {
 	static $result = null;
-	if ( null === $result ) {
+	if ( $result === null ) {
 		$id     = get_queried_object_id();
 		$result = $id > 0
 			&& is_page()
-			&& AI_LANDING_TEMPLATE_KEY === get_page_template_slug( $id );
+			&& AILP_TPL === get_page_template_slug( $id );
 	}
 	return $result;
 }
 
-// ─── Register template in Page Attributes dropdown ───────────────────────
-add_filter( 'theme_page_templates', function ( array $templates ): array {
-	$templates[ AI_LANDING_TEMPLATE_KEY ] = __( 'AI Landing Page', 'ai-landing' );
-	return $templates;
+// Register template in Page Attributes > Template dropdown
+add_filter( 'theme_page_templates', function ( array $tpls ): array {
+	$tpls[ AILP_TPL ] = __( 'AI Landing Page', 'ailp' );
+	return $tpls;
 } );
 
-// ─── Serve the plugin template file ──────────────────────────────────────
-add_filter( 'template_include', function ( string $template ): string {
+// Tell WordPress to use our plugin template file
+add_filter( 'template_include', function ( string $tpl ): string {
 	if ( ! is_page() ) {
-		return $template;
+		return $tpl;
 	}
 	$id = get_queried_object_id();
-	if ( ! $id || AI_LANDING_TEMPLATE_KEY !== get_page_template_slug( $id ) ) {
-		return $template;
+	if ( ! $id || AILP_TPL !== get_page_template_slug( $id ) ) {
+		return $tpl;
 	}
-	$plugin_template = AI_LANDING_DIR . AI_LANDING_TEMPLATE_KEY;
-	return file_exists( $plugin_template ) ? $plugin_template : $template;
+	$file = AILP_DIR . AILP_TPL;
+	return file_exists( $file ) ? $file : $tpl;
 } );
 
-// ─── Suppress any theme content injected via wp_body_open ────────────────
-// Some themes hook header markup onto wp_body_open. We fire at PHP_INT_MIN
-// to remove those hooks before they run, only on our landing page.
+// Prevent themes injecting their header via wp_body_open
 add_action( 'wp_body_open', function (): void {
-	if ( ! ai_landing_is_active() ) {
-		return;
+	if ( ailp_active() ) {
+		remove_all_actions( 'wp_body_open' );
 	}
-	remove_all_actions( 'wp_body_open' );
 }, PHP_INT_MIN );
 
-// ─── Enqueue Google Fonts + stylesheet ───────────────────────────────────
+// Enqueue fonts + stylesheet (landing page only)
 add_action( 'wp_enqueue_scripts', function (): void {
-	if ( ! ai_landing_is_active() ) {
+	if ( ! ailp_active() ) {
 		return;
 	}
-
 	wp_enqueue_style(
-		'ai-landing-google-fonts',
+		'ailp-fonts',
 		'https://fonts.googleapis.com/css2?'
-			. 'family=Fraunces:ital,opsz,wght@'
-			.   '0,9..144,400;0,9..144,600;0,9..144,700;'
-			.   '1,9..144,400;1,9..144,600'
+			. 'family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400'
 			. '&family=DM+Sans:wght@400;500;600'
 			. '&display=swap',
 		[],
 		null
 	);
-
 	wp_enqueue_style(
-		'ai-landing-page',
-		AI_LANDING_URL . 'assets/css/landing-page.css',
-		[ 'ai-landing-google-fonts' ],
-		AI_LANDING_VERSION
+		'ailp-css',
+		AILP_URL . 'assets/css/landing-page.css',
+		[ 'ailp-fonts' ],
+		AILP_VERSION
 	);
-
-	// Strip block styles — not needed without Gutenberg content
+	// Block-editor styles not needed on this template
 	wp_dequeue_style( 'wp-block-library' );
 	wp_dequeue_style( 'wp-block-library-theme' );
 	wp_dequeue_style( 'global-styles' );
 }, 20 );
 
-// ─── Preconnect hints ────────────────────────────────────────────────────
+// Google Fonts preconnect hints
 add_action( 'wp_head', function (): void {
-	if ( ! ai_landing_is_active() ) {
+	if ( ! ailp_active() ) {
 		return;
 	}
 	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
 	echo '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>' . "\n";
 }, 1 );
 
-// ─── Body classes ────────────────────────────────────────────────────────
-add_filter( 'body_class', function ( array $classes ): array {
-	if ( ai_landing_is_active() ) {
-		$classes[] = 'landing-page';
+// Body class for CSS scoping
+add_filter( 'body_class', function ( array $cls ): array {
+	if ( ailp_active() ) {
+		$cls[] = 'ailp-page';
 	}
-	return $classes;
+	return $cls;
 } );
