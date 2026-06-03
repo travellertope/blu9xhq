@@ -3,7 +3,7 @@
  * Plugin Name: AI Productivity Accelerator — Landing Page
  * Plugin URI:  #
  * Description: Standalone sales page for the AI Productivity Accelerator live class. All content managed via ACF fields. No block editor required.
- * Version:     3.0.0
+ * Version:     4.0.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author:      Your Name
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AILP_VERSION', '3.0.0' );
+define( 'AILP_VERSION', '4.0.0' );
 define( 'AILP_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'AILP_URL',     plugin_dir_url( __FILE__ ) );
 define( 'AILP_TPL',     'templates/template-ai-landing.php' );
@@ -84,10 +84,7 @@ add_action( 'wp_enqueue_scripts', function (): void {
 	}
 	wp_enqueue_style(
 		'ailp-fonts',
-		'https://fonts.googleapis.com/css2?'
-			. 'family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400'
-			. '&family=DM+Sans:wght@400;500;600'
-			. '&display=swap',
+		'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap',
 		[],
 		null
 	);
@@ -101,6 +98,8 @@ add_action( 'wp_enqueue_scripts', function (): void {
 	wp_dequeue_style( 'wp-block-library' );
 	wp_dequeue_style( 'wp-block-library-theme' );
 	wp_dequeue_style( 'global-styles' );
+
+
 }, 20 );
 
 // Google Fonts preconnect hints
