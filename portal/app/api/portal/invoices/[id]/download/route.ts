@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {resolveClientPost, getInvoice} from "@/lib/wp-api";
-import { r2SignedUrl } from "@/lib/r2";
+import { resolveClientPost, getInvoice } from "@/lib/wp-api";
+import { r2SignedUrl, objectExists } from "@/lib/r2";
 
 export async function GET(
   req: NextRequest,
@@ -41,7 +41,15 @@ export async function GET(
       }
     }
 
-    const signedUrl = await r2SignedUrl(pdfKey, 60);
+    const exists = await objectExists(pdfKey);
+    if (!exists) {
+      return NextResponse.json(
+        { error: "PDF has not been generated yet. Please ask your account manager to generate it." },
+        { status: 404 }
+      );
+    }
+
+    const signedUrl = await r2SignedUrl(pdfKey, 300);
     return NextResponse.json({ signedUrl });
   } catch (err) {
     console.error("[GET /api/portal/invoices/[id]/download]", err);
