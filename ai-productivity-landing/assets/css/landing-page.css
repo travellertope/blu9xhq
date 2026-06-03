@@ -239,7 +239,11 @@ a   { text-decoration: none; color: inherit; }
 }
 
 .ailp-nav__logo img,
-.ailp-nav__logo .custom-logo { max-height: 36px; width: auto; }
+.ailp-nav__logo .custom-logo {
+  max-height: 24px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
 
 .ailp-nav__wordmark {
   font-family: var(--font-display);
@@ -299,7 +303,6 @@ a   { text-decoration: none; color: inherit; }
   margin-inline: auto;
   padding-inline: clamp(1.25rem, 5vw, 2.5rem);
   padding-block: 5rem 4rem;
-  max-width: 760px;
 }
 
 .ailp-hero__eyebrow {
@@ -1202,13 +1205,14 @@ a   { text-decoration: none; color: inherit; }
 /* ─────────────────────────────────────────────────────────────────────────
    22. SCROLL ANIMATIONS
    ───────────────────────────────────────────────────────────────────────── */
+/* JS adds .js-animate to <body> before observing, so elements without it stay visible */
 @media (prefers-reduced-motion: no-preference) {
-  .ailp-card,
-  .ailp-module-block,
-  .ailp-checklist__item,
-  .ailp-included-item,
-  .ailp-testimonial-card,
-  .ailp-faq-item {
+  .js-animate .ailp-card,
+  .js-animate .ailp-module-block,
+  .js-animate .ailp-checklist__item,
+  .js-animate .ailp-included-item,
+  .js-animate .ailp-testimonial-card,
+  .js-animate .ailp-faq-item {
     opacity: 0;
     transform: translateY(20px);
     transition:
@@ -1219,12 +1223,12 @@ a   { text-decoration: none; color: inherit; }
       border-left-color 0.18s ease;
   }
 
-  .ailp-card.is-visible,
-  .ailp-module-block.is-visible,
-  .ailp-checklist__item.is-visible,
-  .ailp-included-item.is-visible,
-  .ailp-testimonial-card.is-visible,
-  .ailp-faq-item.is-visible {
+  .js-animate .ailp-card.is-visible,
+  .js-animate .ailp-module-block.is-visible,
+  .js-animate .ailp-checklist__item.is-visible,
+  .js-animate .ailp-included-item.is-visible,
+  .js-animate .ailp-testimonial-card.is-visible,
+  .js-animate .ailp-faq-item.is-visible {
     opacity: 1;
     transform: translateY(0);
   }

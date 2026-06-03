@@ -91,7 +91,7 @@ $included_default = [
 	[ 'incl_icon' => 'template',  'incl_text' => 'Templates Pack — reusable frameworks you can deploy immediately after class' ],
 	[ 'incl_icon' => 'recording', 'incl_text' => 'Recording Access — full replay sent within 24 hours so you never miss a thing' ],
 	[ 'incl_icon' => 'qa',        'incl_text' => 'Live Q&A — 20 minutes at the end to get your specific questions answered' ],
-	[ 'incl_icon' => 'lightning', 'incl_text' => 'Bonus: AI Toolkit Guide — the exact free and paid tools worth your time in 2025' ],
+	[ 'incl_icon' => 'lightning', 'incl_text' => 'Bonus: AI Toolkit Guide — the exact free and paid tools worth your time in 2026' ],
 ];
 
 /* Replace these with real testimonials via ACF repeater (key: testimonials) */
@@ -138,7 +138,7 @@ $faq_default = [
 
 // ─── Pull field values (ACF if set, defaults otherwise) ───────────────────
 
-$hero_eyebrow  = ailp_f( 'hero_eyebrow',  'Live Virtual Class · July 2025' );
+$hero_eyebrow  = ailp_f( 'hero_eyebrow',  'Live Virtual Class · July 2026' );
 $hero_headline = ailp_f( 'hero_headline', "Stop Spending Hours on Work\nAI Can Do in Minutes" );
 $hero_sub      = ailp_f( 'hero_sub',      'A practical 2.5-hour live class for UK professionals and small business owners who want to use AI to create content, handle business writing, and free up time — without the overwhelm.' );
 $hero_cta_text = ailp_f( 'hero_cta_text', 'Reserve My Spot — £79' );
@@ -640,6 +640,7 @@ function ailp_icon( string $name ): string {
 (function () {
   'use strict';
   if (!('IntersectionObserver' in window)) return;
+  /* Script is in footer — DOM is fully loaded, run immediately */
   var targets = '.ailp-card,.ailp-module-block,.ailp-checklist__item,.ailp-included-item,.ailp-testimonial-card,.ailp-faq-item';
   var obs = new IntersectionObserver(function (entries) {
     entries.forEach(function (e) {
@@ -648,12 +649,11 @@ function ailp_icon( string $name ): string {
         obs.unobserve(e.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll(targets).forEach(function (el, i) {
-      el.style.transitionDelay = (i % 4) * 0.08 + 's';
-      obs.observe(el);
-    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+  document.body.classList.add('js-animate');
+  document.querySelectorAll(targets).forEach(function (el, i) {
+    el.style.transitionDelay = (i % 4) * 0.075 + 's';
+    obs.observe(el);
   });
 }());
 </script>
