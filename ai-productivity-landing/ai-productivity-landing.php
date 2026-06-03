@@ -5,7 +5,7 @@
  * Description:       Sales page template for the AI Productivity Accelerator class.
  *                    All content is managed through ACF fields — no block editor needed.
  *                    Requires Advanced Custom Fields (free or Pro).
- * Version:           2.0.0
+ * Version:           2.2.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Your Name
@@ -15,7 +15,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AI_LANDING_VERSION',      '2.0.0' );
+define( 'AI_LANDING_VERSION',      '2.2.0' );
 define( 'AI_LANDING_DIR',          plugin_dir_path( __FILE__ ) );
 define( 'AI_LANDING_URL',          plugin_dir_url( __FILE__ ) );
 define( 'AI_LANDING_TEMPLATE_KEY', 'templates/template-ai-landing.php' );
