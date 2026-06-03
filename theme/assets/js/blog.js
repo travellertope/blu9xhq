@@ -101,7 +101,8 @@
         if (nativeBtn) {
             if (navigator.share) {
                 nativeBtn.style.display = 'inline-flex';
-                nativeBtn.addEventListener('click', function () {
+                nativeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
                     navigator.share({ title: title, url: url }).catch(function () {});
                 });
             } else {
