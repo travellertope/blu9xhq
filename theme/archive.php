@@ -48,50 +48,55 @@ get_header();
     <!-- ── Category Filter Bar ───────────────────────────────────────────────── -->
     <nav class="bluu-category-filter" aria-label="<?php esc_attr_e( 'Filter posts by category', 'bluu-interactive' ); ?>">
         <div class="container">
-            <div class="bluu-category-filter__inner">
-                <?php
-                $current_cat = is_category() ? get_queried_object() : null;
-                $is_all      = ! is_category();
+            <div class="bluu-category-filter__bar">
 
-                $blog_url = get_option( 'page_for_posts' )
-                    ? get_permalink( get_option( 'page_for_posts' ) )
-                    : home_url( '/blog/' );
-                ?>
-                <a href="<?php echo esc_url( $blog_url ); ?>"
-                   class="bluu-cat-pill<?php echo $is_all ? ' bluu-cat-pill--active' : ''; ?>"
-                   <?php echo $is_all ? 'aria-current="page"' : ''; ?>>
-                    <?php esc_html_e( 'All posts', 'bluu-interactive' ); ?>
-                </a>
+                <!-- Scrollable pill strip -->
+                <div class="bluu-category-filter__inner">
+                    <?php
+                    $current_cat = is_category() ? get_queried_object() : null;
+                    $is_all      = ! is_category();
 
-                <?php
-                $cats = get_categories( array( 'hide_empty' => true ) );
-                foreach ( $cats as $cat ) :
-                    $is_current = $current_cat && $current_cat->term_id === $cat->term_id;
-                ?>
-                    <a href="<?php echo esc_url( get_category_link( $cat->term_id ) ); ?>"
-                       class="bluu-cat-pill<?php echo $is_current ? ' bluu-cat-pill--active' : ''; ?>"
-                       <?php echo $is_current ? 'aria-current="page"' : ''; ?>>
-                        <?php echo esc_html( $cat->name ); ?>
+                    $blog_url = get_option( 'page_for_posts' )
+                        ? get_permalink( get_option( 'page_for_posts' ) )
+                        : home_url( '/blog/' );
+                    ?>
+                    <a href="<?php echo esc_url( $blog_url ); ?>"
+                       class="bluu-cat-pill<?php echo $is_all ? ' bluu-cat-pill--active' : ''; ?>"
+                       <?php echo $is_all ? 'aria-current="page"' : ''; ?>>
+                        <?php esc_html_e( 'All posts', 'bluu-interactive' ); ?>
                     </a>
-                <?php endforeach; ?>
 
-                <!-- Search — pinned to the right of the filter bar -->
+                    <?php
+                    $cats = get_categories( array( 'hide_empty' => true ) );
+                    foreach ( $cats as $cat ) :
+                        $is_current = $current_cat && $current_cat->term_id === $cat->term_id;
+                    ?>
+                        <a href="<?php echo esc_url( get_category_link( $cat->term_id ) ); ?>"
+                           class="bluu-cat-pill<?php echo $is_current ? ' bluu-cat-pill--active' : ''; ?>"
+                           <?php echo $is_current ? 'aria-current="page"' : ''; ?>>
+                            <?php echo esc_html( $cat->name ); ?>
+                        </a>
+                    <?php endforeach; ?>
+                </div><!-- /.bluu-category-filter__inner -->
+
+                <!-- Search — sits outside the scrollable strip, always right-aligned -->
                 <div class="bluu-archive-search__wrap" role="search">
                     <svg class="bluu-archive-search__icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     <input
                         type="search"
                         id="bluu-archive-search-input"
                         class="bluu-archive-search__input"
-                        placeholder="<?php esc_attr_e( 'Search posts…', 'bluu-interactive' ); ?>"
+                        placeholder="<?php esc_attr_e( 'Search…', 'bluu-interactive' ); ?>"
                         autocomplete="off"
                         spellcheck="false"
                         aria-label="<?php esc_attr_e( 'Search posts', 'bluu-interactive' ); ?>"
                     >
                     <button id="bluu-archive-search-clear" class="bluu-archive-search__clear" type="button" aria-label="<?php esc_attr_e( 'Clear search', 'bluu-interactive' ); ?>">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                 </div>
-            </div>
+
+            </div><!-- /.bluu-category-filter__bar -->
         </div>
     </nav>
 

@@ -76,13 +76,10 @@
         if (!article) { return; }
 
         function updateProgress() {
-            var articleRect = article.getBoundingClientRect();
-            var articleTop    = articleRect.top + window.pageYOffset;
-            var articleBottom = articleTop + article.offsetHeight;
-            var viewH   = window.innerHeight;
-            var scrolled = window.pageYOffset + viewH;
-            var pct = (scrolled - articleTop) / (articleBottom - articleTop + viewH) * 100;
-            bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+            var docH    = document.documentElement.scrollHeight - window.innerHeight;
+            var scrollY = window.pageYOffset || document.documentElement.scrollTop;
+            var pct     = docH > 0 ? (scrollY / docH) * 100 : 0;
+            bar.style.width = Math.min(100, Math.max(0, pct)).toFixed(2) + '%';
         }
 
         window.addEventListener('scroll', updateProgress, { passive: true });
