@@ -812,7 +812,7 @@ function bluu_archive_search_handler() {
                 'title'     => get_the_title( $pid ),
                 'excerpt'   => wp_trim_words( get_the_excerpt(), 18, '…' ),
                 'date'      => get_the_date( 'j M Y', $pid ),
-                'thumb'     => $thumb_id ? wp_get_attachment_image_url( $thumb_id, 'bluu-card' ) : '',
+                'thumb'     => $thumb_id ? ( wp_get_attachment_image_url( $thumb_id, 'bluu-card' ) ?: wp_get_attachment_image_url( $thumb_id, 'large' ) ?: wp_get_attachment_image_url( $thumb_id, 'full' ) ) : '',
                 'cat'       => $cats ? $cats[0]->name : '',
                 'read_time' => function_exists( 'bluu_reading_time' ) ? bluu_reading_time( $pid ) : '',
             );
