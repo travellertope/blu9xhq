@@ -256,9 +256,9 @@ export default function InvoiceDetailPage() {
     if (!invoice) return;
     try {
       const res = await fetch("/api/portal/invoices/" + invoiceId + "/download");
-      if (!res.ok) { toast.error("PDF not yet available"); return; }
-      const { signedUrl } = await res.json() as { signedUrl: string };
-      window.open(signedUrl, "_blank");
+      const data = await res.json() as { signedUrl?: string; error?: string };
+      if (!res.ok) { toast.error(data.error ?? "PDF not yet available"); return; }
+      window.open(data.signedUrl!, "_blank");
     } catch { toast.error("Download failed"); }
   }
 
@@ -355,7 +355,9 @@ export default function InvoiceDetailPage() {
       <div className="border border-slate-200 rounded-xl bg-white p-6 space-y-6">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">BluuHQ</h2>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="BluuHQ" className="h-8 w-auto object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; (e.target as HTMLImageElement).nextElementSibling?.removeAttribute("hidden"); }} />
+            <h2 className="text-xl font-bold text-slate-900" hidden>BluuHQ</h2>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold text-slate-400">INVOICE</p>
