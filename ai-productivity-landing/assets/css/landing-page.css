@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    AI PRODUCTIVITY ACCELERATOR — LANDING PAGE STYLESHEET
-   Version: 2.0  (ACF edition — no Gutenberg block classes)
+   Version: 2.1  (ACF edition — no Gutenberg block classes)
 
    HOW TO CUSTOMISE:
    Edit the :root block below. All colours, fonts, spacing, and the
@@ -309,11 +309,12 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .section-problem h2 { color: #ffffff; }
-.section-problem .section-intro { color: rgba(255, 255, 255, 0.62); margin-inline: auto; }
+.section-problem .section-intro { color: rgba(255, 255, 255, 0.62); margin-inline: auto; margin-bottom: 0; }
+.section-problem h2 { margin-bottom: 0.75rem; }
 
 .pain-points-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 3.5rem;
   text-align: left;
@@ -371,7 +372,7 @@ img { max-width: 100%; height: auto; display: block; }
 
 .modules-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-top: 3.5rem;
   text-align: left;
@@ -463,9 +464,11 @@ img { max-width: 100%; height: auto; display: block; }
   margin-inline: auto;
 }
 
-.section-for-you h2 { margin-bottom: 0.625rem; }
+.section-for-you h2 { margin-bottom: 0.625rem; color: var(--clr-dark); }
 
-.section-for-you .section-intro { margin-bottom: 2.75rem; }
+.section-for-you .section-eyebrow { color: var(--clr-accent); }
+
+.section-for-you .section-intro { margin-bottom: 2.75rem; color: var(--clr-muted); }
 
 .for-you-list {
   list-style: none;
@@ -595,22 +598,36 @@ img { max-width: 100%; height: auto; display: block; }
   width: 100%;
   height: 500px;
   border-radius: var(--radius-card);
-  background: rgba(255, 255, 255, 0.07);
-  border: 2px dashed rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px dashed rgba(201, 107, 40, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.instructor-photo-placeholder span {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.35);
+  line-height: 1.6;
 }
 
 .section-instructor__text {}
 
 .section-instructor__text h2 { color: #ffffff; margin-bottom: 1rem; }
+.section-instructor__text .section-eyebrow { color: var(--clr-accent); }
+
+.instructor-bio { margin-bottom: 1.5rem; }
 
 .instructor-bio p {
   color: rgba(255, 255, 255, 0.72);
   font-size: 1.0625rem;
-  margin-bottom: 1.125rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
+
+.instructor-bio p:last-child { margin-bottom: 0; }
 
 .section-instructor__text .btn { margin-top: 0.5rem; }
 
@@ -933,10 +950,10 @@ img { max-width: 100%; height: auto; display: block; }
     padding-bottom: 4rem;
   }
 
-  /* Stack 3-column grids */
+  /* Stack 3-column grids to single column on mobile */
   .pain-points-grid,
   .modules-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   /* Single-column checklist */
