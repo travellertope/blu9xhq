@@ -239,11 +239,13 @@ a   { text-decoration: none; color: inherit; }
 }
 
 .ailp-nav__logo img,
-.ailp-nav__logo .custom-logo {
-  max-height: 24px !important;
-  height: auto !important;
+.ailp-nav__logo .custom-logo,
+.ailp-nav__logo .custom-logo-link img {
+  max-height: 28px !important;
+  height: 28px !important;
   width: auto !important;
   filter: brightness(0) invert(1) !important;
+  display: block !important;
 }
 
 .ailp-nav__wordmark {
@@ -372,7 +374,7 @@ a   { text-decoration: none; color: inherit; }
    ───────────────────────────────────────────────────────────────────────── */
 .ailp-trust-strip {
   background: var(--clr-dark-alt);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 3px solid var(--clr-accent);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   padding-block: 1.5rem;
 }
@@ -404,7 +406,7 @@ a   { text-decoration: none; color: inherit; }
   font-family: var(--font-display);
   font-size: 1.625rem;
   font-weight: 800;
-  color: var(--clr-accent);
+  color: #fff;
   letter-spacing: -0.02em;
   line-height: 1;
 }
@@ -414,7 +416,7 @@ a   { text-decoration: none; color: inherit; }
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--clr-accent);
 }
 
 @media (max-width: 640px) {
