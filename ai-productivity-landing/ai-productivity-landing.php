@@ -3,20 +3,21 @@
  * Plugin Name: AI Productivity Accelerator — Landing Page
  * Plugin URI:  #
  * Description: Standalone sales page for the AI Productivity Accelerator live class. All content managed via ACF fields. No block editor required.
- * Version:     4.1.0
+ * Version:     4.2.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
- * Author:      Your Name
+ * Author:      Tope Akintayo
  * License:     GPL-2.0-or-later
  * Text Domain: ailp
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AILP_VERSION', '4.1.0' );
+define( 'AILP_VERSION', '4.2.0' );
 define( 'AILP_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'AILP_URL',     plugin_dir_url( __FILE__ ) );
 define( 'AILP_TPL',     'templates/template-ai-landing.php' );
+define( 'AILP_TPL_TY',  'templates/template-ai-thankyou.php' );
 
 // Load ACF field registration
 if ( file_exists( AILP_DIR . 'includes/acf-fields.php' ) ) {
@@ -36,9 +37,6 @@ add_action( 'admin_notices', function (): void {
 
 /**
  * Is the landing page template currently active?
- *
- * Uses get_queried_object_id() instead of get_the_ID() because get_the_ID()
- * returns 0 outside the WordPress loop — before wp_enqueue_scripts fires.
  */
 function ailp_active(): bool {
 	static $result = null;
@@ -51,35 +49,56 @@ function ailp_active(): bool {
 	return $result;
 }
 
-// Register template in Page Attributes > Template dropdown
+/**
+ * Is the thank you page template currently active?
+ */
+function ailp_ty_active(): bool {
+	static $result = null;
+	if ( $result === null ) {
+		$id     = get_queried_object_id();
+		$result = $id > 0
+			&& is_page()
+			&& AILP_TPL_TY === get_page_template_slug( $id );
+	}
+	return $result;
+}
+
+// Register both templates in Page Attributes > Template dropdown
 add_filter( 'theme_page_templates', function ( array $tpls ): array {
-	$tpls[ AILP_TPL ] = __( 'AI Landing Page', 'ailp' );
+	$tpls[ AILP_TPL ]    = __( 'AI Landing Page', 'ailp' );
+	$tpls[ AILP_TPL_TY ] = __( 'AI Thank You Page', 'ailp' );
 	return $tpls;
 } );
 
-// Tell WordPress to use our plugin template file
+// Tell WordPress to use our plugin template files
 add_filter( 'template_include', function ( string $tpl ): string {
 	if ( ! is_page() ) {
 		return $tpl;
 	}
-	$id = get_queried_object_id();
-	if ( ! $id || AILP_TPL !== get_page_template_slug( $id ) ) {
-		return $tpl;
+	$id   = get_queried_object_id();
+	$slug = $id ? get_page_template_slug( $id ) : '';
+
+	if ( AILP_TPL === $slug ) {
+		$file = AILP_DIR . AILP_TPL;
+		return file_exists( $file ) ? $file : $tpl;
 	}
-	$file = AILP_DIR . AILP_TPL;
-	return file_exists( $file ) ? $file : $tpl;
+	if ( AILP_TPL_TY === $slug ) {
+		$file = AILP_DIR . AILP_TPL_TY;
+		return file_exists( $file ) ? $file : $tpl;
+	}
+	return $tpl;
 } );
 
 // Prevent themes injecting their header via wp_body_open
 add_action( 'wp_body_open', function (): void {
-	if ( ailp_active() ) {
+	if ( ailp_active() || ailp_ty_active() ) {
 		remove_all_actions( 'wp_body_open' );
 	}
 }, PHP_INT_MIN );
 
-// Enqueue fonts + stylesheet (landing page only)
+// Enqueue fonts + stylesheet (both plugin templates)
 add_action( 'wp_enqueue_scripts', function (): void {
-	if ( ! ailp_active() ) {
+	if ( ! ailp_active() && ! ailp_ty_active() ) {
 		return;
 	}
 	wp_enqueue_style(
@@ -94,17 +113,14 @@ add_action( 'wp_enqueue_scripts', function (): void {
 		[ 'ailp-fonts' ],
 		filemtime( AILP_DIR . 'assets/css/landing-page.css' )
 	);
-	// Block-editor styles not needed on this template
 	wp_dequeue_style( 'wp-block-library' );
 	wp_dequeue_style( 'wp-block-library-theme' );
 	wp_dequeue_style( 'global-styles' );
-
-
 }, 20 );
 
 // Google Fonts preconnect hints
 add_action( 'wp_head', function (): void {
-	if ( ! ailp_active() ) {
+	if ( ! ailp_active() && ! ailp_ty_active() ) {
 		return;
 	}
 	echo '<link rel="preconnect" href="https://fonts.googleapis.com">' . "\n";
@@ -113,7 +129,7 @@ add_action( 'wp_head', function (): void {
 
 // Body class for CSS scoping
 add_filter( 'body_class', function ( array $cls ): array {
-	if ( ailp_active() ) {
+	if ( ailp_active() || ailp_ty_active() ) {
 		$cls[] = 'ailp-page';
 	}
 	return $cls;

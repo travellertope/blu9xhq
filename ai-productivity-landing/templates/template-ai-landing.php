@@ -167,7 +167,7 @@ $hero_headline = ailp_f( 'hero_headline', "Stop Spending Hours on Work\nAI Can D
 $hero_sub      = ailp_f( 'hero_sub',      'A practical 2.5-hour live class for UK professionals and small business owners who want to use AI to create content, handle business writing, and free up time — without the overwhelm.' );
 $hero_cta_text = ailp_f( 'hero_cta_text', 'Reserve My Spot — £79' );
 $hero_cta_url  = ailp_f( 'hero_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
-$hero_meta     = ailp_f( 'hero_meta',     'Limited to 20 seats · Google Meet · Second week of July' );
+$hero_meta     = ailp_f( 'hero_meta',     'Tuesday 14 July · 7:00pm BST · Registration closes 30 June' );
 
 $prob_eyebrow  = ailp_f( 'prob_eyebrow', 'Sound familiar?' );
 $prob_heading  = ailp_f( 'prob_heading', "You're working harder than you need to." );
@@ -190,7 +190,7 @@ $test_heading  = ailp_f( 'test_heading', 'Real results from real professionals.'
 // fields, not repeaters, so stale-data issues that affect AILP_USE_ACF don't apply.
 $instr_eyebrow = ailp_f_live( 'instr_eyebrow', 'Your Instructor' );
 $instr_heading = ailp_f_live( 'instr_heading', 'Built with AI. Taught from experience.' );
-$instr_name    = ailp_f_live( 'instr_name',    'Your Name Here' );
+$instr_name    = ailp_f_live( 'instr_name',    'Tope Akintayo' );
 $instr_bio     = ailp_f_live( 'instr_bio',     "I'm a digital builder and strategist who has used AI to create platforms, produce content, and run lean operations across multiple projects — from culture publications to community organisations to client digital builds.\n\nI don't teach theory. Everything in this class comes directly from workflows I use in my own work. I've built websites, content systems, and digital products using AI tools — and I've spent time figuring out what actually works so you don't have to.\n\nThis class exists because too many capable professionals are still doing manually what AI can handle in minutes. I want to change that." );
 
 $incl_eyebrow  = ailp_f( 'incl_eyebrow', 'Your Investment' );
@@ -202,7 +202,7 @@ $price_heading  = ailp_f( 'price_heading',   "One class. A system you'll use for
 $price_amount   = ailp_f( 'price_amount',    '79' );
 $price_currency = ailp_f( 'price_currency',  '£' );
 $price_value    = ailp_f( 'price_value',     "That's less than a single hour of most consultants' time — for 2.5 hours of hands-on training and a toolkit you keep forever." );
-$price_urgency  = ailp_f( 'price_urgency',   'Limited to 20 seats to keep the class interactive and valuable.' );
+$price_urgency  = ailp_f( 'price_urgency',   'Registration closes 30 June — limited to 20 seats.' );
 $price_cta_text = ailp_f( 'price_cta_text',  'Reserve My Spot — £79' );
 $price_cta_url  = ailp_f( 'price_cta_url',   'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $price_reassure = ailp_f( 'price_reassure',  "You'll receive a confirmation email with your Google Meet link immediately after booking." );
@@ -214,7 +214,7 @@ $ftrcta_heading  = ailp_f( 'ftrcta_heading',  'Your time is worth more than this
 $ftrcta_sub      = ailp_f( 'ftrcta_sub',      "Stop putting it off. Two and a half hours from now, you could have a content system, a writing toolkit, and an AI workflow you'll use every single week." );
 $ftrcta_cta_text = ailp_f( 'ftrcta_cta_text', 'Reserve My Spot — £79' );
 $ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
-$ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Second week of July · Live on Google Meet · Limited to 20 seats' );
+$ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Tuesday 14 July · 7:00pm BST · Live on Google Meet · 20 seats' );
 
 $pain_points  = ailp_rows( 'pain_points',    $pain_points_default );
 $modules      = ailp_rows( 'modules',        $modules_default );
@@ -285,7 +285,7 @@ function ailp_icon( string $name ): string {
     </a>
 
     <div class="ailp-nav__right">
-      <span class="ailp-nav__seats">20 seats remaining</span>
+      <span class="ailp-nav__seats">Registration closes 30 June</span>
       <a href="<?php echo esc_url( $hero_cta_url ); ?>" class="ailp-btn ailp-btn--accent ailp-btn--sm">
         <?php echo esc_html( $hero_cta_text ); ?>
       </a>
