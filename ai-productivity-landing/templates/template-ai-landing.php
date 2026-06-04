@@ -547,7 +547,9 @@ function ailp_icon( string $name ): string {
         <h2 class="ailp-instructor__heading"><?php echo esc_html( $instr_heading ); ?></h2>
         <p class="ailp-instructor__name"><?php echo esc_html( $instr_name ); ?></p>
         <?php
-        $bio_paragraphs = array_filter( array_map( 'trim', explode( "\n\n", $instr_bio ) ) );
+        $bio_clean      = wp_strip_all_tags( $instr_bio );
+        $bio_clean      = str_replace( [ "\r\n", "\r" ], "\n", $bio_clean );
+        $bio_paragraphs = array_filter( array_map( 'trim', preg_split( '/\n\s*\n/', $bio_clean ) ) );
         foreach ( $bio_paragraphs as $para ) :
         ?>
         <p class="ailp-instructor__para"><?php echo esc_html( $para ); ?></p>
