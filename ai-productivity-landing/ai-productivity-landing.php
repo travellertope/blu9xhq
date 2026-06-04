@@ -3,7 +3,7 @@
  * Plugin Name: AI Productivity Accelerator — Landing Page
  * Plugin URI:  #
  * Description: Standalone sales page for the AI Productivity Accelerator live class. All content managed via ACF fields. No block editor required.
- * Version:     4.0.0
+ * Version:     4.1.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author:      Your Name
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AILP_VERSION', '4.0.0' );
+define( 'AILP_VERSION', '4.1.0' );
 define( 'AILP_DIR',     plugin_dir_path( __FILE__ ) );
 define( 'AILP_URL',     plugin_dir_url( __FILE__ ) );
 define( 'AILP_TPL',     'templates/template-ai-landing.php' );
@@ -92,7 +92,7 @@ add_action( 'wp_enqueue_scripts', function (): void {
 		'ailp-css',
 		AILP_URL . 'assets/css/landing-page.css',
 		[ 'ailp-fonts' ],
-		AILP_VERSION
+		filemtime( AILP_DIR . 'assets/css/landing-page.css' )
 	);
 	// Block-editor styles not needed on this template
 	wp_dequeue_style( 'wp-block-library' );

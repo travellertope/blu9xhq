@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    AI PRODUCTIVITY ACCELERATOR — LANDING PAGE
-   Version: 4.0.0
+   Version: 4.1.0
    Design system: Bluu Interactive theme — Navy + Electric Blue, Plus Jakarta Sans
 
    ── HOW TO CUSTOMISE ────────────────────────────────────────────────────
@@ -1203,35 +1203,15 @@ a   { text-decoration: none; color: inherit; }
 
 
 /* ─────────────────────────────────────────────────────────────────────────
-   22. SCROLL ANIMATIONS
+   22. HOVER TRANSITIONS (replaces JS scroll-animations — content always visible)
    ───────────────────────────────────────────────────────────────────────── */
-/* JS adds .js-animate to <body> before observing, so elements without it stay visible */
-@media (prefers-reduced-motion: no-preference) {
-  .js-animate .ailp-card,
-  .js-animate .ailp-module-block,
-  .js-animate .ailp-checklist__item,
-  .js-animate .ailp-included-item,
-  .js-animate .ailp-testimonial-card,
-  .js-animate .ailp-faq-item {
-    opacity: 0;
-    transform: translateY(20px);
-    transition:
-      opacity 0.5s ease,
-      transform 0.5s ease,
-      box-shadow 0.22s ease,
-      border-color 0.22s ease,
-      border-left-color 0.18s ease;
-  }
-
-  .js-animate .ailp-card.is-visible,
-  .js-animate .ailp-module-block.is-visible,
-  .js-animate .ailp-checklist__item.is-visible,
-  .js-animate .ailp-included-item.is-visible,
-  .js-animate .ailp-testimonial-card.is-visible,
-  .js-animate .ailp-faq-item.is-visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.ailp-card,
+.ailp-module-block,
+.ailp-checklist__item,
+.ailp-included-item,
+.ailp-testimonial-card {
+  transition: box-shadow 0.22s ease, transform 0.22s ease,
+              border-color 0.22s ease, border-left-color 0.18s ease;
 }
 
 
