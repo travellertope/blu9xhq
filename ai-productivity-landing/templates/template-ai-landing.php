@@ -154,7 +154,7 @@ $hero_eyebrow  = ailp_f( 'hero_eyebrow',  'Live Virtual Class · July 2026' );
 $hero_headline = ailp_f( 'hero_headline', "Stop Spending Hours on Work\nAI Can Do in Minutes" );
 $hero_sub      = ailp_f( 'hero_sub',      'A practical 2.5-hour live class for UK professionals and small business owners who want to use AI to create content, handle business writing, and free up time — without the overwhelm.' );
 $hero_cta_text = ailp_f( 'hero_cta_text', 'Reserve My Spot — £79' );
-$hero_cta_url  = ailp_f( 'hero_cta_url',  '#booking' );
+$hero_cta_url  = ailp_f( 'hero_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $hero_meta     = ailp_f( 'hero_meta',     'Limited to 20 seats · Zoom · Second week of July' );
 
 $prob_eyebrow  = ailp_f( 'prob_eyebrow', 'Sound familiar?' );
@@ -190,7 +190,7 @@ $price_currency = ailp_f( 'price_currency',  '£' );
 $price_value    = ailp_f( 'price_value',     "That's less than a single hour of most consultants' time — for 2.5 hours of hands-on training and a toolkit you keep forever." );
 $price_urgency  = ailp_f( 'price_urgency',   'Limited to 20 seats to keep the class interactive and valuable.' );
 $price_cta_text = ailp_f( 'price_cta_text',  'Reserve My Spot — £79' );
-$price_cta_url  = ailp_f( 'price_cta_url',   '#booking' );
+$price_cta_url  = ailp_f( 'price_cta_url',   'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $price_reassure = ailp_f( 'price_reassure',  "You'll receive a confirmation email with your Zoom link immediately after booking." );
 
 $faq_eyebrow    = ailp_f( 'faq_eyebrow', 'Questions' );
@@ -199,7 +199,7 @@ $faq_heading    = ailp_f( 'faq_heading', 'Everything you need to know before you
 $ftrcta_heading  = ailp_f( 'ftrcta_heading',  'Your time is worth more than this.' );
 $ftrcta_sub      = ailp_f( 'ftrcta_sub',      "Stop putting it off. Two and a half hours from now, you could have a content system, a writing toolkit, and an AI workflow you'll use every single week." );
 $ftrcta_cta_text = ailp_f( 'ftrcta_cta_text', 'Reserve My Spot — £79' );
-$ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  '#booking' );
+$ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Second week of July · Live on Zoom · Limited to 20 seats' );
 
 $pain_points  = ailp_rows( 'pain_points',    $pain_points_default );
@@ -500,7 +500,7 @@ function ailp_icon( string $name ): string {
     <p class="ailp-ba-closing">The gap between those two columns is 2.5 hours and £79.</p>
 
     <div class="ailp-ba-cta-wrap">
-      <a href="#booking" class="ailp-btn ailp-btn--accent ailp-btn--lg">Reserve My Spot — £79</a>
+      <a href="https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00" class="ailp-btn ailp-btn--accent ailp-btn--lg">Reserve My Spot — £79</a>
     </div>
 
   </div>
@@ -570,7 +570,7 @@ function ailp_icon( string $name ): string {
 
 
 <!-- ═══════════════════════════ PRICING ════════════════════════════════════ -->
-<section id="booking" class="ailp-section ailp-pricing ailp-section--dark">
+<section class="ailp-section ailp-pricing ailp-section--dark">
   <div class="ailp-container ailp-container--narrow ailp-pricing__inner">
 
     <p class="ailp-eyebrow ailp-eyebrow--center ailp-eyebrow--on-dark">
