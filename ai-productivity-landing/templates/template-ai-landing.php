@@ -26,7 +26,16 @@ function ailp_rows( string $key, array $default ): array {
 	if ( function_exists( 'get_field' ) ) {
 		$rows = get_field( $key );
 		if ( is_array( $rows ) && count( $rows ) > 0 ) {
-			return $rows;
+			// Verify rows have real content; empty rows from stale ACF data fall through.
+			foreach ( $rows as $row ) {
+				if ( is_array( $row ) ) {
+					foreach ( $row as $v ) {
+						if ( $v !== null && $v !== '' && $v !== false ) {
+							return $rows;
+						}
+					}
+				}
+			}
 		}
 	}
 	return $default;
