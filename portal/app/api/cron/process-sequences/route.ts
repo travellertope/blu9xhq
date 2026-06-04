@@ -4,6 +4,7 @@ import { sendSequenceEmail } from "@/lib/resend";
 import { generatePauseToken } from "@/lib/sequencePauseToken";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 // ─── GET /api/cron/process-sequences ─────────────────────────────────────────
 // Runs daily (vercel.json: 0 7 * * *).
@@ -33,55 +34,58 @@ export async function GET(req: NextRequest) {
     );
     results.checked = due.length;
 
-    for (const enrollment of due) {
-      try {
-        const sequence = await getSequence(enrollment.acf.enr_sequence_id);
-        const steps = sequence.acf.steps ?? [];
-        const stepIndex = enrollment.acf.enr_current_step;
-        const step = steps[stepIndex];
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
-        if (!step) {
-          await updateEnrollment(enrollment.id, { acf: { enr_status: "completed" } });
-          results.completed++;
-          continue;
+    await Promise.allSettled(
+      due.map(async (enrollment) => {
+        try {
+          const sequence = await getSequence(enrollment.acf.enr_sequence_id);
+          const steps = sequence.acf.steps ?? [];
+          const stepIndex = enrollment.acf.enr_current_step;
+          const step = steps[stepIndex];
+
+          if (!step) {
+            await updateEnrollment(enrollment.id, { acf: { enr_status: "completed" } });
+            results.completed++;
+            return;
+          }
+
+          if (step.subject && step.body_html) {
+            const token    = generatePauseToken(enrollment.id);
+            const pauseUrl = `${appUrl}/api/sequences/pause?token=${token}`;
+            await sendSequenceEmail({
+              to:      enrollment.acf.enr_client_email,
+              subject: step.subject,
+              html:    step.body_html,
+              pauseUrl,
+              tags:    [{ name: "sequence_id", value: String(enrollment.acf.enr_sequence_id) }],
+            });
+            results.sent++;
+          }
+
+          const nextIndex = stepIndex + 1;
+          const nextStep  = steps[nextIndex];
+
+          if (!nextStep) {
+            await updateEnrollment(enrollment.id, {
+              acf: { enr_status: "completed", enr_current_step: nextIndex },
+            });
+            results.completed++;
+          } else {
+            const delayMs = (nextStep.delay_days ?? 1) * 86_400_000;
+            await updateEnrollment(enrollment.id, {
+              acf: {
+                enr_current_step: nextIndex,
+                enr_next_send_at: new Date(now.getTime() + delayMs).toISOString(),
+              },
+            });
+          }
+        } catch (err) {
+          console.error(`[process-sequences] enrollment ${enrollment.id}:`, err);
+          results.errors++;
         }
-
-        if (step.subject && step.body_html) {
-          const appUrl  = process.env.NEXT_PUBLIC_APP_URL ?? "";
-          const token   = generatePauseToken(enrollment.id);
-          const pauseUrl = `${appUrl}/api/sequences/pause?token=${token}`;
-          await sendSequenceEmail({
-            to:       enrollment.acf.enr_client_email,
-            subject:  step.subject,
-            html:     step.body_html,
-            pauseUrl,
-            tags:     [{ name: "sequence_id", value: String(enrollment.acf.enr_sequence_id) }],
-          });
-          results.sent++;
-        }
-
-        const nextIndex = stepIndex + 1;
-        const nextStep = steps[nextIndex];
-
-        if (!nextStep) {
-          await updateEnrollment(enrollment.id, {
-            acf: { enr_status: "completed", enr_current_step: nextIndex },
-          });
-          results.completed++;
-        } else {
-          const delayMs = (nextStep.delay_days ?? 1) * 86_400_000;
-          await updateEnrollment(enrollment.id, {
-            acf: {
-              enr_current_step: nextIndex,
-              enr_next_send_at: new Date(now.getTime() + delayMs).toISOString(),
-            },
-          });
-        }
-      } catch (err) {
-        console.error(`[process-sequences] enrollment ${enrollment.id}:`, err);
-        results.errors++;
-      }
-    }
+      })
+    );
 
     return NextResponse.json({ ok: true, ...results });
   } catch (err: unknown) {

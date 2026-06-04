@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { listTickets, updateTicket, getClientPost, wpRestFetch, type WPUser } from "@/lib/wp-api";
 import { sendTicketSlaBreached } from "@/lib/resend";
 
+export const maxDuration = 60;
+
 // GET /api/cron/sla-check — runs every 30 minutes via Vercel cron
 // Checks for SLA breaches and alerts the admin team.
 export async function GET(req: NextRequest) {
@@ -25,44 +27,37 @@ export async function GET(req: NextRequest) {
       (t) => t.acf.tkt_status !== "closed" && t.acf.tkt_status !== "resolved"
     );
 
-    for (const ticket of activeTickets) {
-      const {
-        tkt_number,
-        tkt_client,
-        tkt_sla_response_target,
-        tkt_sla_resolve_target,
-        tkt_first_response_at,
-        tkt_resolved_at,
-        tkt_sla_alerted_at,
-        tkt_priority,
-        tkt_assigned_to,
-      } = ticket.acf;
+    const ticketResults = await Promise.allSettled(
+      activeTickets.map(async (ticket) => {
+        const {
+          tkt_number,
+          tkt_client,
+          tkt_sla_response_target,
+          tkt_sla_resolve_target,
+          tkt_first_response_at,
+          tkt_resolved_at,
+          tkt_sla_alerted_at,
+          tkt_priority,
+          tkt_assigned_to,
+        } = ticket.acf;
 
-      // Determine breach type
-      const responseBreached =
-        !tkt_first_response_at &&
-        tkt_sla_response_target &&
-        now > tkt_sla_response_target;
+        const responseBreached =
+          !tkt_first_response_at &&
+          tkt_sla_response_target &&
+          now > tkt_sla_response_target;
 
-      const resolveBreached =
-        !tkt_resolved_at &&
-        tkt_sla_resolve_target &&
-        now > tkt_sla_resolve_target;
+        const resolveBreached =
+          !tkt_resolved_at &&
+          tkt_sla_resolve_target &&
+          now > tkt_sla_resolve_target;
 
-      if (!responseBreached && !resolveBreached) {
-        skipped++;
-        continue;
-      }
+        if (!responseBreached && !resolveBreached) return "skipped";
 
-      // Deduplication: only re-alert if 2+ hours since last alert
-      if (tkt_sla_alerted_at && tkt_sla_alerted_at > twoHoursAgo) {
-        skipped++;
-        continue;
-      }
+        // Deduplication: only re-alert if 2+ hours since last alert
+        if (tkt_sla_alerted_at && tkt_sla_alerted_at > twoHoursAgo) return "skipped";
 
-      const breachType: "response" | "resolve" = responseBreached ? "response" : "resolve";
+        const breachType: "response" | "resolve" = responseBreached ? "response" : "resolve";
 
-      try {
         let clientName = `Client #${tkt_client}`;
         let assignedToName: string | undefined;
 
@@ -88,11 +83,17 @@ export async function GET(req: NextRequest) {
           });
         }
 
-        // Record alert timestamp to prevent spam
         await updateTicket(ticket.id, { acf: { tkt_sla_alerted_at: now } });
-        alerted++;
-      } catch (err) {
-        console.error(`[sla-check] ticket ${tkt_number}:`, err);
+        return "alerted";
+      })
+    );
+
+    for (const r of ticketResults) {
+      if (r.status === "fulfilled") {
+        if (r.value === "alerted") alerted++;
+        else skipped++;
+      } else {
+        console.error("[sla-check] ticket failed:", r.reason);
         skipped++;
       }
     }
