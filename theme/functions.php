@@ -106,6 +106,16 @@ function bluu_enqueue_assets() {
         );
     }
 
+    // What We Produce page styles
+    if ( is_page_template( 'page-what-we-produce.php' ) ) {
+        wp_enqueue_style(
+            'bluu-wwp-css',
+            get_template_directory_uri() . '/assets/css/what-we-produce.css',
+            array( 'bluu-main-css' ),
+            $version
+        );
+    }
+
     // Main JavaScript
     wp_enqueue_script(
         'bluu-main-js',
