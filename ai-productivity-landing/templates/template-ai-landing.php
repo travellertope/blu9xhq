@@ -44,6 +44,18 @@ function ailp_rows( string $key, array $default ): array {
 	return $default;
 }
 
+// Always reads from ACF regardless of AILP_USE_ACF — safe for simple scalar
+// fields (instructor name, bio, etc.) that don't have stale repeater data.
+function ailp_f_live( string $key, string $default ): string {
+	if ( function_exists( 'get_field' ) ) {
+		$v = get_field( $key );
+		if ( $v !== null && $v !== '' && $v !== false ) {
+			return (string) $v;
+		}
+	}
+	return $default;
+}
+
 // ─── Default content ──────────────────────────────────────────────────────
 
 $pain_points_default = [
@@ -98,7 +110,7 @@ $for_you_default = [
 ];
 
 $included_default = [
-	[ 'incl_icon' => 'video',     'incl_text' => 'Live 2.5-hour virtual class via Zoom — interactive, not a lecture' ],
+	[ 'incl_icon' => 'video',     'incl_text' => 'Live 2.5-hour virtual class via Google Meet — interactive, not a lecture' ],
 	[ 'incl_icon' => 'document',  'incl_text' => 'Prompt Library — a ready-to-use collection of prompts for content, writing, and ops tasks' ],
 	[ 'incl_icon' => 'template',  'incl_text' => 'Templates Pack — reusable frameworks you can deploy immediately after class' ],
 	[ 'incl_icon' => 'recording', 'incl_text' => 'Recording Access — full replay sent within 24 hours so you never miss a thing' ],
@@ -140,7 +152,7 @@ $faq_default = [
 	],
 	[
 		'faq_q' => 'How is the class delivered?',
-		'faq_a' => 'Via Zoom. You\'ll receive a link in your confirmation email. The class runs for approximately 2.5 hours including a short break and a Q&A session at the end.',
+		'faq_a' => 'Via Google Meet. You\'ll receive a link in your confirmation email. The class runs for approximately 2.5 hours including a short break and a Q&A session at the end.',
 	],
 	[
 		'faq_q' => 'What\'s your refund policy?',
@@ -155,7 +167,7 @@ $hero_headline = ailp_f( 'hero_headline', "Stop Spending Hours on Work\nAI Can D
 $hero_sub      = ailp_f( 'hero_sub',      'A practical 2.5-hour live class for UK professionals and small business owners who want to use AI to create content, handle business writing, and free up time — without the overwhelm.' );
 $hero_cta_text = ailp_f( 'hero_cta_text', 'Reserve My Spot — £79' );
 $hero_cta_url  = ailp_f( 'hero_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
-$hero_meta     = ailp_f( 'hero_meta',     'Limited to 20 seats · Zoom · Second week of July' );
+$hero_meta     = ailp_f( 'hero_meta',     'Limited to 20 seats · Google Meet · Second week of July' );
 
 $prob_eyebrow  = ailp_f( 'prob_eyebrow', 'Sound familiar?' );
 $prob_heading  = ailp_f( 'prob_heading', "You're working harder than you need to." );
@@ -174,10 +186,12 @@ $break_quote   = ailp_f( 'break_quote', '"The professionals winning in the next 
 $test_eyebrow  = ailp_f( 'test_eyebrow', 'What Attendees Say' );
 $test_heading  = ailp_f( 'test_heading', 'Real results from real professionals.' );
 
-$instr_eyebrow = ailp_f( 'instr_eyebrow', 'Your Instructor' );
-$instr_heading = ailp_f( 'instr_heading', 'Built with AI. Taught from experience.' );
-$instr_name    = ailp_f( 'instr_name',    'Your Name Here' );
-$instr_bio     = ailp_f( 'instr_bio',     "I'm a digital builder and strategist who has used AI to create platforms, produce content, and run lean operations across multiple projects — from culture publications to community organisations to client digital builds.\n\nI don't teach theory. Everything in this class comes directly from workflows I use in my own work. I've built websites, content systems, and digital products using AI tools — and I've spent time figuring out what actually works so you don't have to.\n\nThis class exists because too many capable professionals are still doing manually what AI can handle in minutes. I want to change that." );
+// Instructor fields read live from ACF — safe because these are simple scalar
+// fields, not repeaters, so stale-data issues that affect AILP_USE_ACF don't apply.
+$instr_eyebrow = ailp_f_live( 'instr_eyebrow', 'Your Instructor' );
+$instr_heading = ailp_f_live( 'instr_heading', 'Built with AI. Taught from experience.' );
+$instr_name    = ailp_f_live( 'instr_name',    'Your Name Here' );
+$instr_bio     = ailp_f_live( 'instr_bio',     "I'm a digital builder and strategist who has used AI to create platforms, produce content, and run lean operations across multiple projects — from culture publications to community organisations to client digital builds.\n\nI don't teach theory. Everything in this class comes directly from workflows I use in my own work. I've built websites, content systems, and digital products using AI tools — and I've spent time figuring out what actually works so you don't have to.\n\nThis class exists because too many capable professionals are still doing manually what AI can handle in minutes. I want to change that." );
 
 $incl_eyebrow  = ailp_f( 'incl_eyebrow', 'Your Investment' );
 $incl_heading  = ailp_f( 'incl_heading', "Everything you need to hit the ground running." );
@@ -191,7 +205,7 @@ $price_value    = ailp_f( 'price_value',     "That's less than a single hour of 
 $price_urgency  = ailp_f( 'price_urgency',   'Limited to 20 seats to keep the class interactive and valuable.' );
 $price_cta_text = ailp_f( 'price_cta_text',  'Reserve My Spot — £79' );
 $price_cta_url  = ailp_f( 'price_cta_url',   'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
-$price_reassure = ailp_f( 'price_reassure',  "You'll receive a confirmation email with your Zoom link immediately after booking." );
+$price_reassure = ailp_f( 'price_reassure',  "You'll receive a confirmation email with your Google Meet link immediately after booking." );
 
 $faq_eyebrow    = ailp_f( 'faq_eyebrow', 'Questions' );
 $faq_heading    = ailp_f( 'faq_heading', 'Everything you need to know before you book.' );
@@ -200,7 +214,7 @@ $ftrcta_heading  = ailp_f( 'ftrcta_heading',  'Your time is worth more than this
 $ftrcta_sub      = ailp_f( 'ftrcta_sub',      "Stop putting it off. Two and a half hours from now, you could have a content system, a writing toolkit, and an AI workflow you'll use every single week." );
 $ftrcta_cta_text = ailp_f( 'ftrcta_cta_text', 'Reserve My Spot — £79' );
 $ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
-$ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Second week of July · Live on Zoom · Limited to 20 seats' );
+$ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Second week of July · Live on Google Meet · Limited to 20 seats' );
 
 $pain_points  = ailp_rows( 'pain_points',    $pain_points_default );
 $modules      = ailp_rows( 'modules',        $modules_default );
@@ -255,8 +269,16 @@ function ailp_icon( string $name ): string {
     <a href="<?php echo esc_url( home_url( '/' ) ); ?>"
        class="ailp-nav__logo"
        aria-label="<?php bloginfo( 'name' ); ?> — home">
-      <?php if ( has_custom_logo() ) : ?>
-        <?php the_custom_logo(); ?>
+      <?php
+      // Render our own <img> so WordPress never injects inline width/height
+      // attributes that would override our CSS height constraint.
+      $ailp_logo_id  = get_theme_mod( 'custom_logo' );
+      $ailp_logo_url = $ailp_logo_id ? wp_get_attachment_image_url( $ailp_logo_id, 'full' ) : '';
+      if ( $ailp_logo_url ) : ?>
+        <img src="<?php echo esc_url( $ailp_logo_url ); ?>"
+             alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>"
+             class="ailp-logo-img"
+             loading="eager">
       <?php else : ?>
         <span class="ailp-nav__wordmark"><?php bloginfo( 'name' ); ?></span>
       <?php endif; ?>
@@ -277,11 +299,6 @@ function ailp_icon( string $name ): string {
 <section class="ailp-hero" aria-labelledby="hero-headline">
   <div class="ailp-hero__overlay"></div>
   <div class="ailp-hero__content">
-
-    <div class="ailp-hero__eyebrow">
-      <span class="ailp-hero__eyebrow-dot" aria-hidden="true"></span>
-      <?php echo esc_html( $hero_eyebrow ); ?>
-    </div>
 
     <h1 id="hero-headline" class="ailp-hero__headline">
       <?php echo wp_kses( nl2br( esc_html( $hero_headline ) ), [ 'br' => [] ] ); ?>
