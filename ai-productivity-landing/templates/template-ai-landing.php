@@ -635,29 +635,6 @@ function ailp_icon( string $name ): string {
 </footer><!-- /ailp-footer -->
 
 
-<!-- ════════════════════ SCROLL ANIMATIONS ═════════════════════════════════ -->
-<script>
-(function () {
-  'use strict';
-  if (!('IntersectionObserver' in window)) return;
-  /* Script is in footer — DOM is fully loaded, run immediately */
-  var targets = '.ailp-card,.ailp-module-block,.ailp-checklist__item,.ailp-included-item,.ailp-testimonial-card,.ailp-faq-item';
-  var obs = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) {
-        e.target.classList.add('is-visible');
-        obs.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
-  document.body.classList.add('js-animate');
-  document.querySelectorAll(targets).forEach(function (el, i) {
-    el.style.transitionDelay = (i % 4) * 0.075 + 's';
-    obs.observe(el);
-  });
-}());
-</script>
-
 <!-- ═══════════════════════ FAQ ACCORDION ══════════════════════════════════ -->
 <script>
 (function () {
