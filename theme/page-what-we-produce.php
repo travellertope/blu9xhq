@@ -14,6 +14,16 @@ $cta_headline = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_headline'
 $cta_body     = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_body' )     : '' ) ?: "Most clients start with two or three deliverable types and expand as the operation matures. Book a 15-minute Discovery Call and we will tell you exactly which content types would have the most impact for your specific audience, stage, and channels.";
 $cta_url      = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_url' )      : '' ) ?: home_url( '/contact' );
 
+// ── Hero image — ACF image field (returns array); fallback to Unsplash ────────
+$hero_image = function_exists( 'get_field' ) ? get_field( 'wwp_hero_image' ) : null;
+if ( ! empty( $hero_image ) ) {
+    $hero_img_src = is_array( $hero_image ) ? esc_url( $hero_image['url'] ) : esc_url( $hero_image );
+    $hero_img_alt = is_array( $hero_image ) ? esc_attr( $hero_image['alt'] ) : '';
+} else {
+    $hero_img_src = 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&w=900&q=80';
+    $hero_img_alt = 'Content strategist working at a desk with notebook and laptop';
+}
+
 // ── Content sections 01–07 ────────────────────────────────────────────────────
 $sections = array(
     array(
@@ -150,10 +160,27 @@ get_header();
 <!-- ── Hero ──────────────────────────────────────────────────────────────────── -->
 <section class="wwp-hero" aria-label="<?php esc_attr_e( 'What we produce overview', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="wwp-hero__inner animate-on-scroll">
-            <div class="wwp-hero__badge"><?php echo esc_html( $hero_badge ); ?></div>
-            <h1 class="wwp-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
-            <p class="wwp-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+        <div class="wwp-hero__inner">
+
+            <!-- Left: text -->
+            <div class="wwp-hero__content animate-on-scroll">
+                <div class="wwp-hero__badge"><?php echo esc_html( $hero_badge ); ?></div>
+                <h1 class="wwp-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+                <p class="wwp-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+            </div>
+
+            <!-- Right: image -->
+            <div class="wwp-hero__visual animate-on-scroll">
+                <div class="wwp-hero__image-wrap">
+                    <img
+                        src="<?php echo $hero_img_src; // phpcs:ignore ?>"
+                        alt="<?php echo $hero_img_alt; // phpcs:ignore ?>"
+                        loading="eager"
+                        decoding="async"
+                    >
+                </div>
+            </div>
+
         </div>
     </div>
 </section>
