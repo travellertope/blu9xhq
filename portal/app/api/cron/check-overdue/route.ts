@@ -3,6 +3,8 @@ import { listInvoices, updateInvoice, getClientPost, wpRestFetch } from "@/lib/w
 import { sendInvoiceReminder } from "@/lib/resend";
 import type { WPUser } from "@/lib/wp-api";
 
+export const maxDuration = 60;
+
 function daysOverdue(dueDateStr: string): number {
   const due = new Date(dueDateStr);
   due.setHours(0, 0, 0, 0);
@@ -37,28 +39,28 @@ export async function GET(req: NextRequest) {
     const today = todayStr();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
-    for (const invoice of invoices) {
-      const days = daysOverdue(invoice.acf.inv_due_date);
-      if (days <= 0 && invoice.acf.inv_status === "sent") { skipped++; continue; }
+    const results = await Promise.allSettled(
+      invoices.map(async (invoice) => {
+        const days = daysOverdue(invoice.acf.inv_due_date);
+        if (days <= 0 && invoice.acf.inv_status === "sent") return "skipped";
 
-      try {
         if (invoice.acf.inv_status === "sent" && days > 0) {
           await updateInvoice(invoice.id, { acf: { inv_status: "overdue" } });
         }
 
-        if (!REMINDER_DAYS.has(days)) { skipped++; continue; }
+        if (!REMINDER_DAYS.has(days)) return "skipped";
 
         const lastReminder = invoice.acf.inv_last_reminder_sent ?? "";
-        if (lastReminder === today) { skipped++; continue; }
+        if (lastReminder === today) return "skipped";
 
         const clientPost = await getClientPost(invoice.acf.inv_client);
         const email = clientPost.acf.portal_email;
-        if (!email) { skipped++; continue; }
+        if (!email) return "skipped";
 
         const wpUsers = await wpRestFetch<WPUser[]>("/wp/v2/users?search=" + encodeURIComponent(email)).catch(() => [] as WPUser[]);
         const wpUser = wpUsers?.[0];
         const prefs: string[] = Array.isArray(wpUser?.meta?.notification_preferences) ? wpUser!.meta.notification_preferences as string[] : [];
-        if (prefs.length > 0 && !prefs.includes("invoice_reminders")) { skipped++; continue; }
+        if (prefs.length > 0 && !prefs.includes("invoice_reminders")) return "skipped";
 
         await sendInvoiceReminder(email, {
           clientName: clientPost.acf.contact_name,
@@ -71,9 +73,16 @@ export async function GET(req: NextRequest) {
         });
 
         await updateInvoice(invoice.id, { acf: { inv_last_reminder_sent: today } });
-        processed++;
-      } catch (err) {
-        console.error("[cron/check-overdue] invoice " + invoice.id + ":", err);
+        return "processed";
+      })
+    );
+
+    for (const r of results) {
+      if (r.status === "fulfilled") {
+        if (r.value === "processed") processed++;
+        else skipped++;
+      } else {
+        console.error("[cron/check-overdue] invoice failed:", r.reason);
         skipped++;
       }
     }
