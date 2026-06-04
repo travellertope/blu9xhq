@@ -10,10 +10,14 @@
 
 defined( 'ABSPATH' ) || exit;
 
+// Set true only after you have saved v4 content in WP Admin → ACF fields.
+// While false, all sections use the PHP defaults below — no stale DB data.
+define( 'AILP_USE_ACF', false );
+
 // ─── Helpers ──────────────────────────────────────────────────────────────
 
 function ailp_f( string $key, string $default ): string {
-	if ( function_exists( 'get_field' ) ) {
+	if ( AILP_USE_ACF && function_exists( 'get_field' ) ) {
 		$v = get_field( $key );
 		if ( $v !== null && $v !== '' && $v !== false ) {
 			return (string) $v;
@@ -23,10 +27,18 @@ function ailp_f( string $key, string $default ): string {
 }
 
 function ailp_rows( string $key, array $default ): array {
-	if ( function_exists( 'get_field' ) ) {
+	if ( AILP_USE_ACF && function_exists( 'get_field' ) ) {
 		$rows = get_field( $key );
 		if ( is_array( $rows ) && count( $rows ) > 0 ) {
-			return $rows;
+			foreach ( $rows as $row ) {
+				if ( is_array( $row ) ) {
+					foreach ( $row as $v ) {
+						if ( $v !== null && $v !== '' && $v !== false ) {
+							return $rows;
+						}
+					}
+				}
+			}
 		}
 	}
 	return $default;
@@ -142,7 +154,7 @@ $hero_eyebrow  = ailp_f( 'hero_eyebrow',  'Live Virtual Class · July 2026' );
 $hero_headline = ailp_f( 'hero_headline', "Stop Spending Hours on Work\nAI Can Do in Minutes" );
 $hero_sub      = ailp_f( 'hero_sub',      'A practical 2.5-hour live class for UK professionals and small business owners who want to use AI to create content, handle business writing, and free up time — without the overwhelm.' );
 $hero_cta_text = ailp_f( 'hero_cta_text', 'Reserve My Spot — £79' );
-$hero_cta_url  = ailp_f( 'hero_cta_url',  '#booking' );
+$hero_cta_url  = ailp_f( 'hero_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $hero_meta     = ailp_f( 'hero_meta',     'Limited to 20 seats · Zoom · Second week of July' );
 
 $prob_eyebrow  = ailp_f( 'prob_eyebrow', 'Sound familiar?' );
@@ -178,7 +190,7 @@ $price_currency = ailp_f( 'price_currency',  '£' );
 $price_value    = ailp_f( 'price_value',     "That's less than a single hour of most consultants' time — for 2.5 hours of hands-on training and a toolkit you keep forever." );
 $price_urgency  = ailp_f( 'price_urgency',   'Limited to 20 seats to keep the class interactive and valuable.' );
 $price_cta_text = ailp_f( 'price_cta_text',  'Reserve My Spot — £79' );
-$price_cta_url  = ailp_f( 'price_cta_url',   '#booking' );
+$price_cta_url  = ailp_f( 'price_cta_url',   'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $price_reassure = ailp_f( 'price_reassure',  "You'll receive a confirmation email with your Zoom link immediately after booking." );
 
 $faq_eyebrow    = ailp_f( 'faq_eyebrow', 'Questions' );
@@ -187,7 +199,7 @@ $faq_heading    = ailp_f( 'faq_heading', 'Everything you need to know before you
 $ftrcta_heading  = ailp_f( 'ftrcta_heading',  'Your time is worth more than this.' );
 $ftrcta_sub      = ailp_f( 'ftrcta_sub',      "Stop putting it off. Two and a half hours from now, you could have a content system, a writing toolkit, and an AI workflow you'll use every single week." );
 $ftrcta_cta_text = ailp_f( 'ftrcta_cta_text', 'Reserve My Spot — £79' );
-$ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  '#booking' );
+$ftrcta_cta_url  = ailp_f( 'ftrcta_cta_url',  'https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00' );
 $ftrcta_meta     = ailp_f( 'ftrcta_meta',      'Second week of July · Live on Zoom · Limited to 20 seats' );
 
 $pain_points  = ailp_rows( 'pain_points',    $pain_points_default );
@@ -431,37 +443,68 @@ function ailp_icon( string $name ): string {
 </section><!-- /ailp-break -->
 
 
-<!-- ══════════════════════════ TESTIMONIALS ════════════════════════════════ -->
-<section class="ailp-section ailp-testimonials ailp-section--alt">
-  <div class="ailp-container">
-    <p class="ailp-eyebrow ailp-eyebrow--center"><?php echo esc_html( $test_eyebrow ); ?></p>
-    <h2 class="ailp-section__heading ailp-section__heading--center">
-      <?php echo esc_html( $test_heading ); ?>
-    </h2>
+<!-- ══════════════════════════ BEFORE & AFTER ══════════════════════════════ -->
+<section class="ailp-section ailp-before-after ailp-section--alt">
+  <div class="ailp-container ailp-container--narrow">
 
-    <div class="ailp-cards ailp-cards--3" style="margin-top:var(--space-lg)">
-      <?php foreach ( $testimonials as $t ) :
-        $name  = esc_html( $t['test_name']  ?? '' );
-        $role  = esc_html( $t['test_role']  ?? '' );
-        $quote = esc_html( $t['test_quote'] ?? '' );
-      ?>
-      <div class="ailp-testimonial-card">
-        <div class="ailp-testimonial-card__stars" aria-label="5 stars">
-          <?php for ( $s = 0; $s < 5; $s++ ) : ?><?php echo ailp_icon( 'star' ); ?><?php endfor; ?>
-        </div>
-        <p class="ailp-testimonial-card__quote"><?php echo $quote; ?></p>
-        <div class="ailp-testimonial-card__author">
-          <span class="ailp-testimonial-card__name"><?php echo $name; ?></span>
-          <?php if ( $role ) : ?>
-          <span class="ailp-testimonial-card__role"><?php echo $role; ?></span>
-          <?php endif; ?>
-        </div>
+    <p class="ailp-eyebrow ailp-eyebrow--center">The Difference</p>
+    <h2 class="ailp-section__heading ailp-section__heading--center">
+      This is what changes after 2.5 hours.
+    </h2>
+    <p class="ailp-section__intro ailp-section__intro--center">
+      Not eventually. Not after months of trial and error. By the following Monday.
+    </p>
+
+    <div class="ailp-ba-table" role="table" aria-label="Before and after comparison">
+
+      <div class="ailp-ba-table__header" role="row">
+        <div class="ailp-ba-col-head ailp-ba-col-head--before" role="columnheader">Before</div>
+        <div class="ailp-ba-col-head ailp-ba-col-head--after"  role="columnheader">After</div>
       </div>
-      <?php endforeach; ?>
+
+      <div class="ailp-ba-table__body">
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">A blank page every time you need to post</div>
+          <div class="ailp-ba-row__after"  role="cell">A month of content ready in a single session</div>
+        </div>
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">Hours lost writing proposals and follow-up emails</div>
+          <div class="ailp-ba-row__after"  role="cell">A polished first draft done in under 10 minutes</div>
+        </div>
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">AI tools that feel confusing and hit-or-miss</div>
+          <div class="ailp-ba-row__after"  role="cell">A clear system you actually open every week</div>
+        </div>
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">Repetitive admin eating into your real work</div>
+          <div class="ailp-ba-row__after"  role="cell">Streamlined workflows that run in the background</div>
+        </div>
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">Watching others talk about AI without knowing where to start</div>
+          <div class="ailp-ba-row__after"  role="cell">Confidently using AI as a core part of how you work</div>
+        </div>
+
+        <div class="ailp-ba-row" role="row">
+          <div class="ailp-ba-row__before" role="cell">Inconsistent output that doesn&rsquo;t sound like you</div>
+          <div class="ailp-ba-row__after"  role="cell">Content and copy that sounds exactly like you &mdash; every time</div>
+        </div>
+
+      </div><!-- /.ailp-ba-table__body -->
+    </div><!-- /.ailp-ba-table -->
+
+    <p class="ailp-ba-closing">The gap between those two columns is 2.5 hours and £79.</p>
+
+    <div class="ailp-ba-cta-wrap">
+      <a href="https://buy.stripe.com/28E4gz0k99eMfjC1V7fEk00" class="ailp-btn ailp-btn--accent ailp-btn--lg">Reserve My Spot — £79</a>
     </div>
 
   </div>
-</section><!-- /ailp-testimonials -->
+</section><!-- /ailp-before-after -->
 
 
 <!-- ═══════════════════════════ INSTRUCTOR ═════════════════════════════════ -->
@@ -527,7 +570,7 @@ function ailp_icon( string $name ): string {
 
 
 <!-- ═══════════════════════════ PRICING ════════════════════════════════════ -->
-<section id="booking" class="ailp-section ailp-pricing ailp-section--dark">
+<section class="ailp-section ailp-pricing ailp-section--dark">
   <div class="ailp-container ailp-container--narrow ailp-pricing__inner">
 
     <p class="ailp-eyebrow ailp-eyebrow--center ailp-eyebrow--on-dark">
