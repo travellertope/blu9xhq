@@ -189,12 +189,13 @@ a   { text-decoration: none; color: inherit; }
 
 .ailp-btn--accent {
   background: var(--clr-accent);
-  color: #fff;
+  color: #fff !important;
 }
 
 .ailp-btn--accent:hover,
 .ailp-btn--accent:focus-visible {
   background: var(--clr-accent-hover);
+  color: #fff !important;
   transform: translateY(-2px);
   box-shadow: var(--shadow-btn-hover);
 }
@@ -239,8 +240,7 @@ a   { text-decoration: none; color: inherit; }
 }
 
 .ailp-nav__logo img,
-.ailp-nav__logo .custom-logo,
-.ailp-nav__logo .custom-logo-link img {
+.ailp-nav__logo .ailp-logo-img {
   max-height: 28px !important;
   height: 28px !important;
   width: auto !important;
