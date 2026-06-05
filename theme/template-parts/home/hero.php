@@ -8,7 +8,7 @@
 $hero_badge              = ( function_exists( 'get_field' ) ? get_field( 'hero_badge' )             : '' ) ?: 'B2B Growth Agency';
 $hero_headline           = ( function_exists( 'get_field' ) ? get_field( 'hero_headline' )          : '' ) ?: "Your content operation.\nRunning. Every month.";
 $hero_subheadline        = ( function_exists( 'get_field' ) ? get_field( 'hero_subheadline' )       : '' ) ?: 'Bluu Interactive handles your research, content, publishing, and reporting — so your brand shows up consistently while you focus on running the business.';
-$hero_cta_primary_text   = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_primary_text' )  : '' ) ?: 'Book a Discovery Call';
+$hero_cta_primary_text   = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_primary_text' )  : '' ) ?: 'Let's talk';
 $hero_cta_primary_url    = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_primary_url' )   : '' ) ?: home_url( '/contact' );
 $hero_cta_secondary_text = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_text' ): '' ) ?: "See What's Included";
 $hero_cta_secondary_url  = ( function_exists( 'get_field' ) ? get_field( 'hero_cta_secondary_url' ) : '' ) ?: '#solution';

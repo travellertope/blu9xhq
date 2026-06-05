@@ -46,7 +46,7 @@ acf_add_local_field_group( array(
             'label'         => 'Primary CTA Text',
             'name'          => 'hero_cta_primary_text',
             'type'          => 'text',
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_hero_cta_primary_url',
@@ -323,7 +323,7 @@ acf_add_local_field_group( array(
             'name'          => 'home_cta_body',
             'type'          => 'textarea',
             'rows'          => 2,
-            'default_value' => 'Book a 15-minute Discovery Call. No pitch, no pressure — just an honest conversation to see if Bluu is the right fit for where your business is right now.',
+            'default_value' => 'Let's talk. No pitch, no pressure — just an honest conversation to see if Bluu is the right fit for where your business is right now.',
         ),
         array(
             'key'           => 'field_home_cta_note',
@@ -337,7 +337,7 @@ acf_add_local_field_group( array(
             'label'         => 'CTA Button Text',
             'name'          => 'home_cta_button_text',
             'type'          => 'text',
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_home_cta_button_url',
@@ -503,7 +503,7 @@ acf_add_local_field_group( array(
             'label'         => 'Bottom CTA Button Text',
             'name'          => 'pricing_bottom_cta_button_text',
             'type'          => 'text',
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_pricing_bottom_cta_button_url',
@@ -637,7 +637,7 @@ acf_add_local_field_group( array(
             'label'         => 'Bottom CTA Button Text',
             'name'          => 'industries_bottom_cta_button_text',
             'type'          => 'text',
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_industries_bottom_cta_button_url',
@@ -856,14 +856,14 @@ acf_add_local_field_group( array(
             'name'          => 'faq_cta_body',
             'type'          => 'textarea',
             'rows'          => 2,
-            'default_value' => "We'd rather talk than leave you guessing. Book a no-pressure, 30-minute discovery call and we'll answer everything specific to your situation.",
+            'default_value' => "We'd rather talk than leave you guessing. Let's have a 15-minute conversation and answer everything specific to your situation.",
         ),
         array(
             'key'           => 'field_faq_cta_button_text',
             'label'         => 'CTA Button Text',
             'name'          => 'faq_cta_button_text',
             'type'          => 'text',
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'  => 'field_faq_cta_button_url',
@@ -951,7 +951,7 @@ acf_add_local_field_group( array(
             'name'          => 'uc_hero_cta_label',
             'type'          => 'text',
             'maxlength'     => 40,
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_uc_hero_cta_url',
@@ -1289,7 +1289,7 @@ acf_add_local_field_group( array(
             'name'          => 'uc_cta_primary_label',
             'type'          => 'text',
             'maxlength'     => 40,
-            'default_value' => 'Book a Discovery Call',
+            'default_value' => 'Let's talk',
         ),
         array(
             'key'           => 'field_uc_cta_primary_url',
@@ -1346,7 +1346,7 @@ acf_add_local_field_group( array(
         array( 'key' => 'field_ind_hero_tag',         'label' => 'Tag',         'name' => 'ind_hero_tag',         'type' => 'text',     'maxlength' => 60,  'default_value' => 'Industry — Tech & SaaS startups' ),
         array( 'key' => 'field_ind_hero_headline',    'label' => 'Headline',    'name' => 'ind_hero_headline',    'type' => 'text',     'maxlength' => 100, 'default_value' => 'You are building the product. We run the content.' ),
         array( 'key' => 'field_ind_hero_subheadline', 'label' => 'Subheadline', 'name' => 'ind_hero_subheadline', 'type' => 'textarea', 'rows' => 3,        'default_value' => 'SaaS founders are pulled in every direction. Content is always the thing that gets pushed to next week — and next week never comes. Bluu becomes your content team: research, writing, publishing, and results tracking handled every month without you having to manage it.' ),
-        array( 'key' => 'field_ind_hero_cta_label',   'label' => 'CTA Label',   'name' => 'ind_hero_cta_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_ind_hero_cta_label',   'label' => 'CTA Label',   'name' => 'ind_hero_cta_label',   'type' => 'text',     'default_value' => 'Let's talk' ),
         array( 'key' => 'field_ind_hero_cta_url',     'label' => 'CTA URL',     'name' => 'ind_hero_cta_url',     'type' => 'text',      'default_value' => '/contact' ),
         array( 'key' => 'field_ind_hero_image',       'label' => 'Hero Image',  'name' => 'ind_hero_image',       'type' => 'image',    'return_format' => 'array', 'preview_size' => 'medium', 'instructions' => 'Right-hand hero image. ~1200×800px recommended.' ),
     ),
@@ -1459,8 +1459,8 @@ acf_add_local_field_group( array(
     'title'  => 'Industry: Closing CTA',
     'fields' => array(
         array( 'key' => 'field_ind_cta_heading',         'label' => 'Heading',          'name' => 'ind_cta_heading',         'type' => 'text',     'default_value' => 'Stop putting content off until next sprint.' ),
-        array( 'key' => 'field_ind_cta_subtext',         'label' => 'Subtext',          'name' => 'ind_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.' ),
-        array( 'key' => 'field_ind_cta_primary_label',   'label' => 'Primary Label',    'name' => 'ind_cta_primary_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_ind_cta_subtext',         'label' => 'Subtext',          'name' => 'ind_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Let's talk. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.' ),
+        array( 'key' => 'field_ind_cta_primary_label',   'label' => 'Primary Label',    'name' => 'ind_cta_primary_label',   'type' => 'text',     'default_value' => 'Let's talk' ),
         array( 'key' => 'field_ind_cta_primary_url',     'label' => 'Primary URL',      'name' => 'ind_cta_primary_url',     'type' => 'text',      'default_value' => '/contact' ),
         array( 'key' => 'field_ind_cta_secondary_label', 'label' => 'Secondary Label',  'name' => 'ind_cta_secondary_label', 'type' => 'text',     'default_value' => 'See pricing' ),
         array( 'key' => 'field_ind_cta_secondary_url',   'label' => 'Secondary URL',    'name' => 'ind_cta_secondary_url',   'type' => 'text',      'default_value' => '/pricing' ),
@@ -1495,7 +1495,7 @@ acf_add_local_field_group( array(
         array( 'key' => 'field_si_hero_tag',         'label' => 'Tag',         'name' => 'si_hero_tag',         'type' => 'text',     'default_value' => 'Tech & SaaS — Seed to Series A founders' ),
         array( 'key' => 'field_si_hero_headline',    'label' => 'Headline',    'name' => 'si_hero_headline',    'type' => 'text',     'default_value' => 'You are building the company. Content should not be your problem too.' ),
         array( 'key' => 'field_si_hero_subheadline', 'label' => 'Subheadline', 'name' => 'si_hero_subheadline', 'type' => 'textarea', 'rows' => 3, 'default_value' => 'Between product, hiring, fundraising, and sales, content is always the thing that gets pushed to next sprint. At seed to Series A stage, your brand needs to be moving even when you cannot give it attention. Bluu runs the content operation so it does not depend on you finding the time.' ),
-        array( 'key' => 'field_si_hero_cta_label',  'label' => 'CTA Label',   'name' => 'si_hero_cta_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_si_hero_cta_label',  'label' => 'CTA Label',   'name' => 'si_hero_cta_label',   'type' => 'text',     'default_value' => 'Let's talk' ),
         array( 'key' => 'field_si_hero_cta_url',    'label' => 'CTA URL',     'name' => 'si_hero_cta_url',     'type' => 'text',      'default_value' => '/contact' ),
         array( 'key' => 'field_si_hero_image',      'label' => 'Hero Image',  'name' => 'si_hero_image',       'type' => 'image',    'return_format' => 'array', 'preview_size' => 'medium' ),
     ),
@@ -1584,8 +1584,8 @@ acf_add_local_field_group( array(
     'title'  => 'Sub-industry: Closing CTA',
     'fields' => array(
         array( 'key' => 'field_si_cta_heading',         'label' => 'Heading',         'name' => 'si_cta_heading',         'type' => 'text',     'default_value' => 'Your content should be working while you are in product reviews.' ),
-        array( 'key' => 'field_si_cta_subtext',         'label' => 'Subtext',         'name' => 'si_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Book a 15-minute Discovery Call — we will tell you honestly whether Bluu makes sense for your stage and what starting would look like.' ),
-        array( 'key' => 'field_si_cta_primary_label',   'label' => 'Primary Label',   'name' => 'si_cta_primary_label',   'type' => 'text',     'default_value' => 'Book a Discovery Call' ),
+        array( 'key' => 'field_si_cta_subtext',         'label' => 'Subtext',         'name' => 'si_cta_subtext',         'type' => 'textarea', 'rows' => 2, 'default_value' => 'Let's talk — we will tell you honestly whether Bluu makes sense for your stage and what starting would look like.' ),
+        array( 'key' => 'field_si_cta_primary_label',   'label' => 'Primary Label',   'name' => 'si_cta_primary_label',   'type' => 'text',     'default_value' => 'Let's talk' ),
         array( 'key' => 'field_si_cta_primary_url',     'label' => 'Primary URL',     'name' => 'si_cta_primary_url',     'type' => 'text',      'default_value' => '/contact' ),
         array( 'key' => 'field_si_cta_secondary_label', 'label' => 'Secondary Label', 'name' => 'si_cta_secondary_label', 'type' => 'text',     'default_value' => 'See pricing' ),
         array( 'key' => 'field_si_cta_secondary_url',   'label' => 'Secondary URL',   'name' => 'si_cta_secondary_url',   'type' => 'text',      'default_value' => '/pricing' ),
@@ -1644,7 +1644,7 @@ add_action( 'acf/init', function () {
                 'label'        => 'CTA button label',
                 'name'         => 'bluu_post_cta_button_label',
                 'type'         => 'text',
-                'instructions' => "Defaults to 'Book a Discovery Call' if empty.",
+                'instructions' => "Defaults to 'Let's talk' if empty.",
             ),
             array(
                 'key'          => 'field_bluu_post_cta_button_url',
