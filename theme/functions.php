@@ -114,6 +114,12 @@ function bluu_enqueue_assets() {
         wp_add_inline_style( 'bluu-main-css', file_get_contents( $wwp_css_path ) ); // phpcs:ignore
     }
 
+    // Contact page styles
+    $contact_css_path = get_template_directory() . '/assets/css/contact.css';
+    if ( file_exists( $contact_css_path ) ) {
+        wp_add_inline_style( 'bluu-main-css', file_get_contents( $contact_css_path ) ); // phpcs:ignore
+    }
+
     // Main JavaScript
     wp_enqueue_script(
         'bluu-main-js',
