@@ -185,81 +185,81 @@ get_header();
     </div>
 </section>
 
-<!-- ── Intro ─────────────────────────────────────────────────────────────────── -->
-<section class="wwp-intro">
+<!-- ── Sticky intro + scrolling cards ────────────────────────────────────── -->
+<section class="wwp-sticky-layout" aria-label="<?php esc_attr_e( 'Content categories', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="wwp-intro__inner">
-            <p class="wwp-intro__p">Most content agencies produce blog posts and call it a content operation. Bluu produces the full stack — from the intelligence that informs every piece, to the long-form content that builds authority, to the repurposed assets that distribute it across every channel your audience is actually on.</p>
-            <p class="wwp-intro__p">Every deliverable is research-led. Every piece is structured for discovery in both search and AI tools. Nothing is produced without a brief grounded in real audience intelligence and real competitive context.</p>
-        </div>
-    </div>
-</section>
+        <div class="wwp-sticky-layout__inner">
 
-<!-- ── Service cards grid ────────────────────────────────────────────────────── -->
-<section class="wwp-cards" aria-label="<?php esc_attr_e( 'Content categories', 'bluu-interactive' ); ?>">
-    <div class="container">
-
-        <div class="wwp-cards__header animate-on-scroll">
-            <h2 class="wwp-cards__headline"><?php esc_html_e( 'Every content type, in one place', 'bluu-interactive' ); ?></h2>
-            <p class="wwp-cards__sub"><?php esc_html_e( 'Seven categories covering every channel, every format, and every stage of the funnel. Select any category to see the full deliverable breakdown.', 'bluu-interactive' ); ?></p>
-        </div>
-
-        <div class="wwp-cards__grid">
-            <?php foreach ( $sections as $index => $section ) :
-                $summary = wp_trim_words( $section['intro'], 18, '…' );
-                $count   = count( $section['rows'] );
-            ?>
-            <div class="wwp-card animate-on-scroll">
-                <div class="wwp-card__inner">
-                    <div class="wwp-card__top">
-                        <span class="wwp-card__number" aria-hidden="true"><?php echo esc_html( $section['number'] ); ?></span>
-                        <h3 class="wwp-card__title"><?php echo esc_html( $section['title'] ); ?></h3>
-                        <p class="wwp-card__summary"><?php echo esc_html( $summary ); ?></p>
-                    </div>
-                    <div class="wwp-card__foot">
-                        <span class="wwp-card__count">
-                            <?php echo esc_html( $count ); ?> content type<?php echo $count !== 1 ? 's' : ''; ?>
-                        </span>
-                        <button
-                            class="wwp-card__btn"
-                            data-wwp-open="<?php echo esc_attr( $index ); ?>"
-                            aria-haspopup="dialog"
-                        >
-                            <?php esc_html_e( 'See full breakdown', 'bluu-interactive' ); ?>
-                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                            </svg>
-                        </button>
-                    </div>
+            <!-- Left: sticky intro -->
+            <div class="wwp-sticky-layout__left">
+                <div class="wwp-intro__inner animate-on-scroll">
+                    <h2 class="wwp-intro__heading"><?php esc_html_e( 'Every content type, in one place', 'bluu-interactive' ); ?></h2>
+                    <p class="wwp-intro__p">Most content agencies produce blog posts and call it a content operation. Bluu produces the full stack — from the intelligence that informs every piece, to the long-form content that builds authority, to the repurposed assets that distribute it across every channel your audience is actually on.</p>
+                    <p class="wwp-intro__p">Every deliverable is research-led. Every piece is structured for discovery in both search and AI tools. Nothing is produced without a brief grounded in real audience intelligence and real competitive context.</p>
+                    <p class="wwp-intro__p"><?php esc_html_e( 'Seven categories covering every channel, every format, and every stage of the funnel. Select any category to see the full deliverable breakdown.', 'bluu-interactive' ); ?></p>
                 </div>
             </div>
-            <?php endforeach; ?>
 
-            <!-- 8th card: How repurposing works — distinct dark treatment -->
-            <div class="wwp-card wwp-card--repurpose animate-on-scroll">
-            <div class="wwp-card__inner">
-                <div class="wwp-card__top">
-                    <span class="wwp-card__number">How it works</span>
-                    <h3 class="wwp-card__title">Content repurposing</h3>
-                    <p class="wwp-card__summary">Every long-form piece becomes nine assets — each adapted for the mindset of a specific channel, not copy-pasted.</p>
-                </div>
-                <div class="wwp-card__foot">
-                    <span class="wwp-card__count">9 assets per piece</span>
-                    <button
-                        class="wwp-card__btn wwp-card__btn--repurpose"
-                        data-wwp-open="repurpose"
-                        aria-haspopup="dialog"
-                    >
-                        <?php esc_html_e( 'See how it works', 'bluu-interactive' ); ?>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-        </div><!-- /.wwp-cards__grid -->
+            <!-- Right: single-column scrolling cards -->
+            <div class="wwp-sticky-layout__right">
 
+                <?php foreach ( $sections as $index => $section ) :
+                    $summary = wp_trim_words( $section['intro'], 18, '…' );
+                    $count   = count( $section['rows'] );
+                ?>
+                <div class="wwp-card animate-on-scroll">
+                    <div class="wwp-card__inner">
+                        <div class="wwp-card__top">
+                            <span class="wwp-card__number" aria-hidden="true"><?php echo esc_html( $section['number'] ); ?></span>
+                            <h3 class="wwp-card__title"><?php echo esc_html( $section['title'] ); ?></h3>
+                            <p class="wwp-card__summary"><?php echo esc_html( $summary ); ?></p>
+                        </div>
+                        <div class="wwp-card__foot">
+                            <span class="wwp-card__count">
+                                <?php echo esc_html( $count ); ?> content type<?php echo $count !== 1 ? 's' : ''; ?>
+                            </span>
+                            <button
+                                class="wwp-card__btn"
+                                data-wwp-open="<?php echo esc_attr( $index ); ?>"
+                                aria-haspopup="dialog"
+                            >
+                                <?php esc_html_e( 'See full breakdown', 'bluu-interactive' ); ?>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+
+                <!-- 8th card: How repurposing works — distinct dark treatment -->
+                <div class="wwp-card wwp-card--repurpose animate-on-scroll">
+                    <div class="wwp-card__inner">
+                        <div class="wwp-card__top">
+                            <span class="wwp-card__number">How it works</span>
+                            <h3 class="wwp-card__title">Content repurposing</h3>
+                            <p class="wwp-card__summary">Every long-form piece becomes nine assets — each adapted for the mindset of a specific channel, not copy-pasted.</p>
+                        </div>
+                        <div class="wwp-card__foot">
+                            <span class="wwp-card__count">9 assets per piece</span>
+                            <button
+                                class="wwp-card__btn wwp-card__btn--repurpose"
+                                data-wwp-open="repurpose"
+                                aria-haspopup="dialog"
+                            >
+                                <?php esc_html_e( 'See how it works', 'bluu-interactive' ); ?>
+                                <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /.wwp-sticky-layout__right -->
+
+        </div><!-- /.wwp-sticky-layout__inner -->
     </div><!-- /.container -->
 </section>
 
