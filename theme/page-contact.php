@@ -6,8 +6,7 @@
  */
 
 // ── ACF fields with defaults ──────────────────────────────────────────────────
-$contact_email    = ( function_exists( 'get_field' ) ? get_field( 'contact_email' )    : '' ) ?: 'hello@bluuhq.com';
-$contact_location = ( function_exists( 'get_field' ) ? get_field( 'contact_location' ) : '' ) ?: 'Remote-first — serving US and UK markets';
+$contact_email = ( function_exists( 'get_field' ) ? get_field( 'contact_email' ) : '' ) ?: 'hello@bluuhq.com';
 
 get_header();
 ?>
@@ -50,18 +49,7 @@ get_header();
 							</div>
 						</li>
 
-						<li class="contact-info__item">
-							<span class="contact-info__icon" aria-hidden="true">
-								<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-							</span>
-							<div>
-								<p class="contact-info__label"><?php esc_html_e( 'Location', 'bluu-interactive' ); ?></p>
-								<p class="contact-info__value"><?php echo esc_html( $contact_location ); ?></p>
-							</div>
-						</li>
-
-						<li class="contact-info__item">
+<li class="contact-info__item">
 							<span class="contact-info__icon" aria-hidden="true">
 								<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
