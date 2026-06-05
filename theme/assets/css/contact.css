@@ -1,221 +1,111 @@
 /**
- * Contact page — full-bleed 2-column CTA
+ * Contact page supplemental styles
  *
  * @package bluu-interactive
  */
 
-/* ── Outer shell — full viewport height, flush to header ──────────────────── */
+/* ── Who this call is for — 2-column CTA ─────────────────────────────────── */
 
-.contact-cta {
-    min-height: calc(100vh - var(--header-height, 72px));
-    display: flex;
-    flex-direction: column;
+.contact-fit-cta {
+    background-color: var(--md-primary, #0a192f);
 }
 
-.contact-cta__inner {
+.contact-fit-cta__inner {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    flex: 1;
-    min-height: inherit;
+    gap: var(--space-10);
+    align-items: center;
+    max-width: var(--container-max, 1200px);
+    margin-inline: auto;
+    padding: var(--space-10) var(--space-6);
 }
 
-/* ── Left: dark column ────────────────────────────────────────────────────── */
-
-.contact-cta__left {
-    background-color: var(--md-primary, #0a192f);
-    padding: var(--space-10) var(--space-9);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.contact-cta__left-content {
-    max-width: 480px;
-    margin-left: auto;
-}
-
-.contact-cta__badge {
-    display: inline-block;
+.contact-fit-cta__label {
+    display: block;
     font-size: 0.75rem;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--md-accent, #1560ef);
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-4);
 }
 
-.contact-cta__headline {
-    font-size: clamp(1.875rem, 3vw, 2.625rem);
+.contact-fit-cta__heading {
+    font-size: clamp(1.5rem, 2.5vw, 2.125rem);
     font-weight: 400;
-    line-height: 1.15;
+    line-height: 1.2;
     letter-spacing: -0.02em;
     color: #ffffff;
     margin: 0 0 var(--space-5);
 }
 
-.contact-cta__lead {
-    font-size: 1.0625rem;
+.contact-fit-cta__body {
+    font-size: 0.9375rem;
     line-height: 1.7;
-    color: rgba(255,255,255,0.65);
-    margin: 0 0 var(--space-8);
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 var(--space-5);
 }
 
-/* ── Process steps ────────────────────────────────────────────────────────── */
-
-.contact-cta__steps {
-    list-style: none;
-    margin: 0 0 var(--space-8);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-}
-
-.contact-cta__step {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-4);
-}
-
-.contact-cta__step-num {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: var(--md-accent, #1560ef);
-    color: #ffffff;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    border-radius: 2px;
-    margin-top: 2px;
-}
-
-.contact-cta__step-body {
-    min-width: 0;
-}
-
-.contact-cta__step-title {
-    display: block;
+.contact-fit-cta__link {
     font-size: 0.9375rem;
     font-weight: 600;
-    color: #ffffff;
-    margin-bottom: var(--space-1);
-}
-
-.contact-cta__step-body p {
-    font-size: 0.875rem;
-    line-height: 1.65;
-    color: rgba(255,255,255,0.55);
-    margin: 0;
-}
-
-/* ── Who it's for ─────────────────────────────────────────────────────────── */
-
-.contact-cta__fit {
-    padding-top: var(--space-6);
-    border-top: 1px solid rgba(255,255,255,0.1);
-}
-
-.contact-cta__fit-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.4);
-    margin: 0 0 var(--space-3);
-}
-
-.contact-cta__fit-list {
-    list-style: none;
-    margin: 0 0 var(--space-4);
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-}
-
-.contact-cta__fit-list li {
-    font-size: 0.875rem;
-    line-height: 1.55;
-    color: rgba(255,255,255,0.55);
-    padding-left: 1em;
-    position: relative;
-}
-
-.contact-cta__fit-list li::before {
-    content: '—';
-    position: absolute;
-    left: 0;
-    color: var(--md-accent, #1560ef);
-    font-size: 0.75em;
-    top: 0.15em;
-}
-
-.contact-cta__blog-link {
-    font-size: 0.875rem;
     color: var(--md-accent, #1560ef);
     text-decoration: none;
-    font-weight: 500;
 }
 
-.contact-cta__blog-link:hover {
+.contact-fit-cta__link:hover {
     text-decoration: underline;
 }
 
-/* ── Right: form column ───────────────────────────────────────────────────── */
-
-.contact-cta__right {
-    background-color: var(--md-surface, #ffffff);
-    padding: var(--space-10) var(--space-9);
+.contact-fit-cta__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
     flex-direction: column;
+    gap: var(--space-5);
+}
+
+.contact-fit-cta__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.contact-fit-cta__item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.contact-fit-cta__item-num {
+    flex-shrink: 0;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--md-accent, #1560ef);
+    background: rgba(21, 96, 239, 0.12);
+    border: 1px solid rgba(21, 96, 239, 0.25);
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
     justify-content: center;
+    border-radius: 2px;
+    margin-top: 1px;
 }
 
-.contact-cta__form-wrap {
-    max-width: 480px;
-    margin-right: auto;
-}
-
-.contact-cta__form-heading {
-    font-size: clamp(1.5rem, 2.5vw, 2rem);
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    color: var(--md-primary, #0a192f);
-    margin: 0 0 var(--space-3);
-}
-
-.contact-cta__form-sub {
+.contact-fit-cta__item p {
+    margin: 0;
     font-size: 0.9375rem;
-    line-height: 1.65;
-    color: var(--md-on-surface-variant);
-    margin: 0 0 var(--space-7);
+    line-height: 1.6;
+    color: rgba(255,255,255,0.7);
 }
 
-/* ── Responsive ───────────────────────────────────────────────────────────── */
-
-@media (max-width: 900px) {
-    .contact-cta__inner {
+@media (max-width: 768px) {
+    .contact-fit-cta__inner {
         grid-template-columns: 1fr;
-    }
-
-    .contact-cta__left {
-        padding: var(--space-10) var(--space-6) var(--space-8);
-    }
-
-    .contact-cta__left-content {
-        max-width: 100%;
-        margin-left: 0;
-    }
-
-    .contact-cta__right {
-        padding: var(--space-8) var(--space-6) var(--space-10);
-    }
-
-    .contact-cta__form-wrap {
-        max-width: 100%;
+        gap: var(--space-8);
     }
 }
