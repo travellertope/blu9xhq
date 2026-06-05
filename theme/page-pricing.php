@@ -11,7 +11,7 @@ $hero_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_hea
 $hero_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_hero_body' )     : '' ) ?: 'Everything your content operation needs — research, writing, publishing, and reporting — in a single flat monthly number. No project fees. No hourly billing. No scope creep conversations.';
 
 $cta_headline = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_headline' ) : '' ) ?: 'Not sure which retainer fits?';
-$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_body' )     : '' ) ?: 'Let's talk. We\'ll tell you honestly which tier makes sense for your business right now — and if the timing isn\'t right, we\'ll say so. No pitch, no pressure.';
+$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_body' )     : '' ) ?: 'We\'ll tell you honestly which tier makes sense for your business right now — and if the timing isn\'t right, we\'ll say so. No pitch, no pressure.';
 $cta_url      = ( function_exists( 'get_field' ) ? get_field( 'pricing_cta_url' )      : '' ) ?: home_url( '/contact' );
 
 // ── Pricing tiers ─────────────────────────────────────────────────────────────
@@ -40,7 +40,7 @@ $tiers = array(
         'period'      => '/mo',
         'description' => 'For growing teams who want the full content engine — research, content, publishing, and reporting across every channel.',
         'note'        => 'Best for teams with an active sales motion.',
-        'cta_text'    => 'Let's talk',
+        'cta_text'    => 'Book a Call',
         'cta_url'     => home_url( '/contact' ),
         'cta_style'   => 'solid-blue',
         'featured'    => true,
@@ -369,7 +369,7 @@ get_header();
                     <tr class="pricing-table__cta-row">
                         <td class="pricing-table__feature"></td>
                         <td><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="pricing-table__cta pricing-table__cta--outline"><?php esc_html_e( 'Get Started', 'bluu-interactive' ); ?></a></td>
-                        <td class="pricing-table__cell--featured"><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="pricing-table__cta pricing-table__cta--solid"><?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?></a></td>
+                        <td class="pricing-table__cell--featured"><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="pricing-table__cta pricing-table__cta--solid"><?php esc_html_e( 'Book a Call', 'bluu-interactive' ); ?></a></td>
                         <td><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="pricing-table__cta pricing-table__cta--outline"><?php esc_html_e( 'Contact Us', 'bluu-interactive' ); ?></a></td>
                     </tr>
                 </tbody>
@@ -430,7 +430,7 @@ get_header();
 
             <div class="pricing-cta__actions">
                 <a href="<?php echo esc_url( $cta_url ); ?>" class="btn-primary btn-primary--large">
-                    <?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?>
+                    <?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?>
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                     </svg>

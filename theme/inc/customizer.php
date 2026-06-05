@@ -307,7 +307,7 @@ function bluu_customizer_register( $wp_customize ) {
     ) );
 
     $wp_customize->add_setting( 'bluu_nav_cta_text', array(
-        'default'           => 'Let's talk',
+        'default'           => 'Book a Call',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ) );
@@ -440,7 +440,7 @@ function bluu_customizer_register( $wp_customize ) {
         $wp_customize->selective_refresh->add_partial( 'bluu_nav_cta_text', array(
             'selector'        => '.site-header__cta .btn-primary',
             'render_callback' => function() {
-                return esc_html( get_theme_mod( 'bluu_nav_cta_text', 'Let's talk' ) );
+                return esc_html( get_theme_mod( 'bluu_nav_cta_text', 'Book a Call' ) );
             },
         ) );
     }

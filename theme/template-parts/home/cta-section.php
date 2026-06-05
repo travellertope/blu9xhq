@@ -6,8 +6,8 @@
  */
 
 $cta_headline    = ( function_exists( 'get_field' ) ? get_field( 'home_cta_headline' )    : '' ) ?: 'Ready to hand off your content operation for good?';
-$cta_body        = ( function_exists( 'get_field' ) ? get_field( 'home_cta_body' )        : '' ) ?: 'Let's talk. No pitch, no pressure — just an honest conversation to see if Bluu is the right fit for where your business is right now.';
-$cta_button_text = ( function_exists( 'get_field' ) ? get_field( 'home_cta_button_text' ) : '' ) ?: 'Let's talk';
+$cta_body        = ( function_exists( 'get_field' ) ? get_field( 'home_cta_body' )        : '' ) ?: '15 minutes. No pitch, no pressure — just an honest conversation to see if Bluu is the right fit for where your business is right now.';
+$cta_button_text = ( function_exists( 'get_field' ) ? get_field( 'home_cta_button_text' ) : '' ) ?: "Let's talk";
 $cta_button_url  = ( function_exists( 'get_field' ) ? get_field( 'home_cta_button_url' )  : '' ) ?: home_url( '/contact' );
 $cta_note        = ( function_exists( 'get_field' ) ? get_field( 'home_cta_note' )        : '' ) ?: 'Limited monthly capacity.';
 ?>

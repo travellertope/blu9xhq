@@ -51,7 +51,7 @@ $uc_content = array(
             array( 'title' => 'Content repurposing engine', 'url' => '/industries/tech-saas/content-repurposing', 'desc' => 'Turn competitor insights into original content that fills the gaps your monitoring has identified.' ),
         ),
         'cta_heading'        => 'Stop finding out what your competitors did last month.',
-        'cta_sub'            => 'Let's talk to see if competitor intelligence is the right starting point for your retainer. No pitch — just an honest conversation.',
+        'cta_sub'            => 'to see if competitor intelligence is the right starting point for your retainer. No pitch — just an honest conversation.',
     ),
     'founder-brand' => array(
         'hero_tag'           => 'Use case — Tech & SaaS startups',
@@ -91,7 +91,7 @@ $uc_content = array(
             array( 'title' => 'Product launch content', 'url' => '/industries/tech-saas/product-launch-content', 'desc' => 'Your founder brand is the most powerful channel for announcing new products and features to an engaged audience.' ),
         ),
         'cta_heading'        => 'Your audience is waiting. They just don\'t know you exist yet.',
-        'cta_sub'            => 'Let's talk to talk through what a founder brand programme would look like for your specific situation. Honest, no pressure.',
+        'cta_sub'            => 'to talk through what a founder brand programme would look like for your specific situation. Honest, no pressure.',
     ),
     'content-repurposing' => array(
         'hero_tag'           => 'Use case — Tech & SaaS startups',
@@ -131,7 +131,7 @@ $uc_content = array(
             array( 'title' => 'Competitor intelligence', 'url' => '/industries/tech-saas/competitor-intelligence', 'desc' => 'Intelligence about content gaps in your category informs which long-form pieces are worth creating and repurposing most aggressively.' ),
         ),
         'cta_heading'        => 'Your content is working harder than you think. It could work harder still.',
-        'cta_sub'            => 'Let's talk to see how the repurposing engine would work for your specific content and channels. No pitch — just a practical conversation.',
+        'cta_sub'            => 'to see how the repurposing engine would work for your specific content and channels. No pitch — just a practical conversation.',
     ),
     'product-launch-content' => array(
         'hero_tag'           => 'Use case — Tech & SaaS startups',
@@ -173,7 +173,7 @@ $uc_content = array(
             array( 'title' => 'Competitor intelligence', 'url' => '/industries/tech-saas/competitor-intelligence', 'desc' => 'Knowing what competitors are launching and how they are positioning informs how you differentiate your own announcements.' ),
         ),
         'cta_heading'        => 'Your next launch should reach every person it is relevant to.',
-        'cta_sub'            => 'Let's talk to talk through what a launch content programme would look like for your release cadence. Honest, practical, no pressure.',
+        'cta_sub'            => 'to talk through what a launch content programme would look like for your release cadence. Honest, practical, no pressure.',
     ),
     'own-brand-content' => array(
         'hero_tag'           => 'Use case — Agencies & consultants',
@@ -213,7 +213,7 @@ $uc_content = array(
             array( 'title' => 'White-label content production', 'url' => '/industries/agencies-consultants/white-label-production', 'desc' => 'While we run your own brand, we can also handle content production for your clients under your name.' ),
         ),
         'cta_heading'        => 'Your next client is already looking for someone like you. Are they finding you?',
-        'cta_sub'            => 'Let's talk to talk through what a consistent own-brand content operation would look like for your agency or practice.',
+        'cta_sub'            => 'to talk through what a consistent own-brand content operation would look like for your agency or practice.',
     ),
     'thought-leadership' => array(
         'hero_tag'           => 'Use case — Agencies & consultants',
@@ -252,7 +252,7 @@ $uc_content = array(
             array( 'title' => 'White-label content production', 'url' => '/industries/agencies-consultants/white-label-production', 'desc' => 'While we build your thought leadership, we can also handle client content production under your agency\'s name.' ),
         ),
         'cta_heading'        => 'The people who should be hiring you don\'t know you exist yet.',
-        'cta_sub'            => 'Let's talk to talk through what a thought leadership programme would look like for your specific expertise and audience.',
+        'cta_sub'            => 'to talk through what a thought leadership programme would look like for your specific expertise and audience.',
     ),
     'white-label-production' => array(
         'hero_tag'           => 'Use case — Agencies & consultants',
@@ -292,7 +292,7 @@ $uc_content = array(
             array( 'title' => 'Thought leadership publishing', 'url' => '/industries/agencies-consultants/thought-leadership', 'desc' => 'Build your agency\'s own reputation for expertise while Bluu handles client production in the background.' ),
         ),
         'cta_heading'        => 'Take on more work. Deliver the same quality. Keep your name on it.',
-        'cta_sub'            => 'Let's talk to talk through whether white-label production is the right arrangement for your agency\'s current situation.',
+        'cta_sub'            => 'to talk through whether white-label production is the right arrangement for your agency\'s current situation.',
     ),
     'service-launch' => array(
         'hero_tag'           => 'Use case — Agencies & consultants',
@@ -332,7 +332,7 @@ $uc_content = array(
             array( 'title' => 'White-label content production', 'url' => '/industries/agencies-consultants/white-label-production', 'desc' => 'If the new service includes content production for clients, white-label production gives you the capacity to deliver it without additional hires.' ),
         ),
         'cta_heading'        => 'You built something worth talking about. Let\'s make sure people hear about it.',
-        'cta_sub'            => 'Let's talk to talk through your new service and what a launch content package would cover for your specific situation.',
+        'cta_sub'            => 'to talk through your new service and what a launch content package would cover for your specific situation.',
     ),
     'brand-storytelling' => array(
         'hero_tag'           => 'Use case — E-commerce & DTC brands',
@@ -371,7 +371,7 @@ $uc_content = array(
             array( 'title' => 'Market & trend intelligence', 'url' => '/industries/ecommerce-dtc/market-intelligence', 'desc' => 'Stay ahead of category trends so your editorial content remains relevant and timely.' ),
         ),
         'cta_heading'        => 'Your brand has a story. It should be telling it every day.',
-        'cta_sub'            => 'Let's talk to talk through your brand and what a consistent editorial programme would look like for your specific audience and channels.',
+        'cta_sub'            => 'to talk through your brand and what a consistent editorial programme would look like for your specific audience and channels.',
     ),
     'product-content' => array(
         'hero_tag'           => 'Use case — E-commerce & DTC brands',
@@ -411,7 +411,7 @@ $uc_content = array(
             array( 'title' => 'Market & trend intelligence', 'url' => '/industries/ecommerce-dtc/market-intelligence', 'desc' => 'Stay ahead of category and aesthetic trends so product launches feel timely and relevant, not reactive.' ),
         ),
         'cta_heading'        => 'Your products deserve copy as good as the products themselves.',
-        'cta_sub'            => 'Let's talk to talk through your launch calendar and what a product content programme would cover for your brand.',
+        'cta_sub'            => 'to talk through your launch calendar and what a product content programme would cover for your brand.',
     ),
     'email-newsletter' => array(
         'hero_tag'           => 'Use case — E-commerce & DTC brands',
@@ -450,7 +450,7 @@ $uc_content = array(
             array( 'title' => 'Market & trend intelligence', 'url' => '/industries/ecommerce-dtc/market-intelligence', 'desc' => 'Category intelligence keeps your newsletter content relevant and timely — an informed newsletter is a more interesting newsletter.' ),
         ),
         'cta_heading'        => 'Your subscribers signed up because they wanted to hear from you. Give them something worth reading.',
-        'cta_sub'            => 'Let's talk to talk through your current email programme and what a properly run newsletter could do for your retention and revenue.',
+        'cta_sub'            => 'to talk through your current email programme and what a properly run newsletter could do for your retention and revenue.',
     ),
     'market-intelligence' => array(
         'hero_tag'           => 'Use case — E-commerce & DTC brands',
@@ -489,7 +489,7 @@ $uc_content = array(
             array( 'title' => 'Email newsletter programme', 'url' => '/industries/ecommerce-dtc/email-newsletter', 'desc' => 'Curated trend intelligence makes for genuinely interesting newsletter content — something worth reading beyond promotions.' ),
         ),
         'cta_heading'        => 'Stop finding out what happened in your category last month.',
-        'cta_sub'            => 'Let's talk to talk through your category and what a weekly intelligence programme would cover for your brand.',
+        'cta_sub'            => 'to talk through your category and what a weekly intelligence programme would cover for your brand.',
     ),
     'expert-commentary' => array(
         'hero_tag'           => 'Use case — Professional services',
@@ -528,7 +528,7 @@ $uc_content = array(
             array( 'title' => 'Referral & trust content', 'url' => '/industries/professional-services/referral-trust-content', 'desc' => 'Published commentary is the foundation for referral trust — it gives existing clients something credible to share when recommending you.' ),
         ),
         'cta_heading'        => 'Your expertise built your practice. Now let it build your reputation.',
-        'cta_sub'            => 'Let's talk to talk through your area of expertise and what a structured commentary programme would look like for your practice.',
+        'cta_sub'            => 'to talk through your area of expertise and what a structured commentary programme would look like for your practice.',
     ),
     'client-education' => array(
         'hero_tag'           => 'Use case — Professional services',
@@ -567,7 +567,7 @@ $uc_content = array(
             array( 'title' => 'LinkedIn authority programme', 'url' => '/industries/professional-services/linkedin-authority', 'desc' => 'Educational content distributed through LinkedIn reaches prospects who are not yet on your email list — the two use cases work together to build complete visibility.' ),
         ),
         'cta_heading'        => 'Your expertise is your best business development tool. Most firms leave it in their heads.',
-        'cta_sub'            => 'Let's talk to talk through the questions your clients ask most often and what a client education programme would look like for your practice.',
+        'cta_sub'            => 'to talk through the questions your clients ask most often and what a client education programme would look like for your practice.',
     ),
     'referral-trust-content' => array(
         'hero_tag'           => 'Use case — Professional services',
@@ -606,7 +606,7 @@ $uc_content = array(
             array( 'title' => 'LinkedIn authority programme', 'url' => '/industries/professional-services/linkedin-authority', 'desc' => 'LinkedIn is where many professional referral relationships are maintained and strengthened — a consistent LinkedIn presence reinforces your referral network.' ),
         ),
         'cta_heading'        => 'The people who should be sending you work are waiting to be reminded you exist.',
-        'cta_sub'            => 'Let's talk to talk through your referral relationships and what a systematic trust content programme would look like for your practice.',
+        'cta_sub'            => 'to talk through your referral relationships and what a systematic trust content programme would look like for your practice.',
     ),
     'linkedin-authority' => array(
         'hero_tag'           => 'Use case — Professional services',
@@ -646,7 +646,7 @@ $uc_content = array(
             array( 'title' => 'Referral & trust content', 'url' => '/industries/professional-services/referral-trust-content', 'desc' => 'A consistent LinkedIn presence reinforces trust with your existing network and gives referral sources something credible to share and reference.' ),
         ),
         'cta_heading'        => 'Your next client is already on LinkedIn. They just have not found you yet.',
-        'cta_sub'            => 'Let's talk to talk through your LinkedIn goals and what a structured authority programme would look like for your practice and expertise.',
+        'cta_sub'            => 'to talk through your LinkedIn goals and what a structured authority programme would look like for your practice and expertise.',
     ),
 );
 
@@ -678,7 +678,7 @@ $_uc_ind = isset( $_uc_industry_map[ $current_slug ] ) ? $_uc_industry_map[ $cur
 $hero_tag  = ( $gf ? get_field( 'uc_hero_tag' )         : '' ) ?: ( $d['hero_tag'] ?? '' );
 $hero_hl   = ( $gf ? get_field( 'uc_hero_headline' )    : '' ) ?: ( $d['hero_headline'] ?? '' );
 $hero_sub  = ( $gf ? get_field( 'uc_hero_subheadline' ) : '' ) ?: ( $d['hero_sub'] ?? '' );
-$hero_cta  = ( $gf ? get_field( 'uc_hero_cta_label' )   : '' ) ?: 'Let's talk';
+$hero_cta  = ( $gf ? get_field( 'uc_hero_cta_label' )   : '' ) ?: "Let's talk";
 $hero_url  = ( $gf ? get_field( 'uc_hero_cta_url' )     : '' ) ?: home_url( '/contact' );
 $hero_img  = $gf ? get_field( 'uc_hero_image' ) : null;
 if ( ! empty( $hero_img ) ) {
@@ -737,7 +737,7 @@ if ( empty( $related ) ) $related = $d['related'] ?? array();
 // CTA
 $cta_heading = ( $gf ? get_field( 'uc_cta_heading' )       : '' ) ?: ( $d['cta_heading'] ?? 'Ready to get started?' );
 $cta_sub     = ( $gf ? get_field( 'uc_cta_subtext' )        : '' ) ?: ( $d['cta_sub'] ?? '' );
-$cta_p_label = ( $gf ? get_field( 'uc_cta_primary_label' )  : '' ) ?: 'Let's talk';
+$cta_p_label = ( $gf ? get_field( 'uc_cta_primary_label' )  : '' ) ?: "Let's talk";
 $cta_p_url   = ( $gf ? get_field( 'uc_cta_primary_url' )    : '' ) ?: home_url( '/contact' );
 $cta_s_label = ( $gf ? get_field( 'uc_cta_secondary_label' ): '' ) ?: 'See pricing';
 $cta_s_url   = ( $gf ? get_field( 'uc_cta_secondary_url' )  : '' ) ?: home_url( '/pricing' );

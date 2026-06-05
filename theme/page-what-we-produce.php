@@ -11,7 +11,7 @@ $hero_headline = ( function_exists( 'get_field' ) ? get_field( 'wwp_hero_headlin
 $hero_body     = ( function_exists( 'get_field' ) ? get_field( 'wwp_hero_body' )     : '' ) ?: 'Bluu produces content across every channel your audience uses — written, structured for discovery, and repurposed into every format that earns attention. Here is the complete list of what we build for clients.';
 
 $cta_headline = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_headline' ) : '' ) ?: 'Not sure which content types your operation needs?';
-$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_body' )     : '' ) ?: "Most clients start with two or three deliverable types and expand as the operation matures. Let's talk and we will tell you exactly which content types would have the most impact for your specific audience, stage, and channels.";
+$cta_body     = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_body' )     : '' ) ?: "Most clients start with two or three deliverable types and expand as the operation matures. and we will tell you exactly which content types would have the most impact for your specific audience, stage, and channels.";
 $cta_url      = ( function_exists( 'get_field' ) ? get_field( 'wwp_cta_url' )      : '' ) ?: home_url( '/contact' );
 
 // ── Hero image — ACF image field (returns array); fallback to Unsplash ────────
@@ -312,7 +312,7 @@ get_header();
 
     <div class="wwp-panel__footer">
         <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary">
-            <?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?>
+            <?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?>
         </a>
         <button class="btn-text" data-wwp-close><?php esc_html_e( 'Close', 'bluu-interactive' ); ?></button>
     </div>
@@ -359,7 +359,7 @@ get_header();
 
     <div class="wwp-panel__footer">
         <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary">
-            <?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?>
+            <?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?>
         </a>
         <button class="btn-text" data-wwp-close><?php esc_html_e( 'Close', 'bluu-interactive' ); ?></button>
     </div>
@@ -397,7 +397,7 @@ get_header();
             </div>
             <div class="wwp-cta__actions">
                 <a href="<?php echo esc_url( $cta_url ); ?>" class="btn-primary btn-primary--large">
-                    <?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?>
+                    <?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?>
                     <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                     </svg>
@@ -411,7 +411,7 @@ get_header();
 <!-- Mobile sticky CTA — hidden on desktop via CSS ─────────────────────────────-->
 <div class="wwp-mobile-cta" aria-hidden="true">
     <a href="<?php echo esc_url( $cta_url ); ?>" class="wwp-mobile-cta__btn btn-primary" tabindex="-1">
-        <?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?>
+        <?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?>
     </a>
 </div>
 
