@@ -80,8 +80,8 @@ get_header();
     <div class="container">
         <div class="hub-notsure__inner animate-on-scroll">
             <h2 class="hub-notsure__heading">Not sure if we are the right fit?</h2>
-            <p class="hub-notsure__body">Let's talk. We will tell you honestly whether Bluu makes sense for your business right now — and if the timing is not right, we will say so. No pitch, no pressure.</p>
-            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large">Let's talk</a>
+            <p class="hub-notsure__body">We will tell you honestly whether Bluu makes sense for your business right now — and if the timing is not right, we will say so. No pitch, no pressure.</p>
+            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large">Let\'s talk</a>
         </div>
     </div>
 </section>
@@ -91,9 +91,9 @@ get_header();
     <div class="container">
         <div class="animate-on-scroll">
             <h2 class="industry-pg-cta__headline">Ready to hand off your content operation?</h2>
-            <p class="industry-pg-cta__sub">Let's talk — honest, no pressure, and specific to your industry and situation.</p>
+            <p class="industry-pg-cta__sub">— honest, no pressure, and specific to your industry and situation.</p>
             <div class="industry-pg-cta__buttons">
-                <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large btn-primary--white">Let's talk</a>
+                <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large btn-primary--white">Let\'s talk</a>
                 <a href="<?php echo esc_url( home_url( '/pricing' ) ); ?>" class="industry-btn-outline--cta">See pricing</a>
             </div>
         </div>

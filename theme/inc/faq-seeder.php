@@ -82,7 +82,7 @@ $categories = array(
             ),
             array(
                 'question' => 'How do we get started?',
-                'answer'   => 'Let's talk. We will ask about your business, your audience, and what you have tried before. If we are a good fit, we scope the right retainer tier and onboard you within the week. No pitch deck. No sales pressure.',
+                'answer'   => 'We will ask about your business, your audience, and what you have tried before. If we are a good fit, we scope the right retainer tier and onboard you within the week. No pitch deck. No sales pressure.',
             ),
             array(
                 'question' => 'How long does onboarding take?',

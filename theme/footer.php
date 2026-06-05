@@ -74,7 +74,7 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                         <li><a href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Home', 'bluu-interactive' ); ?></a></li>
                         <li><a href="<?php echo esc_url( home_url( '/pricing' ) ); ?>"><?php esc_html_e( 'Pricing', 'bluu-interactive' ); ?></a></li>
                         <li><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>"><?php esc_html_e( 'Contact', 'bluu-interactive' ); ?></a></li>
-                        <li><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="site-footer__cta-link"><?php esc_html_e( 'Let's talk', 'bluu-interactive' ); ?></a></li>
+                        <li><a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="site-footer__cta-link"><?php esc_html_e( "Let's talk", 'bluu-interactive' ); ?></a></li>
                     </ul>
                 </div>
 
