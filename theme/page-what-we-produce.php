@@ -234,10 +234,9 @@ get_header();
                 </div>
             </div>
             <?php endforeach; ?>
-        </div><!-- /.wwp-cards__grid -->
 
-        <!-- 8th card: How repurposing works — distinct dark treatment -->
-        <div class="wwp-card wwp-card--repurpose animate-on-scroll">
+            <!-- 8th card: How repurposing works — distinct dark treatment -->
+            <div class="wwp-card wwp-card--repurpose animate-on-scroll">
             <div class="wwp-card__inner">
                 <div class="wwp-card__top">
                     <span class="wwp-card__number">How it works</span>
@@ -259,6 +258,7 @@ get_header();
                 </div>
             </div>
         </div>
+        </div><!-- /.wwp-cards__grid -->
 
     </div><!-- /.container -->
 </section>
