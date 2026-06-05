@@ -189,8 +189,10 @@ get_header();
 <section class="wwp-intro">
     <div class="container">
         <div class="wwp-intro__inner">
+            <h2 class="wwp-intro__heading"><?php esc_html_e( 'Every content type, in one place', 'bluu-interactive' ); ?></h2>
             <p class="wwp-intro__p">Most content agencies produce blog posts and call it a content operation. Bluu produces the full stack — from the intelligence that informs every piece, to the long-form content that builds authority, to the repurposed assets that distribute it across every channel your audience is actually on.</p>
             <p class="wwp-intro__p">Every deliverable is research-led. Every piece is structured for discovery in both search and AI tools. Nothing is produced without a brief grounded in real audience intelligence and real competitive context.</p>
+            <p class="wwp-intro__p"><?php esc_html_e( 'Seven categories covering every channel, every format, and every stage of the funnel. Select any category to see the full deliverable breakdown.', 'bluu-interactive' ); ?></p>
         </div>
     </div>
 </section>
@@ -198,11 +200,6 @@ get_header();
 <!-- ── Service cards grid ────────────────────────────────────────────────────── -->
 <section class="wwp-cards" aria-label="<?php esc_attr_e( 'Content categories', 'bluu-interactive' ); ?>">
     <div class="container">
-
-        <div class="wwp-cards__header animate-on-scroll">
-            <h2 class="wwp-cards__headline"><?php esc_html_e( 'Every content type, in one place', 'bluu-interactive' ); ?></h2>
-            <p class="wwp-cards__sub"><?php esc_html_e( 'Seven categories covering every channel, every format, and every stage of the funnel. Select any category to see the full deliverable breakdown.', 'bluu-interactive' ); ?></p>
-        </div>
 
         <div class="wwp-cards__grid">
             <?php foreach ( $sections as $index => $section ) :
