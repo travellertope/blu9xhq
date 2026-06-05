@@ -250,14 +250,17 @@
     background-color: var(--md-surface);
     display: flex;
     flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(110%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
     overflow: hidden;
-    box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+    box-shadow: none;
+    visibility: hidden;
 }
 
 .wwp-panel.is-open {
     transform: translateX(0);
+    box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+    visibility: visible;
 }
 
 .wwp-panel__header {
@@ -760,15 +763,12 @@
 }
 
 .wwp-card__btn--repurpose {
-    background-color: var(--md-accent);
-    color: #ffffff;
-    border-color: var(--md-accent);
+    color: rgba(255,255,255,0.9);
 }
 
 .wwp-card__btn--repurpose:hover,
 .wwp-card__btn--repurpose:focus-visible {
-    background-color: transparent;
-    color: var(--md-accent);
+    color: #ffffff;
 }
 
 /* ── Repurposing panel content ────────────────────────────────────────────── */
