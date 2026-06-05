@@ -12,8 +12,8 @@ $faq_headline    = ( function_exists( 'get_field' ) ? get_field( 'faq_headline' 
 $faq_subheadline = ( function_exists( 'get_field' ) ? get_field( 'faq_subheadline' ) : '' ) ?: 'Straight answers about how Bluu Interactive works, what we cost, and what you can expect.';
 $faq_categories  = ( function_exists( 'get_field' ) ? get_field( 'faq_categories' )  : [] ) ?: bluu_default_faq_categories();
 $faq_cta_headline = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_headline' ) : '' ) ?: 'Still Have Questions?';
-$faq_cta_body     = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_body' )     : '' ) ?: "We'd rather talk than leave you guessing. Book a no-pressure, 30-minute discovery call and we'll answer everything specific to your situation.";
-$faq_cta_button   = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_button_text' ) : '' ) ?: 'Book a Discovery Call';
+$faq_cta_body     = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_body' )     : '' ) ?: "We'd rather talk than leave you guessing. Let's have a 15-minute conversation and answer everything specific to your situation.";
+$faq_cta_button   = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_button_text' ) : '' ) ?: 'Let's talk';
 $faq_cta_url      = ( function_exists( 'get_field' ) ? get_field( 'faq_cta_button_url' )  : '' ) ?: home_url( '/contact' );
 
 // ── Build flat list for schema & search ───────────────────────────────────────

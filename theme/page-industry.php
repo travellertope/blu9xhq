@@ -48,8 +48,8 @@ $ind_content = array(
         'pricing_heading'   => 'One flat monthly retainer. No surprises.',
         'pricing_body'      => 'Bluu retainers for SaaS startups start at $1,500 per month and scale to $3,500 depending on the volume of content, number of platforms, and depth of intelligence coverage you need. No project fees. No hourly billing. Everything in one predictable monthly number. SEO and AI crawl standards are built into every deliverable at every tier — not charged as an add-on.',
         'cta_heading'       => 'Stop putting content off until next sprint.',
-        'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.',
-        'cta_p_label'       => 'Book a Discovery Call',
+        'cta_sub'           => 'Let's talk. We will tell you honestly whether Bluu makes sense for your stage, your team size, and your goals. No pitch, no pressure.',
+        'cta_p_label'       => 'Let's talk',
         'cta_s_label'       => 'See pricing',
         'sub_industries'    => array(
             array( 'name' => 'Seed to Series A',         'url' => '/industries/tech-saas/seed-series-a' ),
@@ -94,8 +94,8 @@ $ind_content = array(
         'pricing_heading'   => 'One flat monthly retainer. No surprises.',
         'pricing_body'      => 'Bluu retainers for agencies and consultancies start at $1,500 per month and scale based on the volume of content, number of principals, and channels covered. No project fees. No hourly billing. Everything in one predictable monthly number. SEO and AI crawl standards are built into every deliverable at every tier — not charged as an add-on.',
         'cta_heading'       => 'Your expertise deserves to be visible.',
-        'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your firm, your stage, and your goals. No pitch, no pressure.',
-        'cta_p_label'       => 'Book a Discovery Call',
+        'cta_sub'           => 'Let's talk. We will tell you honestly whether Bluu is the right fit for your firm, your stage, and your goals. No pitch, no pressure.',
+        'cta_p_label'       => 'Let's talk',
         'cta_s_label'       => 'See pricing',
         'sub_industries'    => array(
             array( 'name' => 'Marketing consultants',       'url' => '/industries/agencies-consultants/marketing-consultants' ),
@@ -144,8 +144,8 @@ $ind_content = array(
         'pricing_heading'   => 'One flat monthly retainer. No surprises.',
         'pricing_body'      => 'Bluu retainers for e-commerce brands start at $1,500 per month and scale based on the volume of content, number of channels, and depth of coverage required. No project fees. No hourly billing. Everything in one predictable monthly number. SEO and AI crawl standards are built into every deliverable at every tier — not charged as an add-on.',
         'cta_heading'       => 'Build the content channel that does not stop working.',
-        'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your brand, your stage, and your goals. No pitch, no pressure.',
-        'cta_p_label'       => 'Book a Discovery Call',
+        'cta_sub'           => 'Let's talk. We will tell you honestly whether Bluu is the right fit for your brand, your stage, and your goals. No pitch, no pressure.',
+        'cta_p_label'       => 'Let's talk',
         'cta_s_label'       => 'See pricing',
         'sub_industries'    => array(
             array( 'name' => 'Emerging DTC brands',         'url' => '/industries/ecommerce-dtc/emerging-dtc-brands' ),
@@ -189,8 +189,8 @@ $ind_content = array(
         'pricing_heading'   => 'One flat monthly retainer. No surprises.',
         'pricing_body'      => 'Bluu retainers for professional services firms start at $1,500 per month and scale based on the volume of content, seniority of principals involved, and depth of subject matter required. No project fees. No hourly billing. Everything in one predictable monthly number. SEO and AI crawl standards are built into every deliverable at every tier — not charged as an add-on.',
         'cta_heading'       => 'Your expertise should be working for you around the clock.',
-        'cta_sub'           => 'Book a 15-minute Discovery Call. We will tell you honestly whether Bluu is the right fit for your firm, your goals, and your growth stage. No pitch, no pressure.',
-        'cta_p_label'       => 'Book a Discovery Call',
+        'cta_sub'           => 'Let's talk. We will tell you honestly whether Bluu is the right fit for your firm, your goals, and your growth stage. No pitch, no pressure.',
+        'cta_p_label'       => 'Let's talk',
         'cta_s_label'       => 'See pricing',
         'sub_industries'    => array(
             array( 'name' => 'Financial advisors',          'url' => '/industries/professional-services/financial-advisors' ),
@@ -220,7 +220,7 @@ $seo_desc   = ( $gf ? get_field( 'ind_meta_description' ) : '' ) ?: '';
 $hero_tag  = ( $gf ? get_field( 'ind_hero_tag' )         : '' ) ?: $d['hero_tag'];
 $hero_hl   = ( $gf ? get_field( 'ind_hero_headline' )    : '' ) ?: $d['hero_headline'];
 $hero_sub  = ( $gf ? get_field( 'ind_hero_subheadline' ) : '' ) ?: $d['hero_sub'];
-$hero_cta  = ( $gf ? get_field( 'ind_hero_cta_label' )   : '' ) ?: 'Book a Discovery Call';
+$hero_cta  = ( $gf ? get_field( 'ind_hero_cta_label' )   : '' ) ?: 'Let's talk';
 $hero_url  = ( $gf ? get_field( 'ind_hero_cta_url' )     : '' ) ?: home_url( '/contact' );
 $hero_img  = $gf ? get_field( 'ind_hero_image' ) : null;
 if ( ! empty( $hero_img ) ) {

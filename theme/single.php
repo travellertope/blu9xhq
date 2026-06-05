@@ -39,8 +39,8 @@ while ( have_posts() ) :
     $cta_btn_lbl = function_exists( 'get_field' ) ? get_field( 'bluu_post_cta_button_label', $post_id ) : '';
     $cta_btn_url = function_exists( 'get_field' ) ? get_field( 'bluu_post_cta_button_url', $post_id ) : '';
     if ( ! $cta_heading ) { $cta_heading = __( 'Ready to hand off your content operation?', 'bluu-interactive' ); }
-    if ( ! $cta_subtext ) { $cta_subtext = __( 'Book a 15-minute Discovery Call. No pitch, no pressure — just an honest conversation.', 'bluu-interactive' ); }
-    if ( ! $cta_btn_lbl ) { $cta_btn_lbl = __( 'Book a Discovery Call', 'bluu-interactive' ); }
+    if ( ! $cta_subtext ) { $cta_subtext = __( 'Let's talk — an honest 15-minute conversation, no pitch, no pressure.', 'bluu-interactive' ); }
+    if ( ! $cta_btn_lbl ) { $cta_btn_lbl = __( 'Let's talk', 'bluu-interactive' ); }
     if ( ! $cta_btn_url ) { $cta_btn_url = home_url( '/contact' ); }
 
     // Related posts

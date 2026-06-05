@@ -17,7 +17,7 @@ $si_content = array(
         'hero_tag'    => 'Tech & SaaS — Seed to Series A founders',
         'hero_headline' => 'You are building the company. Content should not be your problem too.',
         'hero_sub'    => 'Between product, hiring, fundraising, and sales, content is always the thing that gets pushed to next sprint. At seed to Series A stage, your brand needs to be moving even when you cannot give it attention. Bluu runs the content operation so it does not depend on you finding the time.',
-        'hero_cta'    => 'Book a Discovery Call',
+        'hero_cta'    => 'Let's talk',
         'hero_url'    => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'This is for SaaS founders between pre-seed and Series A — typically 2 to 15 people — where the founding team is still doing most things and content is the lowest priority despite being strategically important.',
@@ -45,14 +45,14 @@ $si_content = array(
         'fit_body'    => 'Bluu is designed to run with minimal input from founders. A single monthly conversation is enough to keep the content relevant and in your voice. Everything else — research, writing, publishing, reporting — is handled. No briefing overhead, no project management, no chasing. For a founding team already at capacity, that is the only model that actually works.',
         'fit_proof'   => "Retainers for early-stage SaaS teams start at \$1,500 per month — less than a junior hire's first month salary, with no onboarding time and no management overhead. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.",
         'cta_heading' => 'Your content should be working while you are in product reviews.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call — we will tell you honestly whether Bluu makes sense for your stage and what starting would look like.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk — we will tell you honestly whether Bluu makes sense for your stage and what starting would look like.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'b2b-saas-growth' => array(
         'hero_tag'    => 'Tech & SaaS — B2B SaaS growth teams',
         'hero_headline' => 'You have the team. You still need the system.',
         'hero_sub'    => 'Post product-market-fit SaaS companies often have a marketer or two — but content is still reactive, inconsistent, and siloed from what is happening in the market. Bluu provides the research intelligence and content engine that turns scattered output into a coherent, compounding brand presence.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'B2B SaaS companies between 10 and 40 people, post product-market-fit, with at least one marketing hire — but no structured content system that produces consistent output informed by real market intelligence.',
         'who_items'   => array(
@@ -79,14 +79,14 @@ $si_content = array(
         'fit_body'    => 'Bluu is not a replacement for your marketing team — it is the intelligence and production layer that makes your team more effective. We handle the research, the repurposing, and the production so your team can focus on strategy, campaigns, and the work that requires deep product and customer knowledge. The two work together, not in competition.',
         'fit_proof'   => 'Most growth-stage retainers sit at $2,500 per month — a fraction of the cost of an additional hire, with no ramp time and a system that starts producing from day one. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your competitors are publishing more than you. That gap compounds.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through where the content gaps are and what closing them would look like with Bluu.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through where the content gaps are and what closing them would look like with Bluu.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'no-code-ai-startups' => array(
         'hero_tag'    => 'Tech & SaaS — No-code & AI tool startups',
         'hero_headline' => 'In your category, the brand that educates fastest wins.',
         'hero_sub'    => 'No-code and AI tool categories are defined by content. The companies that establish themselves as educators and thought leaders in an emerging space are the ones that attract the most users, the most press, and the most inbound — while others are still figuring out their messaging. Bluu runs the content engine that gets you there.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'No-code and AI tool startups — typically 1 to 8 people, product-led growth, operating in fast-moving categories where content and community are the primary acquisition channels.',
         'who_items'   => array(
@@ -113,14 +113,14 @@ $si_content = array(
         'fit_body'    => "Bluu's research-led approach is particularly well suited to categories that change quickly. We monitor your space continuously — what competitors are saying, what trends are emerging, what your audience is talking about — and that intelligence feeds directly into the content we produce. The result is content that feels timely and relevant rather than generic and planned six weeks in advance.",
         'fit_proof'   => 'Retainers start at $1,500 per month. Most no-code and AI startups we work with begin with a combination of founder brand content and competitor intelligence — the two use cases that deliver visible impact fastest. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your category is being defined right now. Be part of the conversation.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through where your category is heading and how Bluu can help you get ahead of it.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through where your category is heading and how Bluu can help you get ahead of it.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'developer-tools' => array(
         'hero_tag'    => 'Tech & SaaS — Developer tools & infrastructure',
         'hero_headline' => 'You speak in code. Your buyers speak in outcomes. We bridge that gap.',
         'hero_sub'    => 'Developer tools companies face a content challenge that most agencies do not understand — you need to be technically credible enough to earn developer trust while being commercially clear enough to win budget approval from buyers who have never written a line of code. Bluu produces content that does both.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Developer tools and infrastructure companies — typically 5 to 30 people — where the founding team has deep technical expertise but limited capacity or comfort with the commercial and editorial content that drives top-of-funnel awareness and buyer confidence.',
         'who_items'   => array(
@@ -146,14 +146,14 @@ $si_content = array(
         'fit_body'    => "Bluu's research-first approach means we understand your competitive landscape before we write a single word. We work with your technical team to understand what you are building and why it matters, then we translate that into content that earns developer credibility while winning commercial confidence. We do not produce generic marketing copy dressed up in technical language — that is worse than nothing in a developer audience.",
         'fit_proof'   => 'Retainers for developer tools companies typically start at $2,000 per month given the research depth required. The first engagement usually focuses on competitive intelligence and founder content before expanding to broader content production. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your technical depth deserves content that matches it.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through your audience, your category, and what a content programme would look like for your specific situation.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through your audience, your category, and what a content programme would look like for your specific situation.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'marketing-consultants' => array(
         'hero_tag'    => 'Agencies & consultants — Marketing & growth consultants',
         'hero_headline' => 'You tell clients content builds pipeline. Yours should too.',
         'hero_sub'    => 'Marketing and growth consultants understand content ROI better than almost any other audience. Which makes the gap between what you advise and what you practice particularly costly. Bluu runs your own content operation so that gap closes — and your inbound reflects the expertise you are already selling.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Independent marketing and growth consultants — typically solo or 2 to 5 people — who advise clients on content strategy, brand building, and demand generation while chronically underinvesting in their own brand content.',
         'who_items'   => array(
@@ -179,14 +179,14 @@ $si_content = array(
         'fit_body'    => "Working with a content partner who understands your field is essential — you will immediately know if the content is generic or uninformed. Bluu's research-led approach means we monitor your market, understand your positioning, and produce content that reflects genuine expertise rather than surface-level marketing commentary. The monthly strategy conversation keeps everything sharp and specific to your audience.",
         'fit_proof'   => 'Retainers for marketing consultants typically start at $1,500 per month for own brand content and scale to $2,500 with a full thought leadership programme. Most start with the lighter option and expand once they see the pipeline impact. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Practice what you preach. Starting this month.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call and we will be direct about whether Bluu is the right fit for your practice and what your content operation could look like.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk and we will be direct about whether Bluu is the right fit for your practice and what your content operation could look like.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'branding-design-studios' => array(
         'hero_tag'    => 'Agencies & consultants — Branding & design studios',
         'hero_headline' => 'Your work is extraordinary. The words around it should be too.',
         'hero_sub'    => 'Branding and design studios are among the most visually compelling businesses in any market — and among the worst at written content. The portfolio is beautiful, the case studies are nonexistent, the LinkedIn is sporadic, and the newsletter has not gone out since last year. Bluu provides the written content engine that gives your visual work the context and reach it deserves.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Branding studios and design agencies — typically 2 to 8 people — who do exceptional visual and brand work but have never built a consistent written content presence to match it.',
         'who_items'   => array(
@@ -212,14 +212,14 @@ $si_content = array(
         'fit_body'    => "Bluu's approach to brand voice is meticulous — we spend real time understanding how your studio thinks, talks, and what it believes before we write a word. The result is content that sounds like the smartest, most articulate version of your studio's perspective, not a generic agency blog. For a studio where visual distinctiveness is everything, written content that feels generic is worse than nothing.",
         'fit_proof'   => 'Retainers for design studios typically start at $1,500 per month and are built around a core of LinkedIn and newsletter content. Case study writing is available as an add-on — a natural complement once the content engine is running. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your portfolio deserves an audience bigger than your existing network.',
-        'cta_sub'     => "Book a 15-minute Discovery Call to talk through your studio's voice and what a consistent written content presence would look like alongside your visual work.",
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => "Let's talk to talk through your studio's voice and what a consistent written content presence would look like alongside your visual work.",
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'pr-communications' => array(
         'hero_tag'    => 'Agencies & consultants — PR & communications firms',
         'hero_headline' => 'You place clients in publications. When did you last appear in one yourself?',
         'hero_sub'    => 'PR and communications firms write compelling narratives for clients every single day — and produce almost nothing for their own brand. The expertise is there. The opinions are there. The time is not. Bluu runs the content operation that closes the gap between what you do for clients and what you do for yourself.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'PR and communications agencies and consultancies — typically 3 to 10 people — that produce expert communications for clients daily but have never built a consistent content presence under their own name.',
         'who_items'   => array(
@@ -245,14 +245,14 @@ $si_content = array(
         'fit_body'    => "PR firms have a higher quality bar for written content than almost any other industry — you know immediately when something is generic, off-message, or poorly crafted. Bluu's writing standard is built around that expectation. We spend time understanding your firm's voice and perspective before we produce a word, and every piece is reviewed by you before it goes anywhere. The output should feel like your best account director wrote it on a good day.",
         'fit_proof'   => 'Retainers for PR and communications firms typically start at $1,500 to $2,000 per month depending on volume. Most start with thought leadership and expand to a full own-brand content operation once the editorial rhythm is established. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'You build visibility for clients. It is time to build some for yourself.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call. We will have an honest conversation about whether Bluu makes sense for your firm right now.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk. We will have an honest conversation about whether Bluu makes sense for your firm right now.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'strategy-consultants' => array(
         'hero_tag'    => 'Agencies & consultants — Boutique strategy consultants',
         'hero_headline' => 'One referral source drying up could cut your pipeline in half. Content is the insurance.',
         'hero_sub'    => 'Boutique strategy consultants win almost entirely through referrals — and most know that this is both a strength and a vulnerability. Content is the one growth channel that builds in parallel to referrals, works while you are delivering, and compounds over time. Bluu builds and runs it so you never have to choose between delivery and business development.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Boutique strategy consultancies and solo strategic advisors — typically 1 to 4 people — who win high-ticket engagements through relationships and reputation but have never built a content engine to complement and eventually reduce their dependence on those channels.',
         'who_items'   => array(
@@ -278,14 +278,14 @@ $si_content = array(
         'fit_body'    => "Strategy consultants have a very specific quality bar — content that sounds generic, that oversimplifies, or that lacks genuine intellectual substance is worse for their reputation than no content at all. Bluu's approach starts with depth — a proper understanding of your frameworks, your thinking, and what makes your perspective genuinely distinctive before we write a word. The result is content that your clients and peers would recognise as yours.",
         'fit_proof'   => "Retainers for strategy consultants typically start at \$2,000 per month given the intellectual depth required. Most start with a thought leadership programme and a monthly intelligence digest to keep the content informed by what is happening in their clients' sectors. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.",
         'cta_heading' => 'Your best thinking deserves an audience beyond your current network.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call. An honest conversation about whether Bluu makes sense for your practice and what building a content engine would look like from where you are now.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk. An honest conversation about whether Bluu makes sense for your practice and what building a content engine would look like from where you are now.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'recruitment-consultants' => array(
         'hero_tag'    => 'Agencies & consultants — Recruitment & talent consultants',
         'hero_headline' => 'Every recruiter looks the same on LinkedIn. Content is how the best ones stand out.',
         'hero_sub'    => 'Recruitment is one of the most competitive professional service categories on LinkedIn — and one of the most homogeneous. Market commentary, salary data, hiring trend analysis, and genuine talent market perspective are the tools that separate the specialists from the generalists. Bluu produces that content consistently so you build the authority others are still claiming without evidence.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Independent recruitment consultants and boutique talent agencies — typically solo to 6 people — operating in specialist niches where genuine market knowledge and visible authority meaningfully influence which recruiter a client chooses.',
         'who_items'   => array(
@@ -311,14 +311,14 @@ $si_content = array(
         'fit_body'    => "Bluu produces content that sounds like a genuine market expert, not a recruiter trying to sound like one. We monitor your specific talent market — what is moving, what is changing, what your target audience is discussing — and use that intelligence to produce commentary that reflects real market knowledge. The result is content that attracts the clients and candidates you want rather than the ones who were already going to call you.",
         'fit_proof'   => 'Retainers for recruitment consultants typically start at $1,500 per month covering LinkedIn content, a monthly market commentary newsletter, and quarterly market reports. Most see meaningful inbound improvement within 90 days of consistent publishing. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Stop looking like every other recruiter in your niche.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call and we will be honest about whether Bluu makes sense for your specific market and practice.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk and we will be honest about whether Bluu makes sense for your specific market and practice.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'business-coaches' => array(
         'hero_tag'    => 'Agencies & consultants — Business coaches & advisors',
         'hero_headline' => 'Your content is your proof of expertise. If it is sporadic, so is your pipeline.',
         'hero_sub'    => 'For business coaches and advisors, every piece of content is a direct client touchpoint — a demonstration of how you think, what you believe, and whether your perspective is worth paying for. Bluu runs the content operation that keeps that demonstration consistent every week, not just when you find a spare hour.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Business coaches and advisors — almost always solo — for whom content is the primary pipeline channel and whose publishing is currently too inconsistent to build the audience and authority their expertise deserves.',
         'who_items'   => array(
@@ -344,14 +344,14 @@ $si_content = array(
         'fit_body'    => "For coaches, the voice and authenticity of the content is everything — generic business advice under your name actively damages your brand with the sophisticated clients you want to attract. Bluu spends real time understanding how you think, what frameworks you use, and what your genuine perspective is before producing anything. The content we produce should feel like you had a great writing day, not like something produced by a content factory.",
         'fit_proof'   => 'Retainers for business coaches typically start at $1,500 per month covering LinkedIn content and a monthly newsletter. The monthly strategy conversation is the only consistent time commitment required from you — everything else is handled. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your next client is reading content right now. It should be yours.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk about your practice, your audience, and what a consistent content engine would change about your pipeline.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk about your practice, your audience, and what a consistent content engine would change about your pipeline.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'paid-media-agencies' => array(
         'hero_tag'    => 'Agencies & consultants — Performance & paid media agencies',
         'hero_headline' => 'Paid channels get results. Organic content compounds. You need both.',
         'hero_sub'    => 'Performance agencies are built around paid channels — and they are increasingly aware that clients want organic content as part of the mix. Bluu provides the research-led organic content engine that complements your paid expertise without requiring you to build a content team from scratch.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Performance and paid media agencies — typically 3 to 15 people — that are actively diversifying into organic content services for clients or want to build their own organic presence to reduce dependence on paid channels for their own marketing.',
         'who_items'   => array(
@@ -377,14 +377,14 @@ $si_content = array(
         'fit_body'    => "Bluu's research-led approach means we bring the same data-informed discipline to organic content that your team brings to paid — monitoring what is working in your clients' categories, what competitors are publishing, and what audience signals indicate about content appetite. Organic content managed with a performance agency mindset produces better results and more credible reporting than content produced on instinct.",
         'fit_proof'   => 'White-label arrangements for performance agencies are scoped based on client volume and content type. Own brand retainers start at $1,500 per month. Reach out to discuss a structure that fits your client base. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Add organic to your offering without adding headcount.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through whether a white-label arrangement or own brand content programme makes more sense for your agency right now.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through whether a white-label arrangement or own brand content programme makes more sense for your agency right now.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'full-service-agencies' => array(
         'hero_tag'    => 'Agencies & consultants — Full-service digital agencies',
         'hero_headline' => 'More client demand than content capacity. Bluu is the overflow partner.',
         'hero_sub'    => 'Full-service digital agencies often have more content demand from clients than their internal team can comfortably handle at quality. Bluu operates as a white-label production partner — reliable, invisible, and calibrated to your quality standard — so you can take on more work without the risk and cost of additional hires.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Full-service digital agencies — typically 10 to 30 people — that include content production as part of their client offering and periodically have more demand than their team can serve without compromising quality or burning out.',
         'who_items'   => array(
@@ -409,14 +409,14 @@ $si_content = array(
         'fit_body'    => "Bluu's brief-led production process is designed for agencies — we work from your brief, return structured first drafts, incorporate feedback cleanly, and deliver to agreed timelines. We maintain voice and style guides for each of your clients so there is no reset with each new piece. The arrangement is structured to be as low-friction as possible for your team — we are a production resource, not a relationship you need to manage.",
         'fit_proof'   => 'White-label arrangements are scoped based on monthly volume and content types. Standard turnaround is 48 to 72 hours from brief. Rush turnarounds available. Reach out to discuss a structure that fits your current client load. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Take on more work. Deliver the same standard. Keep your name on it.',
-        'cta_sub'     => "Book a 15-minute Discovery Call to talk through your agency's content volume and what a white-label production arrangement would look like.",
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => "Let's talk to talk through your agency's content volume and what a white-label production arrangement would look like.",
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'emerging-dtc-brands' => array(
         'hero_tag'    => 'E-commerce & DTC — Emerging DTC product brands',
         'hero_headline' => "Building a brand from scratch means everything competes for one person's time. Content should not be the thing that loses.",
         'hero_sub'    => 'Early-stage DTC brands are building product, managing supply chain, running ads, and trying to maintain a brand content presence — usually with one or two people. Something always falls behind. Bluu gives you a structured content engine so the brand narrative keeps moving even while everything else demands your attention.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Emerging DTC and direct-to-consumer product brands — typically 2 to 12 people — that are building a brand with a clear identity and growing audience but do not yet have the resources for a dedicated content team.',
         'who_items'   => array(
@@ -442,14 +442,14 @@ $si_content = array(
         'fit_body'    => "Bluu's content operation is built to run with minimal founder input — a monthly conversation and brand brief at the start is enough to keep the content authentic and on-brand. For a founder who is doing ten other things at the same time, that is the only model that actually works. The content does not stop because you are heads-down on a product launch or dealing with a supply chain issue.",
         'fit_proof'   => 'Retainers for emerging DTC brands typically start at $1,500 per month covering brand editorial content and email. The retainer is designed to feel like hiring a part-time brand content director rather than an agency relationship. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your brand has a story. It should not have to wait for you to find time to tell it.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk about your brand and what a consistent content engine would look like for where you are right now.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk about your brand and what a consistent content engine would look like for where you are right now.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'subscription-lifestyle' => array(
         'hero_tag'    => 'E-commerce & DTC — Subscription box & lifestyle brands',
         'hero_headline' => 'Subscribers stay for the community and content as much as the product.',
         'hero_sub'    => 'Subscription brands know better than anyone that retention is the metric that matters. And the brands with the best retention are the ones where subscribers feel part of something — a community, a lifestyle, a narrative that the product is part of but not all of. Bluu runs the content engine that builds and maintains that connection every month.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Subscription box and lifestyle brands — typically 3 to 15 people — where subscriber retention is the core commercial metric and content is a key lever for keeping subscribers engaged between deliveries.',
         'who_items'   => array(
@@ -475,14 +475,14 @@ $si_content = array(
         'fit_body'    => "Bluu's editorial approach is built around brand narrative rather than promotional calendars — which is exactly what subscription brands need. We understand the difference between content that sells and content that builds loyalty, and the editorial programmes we produce are designed to do the latter consistently. Retention is a content problem as much as a product problem, and we treat it that way.",
         'fit_proof'   => 'Retainers for subscription brands typically start at $1,500 to $2,000 per month covering brand editorial and email. The investment is best measured against subscriber retention improvement rather than direct attribution — community and content impact on churn over 90 to 180 days. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your subscribers are more engaged than your content gives them credit for. Meet them there.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk about your subscription model and what a retention-focused content programme would look like.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk about your subscription model and what a retention-focused content programme would look like.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'marketplaces-platforms' => array(
         'hero_tag'    => 'E-commerce & DTC — Marketplaces & platform businesses',
         'hero_headline' => "Two audiences, one team's bandwidth. There is only one solution.",
         'hero_sub'    => "Marketplace and platform businesses face a content challenge that single-sided businesses do not — they need to attract and engage both sides of their market simultaneously with content that often needs to feel entirely different to each audience. Bluu builds and runs a content operation that speaks to both coherently, without requiring you to double your team.",
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Two-sided marketplace and platform businesses — typically 5 to 25 people — where content needs to serve both a supply-side and demand-side audience with genuinely different needs, language, and motivations.',
         'who_items'   => array(
@@ -508,14 +508,14 @@ $si_content = array(
         'fit_body'    => "Bluu's research-led approach is particularly valuable for marketplace businesses where understanding both sides of the market is essential before producing content for either. We build a clear picture of both audiences before writing a word — their different motivations, their different language, and the content that will move each of them — and we produce content for both coherently within a single retainer.",
         'fit_proof'   => 'Retainers for marketplace businesses typically start at $2,000 to $2,500 per month given the dual-audience complexity. The investment is designed to serve both sides of the platform rather than requiring two separate content engagements. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Both sides of your market deserve better content than they are getting.',
-        'cta_sub'     => "Book a 15-minute Discovery Call to talk through your platform's two audiences and what a content operation that serves both would look like.",
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => "Let's talk to talk through your platform's two audiences and what a content operation that serves both would look like.",
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'financial-advisors' => array(
         'hero_tag'    => 'Professional services — Independent financial advisors',
         'hero_headline' => 'Your clients chose you because they trust your judgement. Content is how prospects find that judgement before they meet you.',
         'hero_sub'    => 'Independent financial advisors and wealth managers win clients through trust — and trust is built through demonstrated expertise over time. Market commentary, client education, and a consistent LinkedIn presence are the content tools that build that trust with people who have not yet met you. Bluu produces them consistently so you never have to find the time.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Independent financial advisors and wealth managers — typically solo or small team — who serve high-net-worth or professional clients and want to build a content presence that reflects their expertise and attracts the right kind of new client.',
         'who_items'   => array(
@@ -541,14 +541,14 @@ $si_content = array(
         'fit_body'    => "Bluu understands that financial content requires careful calibration — educational without crossing into specific advice, opinionated without making claims that create compliance exposure. Every piece we produce is reviewed by you before it goes anywhere, and our approach is to produce content that demonstrates your expertise and judgement rather than content that makes specific recommendations. The compliance checkpoint is yours — we make it as easy as possible.",
         'fit_proof'   => 'Retainers for financial advisors typically start at $1,500 to $2,000 per month covering market commentary and client education content. LinkedIn publishing is available as part of the retainer for advisors who want to build their professional network presence alongside the editorial programme. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your market perspective is worth publishing. Your future clients are looking for exactly that.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through your practice and what a compliant, consistent content programme would look like for your specific situation.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through your practice and what a compliant, consistent content programme would look like for your specific situation.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'boutique-law-firms' => array(
         'hero_tag'    => 'Professional services — Boutique law firms',
         'hero_headline' => 'You know more about your area of law than most. Very few people outside your current clients know that.',
         'hero_sub'    => 'Boutique law firms and specialist solicitors have a genuine expertise advantage over generalist practices. That advantage is almost entirely invisible to anyone who has not already been referred to them. Legal commentary, client education content, and a consistent LinkedIn presence are the tools that make that expertise findable — and Bluu produces them without the billable hour pressure taking over.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Boutique law firms and specialist solicitors — typically 2 to 15 partners — who operate in specialist practice areas and want to build a content presence that demonstrates their expertise to the clients and referral sources who are actively looking for exactly what they do.',
         'who_items'   => array(
@@ -574,14 +574,14 @@ $si_content = array(
         'fit_body'    => "Legal content requires a particular combination of accuracy, accessibility, and genuine insight — and most content agencies lack the discipline to produce all three simultaneously. Bluu's approach is to work closely with your fee-earners to extract the genuine expert perspective and then produce content that reflects that perspective clearly and compliantly. Every piece is reviewed by you before publication and the process is designed to take as little of your fee-earner time as possible.",
         'fit_proof'   => 'Retainers for boutique law firms typically start at $1,500 to $2,000 per month covering commentary and client education content. LinkedIn publishing for key partners is available as an addition. The monthly time commitment from fee-earners is typically one 45-minute conversation. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your expertise in your area of law is a genuine competitive advantage. Very few people can find it.',
-        'cta_sub'     => 'Book a 15-minute Discovery Call to talk through your practice area and what a consistent legal commentary programme would look like for your firm.',
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => 'Let's talk to talk through your practice area and what a consistent legal commentary programme would look like for your firm.',
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
     'management-consultancies' => array(
         'hero_tag'    => 'Professional services — Management & strategy consultancies',
         'hero_headline' => 'Published thinking is the credential that wins new clients. Most consultancies leave theirs unpublished.',
         'hero_sub'    => 'Management and strategy consultancies win work because of how they think — their frameworks, their perspective, their intellectual rigour. Almost none of that thinking is visible publicly. The firms that publish their perspective consistently build a compounding authority advantage over firms that rely entirely on reputation and referral. Bluu produces that published thinking so it does not have to wait for a consultant to find the time.',
-        'hero_cta'    => 'Book a Discovery Call', 'hero_url' => '/contact',
+        'hero_cta'    => 'Let's talk', 'hero_url' => '/contact',
         'who_heading' => 'Exactly who this is built for',
         'who_body'    => 'Boutique management and strategy consultancies — typically 2 to 10 consultants — where intellectual rigour and distinctive strategic frameworks are the primary differentiator from generalist or larger competitors, and where published thinking would meaningfully accelerate trust-building with prospective clients.',
         'who_items'   => array(
@@ -607,8 +607,8 @@ $si_content = array(
         'fit_body'    => "Management consultancies require a content partner who can engage with genuinely complex strategic thinking — not just organise it into publishable form, but challenge it, sharpen it, and make it accessible to a senior business audience without losing the intellectual rigour. Bluu's approach starts with deep briefings with your consultants, works iteratively through drafts, and produces content that your clients would recognise as reflecting how you actually think — not a simplified marketing version of it.",
         'fit_proof'   => 'Retainers for management consultancies typically start at $2,000 to $2,500 per month given the depth and intellectual standards required. Most start with a thought leadership programme for one or two partners and expand as the publishing rhythm is established and the results become visible. All content is structured for search and AI discovery from the first draft — built to SEO and AI crawl standard as a baseline, not an upgrade.',
         'cta_heading' => 'Your best thinking should be working harder than your referral relationships.',
-        'cta_sub'     => "Book a 15-minute Discovery Call to talk through your firm's intellectual frameworks and what a structured thought leadership programme would look like for your practice.",
-        'cta_p_label' => 'Book a Discovery Call', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
+        'cta_sub'     => "Let's talk to talk through your firm's intellectual frameworks and what a structured thought leadership programme would look like for your practice.",
+        'cta_p_label' => 'Let's talk', 'cta_p_url' => '/contact', 'cta_s_label' => 'See pricing', 'cta_s_url' => '/pricing',
     ),
 );
 
@@ -630,7 +630,7 @@ $_ind_url = isset( $_ind_url_map[ $_ind_name_raw ] ) ? home_url( $_ind_url_map[ 
 $hero_tag    = ( $gf ? get_field( 'si_hero_tag' )         : '' ) ?: ( $d['hero_tag']    ?? 'Use case' );
 $hero_hl     = ( $gf ? get_field( 'si_hero_headline' )    : '' ) ?: ( $d['hero_headline'] ?? get_the_title() );
 $hero_sub    = ( $gf ? get_field( 'si_hero_subheadline' ) : '' ) ?: ( $d['hero_sub']   ?? '' );
-$hero_cta    = ( $gf ? get_field( 'si_hero_cta_label' )   : '' ) ?: ( $d['hero_cta']   ?? 'Book a Discovery Call' );
+$hero_cta    = ( $gf ? get_field( 'si_hero_cta_label' )   : '' ) ?: ( $d['hero_cta']   ?? 'Let's talk' );
 $hero_url    = ( $gf ? get_field( 'si_hero_cta_url' )     : '' ) ?: home_url( $d['hero_url'] ?? '/contact' );
 
 $hero_img = $gf ? get_field( 'si_hero_image' ) : null;
@@ -673,8 +673,8 @@ $fit_body    = ( $gf ? get_field( 'si_fit_body' )    : '' ) ?: ( $d['fit_body'] 
 $fit_proof   = ( $gf ? get_field( 'si_fit_proof' )   : '' ) ?: ( $d['fit_proof']   ?? '' );
 
 $cta_heading = ( $gf ? get_field( 'si_cta_heading' )         : '' ) ?: ( $d['cta_heading'] ?? 'Ready to get started?' );
-$cta_sub     = ( $gf ? get_field( 'si_cta_subtext' )         : '' ) ?: ( $d['cta_sub']     ?? 'Book a 15-minute Discovery Call. No pitch, no pressure.' );
-$cta_p_label = ( $gf ? get_field( 'si_cta_primary_label' )   : '' ) ?: ( $d['cta_p_label'] ?? 'Book a Discovery Call' );
+$cta_sub     = ( $gf ? get_field( 'si_cta_subtext' )         : '' ) ?: ( $d['cta_sub']     ?? 'Let's talk. No pitch, no pressure.' );
+$cta_p_label = ( $gf ? get_field( 'si_cta_primary_label' )   : '' ) ?: ( $d['cta_p_label'] ?? 'Let's talk' );
 $cta_p_url   = ( $gf ? get_field( 'si_cta_primary_url' )     : '' ) ?: home_url( $d['cta_p_url'] ?? '/contact' );
 $cta_s_label = ( $gf ? get_field( 'si_cta_secondary_label' ) : '' ) ?: ( $d['cta_s_label'] ?? 'See pricing' );
 $cta_s_url   = ( $gf ? get_field( 'si_cta_secondary_url' )   : '' ) ?: home_url( $d['cta_s_url'] ?? '/pricing' );

@@ -198,9 +198,9 @@ get_header();
     <div class="container">
         <div class="animate-on-scroll">
             <h2 class="industry-pg-cta__headline">Not sure which use case fits?</h2>
-            <p class="industry-pg-cta__sub">Book a 15-minute Discovery Call — we will map your situation to the right use case and tell you honestly whether Bluu is the right fit.</p>
+            <p class="industry-pg-cta__sub">Let's talk — we will map your situation to the right use case and tell you honestly whether Bluu is the right fit.</p>
             <div class="industry-pg-cta__buttons">
-                <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large btn-primary--white">Book a Discovery Call</a>
+                <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary btn-primary--large btn-primary--white">Let's talk</a>
                 <a href="<?php echo esc_url( home_url( '/pricing' ) ); ?>" class="industry-btn-outline--cta">See pricing</a>
             </div>
         </div>

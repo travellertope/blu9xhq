@@ -46,7 +46,7 @@
         <!-- CTA Button -->
         <div class="site-header__cta">
             <?php
-            $cta_text = get_theme_mod( 'bluu_nav_cta_text', 'Book a Call' );
+            $cta_text = get_theme_mod( 'bluu_nav_cta_text', 'Let's talk' );
             $cta_url  = get_theme_mod( 'bluu_nav_cta_url',  home_url( '/contact' ) );
             ?>
             <a href="<?php echo esc_url( $cta_url ); ?>" class="btn-primary btn-primary--small">
@@ -92,7 +92,7 @@
         ?>
         <div class="mobile-nav__cta">
             <a href="<?php echo esc_url( get_theme_mod( 'bluu_nav_cta_url', home_url( '/contact' ) ) ); ?>" class="btn-primary" style="width:100%;justify-content:center;">
-                <?php echo esc_html( get_theme_mod( 'bluu_nav_cta_text', 'Book a Discovery Call' ) ); ?>
+                <?php echo esc_html( get_theme_mod( 'bluu_nav_cta_text', 'Let's talk' ) ); ?>
             </a>
         </div>
     </div>
