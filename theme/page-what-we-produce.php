@@ -204,7 +204,7 @@ get_header();
             <div class="wwp-sticky-layout__right">
 
                 <?php foreach ( $sections as $index => $section ) :
-                    $summary = wp_trim_words( $section['intro'], 18, '…' );
+                    $summary = wp_trim_words( $section['intro'], 28, '…' );
                     $count   = count( $section['rows'] );
                 ?>
                 <div class="wwp-card animate-on-scroll">
