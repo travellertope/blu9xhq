@@ -650,6 +650,125 @@
         initContactForm();
         initStickyHeader();
         initPricingTableSticky();
+        initWwpPanels();
     } );
+
+} )();
+
+/* ── What We Produce — off-canvas panels ──────────────────────────────────── */
+( function () {
+
+    function initWwpPanels() {
+        var overlay    = document.getElementById( 'wwp-overlay' );
+        var openBtns   = document.querySelectorAll( '[data-wwp-open]' );
+        var allPanels  = document.querySelectorAll( '.wwp-panel' );
+
+        if ( ! overlay || ! openBtns.length ) { return; }
+
+        var activePanel   = null;
+        var previousFocus = null;
+
+        function openPanel( index ) {
+            var panel = document.getElementById( 'wwp-panel-' + index );
+            if ( ! panel ) { return; }
+
+            previousFocus = document.activeElement;
+            activePanel   = panel;
+
+            // Show overlay (display first, then opacity for transition)
+            overlay.style.display = 'block';
+            requestAnimationFrame( function () {
+                overlay.classList.add( 'is-open' );
+                overlay.setAttribute( 'aria-hidden', 'false' );
+            } );
+
+            panel.classList.add( 'is-open' );
+            panel.setAttribute( 'aria-hidden', 'false' );
+            document.body.style.overflow = 'hidden';
+
+            // Focus first focusable element inside panel
+            var focusable = panel.querySelectorAll(
+                'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            );
+            if ( focusable.length ) {
+                setTimeout( function () { focusable[ 0 ].focus(); }, 50 );
+            }
+        }
+
+        function closePanel() {
+            if ( ! activePanel ) { return; }
+
+            activePanel.classList.remove( 'is-open' );
+            activePanel.setAttribute( 'aria-hidden', 'true' );
+            activePanel = null;
+
+            overlay.classList.remove( 'is-open' );
+            overlay.setAttribute( 'aria-hidden', 'true' );
+
+            document.body.style.overflow = '';
+
+            // Hide overlay after transition ends
+            overlay.addEventListener( 'transitionend', function handler() {
+                overlay.style.display = 'none';
+                overlay.removeEventListener( 'transitionend', handler );
+            } );
+
+            if ( previousFocus ) {
+                previousFocus.focus();
+                previousFocus = null;
+            }
+        }
+
+        // Open buttons
+        openBtns.forEach( function ( btn ) {
+            btn.addEventListener( 'click', function () {
+                openPanel( btn.getAttribute( 'data-wwp-open' ) );
+            } );
+        } );
+
+        // Close buttons (inside panels)
+        allPanels.forEach( function ( panel ) {
+            panel.querySelectorAll( '[data-wwp-close]' ).forEach( function ( btn ) {
+                btn.addEventListener( 'click', closePanel );
+            } );
+        } );
+
+        // Overlay click
+        overlay.addEventListener( 'click', closePanel );
+
+        // Escape key
+        document.addEventListener( 'keydown', function ( e ) {
+            if ( e.key === 'Escape' && activePanel ) {
+                closePanel();
+            }
+        } );
+
+        // Focus trap
+        document.addEventListener( 'keydown', function ( e ) {
+            if ( e.key !== 'Tab' || ! activePanel ) { return; }
+
+            var focusable = Array.from( activePanel.querySelectorAll(
+                'button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+            ) );
+            if ( ! focusable.length ) { return; }
+
+            var first = focusable[ 0 ];
+            var last  = focusable[ focusable.length - 1 ];
+
+            if ( e.shiftKey ) {
+                if ( document.activeElement === first ) {
+                    e.preventDefault();
+                    last.focus();
+                }
+            } else {
+                if ( document.activeElement === last ) {
+                    e.preventDefault();
+                    first.focus();
+                }
+            }
+        } );
+    }
+
+    document.addEventListener( 'DOMContentLoaded', initWwpPanels );
 
 } )();

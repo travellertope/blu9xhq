@@ -195,6 +195,106 @@ get_header();
     </div>
 </section>
 
+<!-- ── Service cards grid ────────────────────────────────────────────────────── -->
+<section class="wwp-cards" aria-label="<?php esc_attr_e( 'Content categories', 'bluu-interactive' ); ?>">
+    <div class="container">
+
+        <div class="wwp-cards__header animate-on-scroll">
+            <h2 class="wwp-cards__headline"><?php esc_html_e( 'Every content type, in one place', 'bluu-interactive' ); ?></h2>
+            <p class="wwp-cards__sub"><?php esc_html_e( 'Seven categories covering every channel, every format, and every stage of the funnel. Select any category to see the full deliverable breakdown.', 'bluu-interactive' ); ?></p>
+        </div>
+
+        <div class="wwp-cards__grid">
+            <?php foreach ( $sections as $index => $section ) :
+                $summary = wp_trim_words( $section['intro'], 18, '…' );
+                $count   = count( $section['rows'] );
+            ?>
+            <div class="wwp-card animate-on-scroll">
+                <div class="wwp-card__inner">
+                    <div class="wwp-card__top">
+                        <span class="wwp-card__number" aria-hidden="true"><?php echo esc_html( $section['number'] ); ?></span>
+                        <h3 class="wwp-card__title"><?php echo esc_html( $section['title'] ); ?></h3>
+                        <p class="wwp-card__summary"><?php echo esc_html( $summary ); ?></p>
+                    </div>
+                    <div class="wwp-card__foot">
+                        <span class="wwp-card__count">
+                            <?php echo esc_html( $count ); ?> deliverable<?php echo $count !== 1 ? 's' : ''; ?>
+                        </span>
+                        <button
+                            class="wwp-card__btn"
+                            data-wwp-open="<?php echo esc_attr( $index ); ?>"
+                            aria-haspopup="dialog"
+                        >
+                            <?php esc_html_e( 'See full breakdown', 'bluu-interactive' ); ?>
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+
+    </div>
+</section>
+
+<!-- ── Off-canvas modals ──────────────────────────────────────────────────────── -->
+<div class="wwp-overlay" id="wwp-overlay" aria-hidden="true"></div>
+
+<?php foreach ( $sections as $index => $section ) : ?>
+<div
+    class="wwp-panel"
+    id="wwp-panel-<?php echo esc_attr( $index ); ?>"
+    role="dialog"
+    aria-modal="true"
+    aria-label="<?php echo esc_attr( $section['title'] ); ?>"
+    aria-hidden="true"
+>
+    <div class="wwp-panel__header">
+        <div class="wwp-panel__meta">
+            <span class="wwp-panel__number" aria-hidden="true"><?php echo esc_html( $section['number'] ); ?></span>
+            <h2 class="wwp-panel__title"><?php echo esc_html( $section['title'] ); ?></h2>
+        </div>
+        <button class="wwp-panel__close" data-wwp-close aria-label="<?php esc_attr_e( 'Close panel', 'bluu-interactive' ); ?>">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="wwp-panel__body">
+        <p class="wwp-panel__intro"><?php echo esc_html( $section['intro'] ); ?></p>
+
+        <div class="wwp-panel__table-wrap">
+            <table class="wwp-panel__table">
+                <thead>
+                    <tr>
+                        <th scope="col"><?php esc_html_e( 'Deliverable', 'bluu-interactive' ); ?></th>
+                        <th scope="col"><?php esc_html_e( 'What it is', 'bluu-interactive' ); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ( $section['rows'] as $i => $row ) : ?>
+                    <tr class="<?php echo ( $i % 2 !== 0 ) ? 'wwp-panel__row--alt' : ''; ?>">
+                        <td class="wwp-panel__cell--deliverable"><?php echo esc_html( $row['deliverable'] ); ?></td>
+                        <td class="wwp-panel__cell--what"><?php echo esc_html( $row['what'] ); ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="wwp-panel__footer">
+        <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary">
+            <?php esc_html_e( 'Book a Discovery Call', 'bluu-interactive' ); ?>
+        </a>
+        <button class="btn-text" data-wwp-close><?php esc_html_e( 'Close', 'bluu-interactive' ); ?></button>
+    </div>
+</div>
+<?php endforeach; ?>
+
 <!-- ── Content sections 01–07 ────────────────────────────────────────────────── -->
 <section class="wwp-sections" aria-label="<?php esc_attr_e( 'All deliverables', 'bluu-interactive' ); ?>">
     <div class="container">
