@@ -5,9 +5,6 @@
  * @package bluu-interactive
  */
 
-// ── ACF fields with defaults ──────────────────────────────────────────────────
-$contact_email = ( function_exists( 'get_field' ) ? get_field( 'contact_email' ) : '' ) ?: 'hello@bluuhq.com';
-
 get_header();
 ?>
 
@@ -30,40 +27,7 @@ get_header();
 			<!-- ── Left: Context column ──────────────────────────────────── -->
 			<aside class="contact-sidebar">
 
-				<!-- Contact Information -->
-				<div class="contact-info animate-on-scroll">
-					<h2 class="contact-info__heading"><?php esc_html_e( 'Contact information', 'bluu-interactive' ); ?></h2>
-
-					<ul class="contact-info__list">
-
-						<li class="contact-info__item">
-							<span class="contact-info__icon" aria-hidden="true">
-								<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-							</span>
-							<div>
-								<p class="contact-info__label"><?php esc_html_e( 'Email', 'bluu-interactive' ); ?></p>
-								<a class="contact-info__value" href="mailto:<?php echo esc_attr( $contact_email ); ?>">
-									<?php echo esc_html( $contact_email ); ?>
-								</a>
-							</div>
-						</li>
-
-<li class="contact-info__item">
-							<span class="contact-info__icon" aria-hidden="true">
-								<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								<svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-							</span>
-							<div>
-								<p class="contact-info__label"><?php esc_html_e( 'Response time', 'bluu-interactive' ); ?></p>
-								<p class="contact-info__value"><?php esc_html_e( 'We respond within 24 hours. A real person reads every message.', 'bluu-interactive' ); ?></p>
-							</div>
-						</li>
-
-					</ul>
-				</div><!-- /.contact-info -->
-
-				<!-- Our Process -->
+			<!-- Our Process -->
 				<div class="contact-process animate-on-scroll">
 					<h2 class="contact-process__heading"><?php esc_html_e( 'What happens when you reach out', 'bluu-interactive' ); ?></h2>
 
