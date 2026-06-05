@@ -228,12 +228,14 @@
     z-index: 300;
     background-color: rgba(10,25,47,0.5);
     opacity: 0;
-    transition: opacity 0.25s ease;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .wwp-overlay.is-open {
     display: block;
     opacity: 1;
+    visibility: visible;
 }
 
 /* ── Off-canvas panel ─────────────────────────────────────────────────────── */
@@ -725,6 +727,109 @@
     width: 100%;
     justify-content: center;
     text-align: center;
+}
+
+/* ── Repurposing card (8th card — distinct dark treatment) ───────────────── */
+
+.wwp-card--repurpose {
+    background-color: var(--md-primary, #0a192f);
+    border-color: transparent;
+    border-top-color: var(--md-accent);
+}
+
+.wwp-card--repurpose .wwp-card__number {
+    color: rgba(255,255,255,0.5);
+}
+
+.wwp-card--repurpose .wwp-card__title {
+    color: #ffffff;
+}
+
+.wwp-card--repurpose .wwp-card__summary {
+    color: rgba(255,255,255,0.75);
+}
+
+.wwp-card--repurpose .wwp-card__divider {
+    border-color: rgba(255,255,255,0.12);
+}
+
+.wwp-card--repurpose .wwp-card__count {
+    color: rgba(255,255,255,0.5);
+    background-color: rgba(255,255,255,0.08);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.wwp-card__btn--repurpose {
+    background-color: var(--md-accent);
+    color: #ffffff;
+    border-color: var(--md-accent);
+}
+
+.wwp-card__btn--repurpose:hover,
+.wwp-card__btn--repurpose:focus-visible {
+    background-color: transparent;
+    color: var(--md-accent);
+}
+
+/* ── Repurposing panel content ────────────────────────────────────────────── */
+
+.wwp-panel__repurpose-wrap {
+    margin-top: var(--space-5);
+    padding: var(--space-5);
+    background-color: var(--md-surface-variant);
+    border-radius: 8px;
+}
+
+.wwp-panel__repurpose-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-muted);
+    margin: 0 0 var(--space-4);
+}
+
+.wwp-panel__repurpose-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    counter-reset: repurpose-counter;
+}
+
+.wwp-panel__repurpose-list li {
+    counter-increment: repurpose-counter;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-size: 0.9375rem;
+    color: var(--md-on-surface);
+    line-height: 1.5;
+}
+
+.wwp-panel__repurpose-list li::before {
+    content: counter(repurpose-counter);
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--md-accent);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border-radius: 50%;
+    margin-top: 1px;
+}
+
+.wwp-panel__repurpose-note {
+    margin: var(--space-5) 0 0;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--md-on-surface-muted);
 }
 
 /* ── Responsive ───────────────────────────────────────────────────────────── */

@@ -234,9 +234,33 @@ get_header();
                 </div>
             </div>
             <?php endforeach; ?>
+        </div><!-- /.wwp-cards__grid -->
+
+        <!-- 8th card: How repurposing works — distinct dark treatment -->
+        <div class="wwp-card wwp-card--repurpose animate-on-scroll">
+            <div class="wwp-card__inner">
+                <div class="wwp-card__top">
+                    <span class="wwp-card__number">How it works</span>
+                    <h3 class="wwp-card__title">Content repurposing</h3>
+                    <p class="wwp-card__summary">Every long-form piece becomes nine assets — each adapted for the mindset of a specific channel, not copy-pasted.</p>
+                </div>
+                <div class="wwp-card__foot">
+                    <span class="wwp-card__count">9 assets per piece</span>
+                    <button
+                        class="wwp-card__btn wwp-card__btn--repurpose"
+                        data-wwp-open="repurpose"
+                        aria-haspopup="dialog"
+                    >
+                        <?php esc_html_e( 'See how it works', 'bluu-interactive' ); ?>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="square" stroke-linejoin="miter" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
-    </div>
+    </div><!-- /.container -->
 </section>
 
 <!-- ── Off-canvas modals ──────────────────────────────────────────────────────── -->
@@ -295,32 +319,51 @@ get_header();
 </div>
 <?php endforeach; ?>
 
-<!-- ── How repurposing works ─────────────────────────────────────────────────── -->
-<section class="wwp-repurpose" aria-label="<?php esc_attr_e( 'How repurposing works', 'bluu-interactive' ); ?>">
-    <div class="container">
-
-        <div class="wwp-repurpose__header animate-on-scroll">
-            <h2 class="wwp-repurpose__headline"><?php esc_html_e( 'How repurposing works', 'bluu-interactive' ); ?></h2>
-            <p class="wwp-repurpose__sub"><?php esc_html_e( 'Every long-form piece Bluu produces comes with a full set of repurposed assets. The thinking happens once. The content works across every channel.', 'bluu-interactive' ); ?></p>
+<!-- Repurposing panel -->
+<div
+    class="wwp-panel"
+    id="wwp-panel-repurpose"
+    role="dialog"
+    aria-modal="true"
+    aria-label="<?php esc_attr_e( 'How content repurposing works', 'bluu-interactive' ); ?>"
+    aria-hidden="true"
+>
+    <div class="wwp-panel__header">
+        <div class="wwp-panel__meta">
+            <span class="wwp-panel__number"><?php esc_html_e( 'How it works', 'bluu-interactive' ); ?></span>
+            <h2 class="wwp-panel__title"><?php esc_html_e( 'Content repurposing', 'bluu-interactive' ); ?></h2>
         </div>
+        <button class="wwp-panel__close" data-wwp-close aria-label="<?php esc_attr_e( 'Close panel', 'bluu-interactive' ); ?>">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+    </div>
 
-        <div class="wwp-repurpose__card animate-on-scroll">
-            <p class="wwp-repurpose__card-label"><?php esc_html_e( 'One blog post becomes:', 'bluu-interactive' ); ?></p>
-            <ol class="wwp-repurpose__list">
-                <?php foreach ( $repurposed_assets as $asset ) : ?>
-                <li class="wwp-repurpose__item">
-                    <span class="wwp-repurpose__item-text"><?php echo esc_html( $asset ); ?></span>
+    <div class="wwp-panel__body">
+        <p class="wwp-panel__intro"><?php esc_html_e( 'Every long-form piece Bluu produces comes with a full set of repurposed assets. The thinking happens once. The content works across every channel.', 'bluu-interactive' ); ?></p>
+
+        <div class="wwp-panel__repurpose-wrap">
+            <p class="wwp-panel__repurpose-label"><?php esc_html_e( 'One blog post becomes:', 'bluu-interactive' ); ?></p>
+            <ol class="wwp-panel__repurpose-list">
+                <?php foreach ( $repurposed_assets as $i => $asset ) : ?>
+                <li class="wwp-panel__repurpose-item">
+                    <span class="wwp-panel__repurpose-num"><?php echo esc_html( $i + 1 ); ?></span>
+                    <span class="wwp-panel__repurpose-text"><?php echo esc_html( $asset ); ?></span>
                 </li>
                 <?php endforeach; ?>
             </ol>
+            <p class="wwp-panel__repurpose-note"><?php esc_html_e( 'Nine assets from one piece of research. Not copy-pasted — adapted for the mindset of each channel\'s audience, in the format that earns attention on that specific platform.', 'bluu-interactive' ); ?></p>
         </div>
-
-        <p class="wwp-repurpose__footer-note animate-on-scroll">
-            <?php esc_html_e( 'That is nine assets from one piece of research. Not copy-pasted. Adapted — written for the mindset of each channel\'s audience, in the format that earns attention on that specific platform.', 'bluu-interactive' ); ?>
-        </p>
-
     </div>
-</section>
+
+    <div class="wwp-panel__footer">
+        <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-primary">
+            <?php esc_html_e( 'Book a Discovery Call', 'bluu-interactive' ); ?>
+        </a>
+        <button class="btn-text" data-wwp-close><?php esc_html_e( 'Close', 'bluu-interactive' ); ?></button>
+    </div>
+</div>
 
 <!-- ── What every deliverable includes ──────────────────────────────────────── -->
 <section class="wwp-standards" aria-label="<?php esc_attr_e( 'What every deliverable includes', 'bluu-interactive' ); ?>">

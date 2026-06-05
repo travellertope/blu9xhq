@@ -768,6 +768,10 @@
         } );
     }
 
-    document.addEventListener( 'DOMContentLoaded', initWwpPanels );
+    if ( document.readyState === 'loading' ) {
+        document.addEventListener( 'DOMContentLoaded', initWwpPanels );
+    } else {
+        initWwpPanels();
+    }
 
 } )();
