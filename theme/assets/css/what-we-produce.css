@@ -224,7 +224,7 @@
 .wwp-overlay {
     position: fixed;
     inset: 0;
-    z-index: 300;
+    z-index: 10000;
     background-color: rgba(10,25,47,0.5);
     opacity: 0;
     visibility: hidden;
@@ -245,7 +245,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    z-index: 400;
+    z-index: 10001;
     width: min(640px, 100vw);
     background-color: var(--md-surface);
     display: flex;
