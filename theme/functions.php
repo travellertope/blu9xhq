@@ -106,13 +106,11 @@ function bluu_enqueue_assets() {
         );
     }
 
-    // What We Produce page styles — loaded on every page (scoped via .wwp- prefix)
-    wp_enqueue_style(
-        'bluu-wwp-css',
-        get_template_directory_uri() . '/assets/css/what-we-produce.css',
-        array( 'bluu-main-css' ),
-        $version
-    );
+    // What We Produce page styles — inlined after main.css (no file path dependency)
+    $wwp_css_path = get_template_directory() . '/assets/css/what-we-produce.css';
+    if ( file_exists( $wwp_css_path ) ) {
+        wp_add_inline_style( 'bluu-main-css', file_get_contents( $wwp_css_path ) ); // phpcs:ignore
+    }
 
     // Main JavaScript
     wp_enqueue_script(
