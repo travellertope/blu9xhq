@@ -5770,6 +5770,8 @@ a.contact-info__value:hover {
 
 .wwp-cards {
     padding: var(--space-9) 0;
+    background-color: var(--md-surface-subtle);
+    border-top: 1px solid rgba( 0, 0, 0, 0.06 );
     border-bottom: 1px solid rgba( 0, 0, 0, 0.06 );
 }
 
@@ -5800,14 +5802,16 @@ a.contact-info__value:hover {
 }
 
 .wwp-card {
-    border: 1px solid rgba( 0, 0, 0, 0.08 );
+    border: 1px solid rgba( 0, 0, 0, 0.10 );
+    border-top: 3px solid var(--md-accent);
     background-color: var(--md-surface);
+    box-shadow: var(--shadow-1);
     transition: box-shadow 0.18s ease, transform 0.18s ease;
 }
 
 .wwp-card:hover {
     box-shadow: var(--shadow-2);
-    transform: translateY( -2px );
+    transform: translateY( -3px );
 }
 
 .wwp-card__inner {
@@ -5872,6 +5876,8 @@ a.contact-info__value:hover {
     gap: 6px;
     font-size: 0.8125rem;
     font-weight: 600;
+    font-family: inherit;
+    line-height: 1;
     color: var(--md-accent);
     background: none;
     border: none;
