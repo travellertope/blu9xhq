@@ -78,6 +78,8 @@ add_action( 'after_setup_theme', 'bluu_add_image_sizes' );
 
 // ── Enqueue Scripts & Styles ───────────────────────────────────────────────────
 function bluu_enqueue_assets() {
+    $js_ver  = filemtime( get_template_directory() . '/assets/js/main.js' );
+    $css_ver = filemtime( get_template_directory() . '/assets/css/main.css' );
     $version = wp_get_theme()->get( 'Version' );
 
     // Google Fonts – Plus Jakarta Sans
@@ -93,7 +95,7 @@ function bluu_enqueue_assets() {
         'bluu-main-css',
         get_template_directory_uri() . '/assets/css/main.css',
         array( 'bluu-google-fonts' ),
-        $version
+        $css_ver
     );
 
     // Industry page styles — loaded on industry + sub-industry templates only
@@ -117,7 +119,7 @@ function bluu_enqueue_assets() {
         'bluu-main-js',
         get_template_directory_uri() . '/assets/js/main.js',
         array(),
-        $version,
+        $js_ver,
         true // Load in footer
     );
 
