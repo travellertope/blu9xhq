@@ -650,7 +650,6 @@
         initContactForm();
         initStickyHeader();
         initPricingTableSticky();
-        initWwpPanels();
     } );
 
 } )();

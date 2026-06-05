@@ -218,7 +218,7 @@ get_header();
                     </div>
                     <div class="wwp-card__foot">
                         <span class="wwp-card__count">
-                            <?php echo esc_html( $count ); ?> deliverable<?php echo $count !== 1 ? 's' : ''; ?>
+                            <?php echo esc_html( $count ); ?> content type<?php echo $count !== 1 ? 's' : ''; ?>
                         </span>
                         <button
                             class="wwp-card__btn"
@@ -294,44 +294,6 @@ get_header();
     </div>
 </div>
 <?php endforeach; ?>
-
-<!-- ── Content sections 01–07 ────────────────────────────────────────────────── -->
-<section class="wwp-sections" aria-label="<?php esc_attr_e( 'All deliverables', 'bluu-interactive' ); ?>">
-    <div class="container">
-
-        <?php foreach ( $sections as $section ) : ?>
-        <div class="wwp-section animate-on-scroll">
-
-            <div class="wwp-section__head">
-                <span class="wwp-section__number" aria-hidden="true"><?php echo esc_html( $section['number'] ); ?></span>
-                <h2 class="wwp-section__title"><?php echo esc_html( $section['title'] ); ?></h2>
-                <p class="wwp-section__intro"><?php echo esc_html( $section['intro'] ); ?></p>
-            </div>
-
-            <div class="wwp-table-wrap">
-                <table class="wwp-table" role="table">
-                    <thead>
-                        <tr>
-                            <th scope="col" class="wwp-table__col-deliverable"><?php esc_html_e( 'Deliverable', 'bluu-interactive' ); ?></th>
-                            <th scope="col" class="wwp-table__col-what"><?php esc_html_e( 'What it is', 'bluu-interactive' ); ?></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ( $section['rows'] as $i => $row ) : ?>
-                        <tr class="wwp-table__row<?php echo ( $i % 2 !== 0 ) ? ' wwp-table__row--alt' : ''; ?>">
-                            <td class="wwp-table__cell wwp-table__cell--deliverable"><?php echo esc_html( $row['deliverable'] ); ?></td>
-                            <td class="wwp-table__cell wwp-table__cell--what"><?php echo esc_html( $row['what'] ); ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-        <?php endforeach; ?>
-
-    </div>
-</section>
 
 <!-- ── How repurposing works ─────────────────────────────────────────────────── -->
 <section class="wwp-repurpose" aria-label="<?php esc_attr_e( 'How repurposing works', 'bluu-interactive' ); ?>">
