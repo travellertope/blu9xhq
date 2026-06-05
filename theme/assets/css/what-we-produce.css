@@ -74,16 +74,37 @@
 
 /* ── Intro ────────────────────────────────────────────────────────────────── */
 
-.wwp-intro {
-    padding: var(--space-8) 0;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
+/* ── Sticky intro + scrolling cards layout ────────────────────────────────── */
+
+.wwp-sticky-layout {
+    background-color: var(--md-surface-subtle);
+    border-top: 1px solid rgba(0,0,0,0.06);
+}
+
+.wwp-sticky-layout__inner {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-10);
+    align-items: start;
+}
+
+.wwp-sticky-layout__left {
+    position: sticky;
+    top: calc(var(--header-height, 72px) + var(--space-8));
+    padding: var(--space-10) 0;
 }
 
 .wwp-intro__inner {
-    max-width: 680px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-5);
+}
+
+.wwp-sticky-layout__right {
+    padding: var(--space-10) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
 }
 
 .wwp-intro__heading {
@@ -103,38 +124,6 @@
 
 /* ── Service cards grid ───────────────────────────────────────────────────── */
 
-.wwp-cards {
-    padding: var(--space-9) 0;
-    background-color: var(--md-surface-subtle);
-    border-top: 1px solid rgba(0,0,0,0.06);
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-.wwp-cards__header {
-    max-width: 600px;
-    margin-bottom: var(--space-7);
-}
-
-.wwp-cards__headline {
-    font-size: clamp(1.5rem, 3vw, 2rem);
-    font-weight: 400;
-    letter-spacing: -0.015em;
-    color: var(--md-on-surface);
-    margin: 0 0 var(--space-4);
-}
-
-.wwp-cards__sub {
-    font-size: 1rem;
-    line-height: 1.7;
-    color: var(--md-on-surface-variant);
-    margin: 0;
-}
-
-.wwp-cards__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-5);
-}
 
 .wwp-card {
     border: 1px solid rgba(0,0,0,0.10);
@@ -843,8 +832,8 @@
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 
 @media (max-width: 1024px) {
-    .wwp-cards__grid {
-        grid-template-columns: repeat(2, 1fr);
+    .wwp-sticky-layout__inner {
+        grid-template-columns: 1fr 1fr;
     }
 
     .wwp-cta__inner {
@@ -873,8 +862,13 @@
         padding: var(--space-9) 0 var(--space-7);
     }
 
-    .wwp-cards__grid {
+    .wwp-sticky-layout__inner {
         grid-template-columns: 1fr;
+    }
+
+    .wwp-sticky-layout__left {
+        position: static;
+        padding-bottom: 0;
     }
 
     .wwp-panel {
