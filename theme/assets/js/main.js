@@ -674,12 +674,8 @@
             previousFocus = document.activeElement;
             activePanel   = panel;
 
-            // Show overlay (display first, then opacity for transition)
-            overlay.style.display = 'block';
-            requestAnimationFrame( function () {
-                overlay.classList.add( 'is-open' );
-                overlay.setAttribute( 'aria-hidden', 'false' );
-            } );
+            overlay.classList.add( 'is-open' );
+            overlay.setAttribute( 'aria-hidden', 'false' );
 
             panel.classList.add( 'is-open' );
             panel.setAttribute( 'aria-hidden', 'false' );
@@ -706,11 +702,6 @@
 
             document.body.style.overflow = '';
 
-            // Hide overlay after transition ends
-            overlay.addEventListener( 'transitionend', function handler() {
-                overlay.style.display = 'none';
-                overlay.removeEventListener( 'transitionend', handler );
-            } );
 
             if ( previousFocus ) {
                 previousFocus.focus();
