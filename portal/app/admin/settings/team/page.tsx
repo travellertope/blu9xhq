@@ -187,8 +187,14 @@ function AssignClientsModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ assignedClients: Array.from(selected) }),
       });
+      if (!res.ok) {
+        const ct = res.headers.get("content-type") ?? "";
+        const msg = ct.includes("application/json")
+          ? ((await res.json()).error ?? "Failed to save")
+          : `Server error (${res.status})`;
+        throw new Error(msg);
+      }
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to save");
       toast.success(`Clients updated for ${member.name}`);
       // Refresh the team member's session so their assignedClients updates immediately
       await update({ refreshAssignedClients: true }).catch(() => {});
