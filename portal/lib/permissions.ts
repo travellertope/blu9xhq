@@ -26,7 +26,7 @@ export const PERMISSIONS: Record<string, Role[]> = {
   mark_invoices_paid:    ["super_admin", "billing_manager"],
   view_invoices:         ["super_admin", "account_manager", "billing_manager", "support_staff", "viewer"],
   compose_send_emails:   ["super_admin", "account_manager", "billing_manager", "support_staff"],
-  build_sequences:       ["super_admin"],
+  build_sequences:       ["super_admin", "account_manager", "support_staff"],
   log_communications:    ["super_admin", "account_manager", "billing_manager", "support_staff"],
   upload_manage_files:   ["super_admin", "account_manager", "support_staff"],
   delete_files:          ["super_admin"],
