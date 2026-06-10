@@ -131,6 +131,138 @@ function InviteModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: (
   );
 }
 
+// ─── Assign Clients Modal ──────────────────────────────────────────────────────
+
+interface Client {
+  id: number;
+  title: { rendered: string };
+  acf: { company_name?: string };
+}
+
+function AssignClientsModal({
+  member,
+  onClose,
+  onSuccess,
+}: {
+  member: TeamMember;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [clients, setClients]       = useState<Client[]>([]);
+  const [loading, setLoading]       = useState(true);
+  const [search, setSearch]         = useState("");
+  const [selected, setSelected]     = useState<Set<number>>(new Set(member.bluuhq_assigned_clients));
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/admin/clients?per_page=100&orderby=title&order=asc")
+      .then(r => r.json())
+      .then(d => setClients(d.clients ?? []))
+      .catch(() => toast.error("Failed to load clients"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = clients.filter(c => {
+    const name    = c.title.rendered.toLowerCase();
+    const company = (c.acf.company_name ?? "").toLowerCase();
+    const q       = search.toLowerCase();
+    return name.includes(q) || company.includes(q);
+  });
+
+  function toggle(id: number) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  async function handleSave() {
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/team/${member.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignedClients: Array.from(selected) }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to save");
+      toast.success(`Clients updated for ${member.name}`);
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 flex flex-col max-h-[80vh]">
+        <h2 className="text-lg font-semibold mb-1">Assign Clients</h2>
+        <p className="text-sm text-gray-500 mb-4">{member.name}</p>
+
+        <input
+          type="text"
+          placeholder="Search clients…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full border rounded-md px-3 py-2 text-sm mb-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <div className="flex-1 overflow-y-auto border rounded-md divide-y min-h-0">
+          {loading ? (
+            <p className="text-sm text-gray-400 text-center py-6">Loading…</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-6">No clients found</p>
+          ) : (
+            filtered.map(c => (
+              <label
+                key={c.id}
+                className="flex items-center gap-3 px-3 py-2.5 hover:bg-gray-50 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  checked={selected.has(c.id)}
+                  onChange={() => toggle(c.id)}
+                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{c.title.rendered}</p>
+                  {c.acf.company_name && (
+                    <p className="text-xs text-gray-500">{c.acf.company_name}</p>
+                  )}
+                </div>
+              </label>
+            ))
+          )}
+        </div>
+
+        <div className="flex items-center justify-between mt-4 pt-3 border-t">
+          <span className="text-xs text-gray-400">{selected.size} client{selected.size !== 1 ? "s" : ""} selected</span>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={submitting}
+              className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+            >
+              {submitting ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Edit Role Modal ───────────────────────────────────────────────────────────
 
 function EditRoleModal({
@@ -216,6 +348,7 @@ function ActiveMembersTab({
   const { isSuper } = usePermissions();
   const [showInvite, setShowInvite] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
 
   const active = members.filter(m => m.bluuhq_status === "active");
@@ -289,6 +422,14 @@ function ActiveMembersTab({
                       >
                         Edit Role
                       </button>
+                      {member.bluuhq_role === ROLES.ACCOUNT_MANAGER && (
+                        <button
+                          onClick={() => setAssigningMember(member)}
+                          className="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
+                        >
+                          Assign Clients
+                        </button>
+                      )}
                       <button
                         onClick={() => handleDeactivate(member)}
                         disabled={actionLoading === member.id}
@@ -317,6 +458,13 @@ function ActiveMembersTab({
         <EditRoleModal
           member={editingMember}
           onClose={() => setEditingMember(null)}
+          onSuccess={onRefresh}
+        />
+      )}
+      {assigningMember && (
+        <AssignClientsModal
+          member={assigningMember}
+          onClose={() => setAssigningMember(null)}
           onSuccess={onRefresh}
         />
       )}
