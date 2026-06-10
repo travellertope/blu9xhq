@@ -47,7 +47,7 @@ export async function wpRestFetch<T>(path: string, options: FetchOptions = {}): 
   }
   try {
     return JSON.parse(text) as T;
-  } catch {
+  } catch (_e) {
     throw new Error(`WP API returned non-JSON response — WordPress may be in maintenance mode or the endpoint does not exist`);
   }
 }
