@@ -2,8 +2,10 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import type { UserRole } from "@/types";
 
-const WORDPRESS_URL = process.env.WORDPRESS_URL!;
-const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET!;
+const WORDPRESS_URL    = process.env.WORDPRESS_URL!;
+const NEXTAUTH_SECRET  = process.env.NEXTAUTH_SECRET!;
+const WP_APP_USERNAME  = process.env.WP_APP_USERNAME!;
+const WP_APP_PASSWORD  = process.env.WP_APP_PASSWORD!;
 
 // ─── WP credential validation ─────────────────────────────────────────────────
 
@@ -152,7 +154,7 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session: sessionData }) {
       if (user) {
         const u = user as any;
         token.role            = u.role;
@@ -162,6 +164,25 @@ export const authOptions: NextAuthOptions = {
         token.assignedClients = u.assignedClients;
         token.status          = u.status;
       }
+
+      // Re-fetch assignedClients from WP when explicitly triggered
+      // (e.g. after super admin updates the team member's assigned clients)
+      if (trigger === "update" && (sessionData as any)?.refreshAssignedClients && token.wpUserId) {
+        try {
+          const auth = Buffer.from(`${WP_APP_USERNAME}:${WP_APP_PASSWORD}`).toString("base64");
+          const res  = await fetch(`${WORDPRESS_URL}/wp-json/wp/v2/users/${token.wpUserId}`, {
+            headers: { Authorization: `Basic ${auth}` },
+            cache: "no-store",
+          });
+          if (res.ok) {
+            const wpUser = await res.json();
+            token.assignedClients = wpUser.meta?.bluuhq_assigned_clients ?? [];
+          }
+        } catch (_e) {
+          // keep existing assignedClients if refresh fails
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {

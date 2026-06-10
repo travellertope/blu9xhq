@@ -3,6 +3,7 @@
 import { withPermission } from "@/components/shared/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useState, useEffect, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { RoleBadge } from "@/components/admin/RoleBadge";
 import { ROLES, ROLE_LABELS, type Role } from "@/lib/permissions";
 import { toast } from "sonner";
@@ -148,6 +149,7 @@ function AssignClientsModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
+  const { update }                  = useSession();
   const [clients, setClients]       = useState<Client[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
@@ -188,6 +190,8 @@ function AssignClientsModal({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to save");
       toast.success(`Clients updated for ${member.name}`);
+      // Refresh the team member's session so their assignedClients updates immediately
+      await update({ refreshAssignedClients: true }).catch(() => {});
       onSuccess();
       onClose();
     } catch (err: any) {
