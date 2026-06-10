@@ -31,11 +31,25 @@ export async function wpRestFetch<T>(path: string, options: FetchOptions = {}): 
     },
     ...cacheConfig,
   });
+  const text = await res.text().catch(() => res.statusText);
   if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`WP REST API ${res.status}: ${text}`);
+    // Try to extract a clean message from a WP JSON error body
+    try {
+      const json = JSON.parse(text);
+      const msg = json?.message ?? json?.error ?? text;
+      throw new Error(`WP API error (${res.status}): ${msg}`);
+    } catch (parseErr) {
+      if (parseErr instanceof SyntaxError) {
+        throw new Error(`WP API error (${res.status}): unexpected response from WordPress`);
+      }
+      throw parseErr;
+    }
   }
-  return res.json() as Promise<T>;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    throw new Error(`WP API returned non-JSON response — WordPress may be in maintenance mode or the endpoint does not exist`);
+  }
 }
 
 export interface WPListResult<T> {
