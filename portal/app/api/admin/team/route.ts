@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ member: wpUser }, { status: 201 });
   } catch (err: any) {
     console.error("[POST /api/admin/team]", err);
-    return NextResponse.json({ error: err.message ?? "Failed to invite team member" }, { status: 502 });
+    const msg = err instanceof Error ? err.message : "Failed to invite team member";
+    return NextResponse.json({ error: msg }, { status: 502 });
   }
 }
