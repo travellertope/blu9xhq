@@ -168,7 +168,13 @@ export function SequenceComposer({
                       {step.subject.trim() || <span className="text-slate-400 italic">Untitled step</span>}
                     </span>
                     <span className="text-xs text-slate-400">
-                      {step.delayDays === 0 ? "Sends immediately" : `Delay: ${step.delayDays}d`}
+                      {step.delayDays === 0 && i === 0
+                        ? "Sends immediately"
+                        : i === 0
+                        ? `${step.delayDays}d after sequence start`
+                        : step.delayDays === 0
+                        ? "Sends immediately after previous step"
+                        : `${step.delayDays}d after previous step`}
                     </span>
                   </button>
 
@@ -188,7 +194,7 @@ export function SequenceComposer({
                           onChange={(e) => updateStep(i, { delayDays: Math.max(0, parseInt(e.target.value) || 0) })}
                         />
                         <span className="text-sm text-slate-500">
-                          {step.delayDays === 0 ? "days (immediately)" : "days"}
+                          {i === 0 ? "days after sequence start" : "days after previous step"}
                         </span>
 
                         {steps.length > 1 && (
