@@ -22,6 +22,7 @@ const bodySchema = z.object({
 // ─── POST /api/admin/sequences/create-and-enroll ──────────────────────────────
 
 export async function POST(req: NextRequest) {
+  try {
   const rawBody = await req.json().catch(() => ({}));
   const parsed = bodySchema.safeParse(rawBody);
   if (!parsed.success) {
@@ -107,10 +108,17 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, sequenceId: sequence.id, enrollmentId: enrollment.id }, { status: 201 });
   } catch (err: unknown) {
-    console.error("[POST /api/admin/sequences/create-and-enroll]", err);
+    console.error("[POST /api/admin/sequences/create-and-enroll] WP error:", err);
     return NextResponse.json(
       { error: err instanceof Error ? err.message : "Unknown error" },
       { status: 502 }
+    );
+  }
+  } catch (err: unknown) {
+    console.error("[POST /api/admin/sequences/create-and-enroll] Unhandled:", err);
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Internal server error" },
+      { status: 500 }
     );
   }
 }
