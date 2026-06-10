@@ -7,6 +7,17 @@ const NEXTAUTH_SECRET  = process.env.NEXTAUTH_SECRET!;
 const WP_APP_USERNAME  = process.env.WP_APP_USERNAME!;
 const WP_APP_PASSWORD  = process.env.WP_APP_PASSWORD!;
 
+// Handles both old PHP-serialized arrays (returned as number[] by WP) and
+// new JSON-string format (stored as a plain string to avoid WP serialization bugs)
+function parseAssignedClients(raw: unknown): number[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.map(Number).filter(Boolean);
+  if (typeof raw === "string") {
+    try { return JSON.parse(raw); } catch (_e) { return []; }
+  }
+  return [];
+}
+
 // ─── WP credential validation ─────────────────────────────────────────────────
 
 interface WPUserMeta {
@@ -86,7 +97,7 @@ export const authOptions: NextAuthOptions = {
             role: "bluu_admin" as UserRole,
             wpUserId: user.id,
             bluuhqRole,
-            assignedClients: user.meta?.bluuhq_assigned_clients ?? [],
+            assignedClients: parseAssignedClients(user.meta?.bluuhq_assigned_clients),
             status: user.meta?.bluuhq_status ?? "active",
           };
         } catch (err) {
@@ -176,7 +187,7 @@ export const authOptions: NextAuthOptions = {
           });
           if (res.ok) {
             const wpUser = await res.json();
-            token.assignedClients = wpUser.meta?.bluuhq_assigned_clients ?? [];
+            token.assignedClients = parseAssignedClients(wpUser.meta?.bluuhq_assigned_clients);
           }
         } catch (_e) {
           // keep existing assignedClients if refresh fails
