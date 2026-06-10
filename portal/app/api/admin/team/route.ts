@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
         meta: {
           bluuhq_role:             d.role,
           bluuhq_status:           "active",
-          bluuhq_assigned_clients: d.assignedClients,
+          bluuhq_assigned_clients: JSON.stringify(d.assignedClients),
           bluuhq_last_active:      new Date().toISOString(),
         },
       }),

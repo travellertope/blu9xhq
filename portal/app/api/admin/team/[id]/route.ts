@@ -11,24 +11,25 @@ const patchSchema = z.object({
 
 // PATCH /api/admin/team/[id]
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const result = await requirePermission(req, "manage_team");
-  if (result instanceof NextResponse) return result;
-  const { session } = result;
-  const actor = session.user as any;
-
-  const userId = parseInt(params.id, 10);
-  if (isNaN(userId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-
-  const parsed = patchSchema.safeParse(await req.json().catch(() => ({})));
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
-  }
-
-  const meta: Record<string, unknown> = {};
-  if (parsed.data.role            !== undefined) meta.bluuhq_role             = parsed.data.role;
-  if (parsed.data.assignedClients !== undefined) meta.bluuhq_assigned_clients = parsed.data.assignedClients;
-
   try {
+    const result = await requirePermission(req, "manage_team");
+    if (result instanceof NextResponse) return result;
+    const { session } = result;
+    const actor = session.user as any;
+
+    const userId = parseInt(params.id, 10);
+    if (isNaN(userId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+
+    const parsed = patchSchema.safeParse(await req.json().catch(() => ({})));
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
+    }
+
+    const meta: Record<string, unknown> = {};
+    if (parsed.data.role            !== undefined) meta.bluuhq_role             = parsed.data.role;
+    // WP stores this meta as a JSON-encoded string; send it as such to satisfy type validation
+    if (parsed.data.assignedClients !== undefined) meta.bluuhq_assigned_clients = JSON.stringify(parsed.data.assignedClients);
+
     const updated = await wpRestFetch<any>(`/wp/v2/users/${userId}`, {
       method: "POST",
       body: JSON.stringify({ meta }),
@@ -46,6 +47,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ member: updated });
   } catch (err: any) {
     console.error("[PATCH /api/admin/team/[id]]", err);
-    return NextResponse.json({ error: err.message }, { status: 502 });
+    return NextResponse.json({ error: err.message ?? "Internal server error" }, { status: 502 });
   }
 }
