@@ -80,30 +80,34 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <h1 className="text-2xl font-bold text-slate-900">{clientName}</h1>
+          {acf.company_name && (
+            <>
+              <span className="text-slate-300 text-xl font-light">|</span>
+              {acf.company_website ? (
+                <a
+                  href={acf.company_website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-slate-500 text-sm hover:text-indigo-600 hover:underline inline-flex items-center gap-1"
+                >
+                  {acf.company_name}
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              ) : (
+                <span className="text-slate-500 text-sm">{acf.company_name}</span>
+              )}
+            </>
+          )}
           <ClientStatusBadge status={acf.status ?? "onboarding"} />
           <HealthIndicator status={acf.health_status} showLabel />
           <FollowUpBadge clientId={clientIdNum} />
+          <span className="text-xs text-slate-400 flex items-center gap-1">
+            <CalendarDays className="h-3.5 w-3.5" />
+            Active since {createdDate}
+          </span>
         </div>
-        <p className="text-slate-500 text-sm">
-          {acf.company_name}
-          {acf.company_website && (
-            <a
-              href={acf.company_website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="ml-2 inline-flex items-center gap-1 text-indigo-600 hover:underline"
-            >
-              <ExternalLink className="h-3.5 w-3.5" />
-              Website
-            </a>
-          )}
-        </p>
-        <p className="text-xs text-slate-400 flex items-center gap-1">
-          <CalendarDays className="h-3.5 w-3.5" />
-          Active since {createdDate}
-        </p>
 
         <ClientProfileActions
           clientId={params.id}
