@@ -79,33 +79,31 @@ export default async function ClientProfilePage({ params }: { params: { id: stri
     <div className="space-y-6 max-w-5xl">
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-        <div className="flex-1 space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-900">{clientName}</h1>
-            <ClientStatusBadge status={acf.status ?? "onboarding"} />
-            <HealthIndicator status={acf.health_status} showLabel />
-            <FollowUpBadge clientId={clientIdNum} />
-          </div>
-          <p className="text-slate-500 text-sm">
-            {acf.company_name}
-            {acf.company_website && (
-              <a
-                href={acf.company_website}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="ml-2 inline-flex items-center gap-1 text-indigo-600 hover:underline"
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-                Website
-              </a>
-            )}
-          </p>
-          <p className="text-xs text-slate-400 flex items-center gap-1">
-            <CalendarDays className="h-3.5 w-3.5" />
-            Active since {createdDate}
-          </p>
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900">{clientName}</h1>
+          <ClientStatusBadge status={acf.status ?? "onboarding"} />
+          <HealthIndicator status={acf.health_status} showLabel />
+          <FollowUpBadge clientId={clientIdNum} />
         </div>
+        <p className="text-slate-500 text-sm">
+          {acf.company_name}
+          {acf.company_website && (
+            <a
+              href={acf.company_website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ml-2 inline-flex items-center gap-1 text-indigo-600 hover:underline"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Website
+            </a>
+          )}
+        </p>
+        <p className="text-xs text-slate-400 flex items-center gap-1">
+          <CalendarDays className="h-3.5 w-3.5" />
+          Active since {createdDate}
+        </p>
 
         <ClientProfileActions
           clientId={params.id}
