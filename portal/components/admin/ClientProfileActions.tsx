@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Mail, MessageSquare, FolderUp, Send, Activity, Pencil } from "lucide-react";
+import { Mail, MessageSquare, FolderUp, Send, Activity, Pencil, ListOrdered } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { HealthOverrideModal } from "./HealthOverrideModal";
 import { LogCommunicationModal } from "./LogCommunicationModal";
 import { EmailComposer } from "./EmailComposer";
+import { SequenceComposer } from "./SequenceComposer";
 import type { BluuCommunication } from "@/types";
 
 interface ClientProfileActionsProps {
@@ -23,6 +24,7 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth, cli
   const [healthOpen,    setHealthOpen]    = useState(false);
   const [logOpen,       setLogOpen]       = useState(false);
   const [emailOpen,     setEmailOpen]     = useState(false);
+  const [seqOpen,       setSeqOpen]       = useState(false);
   const [health,        setHealth]        = useState(currentHealth);
   const [sendingInvite, setSendingInvite] = useState(false);
 
@@ -63,6 +65,16 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth, cli
       >
         <Mail className="h-3.5 w-3.5" />
         Send Email
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        className="gap-1.5"
+        onClick={() => setSeqOpen(true)}
+      >
+        <ListOrdered className="h-3.5 w-3.5" />
+        Create Sequence
       </Button>
 
       <Button
@@ -134,6 +146,17 @@ export function ClientProfileActions({ clientId, clientIdNum, currentHealth, cli
         clientName={clientName}
         companyName={companyName}
       />
+
+      {clientEmail && (
+        <SequenceComposer
+          open={seqOpen}
+          onClose={() => setSeqOpen(false)}
+          clientId={clientIdNum}
+          clientEmail={clientEmail}
+          clientName={clientName}
+          companyName={companyName}
+        />
+      )}
     </div>
   );
 }
