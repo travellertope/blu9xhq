@@ -20,7 +20,6 @@ export const PERMISSIONS: Record<string, Role[]> = {
   delete_clients:        ["super_admin"],
   assign_subscriptions:  ["super_admin", "account_manager"],
   edit_credentials:      ["super_admin", "account_manager"],
-  view_credentials:      ["super_admin", "account_manager"],
   create_edit_services:  ["super_admin"],
   create_invoices:       ["super_admin", "billing_manager"],
   mark_invoices_paid:    ["super_admin", "billing_manager"],
@@ -29,11 +28,12 @@ export const PERMISSIONS: Record<string, Role[]> = {
   build_sequences:       ["super_admin", "account_manager", "support_staff"],
   log_communications:    ["super_admin", "account_manager", "billing_manager", "support_staff"],
   upload_manage_files:   ["super_admin", "account_manager", "support_staff"],
-  delete_files:          ["super_admin"],
-  approve_cancellations: ["super_admin", "billing_manager"],
+  delete_files:          ["super_admin", "account_manager"],
+  approve_cancellations: ["super_admin", "billing_manager", "account_manager"],
   manage_team:           ["super_admin"],
   access_settings:       ["super_admin"],
-  send_portal_invites:   ["super_admin", "account_manager"],
+  send_portal_invites:   ["super_admin", "account_manager", "support_staff"],
+  view_credentials:      ["super_admin", "account_manager", "support_staff"],
 };
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
