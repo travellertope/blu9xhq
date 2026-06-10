@@ -95,8 +95,14 @@ export function SequenceComposer({
         body:    JSON.stringify({ clientId, clientEmail, clientName, title, steps: substituted }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Failed to create sequence");
+      const ct = res.headers.get("content-type") ?? "";
+      if (!res.ok) {
+        const msg = ct.includes("application/json")
+          ? ((await res.json()).error ?? "Failed to create sequence")
+          : `Server error (${res.status})`;
+        throw new Error(msg);
+      }
+      const data = ct.includes("application/json") ? await res.json() : {};
 
       const firstDelay = steps[0]?.delayDays ?? 0;
       toast.success(
