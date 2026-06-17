@@ -1,0 +1,130 @@
+/* ── Marketing design tokens ─────────────────────────────────────── */
+:root {
+  --blue: #2F5FE0;
+  --blue-dark: #1E3FA8;
+  --blue-soft: #EAF0FF;
+  --navy: #0E1A2E;
+  --navy-soft: #16243B;
+  --coral: #E2543D;
+  --coral-soft: #FBEAE6;
+  --amber: #D9A22A;
+  --green: #2F9E63;
+  --ink: #13181F;
+  --ink-soft: #5B6573;
+  --line: #E4E7EC;
+  --bg: #FFFFFF;
+  --bg-soft: #F5F7FA;
+  --site-radius: 14px;
+  --maxw: 1140px;
+}
+
+/* ── Utilities ───────────────────────────────────────────────────── */
+.max-w-site { max-width: var(--maxw); }
+.font-display { font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif; }
+
+/* ── Marketing colors (Tailwind custom utilities) ────────────────── */
+.text-blue { color: var(--blue); }
+.text-blue-dark { color: var(--blue-dark); }
+.text-ink { color: var(--ink); }
+.text-ink-soft { color: var(--ink-soft); }
+.bg-blue { background-color: var(--blue); }
+.bg-blue-dark { background-color: var(--blue-dark); }
+.bg-blue-soft { background-color: var(--blue-soft); }
+.bg-navy { background-color: var(--navy); }
+.bg-navy-soft { background-color: var(--navy-soft); }
+.bg-bg-soft { background-color: var(--bg-soft); }
+.bg-coral-soft { background-color: var(--coral-soft); }
+.border-line { border-color: var(--line); }
+.border-navy-soft { border-color: var(--navy-soft); }
+
+/* ── Scan demo card ──────────────────────────────────────────────── */
+.demo-card {
+  background: var(--navy);
+  border-radius: 20px;
+  padding: 30px;
+  color: #fff;
+  box-shadow: 0 30px 60px -24px rgba(14,26,46,0.45);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 460px;
+}
+
+.pillar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.pillar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  transition: width 1s ease;
+}
+
+.progress-bar {
+  height: 4px;
+  background: var(--line);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 8px;
+  max-width: 320px;
+}
+
+.progress-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--blue);
+  transition: width 1.6s ease;
+}
+
+/* Results card light variant */
+.results-card .pillar-track { background: var(--bg-soft); }
+
+/* ── Callout ─────────────────────────────────────────────────────── */
+.callout-coral {
+  background: var(--coral-soft);
+  border: 1px solid #F2C9BE;
+  border-left: 4px solid var(--coral);
+}
+
+/* ── Service card pulse ──────────────────────────────────────────── */
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(47,95,224,0); }
+  50% { box-shadow: 0 0 0 6px rgba(47,95,224,0.16); }
+}
+.scard-pulse { animation: pulseGlow 1.4s ease 2; }
+
+/* ── FAQ ─────────────────────────────────────────────────────────── */
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+.faq-answer.open {
+  /* max-height set via JS */
+}
+
+/* ── Fade-in animation ───────────────────────────────────────────── */
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadein { animation: fadein 0.4s ease; }
+
+/* ── Final CTA gradient ──────────────────────────────────────────── */
+.cta-gradient {
+  background: linear-gradient(180deg, #EAF0FF, #DCE7FF);
+}
+
+/* ── Marketing section spacing ───────────────────────────────────── */
+.mkt-section { padding: 96px 0; }
+
+@media (max-width: 880px) {
+  .mkt-section { padding: 64px 0; }
+  .demo-card { min-height: auto; }
+}
