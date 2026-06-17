@@ -16,6 +16,12 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        display: ["var(--font-manrope)", "ui-sans-serif", "system-ui", "sans-serif"],
+      },
+      maxWidth: {
+        site: "1140px",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
