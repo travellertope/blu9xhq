@@ -315,8 +315,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 }
 
 .btn-primary--large {
-    padding: 16px 30px;
-    font-size: var(--font-size-lg);
+    /* matches base — no size override */
 }
 
 .btn-primary--small {
@@ -352,8 +351,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 }
 
 .btn-secondary--large {
-    padding: 16px 30px;
-    font-size: var(--font-size-lg);
+    /* matches base — no size override */
 }
 
 /* Text button */
@@ -555,6 +553,24 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     .site-header__nav { display: none; }
     .site-header__cta { display: none; }
     .site-header__hamburger { display: flex; margin-left: auto; }
+}
+
+@media (max-width: 600px) {
+    .site-header {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    .site-header__inner {
+        height: 44px;
+    }
+    .site-header__logo img,
+    .site-header__logo .custom-logo {
+        height: 22px;
+    }
+    .site-header__logo-mark {
+        width: 20px;
+        height: 20px;
+    }
 }
 
 /* ── Mobile Navigation ──────────────────────────────────────────────────────── */
@@ -3826,8 +3842,7 @@ a.contact-info__value:hover {
 }
 
 .btn-outline--large {
-    padding: 16px 30px;
-    font-size: var(--font-size-lg);
+    /* matches base — no size override */
 }
 
 /* ── Hero — new design ────────────────────────────────────────────────────── */
@@ -4421,20 +4436,22 @@ a.contact-info__value:hover {
 }
 
 .home-cta__headline {
-    font-size: clamp(1.75rem, 3.5vw, 3rem);
-    font-weight: 500;
-    letter-spacing: -0.025em;
+    font-size: 34px;
+    font-weight: 800;
+    line-height: 1.2;
+    max-width: 560px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
     color: var(--md-primary);
     margin-bottom: var(--space-5);
 }
 
 .home-cta__body {
-    color: var(--md-on-surface);
-    opacity: 0.8;
+    color: var(--md-on-surface-variant);
     max-width: 600px;
     margin-inline: auto;
     margin-bottom: var(--space-7);
-    font-size: var(--font-size-lg);
+    font-size: 17px;
     line-height: 1.65;
 }
 
@@ -6221,5 +6238,18 @@ a.contact-info__value:hover {
     .scan-checks__callout {
         flex-direction: column;
         align-items: flex-start;
+    }
+    .scan-hero__form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .scan-hero__input,
+    .scan-hero__no-site-fields,
+    .scan-hero__form-row > .btn-primary {
+        width: 100%;
+        min-width: 0;
+    }
+    .scan-hero__no-site-fields {
+        flex-direction: column;
     }
 }
