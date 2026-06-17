@@ -272,77 +272,63 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 /* ── Buttons ────────────────────────────────────────────────────────────────── */
 
-/* Filled — Electric Blue */
-.btn-primary {
+/* ── Buttons — shared base ─────────────────────────────────────────────────── */
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-white,
+.btn-text {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
-    padding: 12px 28px;
-    background: var(--md-accent);
-    color: var(--md-on-primary);
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    border: none;
-    border-radius: var(--radius-sm);
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14.5px;
     cursor: pointer;
+    border: 1.5px solid transparent;
     text-decoration: none;
-    transition:
-        background var(--transition-fast),
-        box-shadow var(--transition-fast),
-        transform var(--transition-fast);
-    box-shadow: var(--shadow-1);
     white-space: nowrap;
+    transition: transform .12s ease, box-shadow .12s ease, background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.btn-primary:active,
+.btn-secondary:active,
+.btn-outline:active,
+.btn-white:active,
+.btn-text:active {
+    transform: translateY(1px);
+}
+
+/* Filled — Bluu Blue */
+.btn-primary {
+    background: var(--md-accent);
+    color: #fff;
 }
 
 .btn-primary:hover,
 .btn-primary:focus-visible {
     background: var(--md-accent-dark);
-    color: var(--md-on-primary);
-    box-shadow: var(--shadow-2);
-    transform: translateY(-1px);
-}
-
-.btn-primary:active {
-    background: var(--md-accent-dark);
-    box-shadow: var(--shadow-1);
-    transform: translateY(0);
+    color: #fff;
+    box-shadow: 0 10px 24px -8px rgba(47, 95, 224, 0.55);
 }
 
 .btn-primary--large {
-    padding: 16px 36px;
+    padding: 16px 30px;
     font-size: var(--font-size-lg);
-    gap: var(--space-3);
 }
 
 .btn-primary--small {
-    padding: 8px 20px;
-    font-size: var(--font-size-sm);
+    padding: 9px 14px;
+    font-size: 13px;
 }
 
-/* Outlined — Electric Blue border */
+/* Outlined — Accent Blue border */
 .btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: 12px 28px;
     background: transparent;
     color: var(--md-accent);
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    letter-spacing: 0.01em;
-    border: 2px solid var(--md-accent);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    text-decoration: none;
-    transition:
-        background var(--transition-fast),
-        color var(--transition-fast),
-        box-shadow var(--transition-fast),
-        transform var(--transition-fast);
-    white-space: nowrap;
+    border-color: var(--md-accent);
 }
 
 .btn-secondary:hover,
@@ -350,13 +336,6 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     background: var(--md-accent-container);
     color: var(--md-accent-dark);
     border-color: var(--md-accent-dark);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-1);
-}
-
-.btn-secondary:active {
-    transform: translateY(0);
-    box-shadow: none;
 }
 
 /* Outlined on dark backgrounds (white border + white text) */
@@ -373,24 +352,16 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 }
 
 .btn-secondary--large {
-    padding: 14px 36px;
+    padding: 16px 30px;
     font-size: var(--font-size-lg);
 }
 
 /* Text button */
 .btn-text {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
     background: none;
-    border: none;
+    border-color: transparent;
     color: var(--md-accent);
-    font-size: var(--font-size-base);
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
     padding: var(--space-2) var(--space-3);
-    border-radius: var(--radius-sm);
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -2803,26 +2774,15 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 /* btn-white kept as alias for btn-primary for backward compatibility */
 .btn-white {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    padding: 12px var(--space-6);
-    background: var(--md-accent);
-    color: #FFFFFF;
-    border: 2px solid var(--md-accent);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-family-base);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background var(--transition-fast), border-color var(--transition-fast);
+    background: #fff;
+    color: var(--md-on-surface);
+    border-color: transparent;
 }
 
-.btn-white:hover {
-    background: var(--md-accent-dark);
-    border-color: var(--md-accent-dark);
-    color: #FFFFFF;
+.btn-white:hover,
+.btn-white:focus-visible {
+    background: var(--md-accent-container);
+    color: var(--md-on-surface);
 }
 
 /* ── Page Hero Layout ───────────────────────────────────────────────────────── */
@@ -3249,23 +3209,29 @@ a.contact-info__value:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: 8px;
     width: 100%;
-    padding: 14px var(--space-6);
+    padding: 13px 22px;
     background: var(--md-accent);
     color: #FFFFFF;
-    border: none;
-    border-radius: var(--radius-sm);
+    border: 1.5px solid transparent;
+    border-radius: 10px;
     font-family: var(--font-family-base);
     font-size: var(--font-size-base);
-    font-weight: 500;
+    font-weight: 700;
+    font-size: 14.5px;
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: transform .12s ease, box-shadow .12s ease, background .15s ease;
     margin-top: var(--space-2);
 }
 
 .contact-form__submit:hover {
     background: var(--md-accent-dark);
+    box-shadow: 0 10px 24px -8px rgba(47, 95, 224, 0.55);
+}
+
+.contact-form__submit:active {
+    transform: translateY(1px);
 }
 
 .contact-form__submit:disabled {
@@ -3841,38 +3807,26 @@ a.contact-info__value:hover {
     height: 72px;
 }
 
-/* ── btn-outline ──────────────────────────────────────────────────────────── */
+/* ── btn-outline (ghost) ──────────────────────────────────────────────────── */
 .btn-outline {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
     background: transparent;
     color: var(--md-on-surface);
-    border: 1.5px solid var(--md-outline);
-    padding: var(--space-3) var(--space-6);
-    font-size: var(--font-size-base);
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
-    white-space: nowrap;
+    border-color: var(--md-outline);
 }
 
-.btn-outline:hover {
+.btn-outline:hover,
+.btn-outline:focus-visible {
     border-color: var(--md-accent);
     color: var(--md-accent);
 }
 
 .btn-outline--small {
-    padding: var(--space-2) var(--space-5);
-    font-size: var(--font-size-sm);
-    border-width: 1.5px;
+    padding: 9px 14px;
+    font-size: 13px;
 }
 
 .btn-outline--large {
-    padding: var(--space-4) var(--space-7);
+    padding: 16px 30px;
     font-size: var(--font-size-lg);
 }
 
