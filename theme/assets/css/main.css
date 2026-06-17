@@ -5823,8 +5823,8 @@ a.contact-info__value:hover {
 }
 .scan-hero__grid {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 56px;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 48px;
     align-items: center;
 }
 .scan-hero__content { }
