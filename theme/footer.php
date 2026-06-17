@@ -89,15 +89,15 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
 
                 <!-- Logo — div wrapper avoids nesting <a> inside <a> when custom logo is active -->
                 <div class="site-footer__logo">
-                    <?php if ( has_custom_logo() ) : ?>
-                        <?php the_custom_logo(); ?>
-                    <?php else : ?>
-                        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-                            <span class="site-footer__logo-text">
-                                <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent"> Interactive</span>
-                            </span>
-                        </a>
-                    <?php endif; ?>
+                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                        <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                            <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#7FA0FF" stroke-width="1.8"/>
+                            <circle cx="13" cy="13" r="4.5" fill="#7FA0FF"/>
+                        </svg>
+                        <span class="site-footer__logo-text">
+                            <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent">HQ</span>
+                        </span>
+                    </a>
                 </div>
 
                 <!-- Copyright -->
