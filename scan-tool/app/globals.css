@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { -webkit-font-smoothing: antialiased; }
+}
+
+/* ── Scan-specific styles ────────────────────────────────────────── */
+
+.pillar-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.pillar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: 99px;
+  transition: width 1s ease;
+}
+
+.progress-bar {
+  height: 4px;
+  background: #E4E7EC;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 8px;
+  max-width: 320px;
+}
+
+.progress-bar-fill {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: #2F5FE0;
+  transition: width 1.6s ease;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadein { animation: fadein 0.4s ease; }
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(47,95,224,0); }
+  50% { box-shadow: 0 0 0 6px rgba(47,95,224,0.16); }
+}
+.scard-pulse { animation: pulseGlow 1.4s ease 2; }
