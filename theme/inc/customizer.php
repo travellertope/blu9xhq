@@ -91,7 +91,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent / brand blue
     $wp_customize->add_setting( 'bluu_color_accent', array(
-        'default'           => '#0d6efd',
+        'default'           => '#2F5FE0',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -103,7 +103,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent dark (hover)
     $wp_customize->add_setting( 'bluu_color_accent_dark', array(
-        'default'           => '#0b5ed7',
+        'default'           => '#1E3FA8',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -173,7 +173,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Heading font
     $wp_customize->add_setting( 'bluu_font_heading', array(
-        'default'           => 'Plus Jakarta Sans',
+        'default'           => 'Manrope',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'refresh',
     ) );
@@ -183,7 +183,8 @@ function bluu_customizer_register( $wp_customize ) {
         'section'     => 'bluu_typography',
         'type'        => 'select',
         'choices'     => array(
-            'Plus Jakarta Sans' => 'Plus Jakarta Sans (Default)',
+            'Manrope'      => 'Manrope (Default)',
+            'Plus Jakarta Sans' => 'Plus Jakarta Sans',
             'Inter'        => 'Inter',
             'Roboto'       => 'Roboto',
             'Raleway'      => 'Raleway',
@@ -198,7 +199,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Body font
     $wp_customize->add_setting( 'bluu_font_body', array(
-        'default'           => 'Plus Jakarta Sans',
+        'default'           => 'Inter',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'refresh',
     ) );
@@ -208,8 +209,8 @@ function bluu_customizer_register( $wp_customize ) {
         'section'     => 'bluu_typography',
         'type'        => 'select',
         'choices'     => array(
-            'Plus Jakarta Sans' => 'Plus Jakarta Sans (Default)',
-            'Inter'      => 'Inter',
+            'Inter'      => 'Inter (Default)',
+            'Plus Jakarta Sans' => 'Plus Jakarta Sans',
             'Roboto'     => 'Roboto',
             'Open Sans'  => 'Open Sans',
             'Lato'       => 'Lato',
@@ -237,7 +238,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Heading weight
     $wp_customize->add_setting( 'bluu_heading_weight', array(
-        'default'           => '700',
+        'default'           => '800',
         'sanitize_callback' => 'sanitize_text_field',
         'transport'         => 'postMessage',
     ) );
@@ -462,27 +463,29 @@ function bluu_sanitize_decimal( $value ) {
 function bluu_customizer_css() {
     // All valid defaults: current design values + legacy values that should also be treated as "no override"
     $legacy_color_values = [
-        'bluu_color_accent'          => [ '#1a73e8', '#1A73E8' ],
-        'bluu_color_accent_dark'     => [ '#1557b0', '#1557B0' ],
+        'bluu_color_accent'          => [ '#1a73e8', '#1A73E8', '#0d6efd', '#0D6EFD' ],
+        'bluu_color_accent_dark'     => [ '#1557b0', '#1557B0', '#0b5ed7', '#0B5ED7' ],
         'bluu_color_text'            => [ '#1c1b1f', '#1C1B1F' ],
         'bluu_color_text_secondary'  => [ '#5f6368', '#5F6368' ],
         'bluu_color_outline'         => [ '#e0e3e7', '#E0E3E7' ],
-        'bluu_border_radius'         => [ 12 ],
+        'bluu_border_radius'         => [ 12, 0 ],
+        'bluu_heading_weight'        => [ '700', '500', '400' ],
+        'bluu_heading_letter_spacing'=> [ '-0.025', '-0.02', '-0.015' ],
     ];
 
     // Design defaults (must match main.css :root values)
     $defaults = [
-        'bluu_color_accent'          => '#0d6efd',
-        'bluu_color_accent_dark'     => '#0b5ed7',
+        'bluu_color_accent'          => '#2F5FE0',
+        'bluu_color_accent_dark'     => '#1E3FA8',
         'bluu_color_text'            => '#0a192f',
         'bluu_color_text_secondary'  => '#6c757d',
         'bluu_color_surface_variant' => '#f8f9fa',
         'bluu_color_outline'         => '#e9ecef',
         'bluu_font_size_base'        => 16,
-        'bluu_heading_weight'        => '700',
-        'bluu_heading_letter_spacing'=> '-0.025',
+        'bluu_heading_weight'        => '800',
+        'bluu_heading_letter_spacing'=> '-0.01',
         'bluu_body_line_height'      => '1.65',
-        'bluu_border_radius'         => 0,
+        'bluu_border_radius'         => 14,
         'bluu_logo_width'            => 160,
         'bluu_logo_height'           => 40,
         'bluu_logo_width_mobile'     => 120,
@@ -563,15 +566,15 @@ add_action( 'wp_head', 'bluu_customizer_css', 99 );
 /**
  * Enqueue font choices from Customizer.
  * Only fires when the user has explicitly selected a non-default font.
- * Plus Jakarta Sans is always loaded by bluu_enqueue_assets() — no override needed.
+ * Inter + Manrope are always loaded by bluu_enqueue_assets() — no override needed.
  */
 function bluu_customizer_fonts() {
-    $heading_font = sanitize_text_field( get_theme_mod( 'bluu_font_heading', 'Plus Jakarta Sans' ) );
-    $body_font    = sanitize_text_field( get_theme_mod( 'bluu_font_body',    'Plus Jakarta Sans' ) );
+    $heading_font = sanitize_text_field( get_theme_mod( 'bluu_font_heading', 'Manrope' ) );
+    $body_font    = sanitize_text_field( get_theme_mod( 'bluu_font_body',    'Inter' ) );
 
-    // If both fonts are the default (or the old legacy default 'Roboto'), output nothing.
+    // If both fonts are the default (or old legacy defaults), output nothing.
     // main.css already defines the correct CSS vars — no override needed.
-    $non_override_fonts = [ 'Plus Jakarta Sans', 'Roboto' ];
+    $non_override_fonts = [ 'Inter', 'Manrope', 'Plus Jakarta Sans', 'Roboto' ];
     $custom_fonts = array_unique( array_filter( array_diff( [ $heading_font, $body_font ], $non_override_fonts ) ) );
 
     if ( empty( $custom_fonts ) ) {

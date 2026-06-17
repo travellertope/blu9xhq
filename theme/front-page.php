@@ -21,8 +21,6 @@ $scan_url = 'https://scan.bluuhq.com';
 
             <!-- Left: copy + form -->
             <div class="scan-hero__content">
-                <span class="scan-hero__eyebrow">Free 2-minute scan</span>
-
                 <h1 class="scan-hero__headline">
                     Most brands are invisible<br>to AI search.
                     <span class="scan-hero__headline--accent">See your AI visibility score — free.</span>
