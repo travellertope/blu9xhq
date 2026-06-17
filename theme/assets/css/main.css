@@ -555,6 +555,24 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     .site-header__hamburger { display: flex; margin-left: auto; }
 }
 
+@media (max-width: 600px) {
+    .site-header {
+        padding-top: 2px;
+        padding-bottom: 2px;
+    }
+    .site-header__inner {
+        height: 44px;
+    }
+    .site-header__logo img,
+    .site-header__logo .custom-logo {
+        height: 22px;
+    }
+    .site-header__logo-mark {
+        width: 20px;
+        height: 20px;
+    }
+}
+
 /* ── Mobile Navigation ──────────────────────────────────────────────────────── */
 .mobile-nav-overlay {
     display: none;
