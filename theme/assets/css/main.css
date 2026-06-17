@@ -6221,4 +6221,17 @@ a.contact-info__value:hover {
         flex-direction: column;
         align-items: flex-start;
     }
+    .scan-hero__form-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .scan-hero__input,
+    .scan-hero__no-site-fields,
+    .scan-hero__form-row > .btn-primary {
+        width: 100%;
+        min-width: 0;
+    }
+    .scan-hero__no-site-fields {
+        flex-direction: column;
+    }
 }
