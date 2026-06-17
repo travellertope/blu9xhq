@@ -91,7 +91,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent / brand blue
     $wp_customize->add_setting( 'bluu_color_accent', array(
-        'default'           => '#0d6efd',
+        'default'           => '#2F5FE0',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -103,7 +103,7 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Accent dark (hover)
     $wp_customize->add_setting( 'bluu_color_accent_dark', array(
-        'default'           => '#0b5ed7',
+        'default'           => '#1E3FA8',
         'sanitize_callback' => 'sanitize_hex_color',
         'transport'         => 'postMessage',
     ) );
@@ -462,18 +462,18 @@ function bluu_sanitize_decimal( $value ) {
 function bluu_customizer_css() {
     // All valid defaults: current design values + legacy values that should also be treated as "no override"
     $legacy_color_values = [
-        'bluu_color_accent'          => [ '#1a73e8', '#1A73E8' ],
-        'bluu_color_accent_dark'     => [ '#1557b0', '#1557B0' ],
+        'bluu_color_accent'          => [ '#1a73e8', '#1A73E8', '#0d6efd', '#0D6EFD' ],
+        'bluu_color_accent_dark'     => [ '#1557b0', '#1557B0', '#0b5ed7', '#0B5ED7' ],
         'bluu_color_text'            => [ '#1c1b1f', '#1C1B1F' ],
         'bluu_color_text_secondary'  => [ '#5f6368', '#5F6368' ],
         'bluu_color_outline'         => [ '#e0e3e7', '#E0E3E7' ],
-        'bluu_border_radius'         => [ 12 ],
+        'bluu_border_radius'         => [ 12, 0 ],
     ];
 
     // Design defaults (must match main.css :root values)
     $defaults = [
-        'bluu_color_accent'          => '#0d6efd',
-        'bluu_color_accent_dark'     => '#0b5ed7',
+        'bluu_color_accent'          => '#2F5FE0',
+        'bluu_color_accent_dark'     => '#1E3FA8',
         'bluu_color_text'            => '#0a192f',
         'bluu_color_text_secondary'  => '#6c757d',
         'bluu_color_surface_variant' => '#f8f9fa',
@@ -482,7 +482,7 @@ function bluu_customizer_css() {
         'bluu_heading_weight'        => '700',
         'bluu_heading_letter_spacing'=> '-0.025',
         'bluu_body_line_height'      => '1.65',
-        'bluu_border_radius'         => 0,
+        'bluu_border_radius'         => 14,
         'bluu_logo_width'            => 160,
         'bluu_logo_height'           => 40,
         'bluu_logo_width_mobile'     => 120,

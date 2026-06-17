@@ -5549,8 +5549,8 @@ a.contact-info__value:hover {
     color: #fff;
 }
 .pricing-table__cta--solid:hover {
-    background: #0b5ed7;
-    border-color: #0b5ed7;
+    background: var(--md-accent-dark);
+    border-color: var(--md-accent-dark);
 }
 
 /* ── Add-ons section ──────────────────────────────────────────────────────────── */
