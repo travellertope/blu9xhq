@@ -1,6 +1,6 @@
 /* =============================================================================
    Bluu Interactive — Main Stylesheet
-   Sharp Geometric · Plus Jakarta Sans · Electric Blue #0d6efd
+   Soft Rounded · Plus Jakarta Sans · Bluu Blue #2F5FE0
    Version: 2.0.0
    ============================================================================= */
 
@@ -186,7 +186,7 @@ ol {
     background: var(--md-accent);
     color: var(--md-on-primary);
     font-weight: 500;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     z-index: 9999;
     box-shadow: var(--shadow-3);
 }
@@ -254,7 +254,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     font-weight: 500;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    border-radius: 0;
+    border-radius: var(--radius-full);
     border: 1px solid rgba(26, 115, 232, 0.2);
 }
 
@@ -285,7 +285,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     font-weight: 500;
     letter-spacing: 0.01em;
     border: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     text-decoration: none;
     transition:
@@ -334,7 +334,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     font-weight: 500;
     letter-spacing: 0.01em;
     border: 2px solid var(--md-accent);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     text-decoration: none;
     transition:
@@ -390,7 +390,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     cursor: pointer;
     text-decoration: none;
     padding: var(--space-2) var(--space-3);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     transition: background var(--transition-fast), color var(--transition-fast);
 }
 
@@ -534,7 +534,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     font-size: var(--font-size-sm);
     font-weight: 500;
     text-decoration: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     transition: color var(--transition-fast), background var(--transition-fast);
 }
 
@@ -558,7 +558,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     color: var(--md-on-surface);
     cursor: pointer;
     padding: var(--space-2);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     transition: background var(--transition-fast);
     flex-shrink: 0;
 }
@@ -1383,7 +1383,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
     background: rgba(255, 255, 255, 0.96);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-3);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -1465,7 +1465,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 .pillar-card {
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     padding: var(--space-7);
     display: flex;
     flex-direction: column;
@@ -1483,7 +1483,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 .pillar-card__icon-wrap {
     width: 64px;
     height: 64px;
-    border-radius: 0;
+    border-radius: var(--radius-md);
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -1531,7 +1531,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     display: block;
     width: 6px;
     height: 6px;
-    border-radius: 0;
+    border-radius: 50%;
     background: var(--md-accent);
     flex-shrink: 0;
     margin-top: 6px;
@@ -1561,7 +1561,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 .icp-card {
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     padding: var(--space-6) var(--space-5);
     display: flex;
     flex-direction: column;
@@ -1577,7 +1577,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 .icp-card__icon-wrap {
     width: 48px;
     height: 48px;
-    border-radius: 0;
+    border-radius: var(--radius-md);
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -2004,7 +2004,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     color: var(--md-on-surface);
     background: var(--md-surface);
     border: 1px solid var(--md-outline);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
     appearance: none;
 }
@@ -2035,7 +2035,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
 
 .form-status {
     padding: var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
     font-weight: 500;
 }
@@ -2184,7 +2184,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     width: 100%;
     max-height: 480px;
     object-fit: cover;
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-3);
 }
 
@@ -2305,7 +2305,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     min-width: 40px;
     height: 40px;
     padding: 0 var(--space-3);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--md-on-surface);
@@ -2812,7 +2812,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     background: var(--md-accent);
     color: #FFFFFF;
     border: 2px solid var(--md-accent);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     font-family: var(--font-family-base);
     font-size: var(--font-size-sm);
     font-weight: 500;
@@ -2895,7 +2895,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     width: 100%;
     max-width: 420px;
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     padding: var(--space-8) var(--space-7);
     display: flex;
     flex-direction: column;
@@ -2919,7 +2919,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     width: 80px;
     height: 80px;
     background: var(--md-accent-container);
-    border-radius: 0;
+    border-radius: var(--radius-md);
     color: var(--md-accent);
 }
 
@@ -3048,7 +3048,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     width: 40px;
     height: 40px;
     background: var(--md-accent-container);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3104,7 +3104,7 @@ a.contact-info__value:hover {
     height: 44px;
     background: var(--md-accent);
     color: #FFFFFF;
-    border-radius: 0;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3149,7 +3149,7 @@ a.contact-info__value:hover {
 /* Form card (right column) */
 .contact-form-card {
     padding: var(--space-7) var(--space-7);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-2);
@@ -3217,7 +3217,7 @@ a.contact-info__value:hover {
     color: var(--md-on-surface);
     background: var(--md-surface-variant);
     border: 1.5px solid var(--md-outline);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
     outline: none;
     appearance: none;
@@ -3257,7 +3257,7 @@ a.contact-info__value:hover {
     background: var(--md-accent);
     color: #FFFFFF;
     border: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     font-family: var(--font-family-base);
     font-size: var(--font-size-base);
     font-weight: 500;
@@ -3281,7 +3281,7 @@ a.contact-info__value:hover {
     height: 18px;
     border: 2px solid rgba(255,255,255,0.3);
     border-top-color: #FFFFFF;
-    border-radius: 0;
+    border-radius: 50%;
     animation: spin 0.7s linear infinite;
 }
 
@@ -3290,7 +3290,7 @@ a.contact-info__value:hover {
 
 .contact-form__feedback {
     padding: var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
     font-weight: 500;
     margin-bottom: var(--space-4);
@@ -3323,7 +3323,7 @@ a.contact-info__value:hover {
     color: var(--md-on-surface);
     background: var(--md-surface-variant);
     border: 1.5px solid var(--md-outline);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     outline: none;
     appearance: none;
     -webkit-appearance: none;
@@ -3537,7 +3537,7 @@ a.contact-info__value:hover {
     height: 52px;
     padding: 0 var(--space-9) 0 var(--space-9);
     border: 1.5px solid var(--md-outline);
-    border-radius: 0;
+    border-radius: var(--radius-full);
     font-family: var(--font-family-base);
     font-size: var(--font-size-base);
     color: var(--md-on-surface);
@@ -3571,7 +3571,7 @@ a.contact-info__value:hover {
     cursor: pointer;
     color: var(--md-on-surface-variant);
     padding: var(--space-2);
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3593,7 +3593,7 @@ a.contact-info__value:hover {
 
 .faq-tab {
     padding: var(--space-2) var(--space-5);
-    border-radius: 0;
+    border-radius: var(--radius-full);
     border: 1.5px solid var(--md-outline);
     background: transparent;
     font-family: var(--font-family-base);
@@ -3668,7 +3668,7 @@ a.contact-info__value:hover {
     width: 44px;
     height: 44px;
     background: var(--md-accent-container);
-    border-radius: 0;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3696,7 +3696,7 @@ a.contact-info__value:hover {
     flex-direction: column;
     gap: 0;
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     overflow: hidden;
 }
 
@@ -3856,7 +3856,7 @@ a.contact-info__value:hover {
     font-size: var(--font-size-base);
     font-weight: 500;
     text-decoration: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
     white-space: nowrap;
@@ -3897,7 +3897,7 @@ a.contact-info__value:hover {
     text-transform: uppercase;
     border: 1px solid rgba(13, 110, 253, 0.15);
     margin-bottom: var(--space-5);
-    border-radius: 0;
+    border-radius: var(--radius-full);
 }
 
 .home-hero__headline {
@@ -4095,7 +4095,7 @@ a.contact-info__value:hover {
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-1);
     margin-bottom: var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-full);
 }
 
 .problem-section__headline {
@@ -4126,7 +4126,7 @@ a.contact-info__value:hover {
     border-top: 3px solid #ef4444;
     box-shadow: var(--shadow-1);
     transition: box-shadow var(--transition-medium), transform var(--transition-medium);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
 }
 
 .problem-card:hover {
@@ -4143,7 +4143,7 @@ a.contact-info__value:hover {
     align-items: center;
     justify-content: center;
     margin-bottom: var(--space-5);
-    border-radius: 0;
+    border-radius: var(--radius-md);
 }
 
 .problem-card__title {
@@ -4184,7 +4184,7 @@ a.contact-info__value:hover {
     text-transform: uppercase;
     border: 1px solid rgba(13, 110, 253, 0.15);
     margin-bottom: var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-full);
 }
 
 .solution-section__headline {
@@ -4210,7 +4210,7 @@ a.contact-info__value:hover {
     box-shadow: var(--shadow-3);
     overflow: hidden;
     position: relative;
-    border-radius: 0;
+    border-radius: var(--radius-lg);
 }
 
 .solution-card::before {
@@ -4261,7 +4261,7 @@ a.contact-info__value:hover {
     font-weight: 500;
     font-size: var(--font-size-sm);
     text-decoration: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     max-width: max-content;
     transition: background var(--transition-fast);
 }
@@ -4362,7 +4362,7 @@ a.contact-info__value:hover {
     border: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-1);
     margin-bottom: var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-full);
 }
 
 .industries-hp__headline {
@@ -4393,7 +4393,7 @@ a.contact-info__value:hover {
     border-left: 4px solid var(--md-accent);
     box-shadow: var(--shadow-1);
     transition: box-shadow var(--transition-medium), transform var(--transition-medium);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
 }
 
 .industry-hp-card:hover {
@@ -4496,7 +4496,7 @@ a.contact-info__value:hover {
 .md-card {
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-1);
     overflow: hidden;
 }
@@ -4511,7 +4511,7 @@ a.contact-info__value:hover {
 .md-chip--colored {
     font-size: var(--font-size-xs);
     font-weight: 500;
-    border-radius: 0;
+    border-radius: var(--radius-full);
     padding: var(--space-1) var(--space-3);
     display: inline-flex;
     align-items: center;
@@ -4524,7 +4524,7 @@ a.contact-info__value:hover {
     justify-content: center;
     width: 28px;
     height: 28px;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     background: var(--md-surface-variant);
     flex-shrink: 0;
 }
@@ -4552,7 +4552,7 @@ a.contact-info__value:hover {
 /* Pillar card structural elements */
 .pillar-card__accent-bar {
     height: 4px;
-    border-radius: 0;
+    border-radius: var(--radius-xs);
     /* break out of the card's padding to span full width */
     margin: calc(-1 * var(--space-7)) calc(-1 * var(--space-7)) var(--space-5);
     display: block;
@@ -4569,7 +4569,7 @@ a.contact-info__value:hover {
 .pillar-card__icon {
     width: 56px;
     height: 56px;
-    border-radius: 0;
+    border-radius: var(--radius-md);
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -4613,7 +4613,7 @@ a.contact-info__value:hover {
 .icp-card__icon {
     width: 52px;
     height: 52px;
-    border-radius: 0;
+    border-radius: var(--radius-md);
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
@@ -4662,7 +4662,7 @@ a.contact-info__value:hover {
     font-size: var(--font-size-xs);
     font-weight: 500;
     padding: var(--space-1) var(--space-4);
-    border-radius: 0;
+    border-radius: var(--radius-full);
     white-space: nowrap;
     letter-spacing: 0.06em;
     text-transform: uppercase;
@@ -4717,7 +4717,7 @@ a.contact-info__value:hover {
     flex-direction: column;
     gap: 0;
     border: 1px solid var(--md-outline-variant);
-    border-radius: 0;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     margin-top: var(--space-8);
 }
@@ -5705,7 +5705,7 @@ a.contact-info__value:hover {
     color: var(--md-on-surface-variant);
     background: transparent;
     border: none;
-    border-radius: 0;
+    border-radius: var(--radius-sm);
     text-align: left;
     cursor: pointer;
     transition: background 0.12s, color 0.12s;
