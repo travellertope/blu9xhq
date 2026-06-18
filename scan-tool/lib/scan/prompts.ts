@@ -10,9 +10,7 @@ export function generatePrompts(
   niche: string | undefined,
   siteIdentity?: SiteIdentity
 ): CategorizedPrompt[] {
-  const detectedName = siteIdentity?.siteTitle
-    ? siteIdentity.siteTitle.replace(/\s*[-–—|:•].+$/, "").replace(/\s*(home|official|website|page|welcome to)\s*/gi, "").trim()
-    : "";
+  const detectedName = siteIdentity?.siteTitle ? deriveBrandName(siteIdentity.siteTitle, domain) : "";
   const brandName = brand || (detectedName.length > 2 && detectedName.length < 40 ? detectedName : "") || domainToBrand(domain || "");
 
   if (!niche) {
@@ -46,6 +44,46 @@ export function generatePrompts(
     { prompt: `Which ${niche} companies are growing fastest right now?`, category: "comparison", intent: "Market momentum" },
     { prompt: `What's missing from most ${niche} providers that ${brandName} does differently?`, category: "reputation", intent: "Differentiation" },
   ];
+}
+
+function splitTitleSegments(title: string): string[] {
+  return title
+    .split(/[-–—|:•]+/)
+    .map((s) => s.replace(/\b(home|official|website|page|welcome to)\b/gi, "").trim())
+    .filter((s) => s.length > 1);
+}
+
+function domainRoot(domain: string): string {
+  return domain
+    .replace(/^(www\.)?/i, "")
+    .toLowerCase()
+    .replace(/\.(com|io|co|net|org|ai|dev|app|co\.uk|ng|com\.ng)$/, "")
+    .replace(/^the/, "")
+    .replace(/[-_]/g, "");
+}
+
+/**
+ * A page title is often "{tagline} — {description} | {actual site name}".
+ * Picks the segment that matches the domain root rather than blindly taking
+ * the first chunk, since the first segment is frequently a tagline, not the brand.
+ */
+function deriveBrandName(siteTitle: string, domain?: string): string {
+  const segments = splitTitleSegments(siteTitle);
+  if (segments.length === 0) return "";
+
+  if (domain) {
+    const root = domainRoot(domain);
+    if (root.length > 2) {
+      const matches = segments.filter((s) =>
+        s.toLowerCase().replace(/[^a-z0-9]/g, "").includes(root)
+      );
+      if (matches.length > 0) {
+        return matches.reduce((a, b) => (a.length <= b.length ? a : b));
+      }
+    }
+  }
+
+  return segments.reduce((a, b) => (a.length <= b.length ? a : b));
 }
 
 function domainToBrand(domain: string): string {
@@ -104,17 +142,29 @@ export function extractBrandVariants(
   }
 
   if (siteIdentity?.siteTitle) {
-    const title = siteIdentity.siteTitle;
-    const cleanTitle = title
-      .replace(/\s*[-–—|:•].+$/, "")
-      .replace(/\s*(home|official|website|page|welcome to)\s*/gi, "")
-      .trim();
+    const cleanTitle = deriveBrandName(siteIdentity.siteTitle, domain);
 
     if (cleanTitle.length > 2 && cleanTitle.length < 60) {
       variants.push(cleanTitle.toLowerCase());
       const words = cleanTitle.split(/\s+/);
       if (words.length <= 3 && words[0].length > 2) {
         variants.push(words[0].toLowerCase());
+      }
+    }
+
+    // A short brand word (e.g. "Moveee") may also stand alone in titles like
+    // "Moveee Magazine" — pull out any segment word that matches the domain root.
+    if (domain) {
+      const root = domainRoot(domain);
+      if (root.length > 2) {
+        for (const segment of splitTitleSegments(siteIdentity.siteTitle)) {
+          for (const word of segment.split(/\s+/)) {
+            const normalized = word.toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (normalized.length > 2 && (normalized === root || root.includes(normalized) || normalized.includes(root))) {
+              variants.push(normalized);
+            }
+          }
+        }
       }
     }
   }
