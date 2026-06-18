@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { buildAiNarrative } from "@/lib/scan/narrative";
 
 interface ScanScores {
   ai: number;
@@ -21,6 +22,7 @@ interface AiDetail {
   mentioned: boolean;
   position: string;
   sentiment: string;
+  hasCitation: boolean;
   snippet: string;
 }
 
@@ -217,6 +219,9 @@ export default function ScanPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const brandLabel = domain || bizName || "Your brand";
+  const aiNarrative = aiDetails ? buildAiNarrative(aiDetails, brandLabel) : null;
+
   const handleEmailGate = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -407,28 +412,44 @@ export default function ScanPage() {
               </div>
             )}
 
-            {/* ── AI detail breakdown (ungated) ────────────── */}
-            {aiDetails && aiDetails.length > 0 && (
+            {/* ── AI visibility analysis (ungated) ──────────── */}
+            {aiDetails && aiDetails.length > 0 && aiNarrative && (
               <div className="mt-4 mb-4">
-                <h3 className="text-sm font-bold text-ink mb-3">AI Discoverability Breakdown</h3>
-                <div className="space-y-2">
-                  {aiDetails.map((d, i) => (
-                    <div key={i} className="flex items-start gap-3 p-3 bg-bg-soft rounded-lg text-xs">
-                      <span className={`mt-0.5 w-2 h-2 rounded-full flex-none ${d.mentioned ? "bg-green-500" : "bg-red-400"}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-ink">{d.prompt}</p>
-                        {d.mentioned ? (
-                          <p className="text-ink-soft mt-0.5">
-                            {d.position} position &middot; {d.sentiment} sentiment
-                            {d.snippet && <span className="block mt-1 italic text-[11px]">&ldquo;{d.snippet}&rdquo;</span>}
-                          </p>
-                        ) : (
-                          <p className="text-ink-soft mt-0.5">Not mentioned</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                <h3 className="text-sm font-bold text-ink mb-3">AI Visibility Analysis</h3>
+                <div className="p-4 bg-bg-soft rounded-xl text-sm leading-relaxed">
+                  <p className="font-semibold text-ink mb-2">{aiNarrative.headline}</p>
+                  <ul className="space-y-1.5 text-ink-soft text-xs">
+                    {aiNarrative.bullets.map((b, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="mt-1 w-1.5 h-1.5 rounded-full flex-none bg-blue" />
+                        {b}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
+                <details className="mt-2.5 text-xs text-ink-soft">
+                  <summary className="cursor-pointer font-medium text-ink select-none">
+                    View the test prompts and raw results
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    {aiDetails.map((d, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 bg-bg-soft rounded-lg">
+                        <span className={`mt-0.5 w-2 h-2 rounded-full flex-none ${d.mentioned ? "bg-green-500" : "bg-red-400"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-ink">{d.prompt}</p>
+                          {d.mentioned ? (
+                            <p className="text-ink-soft mt-0.5">
+                              {d.position} position &middot; {d.sentiment} sentiment
+                              {d.snippet && <span className="block mt-1 italic text-[11px]">&ldquo;{d.snippet}&rdquo;</span>}
+                            </p>
+                          ) : (
+                            <p className="text-ink-soft mt-0.5">Not mentioned</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
               </div>
             )}
 

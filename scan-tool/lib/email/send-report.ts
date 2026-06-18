@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { buildAiNarrative } from "../scan/narrative";
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY || "");
@@ -9,7 +10,7 @@ interface ScanData {
   input: { domain?: string; brand?: string; niche?: string; noSite: boolean };
   scores: { ai: number; site: number; comp: number; overall: number };
   verdict: { weakest: string; message: string; recommendation: string; serviceUrl: string } | null;
-  aiDetails: Array<{ prompt: string; mentioned: boolean; position: string; sentiment: string; snippet: string }> | null;
+  aiDetails: Array<{ prompt: string; mentioned: boolean; position: string; sentiment: string; hasCitation: boolean; snippet: string }> | null;
   compDetails: { competitors: string[]; brandMentionedMoreThanCompetitors: boolean } | null;
   siteDetails: {
     https: boolean;
@@ -45,17 +46,9 @@ export async function sendScanReport(
 
   const brandLabel = scan.input.domain || scan.input.brand || "your brand";
 
-  const aiRows = (scan.aiDetails || [])
-    .map(
-      (d) =>
-        `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px">${escapeHtml(d.prompt)}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:center">${d.mentioned ? "Yes" : "No"}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:center">${d.position}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;font-size:13px;text-align:center">${d.sentiment}</td>
-        </tr>`
-    )
-    .join("");
+  const aiNarrative = scan.aiDetails && scan.aiDetails.length > 0
+    ? buildAiNarrative(scan.aiDetails, brandLabel)
+    : null;
 
   const fixList = buildFixList(scan.siteDetails);
   const competitors = scan.compDetails?.competitors || [];
@@ -86,19 +79,14 @@ export async function sendScanReport(
       </div>
       ` : ""}
 
-      ${scan.aiDetails && scan.aiDetails.length > 0 ? `
-      <h2 style="font-size:16px;font-weight:700;color:#0f1729;margin:24px 0 12px">AI Discoverability Breakdown</h2>
-      <table style="width:100%;border-collapse:collapse">
-        <thead>
-          <tr style="background:#f9fafb">
-            <th style="padding:8px 12px;text-align:left;font-size:12px;color:#6b7280;font-weight:600">Prompt</th>
-            <th style="padding:8px 12px;text-align:center;font-size:12px;color:#6b7280;font-weight:600">Found</th>
-            <th style="padding:8px 12px;text-align:center;font-size:12px;color:#6b7280;font-weight:600">Position</th>
-            <th style="padding:8px 12px;text-align:center;font-size:12px;color:#6b7280;font-weight:600">Sentiment</th>
-          </tr>
-        </thead>
-        <tbody>${aiRows}</tbody>
-      </table>
+      ${aiNarrative ? `
+      <h2 style="font-size:16px;font-weight:700;color:#0f1729;margin:24px 0 12px">AI Visibility Analysis</h2>
+      <div style="background:#f9fafb;border-radius:8px;padding:16px;margin-bottom:24px">
+        <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#0f1729;line-height:1.5">${escapeHtml(aiNarrative.headline)}</p>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#374151;line-height:1.7">
+          ${aiNarrative.bullets.map((b) => `<li>${escapeHtml(b)}</li>`).join("")}
+        </ul>
+      </div>
       ` : ""}
 
       ${scan.compDetails ? `
