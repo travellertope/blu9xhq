@@ -20,6 +20,8 @@ export async function initScan(id: string, input: ScanInput): Promise<void> {
     verdict: null,
     summary: { pagesChecked: 0, competitorsSurveyed: 0, aiPromptsRun: 0 },
     aiDetails: null,
+    compDetails: null,
+    siteDetails: null,
     createdAt: new Date().toISOString(),
     completedAt: null,
     email: null,
@@ -91,6 +93,8 @@ export async function runScan(id: string, input: ScanInput): Promise<void> {
         aiPromptsRun: aiResult.details.length,
       },
       aiDetails: aiResult.details,
+      compDetails: compResult.details,
+      siteDetails: siteResult.details,
       completedAt: new Date().toISOString(),
     });
   } catch (err) {

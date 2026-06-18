@@ -19,13 +19,15 @@ export async function checkCompetitorIntel(
   brand: string | undefined,
   niche: string | undefined
 ): Promise<{ score: number; details: CompetitorResult }> {
-  const nicheLabel = niche || "their industry";
   const brandName = brand || domainToName(domain || "");
+  const scopePhrase = niche
+    ? `in the ${niche} space`
+    : `that compete with "${brandName}"`;
 
   try {
     const model = getModel();
     const result = await model.generateContent(
-      `List the top 5 companies or tools in the ${nicheLabel} space. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. Reply in this exact JSON format: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`
+      `List the top 5 companies or tools ${scopePhrase}. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. Reply in this exact JSON format: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`
     );
 
     const fullText = result.response.text();

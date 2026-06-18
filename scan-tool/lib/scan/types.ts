@@ -30,6 +30,24 @@ export interface ScanSummary {
   aiPromptsRun: number;
 }
 
+export interface CompDetails {
+  competitors: string[];
+  brandMentionedMoreThanCompetitors: boolean;
+  relativePosition: "ahead" | "even" | "behind";
+}
+
+export interface SiteDetails {
+  dnsResolves: boolean;
+  https: boolean;
+  responseTimeMs: number;
+  hasTitle: boolean;
+  hasDescription: boolean;
+  hasOgTags: boolean;
+  hasRobotsTxt: boolean;
+  hasSitemap: boolean;
+  hasStructuredData: boolean;
+}
+
 export interface ScanResult {
   id: string;
   status: "processing" | "complete" | "failed";
@@ -40,6 +58,8 @@ export interface ScanResult {
   verdict: ScanVerdict | null;
   summary: ScanSummary;
   aiDetails: AiCheckResult[] | null;
+  compDetails: CompDetails | null;
+  siteDetails: SiteDetails | null;
   createdAt: string;
   completedAt: string | null;
   email: string | null;

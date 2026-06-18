@@ -4,14 +4,23 @@ export function generatePrompts(
   niche: string | undefined
 ): string[] {
   const brandName = brand || domainToBrand(domain || "");
-  const nicheLabel = niche || "their industry";
+
+  if (!niche) {
+    return [
+      `What are the best companies or tools in ${brandName}'s space right now?`,
+      `Can you recommend a good alternative to ${brandName}?`,
+      `What do people say about ${brandName}? Is it any good?`,
+      `Compare ${brandName} to its top competitors.`,
+      `Would you recommend ${brandName} to a small business? Why or why not?`,
+    ];
+  }
 
   return [
-    `What are the best ${nicheLabel} companies or tools right now?`,
-    `Can you recommend a good ${nicheLabel} provider?`,
+    `What are the best ${niche} companies or tools right now?`,
+    `Can you recommend a good ${niche} provider?`,
     `What do people say about ${brandName}? Is it any good?`,
-    `Compare the top ${nicheLabel} options available today.`,
-    `What ${nicheLabel} solution would you recommend for a small business?`,
+    `Compare the top ${niche} options available today.`,
+    `What ${niche} solution would you recommend for a small business?`,
   ];
 }
 

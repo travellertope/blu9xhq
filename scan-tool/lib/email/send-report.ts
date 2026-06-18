@@ -10,6 +10,29 @@ interface ScanData {
   scores: { ai: number; site: number; comp: number; overall: number };
   verdict: { weakest: string; message: string; recommendation: string; serviceUrl: string } | null;
   aiDetails: Array<{ prompt: string; mentioned: boolean; position: string; sentiment: string; snippet: string }> | null;
+  compDetails: { competitors: string[]; brandMentionedMoreThanCompetitors: boolean } | null;
+  siteDetails: {
+    https: boolean;
+    hasTitle: boolean;
+    hasDescription: boolean;
+    hasOgTags: boolean;
+    hasRobotsTxt: boolean;
+    hasSitemap: boolean;
+    hasStructuredData: boolean;
+  } | null;
+}
+
+function buildFixList(site: ScanData["siteDetails"]): string[] {
+  if (!site) return [];
+  const fixes: string[] = [];
+  if (!site.https) fixes.push("Move to HTTPS — browsers and AI crawlers both penalize unsecured sites.");
+  if (!site.hasTitle) fixes.push("Add a descriptive <title> tag to your homepage.");
+  if (!site.hasDescription) fixes.push("Add a meta description summarizing what you do.");
+  if (!site.hasOgTags) fixes.push("Add Open Graph tags so AI tools and social previews can read your page.");
+  if (!site.hasStructuredData) fixes.push("Add structured data (schema.org) so AI engines can parse who you are.");
+  if (!site.hasRobotsTxt) fixes.push("Add a robots.txt file so crawlers know what they can index.");
+  if (!site.hasSitemap) fixes.push("Add an XML sitemap so search and AI crawlers can find all your pages.");
+  return fixes;
 }
 
 export async function sendScanReport(
@@ -33,6 +56,9 @@ export async function sendScanReport(
         </tr>`
     )
     .join("");
+
+  const fixList = buildFixList(scan.siteDetails);
+  const competitors = scan.compDetails?.competitors || [];
 
   const html = `
 <!DOCTYPE html>
@@ -73,6 +99,20 @@ export async function sendScanReport(
         </thead>
         <tbody>${aiRows}</tbody>
       </table>
+      ` : ""}
+
+      ${competitors.length > 0 ? `
+      <h2 style="font-size:16px;font-weight:700;color:#0f1729;margin:24px 0 12px">Who AI Recommends Instead</h2>
+      <ul style="margin:0 0 24px;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">
+        ${competitors.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}
+      </ul>
+      ` : ""}
+
+      ${fixList.length > 0 ? `
+      <h2 style="font-size:16px;font-weight:700;color:#0f1729;margin:24px 0 12px">Prioritized Fixes</h2>
+      <ul style="margin:0 0 24px;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">
+        ${fixList.map((f) => `<li>${escapeHtml(f)}</li>`).join("")}
+      </ul>
       ` : ""}
 
       ${scan.verdict?.serviceUrl ? `
