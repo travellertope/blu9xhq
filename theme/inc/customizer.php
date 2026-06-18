@@ -68,6 +68,19 @@ function bluu_customizer_register( $wp_customize ) {
         'input_attrs' => array( 'min' => 60, 'max' => 260, 'step' => 4 ),
     ) );
 
+    // Dark / footer logo (for dark backgrounds)
+    $wp_customize->add_setting( 'bluu_logo_dark', array(
+        'default'           => '',
+        'sanitize_callback' => 'absint',
+        'transport'         => 'refresh',
+    ) );
+    $wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, 'bluu_logo_dark', array(
+        'label'       => esc_html__( 'Footer / Dark Mode Logo', 'bluu-interactive' ),
+        'description' => esc_html__( 'Upload a light-colored logo for use on dark backgrounds (footer). Leave empty to auto-invert the main logo.', 'bluu-interactive' ),
+        'section'     => 'bluu_logo',
+        'mime_type'   => 'image',
+    ) ) );
+
     // Fallback wordmark (text logo)
     $wp_customize->add_setting( 'bluu_wordmark', array(
         'default'           => 'bluu interactive',
@@ -184,7 +197,6 @@ function bluu_customizer_register( $wp_customize ) {
         'type'        => 'select',
         'choices'     => array(
             'Manrope'      => 'Manrope (Default)',
-            'Plus Jakarta Sans' => 'Plus Jakarta Sans',
             'Inter'        => 'Inter',
             'Roboto'       => 'Roboto',
             'Raleway'      => 'Raleway',
@@ -210,7 +222,6 @@ function bluu_customizer_register( $wp_customize ) {
         'type'        => 'select',
         'choices'     => array(
             'Inter'      => 'Inter (Default)',
-            'Plus Jakarta Sans' => 'Plus Jakarta Sans',
             'Roboto'     => 'Roboto',
             'Open Sans'  => 'Open Sans',
             'Lato'       => 'Lato',
@@ -258,13 +269,13 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Letter spacing for headings
     $wp_customize->add_setting( 'bluu_heading_letter_spacing', array(
-        'default'           => '-0.025',
+        'default'           => '-0.01',
         'sanitize_callback' => 'bluu_sanitize_decimal',
         'transport'         => 'postMessage',
     ) );
     $wp_customize->add_control( 'bluu_heading_letter_spacing', array(
         'label'       => esc_html__( 'Heading Letter Spacing (em)', 'bluu-interactive' ),
-        'description' => esc_html__( 'Negative tightens, positive loosens. Default: -0.025', 'bluu-interactive' ),
+        'description' => esc_html__( 'Negative tightens, positive loosens. Default: -0.01', 'bluu-interactive' ),
         'section'     => 'bluu_typography',
         'type'        => 'number',
         'input_attrs' => array( 'min' => -0.1, 'max' => 0.15, 'step' => 0.005 ),
@@ -286,13 +297,13 @@ function bluu_customizer_register( $wp_customize ) {
 
     // Border radius (card roundness)
     $wp_customize->add_setting( 'bluu_border_radius', array(
-        'default'           => '0',
+        'default'           => '14',
         'sanitize_callback' => 'absint',
         'transport'         => 'postMessage',
     ) );
     $wp_customize->add_control( 'bluu_border_radius', array(
         'label'       => esc_html__( 'Card Border Radius (px)', 'bluu-interactive' ),
-        'description' => esc_html__( 'Roundness of cards, modals, and chips. 0 = square, 24 = very round. Default: 12px.', 'bluu-interactive' ),
+        'description' => esc_html__( 'Roundness of cards, modals, and chips. 0 = square, 24 = very round. Default: 14px.', 'bluu-interactive' ),
         'section'     => 'bluu_typography',
         'type'        => 'number',
         'input_attrs' => array( 'min' => 0, 'max' => 32, 'step' => 2 ),
@@ -574,7 +585,7 @@ function bluu_customizer_fonts() {
 
     // If both fonts are the default (or old legacy defaults), output nothing.
     // main.css already defines the correct CSS vars — no override needed.
-    $non_override_fonts = [ 'Inter', 'Manrope', 'Plus Jakarta Sans', 'Roboto' ];
+    $non_override_fonts = [ 'Inter', 'Manrope', 'Roboto' ];
     $custom_fonts = array_unique( array_filter( array_diff( [ $heading_font, $body_font ], $non_override_fonts ) ) );
 
     if ( empty( $custom_fonts ) ) {

@@ -1,18 +1,40 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
-function hashStr(str: string, seedOffset: number): number {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h * 31 + str.charCodeAt(i) + seedOffset) % 100000;
-  }
-  return Math.abs(h);
+interface ScanScores {
+  ai: number;
+  site: number;
+  comp: number;
+  overall: number;
 }
 
-function scoreFrom(str: string, seedOffset: number): number {
-  const s = str || "example";
-  return 22 + (hashStr(s.toLowerCase(), seedOffset) % 70);
+interface ScanVerdict {
+  weakest: string;
+  message: string;
+  recommendation: string;
+  serviceUrl: string;
+}
+
+interface AiDetail {
+  prompt: string;
+  mentioned: boolean;
+  position: string;
+  sentiment: string;
+  snippet: string;
+}
+
+interface ScanPollResponse {
+  id: string;
+  status: "processing" | "complete" | "failed";
+  progress: number;
+  currentStep: string;
+  scores: ScanScores;
+  verdict: ScanVerdict | null;
+  summary: { pagesChecked: number; competitorsSurveyed: number; aiPromptsRun: number };
+  aiDetails: AiDetail[] | null;
+  gated: boolean;
+  error: string | null;
 }
 
 function bandColor(v: number): string {
@@ -28,70 +50,136 @@ export default function ScanPage() {
   const [niche, setNiche] = useState("");
   const [scanning, setScanning] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [scores, setScores] = useState({ ai: 0, site: 0, comp: 0, overall: 0 });
-  const [verdict, setVerdict] = useState("");
+  const [scores, setScores] = useState<ScanScores>({ ai: 0, site: 0, comp: 0, overall: 0 });
+  const [verdict, setVerdict] = useState<ScanVerdict | null>(null);
   const [statusText, setStatusText] = useState("");
-  const [barWidth, setBarWidth] = useState("0%");
+  const [progress, setProgress] = useState(0);
   const [showEmailGate, setShowEmailGate] = useState(false);
   const [email, setEmail] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [aiDetails, setAiDetails] = useState<AiDetail[] | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const scanIdRef = useRef<string | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const handleScan = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      const key = noSite ? bizName || "newbusiness" : domain || "example.com";
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
 
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  const handleScan = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      stopPolling();
+      setScanError(null);
       setShowResults(false);
       setShowEmailGate(false);
+      setEmailSent(false);
+      setAiDetails(null);
       setScanning(true);
+      setProgress(0);
+
+      const key = noSite ? bizName || "newbusiness" : domain || "example.com";
       setStatusText(
-        noSite
-          ? `Mapping the content landscape for "${key}"…`
-          : `Scanning ${key}…`
+        noSite ? `Mapping the content landscape for "${key}"…` : `Scanning ${key}…`
       );
-      setBarWidth("0%");
-      requestAnimationFrame(() => setBarWidth("100%"));
 
-      setTimeout(() => {
-        let ai: number, site: number, comp: number;
-        if (noSite) {
-          ai = scoreFrom(key, 1);
-          comp = scoreFrom(key, 2);
-          site = 12;
-        } else {
-          ai = scoreFrom(key, 1);
-          site = scoreFrom(key, 2);
-          comp = scoreFrom(key, 3);
+      try {
+        const res = await fetch("/api/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            domain: noSite ? undefined : domain,
+            brand: noSite ? bizName : undefined,
+            niche: niche || undefined,
+            noSite,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setScanError(data.message || "Something went wrong.");
+          setScanning(false);
+          setStatusText("");
+          return;
         }
-        const overall = Math.round((ai + site + comp) / 3);
 
-        setScores({ ai, site, comp, overall });
-        setStatusText(
-          noSite ? "Scan complete — based on niche, not a live site." : "Scan complete."
-        );
+        scanIdRef.current = data.id;
+
+        pollRef.current = setInterval(async () => {
+          try {
+            const pollRes = await fetch(`/api/scan/${data.id}`);
+            const poll: ScanPollResponse = await pollRes.json();
+
+            setProgress(poll.progress);
+            setStatusText(poll.currentStep);
+
+            if (poll.status === "complete") {
+              stopPolling();
+              setScores(poll.scores);
+              setVerdict(poll.verdict);
+              setScanning(false);
+              setShowResults(true);
+              if (!poll.gated && poll.aiDetails) {
+                setAiDetails(poll.aiDetails);
+              }
+              setTimeout(() => {
+                resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }, 100);
+            } else if (poll.status === "failed") {
+              stopPolling();
+              setScanError(poll.error || "Scan failed. Please try again.");
+              setScanning(false);
+              setStatusText("");
+            }
+          } catch {
+            // Polling error — keep trying
+          }
+        }, 2000);
+      } catch {
+        setScanError("Network error. Please check your connection.");
         setScanning(false);
-        setShowResults(true);
-
-        const weakScores = { ai, site, comp };
-        const weakest = (Object.keys(weakScores) as Array<keyof typeof weakScores>).reduce(
-          (a, b) => (weakScores[a] <= weakScores[b] ? a : b)
-        );
-
-        let message: string;
-        if (noSite) {
-          message = `No live site detected — before content or hosting matters, <b>${key}</b> needs a site to publish to.`;
-        } else if (weakest === "ai" || weakest === "comp") {
-          message = `Your biggest gap is <b>${weakest === "ai" ? "AI discoverability" : "competitor coverage"}</b>. Content strategy is where to start.`;
-        } else {
-          const pick = hashStr(key, 9) % 3;
-          if (pick === 0) message = "Your site's technical foundation needs rebuilding.";
-          else if (pick === 1) message = "Your site looks unmaintained — fixes and updates are the gap.";
-          else message = "Your site's speed and stability point to a hosting problem.";
-        }
-        setVerdict(message);
-      }, 1700);
+        setStatusText("");
+      }
     },
-    [noSite, domain, bizName, niche]
+    [noSite, domain, bizName, niche, stopPolling]
+  );
+
+  const handleEmailGate = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!scanIdRef.current) return;
+
+      setEmailSending(true);
+      try {
+        const res = await fetch("/api/email-gate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scanId: scanIdRef.current, email }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          setEmailSent(true);
+          if (data.aiDetails) {
+            setAiDetails(data.aiDetails);
+          }
+        }
+      } catch {
+        // Silently handle
+      }
+      setEmailSending(false);
+    },
+    [email]
   );
 
   return (
@@ -144,6 +232,7 @@ export default function ScanPage() {
                 setShowResults(false);
                 setShowEmailGate(false);
                 setStatusText("");
+                setScanError(null);
               }}
               className="accent-blue"
             />
@@ -182,16 +271,25 @@ export default function ScanPage() {
               disabled={scanning}
               className="px-5 py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark hover:shadow-[0_10px_24px_-8px_rgba(47,95,224,0.55)] transition-all cursor-pointer border-none whitespace-nowrap disabled:opacity-70"
             >
-              Run free scan
+              {scanning ? "Scanning…" : "Run free scan"}
             </button>
           </div>
 
-          {statusText && (
+          {scanError && (
+            <div className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg">
+              {scanError}
+            </div>
+          )}
+
+          {statusText && !scanError && (
             <div className="mt-3 text-sm text-ink-soft">
               {statusText}
               {scanning && (
-                <div className="progress-bar">
-                  <i className="progress-bar-fill" style={{ width: barWidth }} />
+                <div className="progress-bar mt-1.5">
+                  <i
+                    className="progress-bar-fill"
+                    style={{ width: `${progress}%`, transition: "width 0.6s ease" }}
+                  />
                 </div>
               )}
             </div>
@@ -233,14 +331,53 @@ export default function ScanPage() {
               ))}
             </div>
 
-            <div
-              className="p-4 bg-bg-soft rounded-xl text-sm leading-relaxed text-ink-soft [&_b]:text-ink"
-              dangerouslySetInnerHTML={{ __html: verdict }}
-            />
+            {verdict && (
+              <div className="p-4 bg-bg-soft rounded-xl text-sm leading-relaxed text-ink-soft mb-4">
+                <p className="font-semibold text-ink mb-1">{verdict.message}</p>
+                <p>{verdict.recommendation}</p>
+                <a
+                  href={verdict.serviceUrl}
+                  className="inline-block mt-2 text-blue font-semibold text-xs hover:underline"
+                >
+                  See how we can help &rarr;
+                </a>
+              </div>
+            )}
+
+            {/* ── AI detail breakdown (ungated) ────────────── */}
+            {aiDetails && aiDetails.length > 0 && (
+              <div className="mt-4 mb-4">
+                <h3 className="text-sm font-bold text-ink mb-3">AI Discoverability Breakdown</h3>
+                <div className="space-y-2">
+                  {aiDetails.map((d, i) => (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-bg-soft rounded-lg text-xs">
+                      <span className={`mt-0.5 w-2 h-2 rounded-full flex-none ${d.mentioned ? "bg-green-500" : "bg-red-400"}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-ink">{d.prompt}</p>
+                        {d.mentioned ? (
+                          <p className="text-ink-soft mt-0.5">
+                            {d.position} position &middot; {d.sentiment} sentiment
+                            {d.snippet && <span className="block mt-1 italic text-[11px]">&ldquo;{d.snippet}&rdquo;</span>}
+                          </p>
+                        ) : (
+                          <p className="text-ink-soft mt-0.5">Not mentioned</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ── Email gate for full report ───────────────── */}
             <div className="mt-6 pt-5 border-t border-line">
-              {!showEmailGate ? (
+              {emailSent ? (
+                <div className="text-center py-3">
+                  <p className="text-sm font-semibold text-green-700">
+                    Report sent! Check your inbox.
+                  </p>
+                </div>
+              ) : !showEmailGate ? (
                 <button
                   onClick={() => setShowEmailGate(true)}
                   className="w-full py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark transition-all cursor-pointer border-none"
@@ -256,14 +393,7 @@ export default function ScanPage() {
                     We&apos;ll send the full breakdown — what&apos;s wrong, competitor names,
                     and a recommended next step. No spam, no card.
                   </p>
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      // Phase 1: this will POST to an API route
-                      alert(`Report will be sent to ${email}`);
-                    }}
-                    className="flex gap-2.5"
-                  >
+                  <form onSubmit={handleEmailGate} className="flex gap-2.5">
                     <input
                       type="email"
                       required
@@ -274,9 +404,10 @@ export default function ScanPage() {
                     />
                     <button
                       type="submit"
-                      className="px-5 py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark transition-all cursor-pointer border-none whitespace-nowrap"
+                      disabled={emailSending}
+                      className="px-5 py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark transition-all cursor-pointer border-none whitespace-nowrap disabled:opacity-70"
                     >
-                      Send report
+                      {emailSending ? "Sending…" : "Send report"}
                     </button>
                   </form>
                 </div>
@@ -286,7 +417,7 @@ export default function ScanPage() {
         )}
 
         <p className="mt-4 text-center text-xs text-ink-soft">
-          No credit card required &middot; Results in 2 minutes
+          No credit card required &middot; Results in ~2 minutes
         </p>
       </main>
 
