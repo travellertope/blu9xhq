@@ -24,6 +24,21 @@ interface AiDetail {
   snippet: string;
 }
 
+interface CompDetails {
+  competitors: string[];
+  brandMentionedMoreThanCompetitors: boolean;
+}
+
+interface SiteDetails {
+  https: boolean;
+  hasTitle: boolean;
+  hasDescription: boolean;
+  hasOgTags: boolean;
+  hasRobotsTxt: boolean;
+  hasSitemap: boolean;
+  hasStructuredData: boolean;
+}
+
 interface ScanPollResponse {
   id: string;
   status: "processing" | "complete" | "failed";
@@ -33,9 +48,21 @@ interface ScanPollResponse {
   verdict: ScanVerdict | null;
   summary: { pagesChecked: number; competitorsSurveyed: number; aiPromptsRun: number };
   aiDetails: AiDetail[] | null;
+  compDetails: CompDetails | null;
+  siteDetails: SiteDetails | null;
   gated: boolean;
   error: string | null;
 }
+
+const SITE_FIX_LABELS: Array<{ key: keyof SiteDetails; label: string }> = [
+  { key: "https", label: "Move to HTTPS" },
+  { key: "hasTitle", label: "Add a descriptive page title" },
+  { key: "hasDescription", label: "Add a meta description" },
+  { key: "hasOgTags", label: "Add Open Graph tags" },
+  { key: "hasStructuredData", label: "Add structured data (schema.org)" },
+  { key: "hasRobotsTxt", label: "Add a robots.txt file" },
+  { key: "hasSitemap", label: "Add an XML sitemap" },
+];
 
 function bandColor(v: number): string {
   if (v < 45) return "#E2543D";
@@ -59,6 +86,8 @@ export default function ScanPage() {
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [aiDetails, setAiDetails] = useState<AiDetail[] | null>(null);
+  const [compDetails, setCompDetails] = useState<CompDetails | null>(null);
+  const [siteDetails, setSiteDetails] = useState<SiteDetails | null>(null);
   const [scanError, setScanError] = useState<string | null>(null);
   const scanIdRef = useRef<string | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -83,6 +112,8 @@ export default function ScanPage() {
       setShowEmailGate(false);
       setEmailSent(false);
       setAiDetails(null);
+      setCompDetails(null);
+      setSiteDetails(null);
       setScanning(true);
       setProgress(0);
 
@@ -128,8 +159,10 @@ export default function ScanPage() {
               setVerdict(poll.verdict);
               setScanning(false);
               setShowResults(true);
-              if (!poll.gated && poll.aiDetails) {
-                setAiDetails(poll.aiDetails);
+              if (!poll.gated) {
+                if (poll.aiDetails) setAiDetails(poll.aiDetails);
+                if (poll.compDetails) setCompDetails(poll.compDetails);
+                if (poll.siteDetails) setSiteDetails(poll.siteDetails);
               }
               setTimeout(() => {
                 resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -200,9 +233,9 @@ export default function ScanPage() {
 
         if (res.ok) {
           setEmailSent(true);
-          if (data.aiDetails) {
-            setAiDetails(data.aiDetails);
-          }
+          if (data.aiDetails) setAiDetails(data.aiDetails);
+          if (data.compDetails) setCompDetails(data.compDetails);
+          if (data.siteDetails) setSiteDetails(data.siteDetails);
         }
       } catch {
         // Silently handle
@@ -395,6 +428,38 @@ export default function ScanPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Competitor names (gated) ──────────────────── */}
+            {compDetails && compDetails.competitors.length > 0 && (
+              <div className="mt-4 mb-4">
+                <h3 className="text-sm font-bold text-ink mb-3">Who AI Recommends Instead</h3>
+                <div className="flex flex-wrap gap-2">
+                  {compDetails.competitors.map((c, i) => (
+                    <span key={i} className="text-xs font-medium px-3 py-1.5 bg-bg-soft rounded-full text-ink">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── Prioritized fixes (gated) ─────────────────── */}
+            {siteDetails && (
+              <div className="mt-4 mb-4">
+                <h3 className="text-sm font-bold text-ink mb-3">Prioritized Fixes</h3>
+                <div className="space-y-1.5">
+                  {SITE_FIX_LABELS.filter((f) => !siteDetails[f.key]).map((f) => (
+                    <div key={f.key} className="flex items-start gap-2 text-xs text-ink-soft">
+                      <span className="mt-0.5 w-2 h-2 rounded-full flex-none bg-red-400" />
+                      {f.label}
+                    </div>
+                  ))}
+                  {SITE_FIX_LABELS.every((f) => siteDetails[f.key]) && (
+                    <p className="text-xs text-ink-soft">Nice — no technical gaps found.</p>
+                  )}
                 </div>
               </div>
             )}

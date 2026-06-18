@@ -59,6 +59,8 @@ export async function POST(request: Request) {
     verdict: scan.verdict,
     summary: scan.summary,
     aiDetails: scan.aiDetails,
+    compDetails: scan.compDetails,
+    siteDetails: scan.siteDetails,
     gated: false,
   });
 }

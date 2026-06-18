@@ -44,6 +44,8 @@ export async function GET(
 
   if (hasEmail && scan.status === "complete") {
     response.aiDetails = scan.aiDetails;
+    response.compDetails = scan.compDetails;
+    response.siteDetails = scan.siteDetails;
   }
 
   return NextResponse.json(response);
