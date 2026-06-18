@@ -61,6 +61,7 @@ export async function POST(request: Request) {
     aiDetails: scan.aiDetails,
     compDetails: scan.compDetails,
     siteDetails: scan.siteDetails,
+    strategicAnalysis: scan.strategicAnalysis,
     gated: false,
   });
 }
