@@ -1,12 +1,8 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import type { CompDetails, CompetitorProfile, SiteDetails } from "./types";
 
-function getModel() {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-  return genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    tools: [{ googleSearchRetrieval: {} }],
-  });
+function getClient() {
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 }
 
 export async function checkCompetitorIntel(
@@ -24,12 +20,14 @@ export async function checkCompetitorIntel(
     : "";
 
   try {
-    const model = getModel();
-    const result = await model.generateContent(
-      `${subject} is a real, existing business or website.${siteContext}\nBased on the above (and a web search if useful), identify what category/industry this business operates in, then list the top 5 real companies or tools that are its direct competitors ${scopePhrase}. For each, give the company name and their website domain — these must be real, currently-operating competitors, not made up. Then state whether "${brandName}" is among the most visible brands in this space. Always return exactly 5 competitor names — never an empty list, even if you have to use your best judgment based on the category. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": [{"name": "Company Name", "domain": "example.com"}, ...], "brandVisible": true/false}`
-    );
+    const ai = getClient();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: `${subject} is a real, existing business or website.${siteContext}\nBased on the above (and a web search if useful), identify what category/industry this business operates in, then list the top 5 real companies or tools that are its direct competitors ${scopePhrase}. For each, give the company name and their website domain — these must be real, currently-operating competitors, not made up. Then state whether "${brandName}" is among the most visible brands in this space. Always return exactly 5 competitor names — never an empty list, even if you have to use your best judgment based on the category. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": [{"name": "Company Name", "domain": "example.com"}, ...], "brandVisible": true/false}`,
+      config: { tools: [{ googleSearch: {} }] },
+    });
 
-    const fullText = result.response.text();
+    const fullText = result.text || "";
     const cleanedText = fullText.replace(/```json|```/gi, "").trim();
 
     let rawCompetitors: Array<{ name: string; domain?: string }> = [];

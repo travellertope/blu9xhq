@@ -1,13 +1,9 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { generatePrompts, extractBrandVariants, extractSiteIdentity } from "./prompts";
 import type { AiCheckResult, SiteDetails } from "./types";
 
-function getModel() {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-  return genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    tools: [{ googleSearchRetrieval: {} }],
-  });
+function getClient() {
+  return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 }
 
 export async function checkAiDiscoverability(
@@ -41,9 +37,13 @@ async function runSingleCheck(
   brandVariants: string[]
 ): Promise<Omit<AiCheckResult, "category" | "intent">> {
   try {
-    const model = getModel();
-    const result = await model.generateContent(prompt);
-    const fullText = result.response.text();
+    const ai = getClient();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+      config: { tools: [{ googleSearch: {} }] },
+    });
+    const fullText = result.text || "";
     const lower = fullText.toLowerCase();
 
     const mentioned = brandVariants.some((v) => lower.includes(v));
