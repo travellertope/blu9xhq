@@ -6,7 +6,7 @@ function getModel() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
   return genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    tools: [{ googleSearch: {} } as never],
+    tools: [{ googleSearchRetrieval: {} }],
   });
 }
 
