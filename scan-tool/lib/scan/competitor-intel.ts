@@ -5,7 +5,7 @@ function getModel() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
   return genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
-    tools: [{ googleSearch: {} } as never],
+    tools: [{ googleSearchRetrieval: {} }],
   });
 }
 
@@ -19,10 +19,14 @@ export async function checkCompetitorIntel(
   const subject = domain ? `the website "${domain}"` : `the business "${brandName}"`;
   const scopePhrase = niche ? `in the ${niche} space` : "in its space";
 
+  const siteContext = ownSiteDetails?.homepageSummary
+    ? `\n\nHere is real content scraped directly from ${subject}'s own homepage — use this as ground truth for what the business actually does, don't rely on search alone since this brand may be small or hard to find:\n"""\n${ownSiteDetails.homepageSummary}\n"""\n`
+    : "";
+
   try {
     const model = getModel();
     const result = await model.generateContent(
-      `Search the web to find out what ${subject} does. Then list the top 5 companies or tools that are its direct competitors ${scopePhrase}. For each, give the company name and their website domain. Then state whether "${brandName}" is among the most visible brands in this space. If you cannot find anything about ${subject}, make your best guess based on the name alone — still return 5 names, never an empty list. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": [{"name": "Company Name", "domain": "example.com"}, ...], "brandVisible": true/false}`
+      `${subject} is a real, existing business or website.${siteContext}\nBased on the above (and a web search if useful), identify what category/industry this business operates in, then list the top 5 real companies or tools that are its direct competitors ${scopePhrase}. For each, give the company name and their website domain — these must be real, currently-operating competitors, not made up. Then state whether "${brandName}" is among the most visible brands in this space. Always return exactly 5 competitor names — never an empty list, even if you have to use your best judgment based on the category. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": [{"name": "Company Name", "domain": "example.com"}, ...], "brandVisible": true/false}`
     );
 
     const fullText = result.response.text();

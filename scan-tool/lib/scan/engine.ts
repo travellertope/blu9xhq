@@ -34,23 +34,30 @@ export async function initScan(id: string, input: ScanInput): Promise<void> {
 
 export async function runScan(id: string, input: ScanInput): Promise<void> {
   try {
-    // Phase 1: AI discoverability + site health run in parallel
+    // Phase 1: Crawl the site first to learn the real brand name/identity
     await updateScan(id, {
       progress: 5,
+      currentStep: "Crawling your website to understand your brand…",
+    });
+
+    const siteResult = await checkSiteHealth(input.noSite ? undefined : input.domain);
+
+    // Phase 2: AI discoverability — now informed by scraped site identity
+    await updateScan(id, {
+      progress: 20,
       currentStep: "Analyzing AI visibility across 12 real-world queries…",
     });
 
-    const [aiResult, siteResult] = await Promise.all([
-      checkAiDiscoverability(input.domain, input.brand, input.niche),
-      checkSiteHealth(input.noSite ? undefined : input.domain),
-    ]);
+    const aiResult = await checkAiDiscoverability(
+      input.domain, input.brand, input.niche, siteResult.details
+    );
 
     await updateScan(id, {
       progress: 55,
       currentStep: "Researching competitors and comparing signals…",
     });
 
-    // Phase 2: competitor intel (needs siteResult for gap analysis)
+    // Phase 3: competitor intel (needs siteResult for gap analysis)
     const compResult = await checkCompetitorIntel(
       input.domain,
       input.brand,
@@ -74,7 +81,7 @@ export async function runScan(id: string, input: ScanInput): Promise<void> {
 
     const verdict = buildVerdict(scores, input);
 
-    // Phase 3: Gemini synthesis — write a professional analysis paragraph
+    // Phase 4: Gemini synthesis — write a professional analysis paragraph
     const strategicAnalysis = await generateStrategicAnalysis(input, scores, aiResult, siteResult, compResult);
 
     await updateScan(id, {

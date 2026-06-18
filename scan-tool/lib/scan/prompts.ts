@@ -7,9 +7,13 @@ export interface CategorizedPrompt {
 export function generatePrompts(
   domain: string | undefined,
   brand: string | undefined,
-  niche: string | undefined
+  niche: string | undefined,
+  siteIdentity?: SiteIdentity
 ): CategorizedPrompt[] {
-  const brandName = brand || domainToBrand(domain || "");
+  const detectedName = siteIdentity?.siteTitle
+    ? siteIdentity.siteTitle.replace(/\s*[-–—|:•].+$/, "").replace(/\s*(home|official|website|page|welcome to)\s*/gi, "").trim()
+    : "";
+  const brandName = brand || (detectedName.length > 2 && detectedName.length < 40 ? detectedName : "") || domainToBrand(domain || "");
 
   if (!niche) {
     return [
@@ -52,9 +56,25 @@ function domainToBrand(domain: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+export interface SiteIdentity {
+  siteTitle: string;
+  tagline: string;
+}
+
+export function extractSiteIdentity(homepageSummary: string): SiteIdentity {
+  const titleMatch = homepageSummary.match(/^Title:\s*(.+)$/m);
+  const descMatch = homepageSummary.match(/^Description:\s*(.+)$/m);
+
+  return {
+    siteTitle: titleMatch?.[1]?.trim() || "",
+    tagline: descMatch?.[1]?.trim() || "",
+  };
+}
+
 export function extractBrandVariants(
   domain: string | undefined,
-  brand: string | undefined
+  brand: string | undefined,
+  siteIdentity?: SiteIdentity
 ): string[] {
   const variants: string[] = [];
 
@@ -65,10 +85,39 @@ export function extractBrandVariants(
   if (domain) {
     const clean = domain.replace(/^(www\.)?/, "").toLowerCase();
     variants.push(clean);
-    const name = clean.replace(/\.(com|io|co|net|org|ai|dev|app)$/, "");
+    const name = clean.replace(/\.(com|io|co|net|org|ai|dev|app|co\.uk|ng|com\.ng)$/, "");
     variants.push(name);
     variants.push(name.replace(/[-_]/g, " "));
+
+    if (/^the[a-z]/.test(name)) {
+      const withoutThe = name.replace(/^the/, "");
+      variants.push(withoutThe);
+      variants.push(withoutThe.replace(/[-_]/g, " "));
+    }
   }
 
-  return Array.from(new Set(variants.filter(Boolean)));
+  if (brand) {
+    const lowerBrand = brand.toLowerCase();
+    if (/^the\s+/.test(lowerBrand)) {
+      variants.push(lowerBrand.replace(/^the\s+/, ""));
+    }
+  }
+
+  if (siteIdentity?.siteTitle) {
+    const title = siteIdentity.siteTitle;
+    const cleanTitle = title
+      .replace(/\s*[-–—|:•].+$/, "")
+      .replace(/\s*(home|official|website|page|welcome to)\s*/gi, "")
+      .trim();
+
+    if (cleanTitle.length > 2 && cleanTitle.length < 60) {
+      variants.push(cleanTitle.toLowerCase());
+      const words = cleanTitle.split(/\s+/);
+      if (words.length <= 3 && words[0].length > 2) {
+        variants.push(words[0].toLowerCase());
+      }
+    }
+  }
+
+  return Array.from(new Set(variants.filter((v) => v && v.length > 2)));
 }

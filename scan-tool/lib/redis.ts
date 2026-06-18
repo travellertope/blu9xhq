@@ -43,3 +43,67 @@ export async function checkRateLimit(ip: string, limit = 5): Promise<boolean> {
   }
   return current <= limit;
 }
+
+// ─── Users & scan history (Phase 2 dashboard) ──────────────────────────────
+
+export interface ScanUser {
+  email: string;
+  createdAt: string;
+  scanCount: number;
+}
+
+export async function upsertUser(email: string): Promise<void> {
+  const key = `user:${email}`;
+  const existing = await getRedis().get<ScanUser>(key);
+  if (existing) {
+    await getRedis().set(key, { ...existing, scanCount: existing.scanCount + 1 });
+  } else {
+    await getRedis().set(key, {
+      email,
+      createdAt: new Date().toISOString(),
+      scanCount: 1,
+    });
+  }
+}
+
+export async function getUser(email: string): Promise<ScanUser | null> {
+  return getRedis().get<ScanUser>(`user:${email}`);
+}
+
+export async function ensureUser(email: string): Promise<void> {
+  const existing = await getUser(email);
+  if (!existing) {
+    await getRedis().set(`user:${email}`, {
+      email,
+      createdAt: new Date().toISOString(),
+      scanCount: 0,
+    });
+  }
+}
+
+export async function addScanToUserIndex(email: string, scanId: string): Promise<void> {
+  await getRedis().zadd(`scans:${email}`, { score: Date.now(), member: scanId });
+}
+
+export async function getUserScanIds(email: string, limit = 50): Promise<string[]> {
+  const ids = await getRedis().zrange<string[]>(`scans:${email}`, 0, limit - 1, { rev: true });
+  return ids;
+}
+
+// ─── Magic-link tokens (self-contained, no WordPress dependency) ──────────
+// Scan-tool users are anonymous leads identified only by the email they gave
+// at the gate — not WordPress accounts — so login is a one-time emailed
+// token verified against Redis, not a password or WP JWT bridge.
+
+const MAGIC_TOKEN_TTL = 900; // 15 minutes
+
+export async function createMagicToken(email: string, token: string): Promise<void> {
+  await getRedis().set(`magictoken:${token}`, email, { ex: MAGIC_TOKEN_TTL });
+}
+
+export async function consumeMagicToken(token: string): Promise<string | null> {
+  const email = await getRedis().get<string>(`magictoken:${token}`);
+  if (!email) return null;
+  await getRedis().del(`magictoken:${token}`);
+  return email;
+}
