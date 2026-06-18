@@ -31,23 +31,28 @@ export async function checkCompetitorIntel(
     );
 
     const fullText = result.response.text();
+    const cleanedText = fullText.replace(/```json|```/gi, "");
 
     let competitors: string[] = [];
     let brandVisible = false;
 
-    const jsonMatch = fullText.match(/\{[\s\S]*"competitors"[\s\S]*\}/);
+    const jsonMatch = cleanedText.match(/\{[\s\S]*?"brandVisible"\s*:\s*(?:true|false)[\s\S]*?\}/);
     if (jsonMatch) {
       try {
         const parsed = JSON.parse(jsonMatch[0]);
-        competitors = parsed.competitors || [];
+        competitors = Array.isArray(parsed.competitors) ? parsed.competitors : [];
         brandVisible = parsed.brandVisible === true;
       } catch {
-        competitors = extractCompetitorNames(fullText);
-        brandVisible = fullText.toLowerCase().includes(brandName.toLowerCase());
+        competitors = extractCompetitorNames(cleanedText);
+        brandVisible = cleanedText.toLowerCase().includes(brandName.toLowerCase());
       }
     } else {
-      competitors = extractCompetitorNames(fullText);
-      brandVisible = fullText.toLowerCase().includes(brandName.toLowerCase());
+      competitors = extractCompetitorNames(cleanedText);
+      brandVisible = cleanedText.toLowerCase().includes(brandName.toLowerCase());
+    }
+
+    if (competitors.length === 0) {
+      competitors = extractCompetitorNames(cleanedText);
     }
 
     const relativePosition: CompetitorResult["relativePosition"] = brandVisible
@@ -85,9 +90,18 @@ function domainToName(domain: string): string {
 }
 
 function extractCompetitorNames(text: string): string[] {
-  const lines = text.split("\n").filter((l) => /^\s*\d+[\.\)]\s/.test(l));
+  const lines = text
+    .split("\n")
+    .filter((l) => /^\s*(\d+[\.\)]|[-*•])\s+\S/.test(l));
+
   return lines
-    .map((l) => l.replace(/^\s*\d+[\.\)]\s*/, "").replace(/[*_`]/g, "").trim())
+    .map((l) =>
+      l
+        .replace(/^\s*(\d+[\.\)]|[-*•])\s*/, "")
+        .replace(/[*_`]/g, "")
+        .split(/[:–—-]/)[0]
+        .trim()
+    )
     .filter(Boolean)
     .slice(0, 5);
 }
