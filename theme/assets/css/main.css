@@ -237,10 +237,10 @@ ol {
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-family-heading); }
 h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.12; letter-spacing: -0.01em; }
 h2 { font-size: clamp(1.5rem, 3.5vw, 2.5rem); font-weight: 800; line-height: 1.15; letter-spacing: -0.01em; }
-h3 { font-size: clamp(1.125rem, 2vw, 1.5rem); font-weight: 700; line-height: 1.3; letter-spacing: -0.01em; }
-h4 { font-size: var(--font-size-xl); font-weight: 400; line-height: 1.4; }
-h5 { font-size: var(--font-size-lg); font-weight: 400; line-height: 1.4; }
-h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
+h3 { font-size: clamp(1.125rem, 2vw, 1.5rem); font-weight: 800; line-height: 1.3; letter-spacing: -0.01em; }
+h4 { font-size: var(--font-size-xl); font-weight: 800; line-height: 1.4; }
+h5 { font-size: var(--font-size-lg); font-weight: 800; line-height: 1.4; }
+h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 
 /* ── Material Design 3 Chips ────────────────────────────────────────────────── */
 .md-chip {
@@ -561,7 +561,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
         padding-bottom: 0;
     }
     .site-header__inner {
-        height: 44px;
+        height: 32px;
     }
     .site-header__logo img,
     .site-header__logo .custom-logo {
@@ -2195,6 +2195,7 @@ h6 { font-size: var(--font-size-base); font-weight: 400; line-height: 1.5; }
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    border-radius: var(--md-corner);
     transition: transform var(--transition-medium), box-shadow var(--transition-medium);
 }
 
@@ -3832,7 +3833,7 @@ a.contact-info__value:hover {
 
 /* ── Header height ────────────────────────────────────────────────────────── */
 .site-header__inner {
-    height: 72px;
+    height: 42px;
 }
 
 /* ── btn-outline (ghost) ──────────────────────────────────────────────────── */
@@ -5830,7 +5831,6 @@ a.contact-info__value:hover {
 }
 .scan-hero__headline--accent {
     color: var(--md-accent);
-    display: block;
 }
 .scan-hero__sub {
     max-width: 480px;
@@ -5864,7 +5864,7 @@ a.contact-info__value:hover {
     flex: 1;
     min-width: 170px;
     padding: 14px 16px;
-    border-radius: 10px;
+    border-radius: var(--md-corner);
     border: 1.5px solid var(--md-outline);
     background: #fff;
     color: var(--md-on-surface);
@@ -5992,7 +5992,7 @@ a.contact-info__value:hover {
     margin-top: 20px;
     padding: 14px 16px;
     background: #16243B;
-    border-radius: 12px;
+    border-radius: var(--md-corner);
     font-size: 13.5px;
     line-height: 1.55;
     color: #D7E0EE;
@@ -6071,7 +6071,7 @@ a.contact-info__value:hover {
 .scan-checks__icon {
     width: 42px;
     height: 42px;
-    border-radius: 10px;
+    border-radius: var(--md-corner);
     background: var(--md-accent-container);
     display: flex;
     align-items: center;
