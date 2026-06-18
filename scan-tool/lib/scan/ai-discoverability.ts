@@ -18,12 +18,9 @@ export async function checkAiDiscoverability(
   const prompts = generatePrompts(domain, brand, niche);
   const variants = extractBrandVariants(domain, brand);
 
-  const results: AiCheckResult[] = [];
-
-  for (const prompt of prompts) {
-    const result = await runSingleCheck(prompt, variants);
-    results.push(result);
-  }
+  const results = await Promise.all(
+    prompts.map((prompt) => runSingleCheck(prompt, variants))
+  );
 
   const score = calculateScore(results);
   return { score, details: results };

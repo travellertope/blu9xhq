@@ -1,8 +1,13 @@
 import { NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/redis";
 import { createScanId, initScan, runScan } from "@/lib/scan/engine";
 import type { ScanInput } from "@/lib/scan/types";
+
+// Sequential external calls (AI checks, site fetch, competitor lookup) can
+// take well over the default 10s — give the background scan room to finish.
+export const maxDuration = 300;
 
 const ScanSchema = z.object({
   domain: z.string().optional(),
@@ -86,7 +91,10 @@ export async function POST(request: Request) {
   const id = createScanId();
   await initScan(id, input);
 
-  runScan(id, input).catch(() => {});
+  // Keep the serverless function alive until the background scan
+  // finishes — without this, Vercel freezes the lambda the instant
+  // the response below is sent, killing runScan mid-flight.
+  waitUntil(runScan(id, input).catch(() => {}));
 
   return NextResponse.json({
     id,
