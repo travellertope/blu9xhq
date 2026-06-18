@@ -68,6 +68,7 @@ export interface SiteDetails {
   avgInternalLinks: number;
   imageAltCoverage: number;
   pages: PageAnalysis[];
+  homepageSummary: string;
 }
 
 export interface CompetitorProfile {

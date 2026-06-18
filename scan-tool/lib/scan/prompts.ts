@@ -65,10 +65,24 @@ export function extractBrandVariants(
   if (domain) {
     const clean = domain.replace(/^(www\.)?/, "").toLowerCase();
     variants.push(clean);
-    const name = clean.replace(/\.(com|io|co|net|org|ai|dev|app)$/, "");
+    const name = clean.replace(/\.(com|io|co|net|org|ai|dev|co\.uk|ng|com\.ng)$/, "");
     variants.push(name);
     variants.push(name.replace(/[-_]/g, " "));
+
+    // Catch brand names that drop a leading "the" (e.g. "themoveee" -> "moveee")
+    if (/^the[a-z]/.test(name)) {
+      const withoutThe = name.replace(/^the/, "");
+      variants.push(withoutThe);
+      variants.push(withoutThe.replace(/[-_]/g, " "));
+    }
   }
 
-  return Array.from(new Set(variants.filter(Boolean)));
+  if (brand) {
+    const lowerBrand = brand.toLowerCase();
+    if (/^the\s+/.test(lowerBrand)) {
+      variants.push(lowerBrand.replace(/^the\s+/, ""));
+    }
+  }
+
+  return Array.from(new Set(variants.filter((v) => v && v.length > 2)));
 }

@@ -29,6 +29,7 @@ export async function checkSiteHealth(
   }
 
   analyzeHomepage(homepageHtml, detail);
+  detail.homepageSummary = extractHomepageSummary(homepageHtml);
 
   const internalLinks = extractInternalLinks(homepageHtml, baseUrl);
 
@@ -95,7 +96,29 @@ function emptyDetails(): SiteDetails {
     avgInternalLinks: 0,
     imageAltCoverage: 0,
     pages: [],
+    homepageSummary: "",
   };
+}
+
+function extractHomepageSummary(html: string): string {
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+  const descMatch = html.match(/meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+  const ogDescMatch = html.match(/meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i);
+
+  const textContent = html
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const parts: string[] = [];
+  if (titleMatch?.[1]) parts.push(`Title: ${titleMatch[1].trim()}`);
+  const description = descMatch?.[1] || ogDescMatch?.[1];
+  if (description) parts.push(`Description: ${description.trim()}`);
+  if (textContent) parts.push(`Page text excerpt: ${textContent.slice(0, 1000)}`);
+
+  return parts.join("\n");
 }
 
 async function fetchWithFallback(url: string): Promise<Response> {
