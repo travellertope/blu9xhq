@@ -444,6 +444,7 @@
     height: auto;
     display: block;
     margin: var(--space-6) 0;
+    border-radius: var(--radius-lg);
     filter: grayscale(100%);
     transition: filter 0.3s ease;
 }
@@ -626,6 +627,7 @@
     width: 64px;
     height: 64px;
     object-fit: cover;
+    border-radius: 50%;
     margin: 0;
 }
 .bluu-author-block__name {
@@ -1033,6 +1035,7 @@
     color: var(--md-on-surface);
     background: transparent;
     border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-full);
     outline: none;
     transition: border-color 0.15s, background 0.15s;
     box-sizing: border-box;

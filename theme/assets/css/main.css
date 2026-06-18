@@ -66,6 +66,7 @@
     --radius-lg:   14px;
     --radius-xl:   20px;
     --radius-full: 9999px;
+    --md-corner:   var(--radius-lg);
 
     /* Typography */
     --font-family-base:    'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -2385,6 +2386,7 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 .pricing-card {
     background: var(--md-surface);
     border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
     padding: var(--space-7);
     display: flex;
     flex-direction: column;
@@ -3954,6 +3956,7 @@ a.contact-info__value:hover {
     width: 140%;
     min-height: 420px; /* fallback height; flex-stretch fills grid row height */
     overflow: hidden;
+    border-radius: var(--radius-lg);
     /* aspect-ratio removed — height now fills available space */
 }
 
@@ -4852,6 +4855,7 @@ a.contact-info__value:hover {
 .industry-block__visual {
     background: var(--md-surface-variant);
     border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
     min-height: 400px;
     display: flex;
     align-items: center;
@@ -5566,6 +5570,7 @@ a.contact-info__value:hover {
 .pricing-addon-card {
     background: #fff;
     border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
     padding: var(--space-7);
     display: flex;
     flex-direction: column;
@@ -5790,6 +5795,7 @@ a.contact-info__value:hover {
     font-weight: 600;
     color: var(--md-accent);
     background: #e8effd;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     transition: background 0.12s;
 }

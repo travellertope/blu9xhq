@@ -100,7 +100,7 @@ $scan_url = 'https://scan.bluuhq.com';
         <div class="scan-checks__header">
             <span class="scan-checks__eyebrow">What the scan checks</span>
             <h2 class="scan-checks__headline">Three things, in about two minutes.</h2>
-            <p class="scan-checks__sub">No fluff metrics. Just whether AI and search can actually find you, and what to do if they can't.</p>
+            <p class="scan-checks__sub">Three plain-English answers. Just whether AI and search can actually find you, and what to do if they can't.</p>
         </div>
 
         <div class="scan-checks__grid">
@@ -234,7 +234,7 @@ $scan_url = 'https://scan.bluuhq.com';
         <p class="home-cta__body">Run the free scan, or skip straight to a conversation.</p>
         <div class="scan-hero__cta-group">
             <a href="#top" class="btn-primary">Run your free scan</a>
-            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-outline" style="background:#fff">Book a Discovery Call</a>
+            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-outline" style="background:#fff">Let's talk</a>
         </div>
         <p class="home-cta__note">Limited monthly capacity</p>
     </div>
