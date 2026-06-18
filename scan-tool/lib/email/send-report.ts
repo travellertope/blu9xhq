@@ -101,11 +101,18 @@ export async function sendScanReport(
       </table>
       ` : ""}
 
-      ${competitors.length > 0 ? `
+      ${scan.compDetails ? `
       <h2 style="font-size:16px;font-weight:700;color:#0f1729;margin:24px 0 12px">Who AI Recommends Instead</h2>
+      ${competitors.length > 0 ? `
       <ul style="margin:0 0 24px;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">
         ${competitors.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}
       </ul>
+      ` : `
+      <p style="margin:0 0 24px;font-size:13px;color:#6b7280">
+        We couldn't confidently name competitors for this brand — likely because it's too new or niche
+        for AI to compare yet.
+      </p>
+      `}
       ` : ""}
 
       ${fixList.length > 0 ? `

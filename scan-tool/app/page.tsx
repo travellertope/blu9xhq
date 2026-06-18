@@ -433,16 +433,23 @@ export default function ScanPage() {
             )}
 
             {/* ── Competitor names (gated) ──────────────────── */}
-            {compDetails && compDetails.competitors.length > 0 && (
+            {compDetails && (
               <div className="mt-4 mb-4">
                 <h3 className="text-sm font-bold text-ink mb-3">Who AI Recommends Instead</h3>
-                <div className="flex flex-wrap gap-2">
-                  {compDetails.competitors.map((c, i) => (
-                    <span key={i} className="text-xs font-medium px-3 py-1.5 bg-bg-soft rounded-full text-ink">
-                      {c}
-                    </span>
-                  ))}
-                </div>
+                {compDetails.competitors.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {compDetails.competitors.map((c, i) => (
+                      <span key={i} className="text-xs font-medium px-3 py-1.5 bg-bg-soft rounded-full text-ink">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-ink-soft">
+                    We couldn&apos;t confidently name competitors for this brand — likely because it&apos;s too
+                    new or niche for AI to compare yet. Adding a niche on your next scan will sharpen this.
+                  </p>
+                )}
               </div>
             )}
 

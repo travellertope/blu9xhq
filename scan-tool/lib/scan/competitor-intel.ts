@@ -20,14 +20,13 @@ export async function checkCompetitorIntel(
   niche: string | undefined
 ): Promise<{ score: number; details: CompetitorResult }> {
   const brandName = brand || domainToName(domain || "");
-  const scopePhrase = niche
-    ? `in the ${niche} space`
-    : `that compete with "${brandName}"`;
+  const subject = domain ? `the website "${domain}"` : `the business "${brandName}"`;
+  const scopePhrase = niche ? `in the ${niche} space` : "in its space";
 
   try {
     const model = getModel();
     const result = await model.generateContent(
-      `List the top 5 companies or tools ${scopePhrase}. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. Reply in this exact JSON format: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`
+      `Search the web to find out what ${subject} does. Then list the top 5 companies or tools that are its direct competitors ${scopePhrase}. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. If you cannot find anything about ${subject}, make your best guess based on the name alone — still return 5 names, never an empty list. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`
     );
 
     const fullText = result.response.text();
