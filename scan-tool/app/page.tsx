@@ -75,9 +75,8 @@ export default function ScanPage() {
     return () => stopPolling();
   }, [stopPolling]);
 
-  const handleScan = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+  const performScan = useCallback(
+    async (params: { domain: string; bizName: string; niche: string; noSite: boolean }) => {
       stopPolling();
       setScanError(null);
       setShowResults(false);
@@ -87,9 +86,9 @@ export default function ScanPage() {
       setScanning(true);
       setProgress(0);
 
-      const key = noSite ? bizName || "newbusiness" : domain || "example.com";
+      const key = params.noSite ? params.bizName || "newbusiness" : params.domain || "example.com";
       setStatusText(
-        noSite ? `Mapping the content landscape for "${key}"…` : `Scanning ${key}…`
+        params.noSite ? `Mapping the content landscape for "${key}"…` : `Scanning ${key}…`
       );
 
       try {
@@ -97,10 +96,10 @@ export default function ScanPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            domain: noSite ? undefined : domain,
-            brand: noSite ? bizName : undefined,
-            niche: niche || undefined,
-            noSite,
+            domain: params.noSite ? undefined : params.domain,
+            brand: params.noSite ? params.bizName : undefined,
+            niche: params.niche || undefined,
+            noSite: params.noSite,
           }),
         });
 
@@ -151,8 +150,39 @@ export default function ScanPage() {
         setStatusText("");
       }
     },
-    [noSite, domain, bizName, niche, stopPolling]
+    [stopPolling]
   );
+
+  const handleScan = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+      performScan({ domain, bizName, niche, noSite });
+    },
+    [performScan, noSite, domain, bizName, niche]
+  );
+
+  // Auto-run the scan when arriving from the homepage form with a
+  // domain/brand already in the query string, instead of showing an
+  // empty form the visitor has to resubmit.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const domainParam = url.searchParams.get("domain")?.trim() ?? "";
+    const brandParam = url.searchParams.get("brand")?.trim() ?? "";
+    const nicheParam = url.searchParams.get("niche")?.trim() ?? "";
+
+    if (!domainParam && !brandParam) return;
+
+    const noSiteParam = !domainParam && !!brandParam;
+
+    setDomain(domainParam);
+    setBizName(brandParam);
+    setNiche(nicheParam);
+    setNoSite(noSiteParam);
+
+    performScan({ domain: domainParam, bizName: brandParam, niche: nicheParam, noSite: noSiteParam });
+    // Only ever run on initial load from the incoming URL.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEmailGate = useCallback(
     async (e: React.FormEvent) => {
