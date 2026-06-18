@@ -19,7 +19,13 @@ export async function checkAiDiscoverability(
   const variants = extractBrandVariants(domain, brand);
 
   const results = await Promise.all(
-    prompts.map((prompt) => runSingleCheck(prompt, variants))
+    prompts.map((cp) =>
+      runSingleCheck(cp.prompt, variants).then((r) => ({
+        ...r,
+        category: cp.category,
+        intent: cp.intent,
+      }))
+    )
   );
 
   const score = calculateScore(results);
@@ -29,7 +35,7 @@ export async function checkAiDiscoverability(
 async function runSingleCheck(
   prompt: string,
   brandVariants: string[]
-): Promise<AiCheckResult> {
+): Promise<Omit<AiCheckResult, "category" | "intent">> {
   try {
     const model = getModel();
     const result = await model.generateContent(prompt);
@@ -61,9 +67,7 @@ async function runSingleCheck(
       return urlPattern.test(fullText);
     });
 
-    const snippet = mentioned
-      ? extractSnippet(fullText, brandVariants)
-      : "";
+    const snippet = mentioned ? extractSnippet(fullText, brandVariants) : "";
 
     return { prompt, mentioned, position, sentiment, hasCitation, snippet };
   } catch {
@@ -87,8 +91,8 @@ function classifySentiment(
     const idx = lower.indexOf(v);
     if (idx < 0) continue;
     const window = lower.slice(Math.max(0, idx - 100), idx + v.length + 100);
-    const positive = /\b(great|excellent|best|top|leading|popular|reliable|trusted|recommend|strong|standout)\b/.test(window);
-    const negative = /\b(poor|bad|worst|avoid|unreliable|outdated|weak|lacking|disappointing)\b/.test(window);
+    const positive = /\b(great|excellent|best|top|leading|popular|reliable|trusted|recommend|strong|standout|innovative|impressive|well-regarded|reputable)\b/.test(window);
+    const negative = /\b(poor|bad|worst|avoid|unreliable|outdated|weak|lacking|disappointing|limited|overpriced|behind)\b/.test(window);
     if (positive && !negative) return "positive";
     if (negative && !positive) return "negative";
   }
@@ -101,7 +105,7 @@ function extractSnippet(text: string, variants: string[]): string {
     const idx = lower.indexOf(v);
     if (idx < 0) continue;
     const start = Math.max(0, idx - 60);
-    const end = Math.min(text.length, idx + v.length + 100);
+    const end = Math.min(text.length, idx + v.length + 120);
     return (start > 0 ? "…" : "") + text.slice(start, end).trim() + (end < text.length ? "…" : "");
   }
   return "";
@@ -113,7 +117,7 @@ function calculateScore(results: AiCheckResult[]): number {
 
   const mentioned = results.filter((r) => r.mentioned);
   const mentionRate = mentioned.length / total;
-  const mentionPoints = Math.round(mentionRate * 40);
+  const mentionPoints = Math.round(mentionRate * 35);
 
   let positionPoints = 0;
   for (const r of mentioned) {
@@ -136,5 +140,9 @@ function calculateScore(results: AiCheckResult[]): number {
   const consistencyPoints =
     mentionRate >= 0.6 ? 10 : mentionRate >= 0.4 ? 6 : mentionRate >= 0.2 ? 3 : 0;
 
-  return Math.min(100, mentionPoints + positionPoints + sentimentPoints + citationPoints + consistencyPoints);
+  // Category coverage bonus: mentioned in at least 3 of 4 categories
+  const mentionedCategories = new Set(mentioned.map((r) => r.category));
+  const categoryPoints = mentionedCategories.size >= 3 ? 5 : mentionedCategories.size >= 2 ? 2 : 0;
+
+  return Math.min(100, mentionPoints + positionPoints + sentimentPoints + citationPoints + consistencyPoints + categoryPoints);
 }

@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { saveScan, updateScan } from "../redis";
 import { checkAiDiscoverability } from "./ai-discoverability";
 import { checkSiteHealth } from "./site-health";
@@ -22,6 +23,7 @@ export async function initScan(id: string, input: ScanInput): Promise<void> {
     aiDetails: null,
     compDetails: null,
     siteDetails: null,
+    strategicAnalysis: null,
     createdAt: new Date().toISOString(),
     completedAt: null,
     email: null,
@@ -32,42 +34,33 @@ export async function initScan(id: string, input: ScanInput): Promise<void> {
 
 export async function runScan(id: string, input: ScanInput): Promise<void> {
   try {
+    // Phase 1: AI discoverability + site health run in parallel
     await updateScan(id, {
-      progress: 10,
-      currentStep: "Checking AI discoverability…",
+      progress: 5,
+      currentStep: "Analyzing AI visibility across 12 real-world queries…",
     });
 
-    const aiResult = await checkAiDiscoverability(
-      input.domain,
-      input.brand,
-      input.niche
-    );
+    const [aiResult, siteResult] = await Promise.all([
+      checkAiDiscoverability(input.domain, input.brand, input.niche),
+      checkSiteHealth(input.noSite ? undefined : input.domain),
+    ]);
 
     await updateScan(id, {
-      progress: 45,
-      currentStep: input.noSite
-        ? "No site to check — skipping site health."
-        : "Checking site health…",
+      progress: 55,
+      currentStep: "Researching competitors and comparing signals…",
     });
 
-    const siteResult = await checkSiteHealth(
-      input.noSite ? undefined : input.domain
-    );
-
-    await updateScan(id, {
-      progress: 70,
-      currentStep: "Analyzing competitor landscape…",
-    });
-
+    // Phase 2: competitor intel (needs siteResult for gap analysis)
     const compResult = await checkCompetitorIntel(
       input.domain,
       input.brand,
-      input.niche
+      input.niche,
+      siteResult.details
     );
 
     await updateScan(id, {
-      progress: 90,
-      currentStep: "Generating your report…",
+      progress: 80,
+      currentStep: "Writing your strategic analysis…",
     });
 
     const scores: ScanScores = {
@@ -75,11 +68,14 @@ export async function runScan(id: string, input: ScanInput): Promise<void> {
       site: siteResult.score,
       comp: compResult.score,
       overall: Math.round(
-        (aiResult.score + siteResult.score + compResult.score) / 3
+        aiResult.score * 0.45 + siteResult.score * 0.30 + compResult.score * 0.25
       ),
     };
 
     const verdict = buildVerdict(scores, input);
+
+    // Phase 3: Gemini synthesis — write a professional analysis paragraph
+    const strategicAnalysis = await generateStrategicAnalysis(input, scores, aiResult, siteResult, compResult);
 
     await updateScan(id, {
       status: "complete",
@@ -88,13 +84,14 @@ export async function runScan(id: string, input: ScanInput): Promise<void> {
       scores,
       verdict,
       summary: {
-        pagesChecked: siteResult.details.dnsResolves ? 1 : 0,
+        pagesChecked: siteResult.details.pages?.length || 0,
         competitorsSurveyed: compResult.details.competitors.length,
         aiPromptsRun: aiResult.details.length,
       },
       aiDetails: aiResult.details,
       compDetails: compResult.details,
       siteDetails: siteResult.details,
+      strategicAnalysis,
       completedAt: new Date().toISOString(),
     });
   } catch (err) {
@@ -105,6 +102,38 @@ export async function runScan(id: string, input: ScanInput): Promise<void> {
       currentStep: "Scan failed.",
       error: message,
     });
+  }
+}
+
+async function generateStrategicAnalysis(
+  input: ScanInput,
+  scores: ScanScores,
+  aiResult: { score: number; details: { mentioned: boolean }[] },
+  siteResult: { score: number },
+  compResult: { score: number; details: { competitors: unknown[]; gaps: string[] } }
+): Promise<string> {
+  try {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    const brandName = input.brand || input.domain || "this brand";
+    const prompt = `You are a senior digital strategist writing a brief AI visibility assessment for a client named "${brandName}".
+
+Here are the scan results:
+
+- AI Visibility Score: ${scores.ai}/100 (the brand was mentioned in ${aiResult.details.filter((d) => d.mentioned).length} of ${aiResult.details.length} AI-generated responses to real buyer queries)
+- Site Health Score: ${scores.site}/100 ${input.noSite ? "(no website)" : ""}
+- Competitive Position Score: ${scores.comp}/100 (${compResult.details.competitors.length} competitors analyzed)
+- Overall Score: ${scores.overall}/100
+
+${compResult.details.gaps.length > 0 ? `Key competitive gaps found:\n${compResult.details.gaps.map((g) => `- ${g}`).join("\n")}` : ""}
+
+Write a 3-4 paragraph strategic assessment. Be specific and direct — no filler, no generic advice. Reference the actual scores and findings. End with one clear, prioritized recommendation. Write in second person ("you", "your"). Do not use bullet points or headers — write in flowing prose. Do not mention that this is an AI-generated assessment.`;
+
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch {
+    return "";
   }
 }
 

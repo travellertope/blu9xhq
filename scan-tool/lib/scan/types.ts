@@ -5,11 +5,6 @@ export interface ScanInput {
   noSite: boolean;
 }
 
-export interface PillarScore {
-  score: number;
-  details: Record<string, unknown>;
-}
-
 export interface ScanScores {
   ai: number;
   site: number;
@@ -30,10 +25,27 @@ export interface ScanSummary {
   aiPromptsRun: number;
 }
 
-export interface CompDetails {
-  competitors: string[];
-  brandMentionedMoreThanCompetitors: boolean;
-  relativePosition: "ahead" | "even" | "behind";
+export interface AiCheckResult {
+  prompt: string;
+  category: "informational" | "transactional" | "comparison" | "reputation";
+  intent: string;
+  mentioned: boolean;
+  position: "top" | "middle" | "bottom" | "absent";
+  sentiment: "positive" | "neutral" | "negative" | "absent";
+  hasCitation: boolean;
+  snippet: string;
+}
+
+export interface PageAnalysis {
+  url: string;
+  title: string;
+  wordCount: number;
+  headingCount: number;
+  internalLinkCount: number;
+  externalLinkCount: number;
+  hasStructuredData: boolean;
+  imageCount: number;
+  imagesWithAlt: number;
 }
 
 export interface SiteDetails {
@@ -46,6 +58,32 @@ export interface SiteDetails {
   hasRobotsTxt: boolean;
   hasSitemap: boolean;
   hasStructuredData: boolean;
+  hasLlmsTxt: boolean;
+  hasBlog: boolean;
+  hasCanonical: boolean;
+  hasMobileViewport: boolean;
+  totalPagesFound: number;
+  avgWordCount: number;
+  avgHeadingCount: number;
+  avgInternalLinks: number;
+  imageAltCoverage: number;
+  pages: PageAnalysis[];
+}
+
+export interface CompetitorProfile {
+  name: string;
+  domain: string | null;
+  hasStructuredData: boolean;
+  hasBlog: boolean;
+  estimatedContentDepth: "thin" | "moderate" | "deep";
+  wordCount: number;
+}
+
+export interface CompDetails {
+  competitors: CompetitorProfile[];
+  brandMentionedMoreThanCompetitors: boolean;
+  relativePosition: "ahead" | "even" | "behind";
+  gaps: string[];
 }
 
 export interface ScanResult {
@@ -60,17 +98,9 @@ export interface ScanResult {
   aiDetails: AiCheckResult[] | null;
   compDetails: CompDetails | null;
   siteDetails: SiteDetails | null;
+  strategicAnalysis: string | null;
   createdAt: string;
   completedAt: string | null;
   email: string | null;
   error: string | null;
-}
-
-export interface AiCheckResult {
-  prompt: string;
-  mentioned: boolean;
-  position: "top" | "middle" | "bottom" | "absent";
-  sentiment: "positive" | "neutral" | "negative" | "absent";
-  hasCitation: boolean;
-  snippet: string;
 }

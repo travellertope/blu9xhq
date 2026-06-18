@@ -40,6 +40,7 @@ export async function GET(
 
   if (scan.status === "complete") {
     response.verdict = scan.verdict;
+    response.strategicAnalysis = scan.strategicAnalysis;
   }
 
   if (hasEmail && scan.status === "complete") {
