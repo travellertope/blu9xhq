@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { generatePrompts, extractBrandVariants } from "./prompts";
-import type { AiCheckResult } from "./types";
+import { generatePrompts, extractBrandVariants, extractSiteIdentity } from "./prompts";
+import type { AiCheckResult, SiteDetails } from "./types";
 
 function getModel() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
@@ -13,10 +13,14 @@ function getModel() {
 export async function checkAiDiscoverability(
   domain: string | undefined,
   brand: string | undefined,
-  niche: string | undefined
+  niche: string | undefined,
+  siteDetails?: SiteDetails | null
 ): Promise<{ score: number; details: AiCheckResult[] }> {
-  const prompts = generatePrompts(domain, brand, niche);
-  const variants = extractBrandVariants(domain, brand);
+  const siteIdentity = siteDetails?.homepageSummary
+    ? extractSiteIdentity(siteDetails.homepageSummary)
+    : undefined;
+  const prompts = generatePrompts(domain, brand, niche, siteIdentity);
+  const variants = extractBrandVariants(domain, brand, siteIdentity);
 
   const results = await Promise.all(
     prompts.map((cp) =>
