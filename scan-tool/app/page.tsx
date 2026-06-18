@@ -408,19 +408,30 @@ export default function ScanPage() {
                   </p>
                 </div>
               ) : !showEmailGate ? (
-                <button
-                  onClick={() => setShowEmailGate(true)}
-                  className="w-full py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark transition-all cursor-pointer border-none"
-                >
-                  Get the full breakdown &rarr;
-                </button>
+                <div>
+                  <ul className="text-xs text-ink-soft mb-3 space-y-1.5">
+                    <li>&bull; Every AI prompt we tested, with your exact position and sentiment</li>
+                    <li>&bull; The competitors AI recommends instead of you, by name</li>
+                    <li>&bull; A prioritized fix list for site health and content gaps</li>
+                    <li>&bull; One clear next step based on your weakest score</li>
+                  </ul>
+                  <button
+                    onClick={() => setShowEmailGate(true)}
+                    className="w-full py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark transition-all cursor-pointer border-none"
+                  >
+                    Get the full breakdown — free &rarr;
+                  </button>
+                  <p className="text-xs text-ink-soft text-center mt-2">
+                    100% free &middot; no credit card &middot; takes 10 seconds
+                  </p>
+                </div>
               ) : (
                 <div>
                   <p className="text-sm font-semibold text-ink mb-2">
                     Enter your email to unlock the detailed report
                   </p>
                   <p className="text-xs text-ink-soft mb-3">
-                    We&apos;ll send the full breakdown — what&apos;s wrong, competitor names,
+                    Free — we&apos;ll send the full breakdown — what&apos;s wrong, competitor names,
                     and a recommended next step. No spam, no card.
                   </p>
                   <form onSubmit={handleEmailGate} className="flex gap-2.5">
