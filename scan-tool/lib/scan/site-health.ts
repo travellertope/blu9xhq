@@ -71,8 +71,45 @@ export async function checkSiteHealth(
 
   detail.hasBlog = detectBlog(internalLinks, homepageHtml);
 
+  const pageSpeed = await getPageSpeedData(baseUrl);
+  detail.performanceScore = pageSpeed?.performanceScore ?? null;
+  detail.lcpMs = pageSpeed?.lcpMs ?? null;
+  detail.clsScore = pageSpeed?.clsScore ?? null;
+  detail.mobileFriendly = pageSpeed?.mobileFriendly ?? null;
+
   const score = computeSiteScore(detail);
   return { score, details: detail };
+}
+
+interface PageSpeedData {
+  performanceScore: number;
+  lcpMs: number;
+  clsScore: number;
+  mobileFriendly: boolean;
+}
+
+async function getPageSpeedData(url: string): Promise<PageSpeedData | null> {
+  const apiKey = process.env.PAGESPEED_API_KEY;
+  if (!apiKey) return null;
+
+  try {
+    const endpoint = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile&category=performance&key=${apiKey}`;
+    const res = await fetch(endpoint, { signal: AbortSignal.timeout(20000) });
+    if (!res.ok) return null;
+
+    const data = await res.json();
+    const lighthouse = data?.lighthouseResult;
+    if (!lighthouse) return null;
+
+    const performanceScore = Math.round((lighthouse.categories?.performance?.score ?? 0) * 100);
+    const lcpMs = Math.round(lighthouse.audits?.["largest-contentful-paint"]?.numericValue ?? 0);
+    const clsScore = lighthouse.audits?.["cumulative-layout-shift"]?.numericValue ?? 0;
+    const mobileFriendly = (lighthouse.audits?.viewport?.score ?? 0) === 1;
+
+    return { performanceScore, lcpMs, clsScore, mobileFriendly };
+  } catch {
+    return null;
+  }
 }
 
 function emptyDetails(): SiteDetails {
@@ -97,6 +134,10 @@ function emptyDetails(): SiteDetails {
     imageAltCoverage: 0,
     pages: [],
     homepageSummary: "",
+    performanceScore: null,
+    lcpMs: null,
+    clsScore: null,
+    mobileFriendly: null,
   };
 }
 
@@ -244,9 +285,15 @@ function computeSiteScore(d: SiteDetails): number {
   // Foundation (30 pts)
   if (d.dnsResolves) score += 8;
   if (d.https) score += 8;
-  if (d.responseTimeMs > 0 && d.responseTimeMs < 1000) score += 8;
-  else if (d.responseTimeMs > 0 && d.responseTimeMs < 2500) score += 4;
-  if (d.hasMobileViewport) score += 3;
+  if (d.performanceScore !== null) {
+    // Real Lighthouse performance score (PageSpeed Insights) when available
+    score += Math.round((d.performanceScore / 100) * 8);
+  } else if (d.responseTimeMs > 0 && d.responseTimeMs < 1000) {
+    score += 8;
+  } else if (d.responseTimeMs > 0 && d.responseTimeMs < 2500) {
+    score += 4;
+  }
+  if (d.mobileFriendly !== null ? d.mobileFriendly : d.hasMobileViewport) score += 3;
   if (d.hasCanonical) score += 3;
 
   // Metadata (15 pts)

@@ -69,6 +69,10 @@ export interface SiteDetails {
   imageAltCoverage: number;
   pages: PageAnalysis[];
   homepageSummary: string;
+  performanceScore: number | null;
+  lcpMs: number | null;
+  clsScore: number | null;
+  mobileFriendly: boolean | null;
 }
 
 export interface CompetitorProfile {

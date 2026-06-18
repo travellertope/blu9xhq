@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getScan, updateScan } from "@/lib/redis";
+import { getScan, updateScan, upsertUser, addScanToUserIndex } from "@/lib/redis";
 import { sendScanReport } from "@/lib/email/send-report";
 
 const EmailGateSchema = z.object({
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
   }
 
   await updateScan(scanId, { email });
+  await upsertUser(email);
+  await addScanToUserIndex(email, scanId);
 
   try {
     await sendScanReport(email, scan);
