@@ -1,6 +1,12 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const client = new Anthropic();
+function getModel() {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  return genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    tools: [{ googleSearch: {} } as never],
+  });
+}
 
 export interface CompetitorResult {
   competitors: string[];
@@ -17,20 +23,12 @@ export async function checkCompetitorIntel(
   const brandName = brand || domainToName(domain || "");
 
   try {
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      tools: [{ type: "web_search_20250305", name: "web_search" }],
-      messages: [
-        {
-          role: "user",
-          content: `List the top 5 companies or tools in the ${nicheLabel} space. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. Reply in this exact JSON format: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`,
-        },
-      ],
-    });
+    const model = getModel();
+    const result = await model.generateContent(
+      `List the top 5 companies or tools in the ${nicheLabel} space. For each, give just the company name. Then state whether "${brandName}" is among the most visible brands in this space. Reply in this exact JSON format: {"competitors": ["Name1","Name2","Name3","Name4","Name5"], "brandVisible": true/false}`
+    );
 
-    const textBlocks = response.content.filter((b) => b.type === "text");
-    const fullText = textBlocks.map((b) => b.text).join("\n");
+    const fullText = result.response.text();
 
     let competitors: string[] = [];
     let brandVisible = false;

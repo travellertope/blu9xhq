@@ -234,7 +234,7 @@ scan-tool/components/
 ## Dependencies to Add
 
 ```bash
-npm install @anthropic-ai/sdk        # Claude API for AI checks
+npm install @google/generative-ai    # Gemini API for AI checks
 npm install @upstash/redis            # Scan state storage
 npm install @upstash/qstash           # Async job queuing
 npm install resend                    # Transactional email
@@ -247,8 +247,8 @@ npm install nanoid                    # Scan ID generation
 ## Environment Variables
 
 ```env
-# Claude API
-ANTHROPIC_API_KEY=sk-ant-...
+# Gemini API
+GEMINI_API_KEY=AIza...
 
 # Upstash Redis
 UPSTASH_REDIS_REST_URL=https://...
@@ -348,7 +348,7 @@ scan-tool/
 
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| LLM provider | Claude API (Sonnet) | Already in ecosystem, search grounding, cost-effective |
+| LLM provider | Gemini 2.0 Flash (Google) | Google Search grounding, cost-effective, fast |
 | State store | Upstash Redis | Serverless, no cold start, built-in TTL |
 | Job queue | Inline first, QStash later | MVP speed; QStash when scan >10s |
 | Email | Resend | Simple API, React Email templates, good deliverability |
@@ -360,7 +360,7 @@ scan-tool/
 
 | Risk | Mitigation |
 |------|-----------|
-| Claude API latency (5-15s for grounded search) | Show real progress updates; consider streaming |
+| Gemini API latency (3-10s for grounded search) | Show real progress updates; consider streaming |
 | AI discoverability scores feel arbitrary | Publish scoring rubric on results page; use consistent methodology |
 | Rate limiting too aggressive | Start generous (5/hr), tighten based on abuse patterns |
 | Email deliverability | Use custom domain (scan@bluuhq.com), DKIM/SPF, Resend reputation |
@@ -816,7 +816,7 @@ api_keys     { id, userId, key, createdAt, lastUsedAt }
 | Framework | Next.js 14 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS 3.4 |
-| LLM | Claude API (Sonnet) via `@anthropic-ai/sdk` |
+| LLM | Gemini 2.0 Flash via `@google/generative-ai` |
 | Auth | NextAuth.js (magic-link + credentials) |
 | Database (Ph 1-3) | Upstash Redis |
 | Database (Ph 4) | Turso (libSQL) + Drizzle ORM |

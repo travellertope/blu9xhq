@@ -1,8 +1,14 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generatePrompts, extractBrandVariants } from "./prompts";
 import type { AiCheckResult } from "./types";
 
-const client = new Anthropic();
+function getModel() {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+  return genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    tools: [{ googleSearch: {} } as never],
+  });
+}
 
 export async function checkAiDiscoverability(
   domain: string | undefined,
@@ -28,15 +34,9 @@ async function runSingleCheck(
   brandVariants: string[]
 ): Promise<AiCheckResult> {
   try {
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6",
-      max_tokens: 1024,
-      tools: [{ type: "web_search_20250305", name: "web_search" }],
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const textBlocks = response.content.filter((b) => b.type === "text");
-    const fullText = textBlocks.map((b) => b.text).join("\n");
+    const model = getModel();
+    const result = await model.generateContent(prompt);
+    const fullText = result.response.text();
     const lower = fullText.toLowerCase();
 
     const mentioned = brandVariants.some((v) => lower.includes(v));
