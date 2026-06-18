@@ -234,7 +234,7 @@ $scan_url = 'https://scan.bluuhq.com';
         <p class="home-cta__body">Run the free scan, or skip straight to a conversation.</p>
         <div class="scan-hero__cta-group">
             <a href="#top" class="btn-primary">Run your free scan</a>
-            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-outline" style="background:#fff">Book a Discovery Call</a>
+            <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-outline" style="background:#fff">Let's talk</a>
         </div>
         <p class="home-cta__note">Limited monthly capacity</p>
     </div>
