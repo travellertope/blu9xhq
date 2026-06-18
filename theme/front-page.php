@@ -22,8 +22,7 @@ $scan_url = 'https://scan.bluuhq.com';
             <!-- Left: copy + form -->
             <div class="scan-hero__content">
                 <h1 class="scan-hero__headline">
-                    Most brands are invisible<br>to AI search.
-                    <span class="scan-hero__headline--accent">See your AI visibility score — free.</span>
+                    Most brands are invisible to AI search. <span class="scan-hero__headline--accent">See your AI visibility score — free.</span>
                 </h1>
 
                 <p class="scan-hero__sub">
