@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { saveScan, updateScan } from "../redis";
 import { checkAiDiscoverability } from "./ai-discoverability";
 import { checkSiteHealth } from "./site-health";
@@ -120,8 +120,7 @@ async function generateStrategicAnalysis(
   compResult: { score: number; details: { competitors: unknown[]; gaps: string[] } }
 ): Promise<string> {
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
     const brandName = input.brand || input.domain || "this brand";
     const prompt = `You are a senior digital strategist writing a brief AI visibility assessment for a client named "${brandName}".
@@ -137,8 +136,11 @@ ${compResult.details.gaps.length > 0 ? `Key competitive gaps found:\n${compResul
 
 Write a 3-4 paragraph strategic assessment. Be specific and direct — no filler, no generic advice. Reference the actual scores and findings. End with one clear, prioritized recommendation. Write in second person ("you", "your"). Do not use bullet points or headers — write in flowing prose. Do not mention that this is an AI-generated assessment.`;
 
-    const result = await model.generateContent(prompt);
-    return result.response.text().trim();
+    const result = await ai.models.generateContent({
+      model: "gemini-2.0-flash",
+      contents: prompt,
+    });
+    return (result.text || "").trim();
   } catch {
     return "";
   }
