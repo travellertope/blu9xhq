@@ -87,16 +87,29 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
         <div class="container">
             <div class="site-footer__bottom-inner">
 
-                <!-- Logo — div wrapper avoids nesting <a> inside <a> when custom logo is active -->
+                <!-- Logo -->
                 <div class="site-footer__logo">
                     <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-                        <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-                            <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#7FA0FF" stroke-width="1.8"/>
-                            <circle cx="13" cy="13" r="4.5" fill="#7FA0FF"/>
-                        </svg>
-                        <span class="site-footer__logo-text">
-                            <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent">HQ</span>
-                        </span>
+                        <?php
+                        $dark_logo_id = get_theme_mod( 'bluu_logo_dark' );
+                        if ( $dark_logo_id ) :
+                            $dark_logo_url = wp_get_attachment_image_url( $dark_logo_id, 'full' );
+                        ?>
+                            <img src="<?php echo esc_url( $dark_logo_url ); ?>" alt="<?php bloginfo( 'name' ); ?>" class="custom-logo site-footer__logo-img">
+                        <?php elseif ( has_custom_logo() ) :
+                            $logo_id  = get_theme_mod( 'custom_logo' );
+                            $logo_url = wp_get_attachment_image_url( $logo_id, 'full' );
+                        ?>
+                            <img src="<?php echo esc_url( $logo_url ); ?>" alt="<?php bloginfo( 'name' ); ?>" class="custom-logo site-footer__logo-img site-footer__logo-img--invert">
+                        <?php else : ?>
+                            <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                                <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#7FA0FF" stroke-width="1.8"/>
+                                <circle cx="13" cy="13" r="4.5" fill="#7FA0FF"/>
+                            </svg>
+                            <span class="site-footer__logo-text">
+                                <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent">HQ</span>
+                            </span>
+                        <?php endif; ?>
                     </a>
                 </div>
 

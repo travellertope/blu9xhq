@@ -626,9 +626,17 @@
         if ( ! header ) { return; }
 
         function sync() {
-            var h = Math.round( header.getBoundingClientRect().height );
-            if ( h > 0 ) {
-                document.documentElement.style.setProperty( '--header-height', h + 'px' );
+            var inner = header.querySelector( '.site-header__inner' );
+            var target = inner || header;
+            var css = getComputedStyle( target );
+            var declared = parseInt( css.height, 10 );
+            if ( declared > 0 && css.height !== 'auto' ) {
+                document.documentElement.style.setProperty( '--header-height', declared + 'px' );
+            } else {
+                var h = Math.round( header.getBoundingClientRect().height );
+                if ( h > 0 ) {
+                    document.documentElement.style.setProperty( '--header-height', h + 'px' );
+                }
             }
         }
 

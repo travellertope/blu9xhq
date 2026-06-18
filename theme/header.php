@@ -19,13 +19,21 @@
 
         <!-- Logo -->
         <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-header__logo" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-            <svg class="site-header__logo-mark" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
-                <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#2F5FE0" stroke-width="1.8"/>
-                <circle cx="13" cy="13" r="4.5" fill="#2F5FE0"/>
-            </svg>
-            <span class="site-header__logo-text">
-                <span class="site-header__logo-name">Bluu</span><span class="site-header__logo-name site-header__logo-name--accent">HQ</span>
-            </span>
+            <?php if ( has_custom_logo() ) : ?>
+                <?php
+                $custom_logo_id  = get_theme_mod( 'custom_logo' );
+                $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id, 'full' );
+                ?>
+                <img src="<?php echo esc_url( $custom_logo_url ); ?>" alt="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?>" class="custom-logo">
+            <?php else : ?>
+                <svg class="site-header__logo-mark" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                    <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#2F5FE0" stroke-width="1.8"/>
+                    <circle cx="13" cy="13" r="4.5" fill="#2F5FE0"/>
+                </svg>
+                <span class="site-header__logo-text">
+                    <span class="site-header__logo-name">Bluu</span><span class="site-header__logo-name site-header__logo-name--accent">HQ</span>
+                </span>
+            <?php endif; ?>
         </a>
 
         <!-- Primary Navigation -->
