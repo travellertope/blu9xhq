@@ -137,7 +137,7 @@ ${compResult.details.gaps.length > 0 ? `Key competitive gaps found:\n${compResul
 Write a 3-4 paragraph strategic assessment. Be specific and direct — no filler, no generic advice. Reference the actual scores and findings. End with one clear, prioritized recommendation. Write in second person ("you", "your"). Do not use bullet points or headers — write in flowing prose. Do not mention that this is an AI-generated assessment.`;
 
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
     });
     return (result.text || "").trim();

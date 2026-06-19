@@ -13,36 +13,41 @@ export function generatePrompts(
   const detectedName = siteIdentity?.siteTitle ? deriveBrandName(siteIdentity.siteTitle, domain) : "";
   const brandName = brand || (detectedName.length > 2 && detectedName.length < 40 ? detectedName : "") || domainToBrand(domain || "");
 
+  // A bare brand name (especially a generic-sounding one like "Moveee Magazine") is
+  // ambiguous for search-grounded retrieval. Pairing it with the domain anchors the
+  // model on the right entity instead of guessing at something with a similar name.
+  const subject = domain ? `${brandName} (${domain})` : brandName;
+
   if (!niche) {
     return [
-      { prompt: `What does ${brandName} do and is it worth using?`, category: "informational", intent: "Brand awareness" },
-      { prompt: `What are the best alternatives to ${brandName}?`, category: "comparison", intent: "Alternative search" },
-      { prompt: `Is ${brandName} legit? What do customers say about it?`, category: "reputation", intent: "Trust evaluation" },
-      { prompt: `Compare ${brandName} to its main competitors — which is better?`, category: "comparison", intent: "Head-to-head comparison" },
-      { prompt: `Should a small business use ${brandName}? Pros and cons?`, category: "transactional", intent: "Purchase decision" },
-      { prompt: `What companies are similar to ${brandName}?`, category: "informational", intent: "Market mapping" },
-      { prompt: `${brandName} review — is it good for beginners?`, category: "reputation", intent: "User experience" },
-      { prompt: `What problem does ${brandName} solve and who is it for?`, category: "informational", intent: "Value proposition" },
-      { prompt: `I'm looking for a service like ${brandName} but better. What do you recommend?`, category: "transactional", intent: "Switching intent" },
-      { prompt: `What is ${brandName} known for in its industry?`, category: "reputation", intent: "Industry authority" },
-      { prompt: `How does ${brandName} pricing compare to competitors?`, category: "transactional", intent: "Price comparison" },
-      { prompt: `Who are the market leaders in ${brandName}'s space?`, category: "comparison", intent: "Market leadership" },
+      { prompt: `What does ${subject} do and is it worth using?`, category: "informational", intent: "Brand awareness" },
+      { prompt: `What are the best alternatives to ${subject}?`, category: "comparison", intent: "Alternative search" },
+      { prompt: `Is ${subject} legit? What do customers say about it?`, category: "reputation", intent: "Trust evaluation" },
+      { prompt: `Compare ${subject} to its main competitors — which is better?`, category: "comparison", intent: "Head-to-head comparison" },
+      { prompt: `Should a small business use ${subject}? Pros and cons?`, category: "transactional", intent: "Purchase decision" },
+      { prompt: `What companies are similar to ${subject}?`, category: "informational", intent: "Market mapping" },
+      { prompt: `${subject} review — is it good for beginners?`, category: "reputation", intent: "User experience" },
+      { prompt: `What problem does ${subject} solve and who is it for?`, category: "informational", intent: "Value proposition" },
+      { prompt: `I'm looking for a service like ${subject} but better. What do you recommend?`, category: "transactional", intent: "Switching intent" },
+      { prompt: `What is ${subject} known for in its industry?`, category: "reputation", intent: "Industry authority" },
+      { prompt: `How does ${subject} pricing compare to competitors?`, category: "transactional", intent: "Price comparison" },
+      { prompt: `Who are the market leaders in the same space as ${subject}?`, category: "comparison", intent: "Market leadership" },
     ];
   }
 
   return [
     { prompt: `What are the best ${niche} companies or tools right now?`, category: "informational", intent: "Category discovery" },
     { prompt: `Can you recommend a good ${niche} provider for a growing business?`, category: "transactional", intent: "Purchase decision" },
-    { prompt: `What do people say about ${brandName}? Is it any good for ${niche}?`, category: "reputation", intent: "Trust evaluation" },
+    { prompt: `What do people say about ${subject}? Is it any good for ${niche}?`, category: "reputation", intent: "Trust evaluation" },
     { prompt: `Compare the top ${niche} options available today — which stands out?`, category: "comparison", intent: "Head-to-head comparison" },
     { prompt: `What ${niche} solution would you recommend for a small business and why?`, category: "transactional", intent: "SMB recommendation" },
     { prompt: `Who are the market leaders in ${niche} right now?`, category: "informational", intent: "Market leadership" },
     { prompt: `I need a ${niche} solution. What should I look for and who offers it?`, category: "transactional", intent: "Buying criteria" },
-    { prompt: `What are the pros and cons of using ${brandName} for ${niche}?`, category: "reputation", intent: "Product evaluation" },
-    { prompt: `Is ${brandName} a good choice for ${niche} compared to alternatives?`, category: "comparison", intent: "Alternative search" },
+    { prompt: `What are the pros and cons of using ${subject} for ${niche}?`, category: "reputation", intent: "Product evaluation" },
+    { prompt: `Is ${subject} a good choice for ${niche} compared to alternatives?`, category: "comparison", intent: "Alternative search" },
     { prompt: `What ${niche} trends should businesses pay attention to in 2025?`, category: "informational", intent: "Thought leadership" },
     { prompt: `Which ${niche} companies are growing fastest right now?`, category: "comparison", intent: "Market momentum" },
-    { prompt: `What's missing from most ${niche} providers that ${brandName} does differently?`, category: "reputation", intent: "Differentiation" },
+    { prompt: `What's missing from most ${niche} providers that ${subject} does differently?`, category: "reputation", intent: "Differentiation" },
   ];
 }
 
@@ -67,7 +72,7 @@ function domainRoot(domain: string): string {
  * Picks the segment that matches the domain root rather than blindly taking
  * the first chunk, since the first segment is frequently a tagline, not the brand.
  */
-function deriveBrandName(siteTitle: string, domain?: string): string {
+export function deriveBrandName(siteTitle: string, domain?: string): string {
   const segments = splitTitleSegments(siteTitle);
   if (segments.length === 0) return "";
 

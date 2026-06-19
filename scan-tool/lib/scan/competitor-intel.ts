@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { extractSiteIdentity, deriveBrandName } from "./prompts";
 import type { CompDetails, CompetitorProfile, SiteDetails } from "./types";
 
 function getClient() {
@@ -11,8 +12,10 @@ export async function checkCompetitorIntel(
   niche: string | undefined,
   ownSiteDetails: SiteDetails | null
 ): Promise<{ score: number; details: CompDetails }> {
-  const brandName = brand || domainToName(domain || "");
-  const subject = domain ? `the website "${domain}"` : `the business "${brandName}"`;
+  const siteIdentity = ownSiteDetails?.homepageSummary ? extractSiteIdentity(ownSiteDetails.homepageSummary) : undefined;
+  const detectedName = siteIdentity?.siteTitle ? deriveBrandName(siteIdentity.siteTitle, domain) : "";
+  const brandName = brand || (detectedName.length > 2 && detectedName.length < 40 ? detectedName : "") || domainToName(domain || "");
+  const subject = domain ? `the website "${domain}" (also known as "${brandName}")` : `the business "${brandName}"`;
   const scopePhrase = niche ? `in the ${niche} space` : "in its space";
 
   const siteContext = ownSiteDetails?.homepageSummary
@@ -22,7 +25,7 @@ export async function checkCompetitorIntel(
   try {
     const ai = getClient();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: `${subject} is a real, existing business or website.${siteContext}\nBased on the above (and a web search if useful), identify what category/industry this business operates in, then list the top 5 real companies or tools that are its direct competitors ${scopePhrase}. For each, give the company name and their website domain — these must be real, currently-operating competitors, not made up. Then state whether "${brandName}" is among the most visible brands in this space. Always return exactly 5 competitor names — never an empty list, even if you have to use your best judgment based on the category. Respond with ONLY this JSON object, no markdown, no extra commentary: {"competitors": [{"name": "Company Name", "domain": "example.com"}, ...], "brandVisible": true/false}`,
       config: { tools: [{ googleSearch: {} }] },
     });
@@ -76,7 +79,8 @@ export async function checkCompetitorIntel(
         gaps,
       },
     };
-  } catch {
+  } catch (err) {
+    console.error("[competitor-intel] generateContent failed:", err instanceof Error ? err.message : err);
     return {
       score: 50,
       details: {

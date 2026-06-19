@@ -39,7 +39,7 @@ async function runSingleCheck(
   try {
     const ai = getClient();
     const result = await ai.models.generateContent({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       contents: prompt,
       config: { tools: [{ googleSearch: {} }] },
     });
@@ -74,7 +74,8 @@ async function runSingleCheck(
     const snippet = mentioned ? extractSnippet(fullText, brandVariants) : "";
 
     return { prompt, mentioned, position, sentiment, hasCitation, snippet };
-  } catch {
+  } catch (err) {
+    console.error("[ai-discoverability] generateContent failed:", err instanceof Error ? err.message : err);
     return {
       prompt,
       mentioned: false,
