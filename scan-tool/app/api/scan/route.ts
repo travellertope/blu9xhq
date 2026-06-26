@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
+import { getServerSession } from "next-auth";
 import { z } from "zod";
-import { checkRateLimit } from "@/lib/redis";
+import { authOptions } from "@/lib/auth";
+import { checkRateLimit, checkAndIncrementMonthlyScans, getUser } from "@/lib/redis";
+import { TIER_SCAN_LIMITS } from "@/lib/stripe";
 import { createScanId, initScan, runScan } from "@/lib/scan/engine";
 import type { ScanInput } from "@/lib/scan/types";
 
@@ -39,6 +42,26 @@ export async function POST(request: Request) {
       },
       { status: 429 }
     );
+  }
+
+  // Logged-in users on the free tier are capped monthly; anonymous scans
+  // (no session yet) are governed by the IP rate limit above only, since
+  // the lead hasn't unlocked an account at this point in the funnel.
+  const session = await getServerSession(authOptions);
+  const email = session?.user?.email;
+  if (email) {
+    const user = await getUser(email);
+    const tier = user?.tier || "free";
+    const withinLimit = await checkAndIncrementMonthlyScans(email, TIER_SCAN_LIMITS[tier]);
+    if (!withinLimit) {
+      return NextResponse.json(
+        {
+          error: "scan_limit_reached",
+          message: "You've used all your scans this month. Upgrade to Monitor for unlimited scans.",
+        },
+        { status: 429 }
+      );
+    }
   }
 
   let body: unknown;

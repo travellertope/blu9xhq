@@ -106,7 +106,7 @@ export async function checkCompetitorIntel(
   }
 }
 
-async function buildCompetitorProfile(
+export async function buildCompetitorProfile(
   name: string,
   domain: string | null
 ): Promise<CompetitorProfile> {
@@ -262,7 +262,7 @@ function assessFreshness(competitors: CompetitorProfile[]): CompDetails["content
   return daysSince <= 60 ? "fresh" : "stale";
 }
 
-function identifyTopicGaps(
+export function identifyTopicGaps(
   own: SiteDetails | null,
   competitors: CompetitorProfile[]
 ): TopicGap[] {
