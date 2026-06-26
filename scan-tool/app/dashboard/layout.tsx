@@ -21,6 +21,9 @@ export default async function DashboardLayout({
             <nav className="flex items-center gap-4 text-sm text-gray-600">
               <Link href="/dashboard">Overview</Link>
               <Link href="/dashboard/scans">Scan history</Link>
+              <Link href="/dashboard/trends">Trends</Link>
+              <Link href="/dashboard/competitors">Competitors</Link>
+              <Link href="/dashboard/billing">Billing</Link>
               <Link href="/dashboard/settings">Settings</Link>
             </nav>
           </div>

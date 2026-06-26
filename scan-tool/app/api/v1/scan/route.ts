@@ -1,15 +1,12 @@
 import { NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import { getServerSession } from "next-auth";
 import { z } from "zod";
-import { authOptions } from "@/lib/auth";
-import { checkRateLimit, checkAndIncrementMonthlyScans, getUser } from "@/lib/redis";
+import { authenticateApiKey } from "@/lib/api-auth";
+import { addScanToUserIndex, checkAndIncrementMonthlyScans } from "@/lib/redis";
 import { TIER_SCAN_LIMITS } from "@/lib/stripe";
 import { createScanId, initScan, runScan } from "@/lib/scan/engine";
 import type { ScanInput } from "@/lib/scan/types";
 
-// Sequential external calls (AI checks, site fetch, competitor lookup) can
-// take well over the default 10s — give the background scan room to finish.
 export const maxDuration = 300;
 
 const ScanSchema = z.object({
@@ -29,39 +26,23 @@ function normalizeDomain(raw: string): string {
 }
 
 export async function POST(request: Request) {
-  const forwarded = request.headers.get("x-forwarded-for");
-  const ip = forwarded?.split(",")[0]?.trim() || "unknown";
-
-  const allowed = await checkRateLimit(ip);
-  if (!allowed) {
+  const user = await authenticateApiKey(request);
+  if (!user) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (user.tier !== "monitor_pro") {
     return NextResponse.json(
-      {
-        error: "rate_limited",
-        message:
-          "You've run a few scans already — try again in an hour, or book a call.",
-      },
-      { status: 429 }
+      { error: "forbidden", message: "API access requires the Monitor Pro plan." },
+      { status: 403 }
     );
   }
 
-  // Logged-in users on the free tier are capped monthly; anonymous scans
-  // (no session yet) are governed by the IP rate limit above only, since
-  // the lead hasn't unlocked an account at this point in the funnel.
-  const session = await getServerSession(authOptions);
-  const email = session?.user?.email;
-  if (email) {
-    const user = await getUser(email);
-    const tier = user?.tier || "free";
-    const withinLimit = await checkAndIncrementMonthlyScans(email, TIER_SCAN_LIMITS[tier]);
-    if (!withinLimit) {
-      return NextResponse.json(
-        {
-          error: "scan_limit_reached",
-          message: "You've used all your scans this month. Upgrade to Monitor for unlimited scans.",
-        },
-        { status: 429 }
-      );
-    }
+  const withinLimit = await checkAndIncrementMonthlyScans(user.email, TIER_SCAN_LIMITS[user.tier]);
+  if (!withinLimit) {
+    return NextResponse.json(
+      { error: "scan_limit_reached", message: "You've used all your scans this month." },
+      { status: 429 }
+    );
   }
 
   let body: unknown;
@@ -114,10 +95,11 @@ export async function POST(request: Request) {
   const id = createScanId();
   await initScan(id, input);
 
-  // Keep the serverless function alive until the background scan
-  // finishes — without this, Vercel freezes the lambda the instant
-  // the response below is sent, killing runScan mid-flight.
-  waitUntil(runScan(id, input).catch(() => {}));
+  waitUntil(
+    runScan(id, input)
+      .then(() => addScanToUserIndex(user.email, id))
+      .catch(() => {})
+  );
 
   return NextResponse.json({
     id,
