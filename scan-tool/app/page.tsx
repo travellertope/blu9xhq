@@ -329,12 +329,20 @@ export default function ScanPage() {
             Bluu<span className="text-blue">HQ</span>
             <span className="text-ink-soft font-medium text-sm ml-1">/ scan</span>
           </a>
-          <a
-            href="https://bluuhq.com/contact"
-            className="text-sm font-semibold text-ink-soft hover:text-ink transition-colors"
-          >
-            Let&apos;s talk &rarr;
-          </a>
+          <div className="flex items-center gap-6">
+            <a
+              href="/login"
+              className="text-sm font-semibold text-ink-soft hover:text-ink transition-colors"
+            >
+              Log in
+            </a>
+            <a
+              href="https://bluuhq.com/contact"
+              className="text-sm font-semibold text-ink-soft hover:text-ink transition-colors"
+            >
+              Let&apos;s talk &rarr;
+            </a>
+          </div>
         </div>
       </header>
 
