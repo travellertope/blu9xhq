@@ -82,6 +82,15 @@ export interface CompetitorProfile {
   hasBlog: boolean;
   estimatedContentDepth: "thin" | "moderate" | "deep";
   wordCount: number;
+  sitemapPageCount: number;
+  topTopics: string[];
+  lastModified: string | null;
+}
+
+export interface TopicGap {
+  topic: string;
+  competitorsCovering: number;
+  opportunity: "high" | "medium" | "low";
 }
 
 export interface CompDetails {
@@ -89,6 +98,8 @@ export interface CompDetails {
   brandMentionedMoreThanCompetitors: boolean;
   relativePosition: "ahead" | "even" | "behind";
   gaps: string[];
+  topicGaps: TopicGap[];
+  contentFreshness: "fresh" | "stale" | "unknown";
 }
 
 export interface ScanResult {

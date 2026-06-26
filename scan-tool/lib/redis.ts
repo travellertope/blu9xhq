@@ -85,6 +85,20 @@ export async function addScanToUserIndex(email: string, scanId: string): Promise
   await getRedis().zadd(`scans:${email}`, { score: Date.now(), member: scanId });
 }
 
+// ─── Competitor profile cache (Phase 3) ────────────────────────────────────
+// Sitemap crawling + content fetching per competitor is the slowest part of a
+// scan and the result barely changes day to day, so cache it across scans.
+
+const COMPETITOR_CACHE_TTL = 86400; // 24h
+
+export async function getCachedCompetitor<T>(domain: string): Promise<T | null> {
+  return getRedis().get<T>(`competitor:${domain}`);
+}
+
+export async function cacheCompetitor<T>(domain: string, profile: T): Promise<void> {
+  await getRedis().set(`competitor:${domain}`, profile, { ex: COMPETITOR_CACHE_TTL });
+}
+
 export async function getUserScanIds(email: string, limit = 50): Promise<string[]> {
   const ids = await getRedis().zrange<string[]>(`scans:${email}`, 0, limit - 1, { rev: true });
   return ids;

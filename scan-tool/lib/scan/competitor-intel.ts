@@ -1,6 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { extractSiteIdentity, deriveBrandName } from "./prompts";
-import type { CompDetails, CompetitorProfile, SiteDetails } from "./types";
+import { getCachedCompetitor, cacheCompetitor } from "../redis";
+import type { CompDetails, CompetitorProfile, SiteDetails, TopicGap } from "./types";
+
+const MAX_SITEMAP_URLS = 50;
+const STOPWORD_SLUGS = new Set([
+  "page", "index", "home", "category", "tag", "tags", "author", "p", "id",
+  "amp", "feed", "wp-content", "wp-json", "static", "assets", "en", "us",
+]);
 
 function getClient() {
   return new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -63,6 +70,8 @@ export async function checkCompetitorIntel(
     );
 
     const gaps = identifyGaps(ownSiteDetails, profiles);
+    const topicGaps = identifyTopicGaps(ownSiteDetails, profiles);
+    const contentFreshness = assessFreshness(profiles);
 
     const relativePosition: CompDetails["relativePosition"] = brandVisible
       ? "even"
@@ -77,6 +86,8 @@ export async function checkCompetitorIntel(
         brandMentionedMoreThanCompetitors: brandVisible,
         relativePosition,
         gaps,
+        topicGaps,
+        contentFreshness,
       },
     };
   } catch (err) {
@@ -88,6 +99,8 @@ export async function checkCompetitorIntel(
         brandMentionedMoreThanCompetitors: false,
         relativePosition: "even",
         gaps: [],
+        topicGaps: [],
+        contentFreshness: "unknown",
       },
     };
   }
@@ -104,11 +117,19 @@ async function buildCompetitorProfile(
     hasBlog: false,
     estimatedContentDepth: "thin",
     wordCount: 0,
+    sitemapPageCount: 0,
+    topTopics: [],
+    lastModified: null,
   };
 
   if (!domain) return profile;
 
   const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/\/+$/, "");
+
+  const cached = await getCachedCompetitor<CompetitorProfile>(cleanDomain);
+  if (cached) {
+    return { ...cached, name: profile.name };
+  }
 
   try {
     const res = await fetch(`https://${cleanDomain}`, {
@@ -140,7 +161,147 @@ async function buildCompetitorProfile(
     // Fetch failed — leave defaults
   }
 
+  const sitemapResult = await crawlSitemap(cleanDomain);
+  profile.sitemapPageCount = sitemapResult.urls.length;
+  profile.topTopics = extractTopics(sitemapResult.urls);
+  profile.lastModified = sitemapResult.mostRecentLastmod;
+
+  await cacheCompetitor(cleanDomain, profile);
+
   return profile;
+}
+
+interface SitemapResult {
+  urls: string[];
+  mostRecentLastmod: string | null;
+}
+
+async function crawlSitemap(domain: string): Promise<SitemapResult> {
+  const empty: SitemapResult = { urls: [], mostRecentLastmod: null };
+
+  try {
+    const res = await fetch(`https://${domain}/sitemap.xml`, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!res.ok) return empty;
+
+    const xml = await res.text();
+
+    // Sitemap index — descend into the first child sitemap rather than
+    // returning empty, since most real sites use index files.
+    const sitemapRefs = Array.from(xml.matchAll(/<sitemap>[\s\S]*?<loc>([^<]+)<\/loc>[\s\S]*?<\/sitemap>/gi)).map((m) => m[1]);
+    if (sitemapRefs.length > 0) {
+      const childRes = await fetch(sitemapRefs[0], { signal: AbortSignal.timeout(6000) });
+      if (!childRes.ok) return empty;
+      return parseUrlset(await childRes.text());
+    }
+
+    return parseUrlset(xml);
+  } catch {
+    return empty;
+  }
+}
+
+function parseUrlset(xml: string): SitemapResult {
+  const entries = Array.from(xml.matchAll(/<url>([\s\S]*?)<\/url>/gi)).map((m) => m[1]);
+  const urls: string[] = [];
+  let mostRecentLastmod: string | null = null;
+
+  for (const entry of entries.slice(0, MAX_SITEMAP_URLS)) {
+    const loc = entry.match(/<loc>([^<]+)<\/loc>/i)?.[1];
+    if (loc) urls.push(loc.trim());
+
+    const lastmod = entry.match(/<lastmod>([^<]+)<\/lastmod>/i)?.[1];
+    if (lastmod && (!mostRecentLastmod || lastmod > mostRecentLastmod)) {
+      mostRecentLastmod = lastmod;
+    }
+  }
+
+  return { urls, mostRecentLastmod };
+}
+
+function extractTopics(urls: string[]): string[] {
+  const counts = new Map<string, number>();
+
+  for (const url of urls) {
+    try {
+      const path = new URL(url).pathname;
+      const segments = path.split("/").filter(Boolean);
+      for (const segment of segments) {
+        const slug = segment.toLowerCase().replace(/\.\w+$/, "");
+        if (slug.length < 3 || /^\d+$/.test(slug) || STOPWORD_SLUGS.has(slug)) continue;
+        const words = slug.split(/[-_]/).filter((w) => w.length > 2);
+        for (const word of words) {
+          counts.set(word, (counts.get(word) || 0) + 1);
+        }
+      }
+    } catch {
+      // Malformed URL — skip
+    }
+  }
+
+  return Array.from(counts.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([word]) => word);
+}
+
+function assessFreshness(competitors: CompetitorProfile[]): CompDetails["contentFreshness"] {
+  const dates = competitors
+    .map((c) => c.lastModified)
+    .filter((d): d is string => !!d)
+    .map((d) => new Date(d).getTime())
+    .filter((t) => !Number.isNaN(t));
+
+  if (dates.length === 0) return "unknown";
+
+  const mostRecent = Math.max(...dates);
+  const daysSince = (Date.now() - mostRecent) / (1000 * 60 * 60 * 24);
+
+  return daysSince <= 60 ? "fresh" : "stale";
+}
+
+function identifyTopicGaps(
+  own: SiteDetails | null,
+  competitors: CompetitorProfile[]
+): TopicGap[] {
+  if (!own || competitors.length === 0) return [];
+
+  const ownTopics = new Set(
+    own.pages.flatMap((p) => {
+      try {
+        return new URL(p.url).pathname
+          .split("/")
+          .filter(Boolean)
+          .flatMap((seg) => seg.toLowerCase().replace(/\.\w+$/, "").split(/[-_]/))
+          .filter((w) => w.length > 2);
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  const topicCoverage = new Map<string, number>();
+  for (const comp of competitors) {
+    for (const topic of comp.topTopics) {
+      topicCoverage.set(topic, (topicCoverage.get(topic) || 0) + 1);
+    }
+  }
+
+  const gaps: TopicGap[] = [];
+  for (const [topic, coveringCount] of Array.from(topicCoverage.entries())) {
+    if (ownTopics.has(topic)) continue;
+    if (coveringCount < 2) continue;
+
+    gaps.push({
+      topic,
+      competitorsCovering: coveringCount,
+      opportunity: coveringCount >= 3 ? "high" : "medium",
+    });
+  }
+
+  return gaps.sort((a, b) => b.competitorsCovering - a.competitorsCovering).slice(0, 5);
 }
 
 function identifyGaps(
@@ -165,6 +326,13 @@ function identifyGaps(
     : 0;
   if (own.avgWordCount > 0 && avgCompWordCount > 0 && own.avgWordCount < avgCompWordCount * 0.6) {
     gaps.push(`Your pages average ${own.avgWordCount} words — competitors average ${avgCompWordCount}. Thin content hurts AI visibility.`);
+  }
+
+  const avgCompPageCount = competitors.length > 0
+    ? Math.round(competitors.reduce((s, c) => s + c.sitemapPageCount, 0) / competitors.length)
+    : 0;
+  if (avgCompPageCount > 0 && own.totalPagesFound > 0 && own.totalPagesFound < avgCompPageCount * 0.5) {
+    gaps.push(`Competitors publish ${avgCompPageCount} pages on average — you have ${own.totalPagesFound}. More content volume means more chances to be cited.`);
   }
 
   if (!own.hasSitemap) {

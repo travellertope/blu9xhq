@@ -145,8 +145,14 @@ function buildCompSection(details: CompDetails | null, brandName: string) {
     ? `${brandName} holds its own against ${compCount} identified competitors — but there's room to pull ahead.`
     : `${brandName} is being outpaced by ${compCount} competitors in AI-generated recommendations.`;
 
+  const topicGapBullets = details.topicGaps.map(
+    (g) => `"${g.topic}" is covered by ${g.competitorsCovering} of ${compCount} competitors but not by you — ${g.opportunity}-opportunity content gap.`
+  );
+
+  const compBullets = [...details.gaps, ...topicGapBullets];
+
   return {
     compHeadline,
-    compBullets: details.gaps.length > 0 ? details.gaps : ["No critical competitive gaps detected — focus on maintaining your edge."],
+    compBullets: compBullets.length > 0 ? compBullets : ["No critical competitive gaps detected — focus on maintaining your edge."],
   };
 }
