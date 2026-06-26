@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { randomBytes } from "crypto";
 
 let _redis: Redis | null = null;
 
@@ -256,6 +257,50 @@ export async function markScheduleRun(email: string, frequency: "weekly" | "dail
     lastRunAt: now.toISOString(),
     nextRunAt: new Date(now.getTime() + msFor(frequency)).toISOString(),
   });
+}
+
+// ─── API keys (Phase 4, Pro tier programmatic access) ──────────────────────
+
+export interface ApiKey {
+  key: string;
+  email: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+}
+
+function randomApiKey(): string {
+  return `sk_${randomBytes(24).toString("hex")}`;
+}
+
+export async function createApiKey(email: string): Promise<ApiKey> {
+  const apiKey: ApiKey = {
+    key: randomApiKey(),
+    email,
+    createdAt: new Date().toISOString(),
+    lastUsedAt: null,
+  };
+  await getRedis().set(`apikey:${apiKey.key}`, apiKey);
+  await getRedis().set(`apikeyByUser:${email}`, apiKey.key);
+  return apiKey;
+}
+
+export async function getApiKeyForUser(email: string): Promise<ApiKey | null> {
+  const key = await getRedis().get<string>(`apikeyByUser:${email}`);
+  if (!key) return null;
+  return getRedis().get<ApiKey>(`apikey:${key}`);
+}
+
+export async function revokeApiKey(email: string): Promise<void> {
+  const key = await getRedis().get<string>(`apikeyByUser:${email}`);
+  if (key) await getRedis().del(`apikey:${key}`);
+  await getRedis().del(`apikeyByUser:${email}`);
+}
+
+export async function getUserByApiKey(key: string): Promise<ScanUser | null> {
+  const apiKey = await getRedis().get<ApiKey>(`apikey:${key}`);
+  if (!apiKey) return null;
+  await getRedis().set(`apikey:${key}`, { ...apiKey, lastUsedAt: new Date().toISOString() });
+  return getUser(apiKey.email);
 }
 
 // ─── Magic-link tokens (self-contained, no WordPress dependency) ──────────

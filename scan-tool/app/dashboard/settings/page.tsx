@@ -1,7 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getUser, getSchedule, getUserScanIds, getScan } from "@/lib/redis";
+import { getUser, getSchedule, getUserScanIds, getScan, getApiKeyForUser } from "@/lib/redis";
 import { ScheduleForm } from "./schedule-form";
+import { ApiKeyPanel } from "./api-key-panel";
 
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
@@ -12,6 +13,8 @@ export default async function SettingsPage() {
   const latestIds = email ? await getUserScanIds(email, 1) : [];
   const latestScan = latestIds.length > 0 ? await getScan(latestIds[0]) : null;
   const defaultDomain: string = latestScan?.input?.domain || "";
+  const apiKey = email ? await getApiKeyForUser(email) : null;
+  const tier = user?.tier || "free";
 
   return (
     <div className="space-y-6">
@@ -40,6 +43,14 @@ export default async function SettingsPage() {
           Available on Monitor and Monitor Pro. Automatically re-scans your domain and emails you if the score moves.
         </p>
         <ScheduleForm schedule={schedule} defaultDomain={defaultDomain} />
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <h2 className="font-bold text-ink mb-1">API access</h2>
+        <p className="text-xs text-gray-500 mb-4">
+          Available on Monitor Pro. Trigger scans and fetch results programmatically.
+        </p>
+        <ApiKeyPanel apiKey={apiKey} isPro={tier === "monitor_pro"} />
       </div>
     </div>
   );
