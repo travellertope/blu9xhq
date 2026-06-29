@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { z } from "zod";
 import { authenticateApiKey } from "@/lib/api-auth";
-import { addScanToUserIndex, checkAndIncrementMonthlyScans } from "@/lib/redis";
+import { addScanToUserIndex, checkAndIncrementMonthlyScans, persistScan } from "@/lib/redis";
 import { TIER_SCAN_LIMITS } from "@/lib/stripe";
 import { createScanId, initScan, runScan } from "@/lib/scan/engine";
 import type { ScanInput } from "@/lib/scan/types";
@@ -97,6 +97,7 @@ export async function POST(request: Request) {
 
   waitUntil(
     runScan(id, input)
+      .then(() => persistScan(id))
       .then(() => addScanToUserIndex(user.email, id))
       .catch(() => {})
   );

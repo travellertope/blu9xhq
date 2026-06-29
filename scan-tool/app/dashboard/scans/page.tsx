@@ -8,6 +8,7 @@ export default async function ScanHistoryPage() {
   const email = session?.user?.email;
   const ids = email ? await getUserScanIds(email) : [];
   const scans = (await Promise.all(ids.map((id) => getScan(id)))).filter(Boolean);
+  const hasExpiredScans = ids.length > 0 && scans.length === 0;
 
   return (
     <div className="space-y-6">
@@ -15,7 +16,9 @@ export default async function ScanHistoryPage() {
 
       {scans.length === 0 ? (
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 text-sm">
-          No scans yet.
+          {hasExpiredScans
+            ? "Your earlier scan reports have expired and are no longer available. New scans now stay in your history permanently."
+            : "No scans yet."}
         </div>
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">

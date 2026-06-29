@@ -5,6 +5,7 @@ import {
   getSchedule,
   markScheduleRun,
   addScanToUserIndex,
+  persistScan,
 } from "@/lib/redis";
 import { createScanId, initScan, runScan } from "@/lib/scan/engine";
 import type { ScanInput } from "@/lib/scan/types";
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
     await initScan(id, input);
     waitUntil(
       runScan(id, input)
+        .then(() => persistScan(id))
         .then(() => addScanToUserIndex(email, id))
         .catch(() => {})
     );

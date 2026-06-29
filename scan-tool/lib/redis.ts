@@ -15,8 +15,19 @@ function getRedis(): Redis {
 
 const SCAN_TTL = parseInt(process.env.SCAN_TTL_SECONDS || "259200", 10);
 
-export async function saveScan(id: string, data: Record<string, unknown>) {
-  await getRedis().set(`scan:${id}`, JSON.stringify(data), { ex: SCAN_TTL });
+export async function saveScan(
+  id: string,
+  data: Record<string, unknown>,
+  opts?: { persist?: boolean }
+) {
+  if (opts?.persist) {
+    // Claimed by a logged-in user (email gate) — keep it forever so it stays
+    // visible in their Scan history, instead of expiring after SCAN_TTL like
+    // anonymous/unclaimed scans do.
+    await getRedis().set(`scan:${id}`, JSON.stringify(data));
+  } else {
+    await getRedis().set(`scan:${id}`, JSON.stringify(data), { ex: SCAN_TTL });
+  }
 }
 
 export async function getScan(id: string) {
@@ -27,13 +38,20 @@ export async function getScan(id: string) {
 
 export async function updateScan(
   id: string,
-  updates: Record<string, unknown>
+  updates: Record<string, unknown>,
+  opts?: { persist?: boolean }
 ) {
   const existing = await getScan(id);
   if (!existing) return null;
   const merged = { ...existing, ...updates };
-  await saveScan(id, merged);
+  await saveScan(id, merged, opts);
   return merged;
+}
+
+/** Strips the TTL from an already-saved scan once it's tied to a user account. */
+export async function persistScan(id: string): Promise<void> {
+  const existing = await getScan(id);
+  if (existing) await saveScan(id, existing, { persist: true });
 }
 
 export async function checkRateLimit(ip: string, limit = 5): Promise<boolean> {
