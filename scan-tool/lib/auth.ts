@@ -4,9 +4,28 @@ import { consumeMagicToken, ensureUser } from "./redis";
 
 const NEXTAUTH_SECRET = process.env.NEXTAUTH_SECRET!;
 
+// Pinned explicitly (name + secure flag) rather than left to NextAuth's
+// runtime heuristic, which has been observed to disagree between the
+// Node API route and the Edge middleware on Vercel — the route would set
+// a session cookie that getToken() in middleware then failed to find,
+// silently bouncing freshly-signed-in users back to /login.
+export const SESSION_COOKIE_NAME = "__Secure-next-auth.session-token";
+
 export const authOptions: NextAuthOptions = {
   secret: NEXTAUTH_SECRET,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 }, // 30 days
+
+  cookies: {
+    sessionToken: {
+      name: SESSION_COOKIE_NAME,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+  },
 
   pages: {
     signIn: "/login",
