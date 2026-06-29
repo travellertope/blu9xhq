@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getTrackedCompetitors, getUserScanIds, getScan } from "@/lib/redis";
+import { getTrackedCompetitors, getUserScanIds, getScan, getUser } from "@/lib/redis";
+import { TIER_COMPETITOR_LIMITS } from "@/lib/stripe";
 import { buildCompetitorProfile, identifyTopicGaps } from "@/lib/scan/competitor-intel";
 import type { SiteDetails } from "@/lib/scan/types";
 import { AddCompetitorForm } from "./add-competitor-form";
@@ -9,6 +10,24 @@ import { RemoveCompetitorButton } from "./remove-competitor-button";
 export default async function CompetitorsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
+
+  const user = email ? await getUser(email) : null;
+  const limit = TIER_COMPETITOR_LIMITS[user?.tier || "free"];
+
+  if (limit === 0) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-extrabold text-ink">Competitor tracking</h1>
+        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 text-sm">
+          Competitor tracking requires the Monitor plan or higher.{" "}
+          <a href="/dashboard/billing" className="text-blue-600 font-medium">
+            Upgrade on the Billing page
+          </a>
+          .
+        </div>
+      </div>
+    );
+  }
 
   const tracked = email ? await getTrackedCompetitors(email) : [];
 
@@ -27,7 +46,7 @@ export default async function CompetitorsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-extrabold text-ink">Competitor tracking</h1>
-        <AddCompetitorForm disabled={tracked.length >= 5} />
+        <AddCompetitorForm disabled={tracked.length >= limit} />
       </div>
 
       {!ownSiteDetails && (

@@ -7,13 +7,17 @@ import type { ScanSchedule } from "@/lib/redis";
 export function ScheduleForm({
   schedule,
   defaultDomain,
+  allowedFrequencies,
 }: {
   schedule: ScanSchedule | null;
   defaultDomain: string;
+  allowedFrequencies: Array<"weekly" | "daily">;
 }) {
   const router = useRouter();
   const [domain, setDomain] = useState(schedule?.domain || defaultDomain);
-  const [frequency, setFrequency] = useState<"weekly" | "daily">(schedule?.frequency || "weekly");
+  const [frequency, setFrequency] = useState<"weekly" | "daily">(
+    schedule?.frequency || allowedFrequencies[0] || "weekly"
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,6 +50,18 @@ export function ScheduleForm({
     await fetch("/api/dashboard/schedule", { method: "DELETE" });
     setLoading(false);
     router.refresh();
+  }
+
+  if (allowedFrequencies.length === 0) {
+    return (
+      <p className="text-sm text-gray-500">
+        Upgrade to Monitor from the{" "}
+        <a href="/dashboard/billing" className="text-blue-600 font-medium">
+          Billing page
+        </a>{" "}
+        to enable scheduled re-scans.
+      </p>
+    );
   }
 
   if (schedule) {
@@ -89,9 +105,12 @@ export function ScheduleForm({
           onChange={(e) => setFrequency(e.target.value as "weekly" | "daily")}
           className="rounded-lg border border-gray-300 px-3 py-2 text-sm"
         >
-          <option value="weekly">Weekly</option>
-          <option value="daily">Daily</option>
+          {allowedFrequencies.includes("weekly") && <option value="weekly">Weekly</option>}
+          {allowedFrequencies.includes("daily") && <option value="daily">Daily</option>}
         </select>
+        {!allowedFrequencies.includes("daily") && (
+          <p className="text-xs text-gray-500 mt-1">Daily re-scans require Monitor Pro.</p>
+        )}
       </div>
       <button
         type="submit"

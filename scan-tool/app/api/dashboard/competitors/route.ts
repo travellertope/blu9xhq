@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
-import { addTrackedCompetitor, removeTrackedCompetitor, getTrackedCompetitors } from "@/lib/redis";
+import { addTrackedCompetitor, removeTrackedCompetitor, getTrackedCompetitors, getUser } from "@/lib/redis";
+import { TIER_COMPETITOR_LIMITS } from "@/lib/stripe";
 
 const DomainSchema = z.object({
   domain: z
@@ -43,7 +44,16 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await addTrackedCompetitor(email, parsed.data.domain);
+  const user = await getUser(email);
+  const limit = TIER_COMPETITOR_LIMITS[user?.tier || "free"];
+  if (limit === 0) {
+    return NextResponse.json(
+      { error: "forbidden", message: "Competitor tracking requires the Monitor plan or higher." },
+      { status: 403 }
+    );
+  }
+
+  const result = await addTrackedCompetitor(email, parsed.data.domain, limit);
   if (!result.ok) {
     return NextResponse.json({ error: "add_failed", message: result.error }, { status: 400 });
   }
