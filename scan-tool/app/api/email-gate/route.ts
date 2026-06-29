@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     );
   }
 
-  await updateScan(scanId, { email });
+  await updateScan(scanId, { email }, { persist: true });
   await upsertUser(email);
   await addScanToUserIndex(email, scanId);
 
