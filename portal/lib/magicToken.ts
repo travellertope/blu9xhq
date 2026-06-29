@@ -71,9 +71,19 @@ export async function verifyAndConsumeMagicToken(
   email: string,
   token: string
 ): Promise<WPUser | null> {
-  if (!verifyMagicToken(token, email)) return null;
+  if (!verifyMagicToken(token, email)) {
+    console.error("[magic-link] HMAC verification failed for", email, "— bad signature, wrong email, or expired token");
+    return null;
+  }
   const user = await findWPClientByEmail(email);
-  if (!user || !user.roles.includes("bluu_client")) return null;
+  if (!user) {
+    console.error("[magic-link] no WP user found matching email/username for", email);
+    return null;
+  }
+  if (!user.roles.includes("bluu_client")) {
+    console.error("[magic-link] WP user found for", email, "but missing bluu_client role — roles:", user.roles);
+    return null;
+  }
   return user;
 }
 
