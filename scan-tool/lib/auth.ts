@@ -24,10 +24,20 @@ export const authOptions: NextAuthOptions = {
         token: { label: "Token", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.token) return null;
+        if (!credentials?.email || !credentials?.token) {
+          console.error("magic-link authorize: missing email or token in request");
+          return null;
+        }
 
         const verifiedEmail = await consumeMagicToken(credentials.token);
-        if (!verifiedEmail || verifiedEmail !== credentials.email) return null;
+        if (!verifiedEmail) {
+          console.error("magic-link authorize: token not found, already used, or expired");
+          return null;
+        }
+        if (verifiedEmail !== credentials.email) {
+          console.error("magic-link authorize: token email mismatch");
+          return null;
+        }
 
         await ensureUser(verifiedEmail);
 
