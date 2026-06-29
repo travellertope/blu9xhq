@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { getUser, getSchedule, getUserScanIds, getScan, getApiKeyForUser } from "@/lib/redis";
+import { TIER_SCHEDULE_FREQUENCIES } from "@/lib/stripe";
 import { ScheduleForm } from "./schedule-form";
 import { ApiKeyPanel } from "./api-key-panel";
 
@@ -15,6 +16,7 @@ export default async function SettingsPage() {
   const defaultDomain: string = latestScan?.input?.domain || "";
   const apiKey = email ? await getApiKeyForUser(email) : null;
   const tier = user?.tier || "free";
+  const allowedFrequencies = TIER_SCHEDULE_FREQUENCIES[tier];
 
   return (
     <div className="space-y-6">
@@ -42,7 +44,7 @@ export default async function SettingsPage() {
         <p className="text-xs text-gray-500 mb-4">
           Available on Monitor and Monitor Pro. Automatically re-scans your domain and emails you if the score moves.
         </p>
-        <ScheduleForm schedule={schedule} defaultDomain={defaultDomain} />
+        <ScheduleForm schedule={schedule} defaultDomain={defaultDomain} allowedFrequencies={allowedFrequencies} />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">

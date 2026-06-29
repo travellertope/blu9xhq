@@ -1,11 +1,29 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { getUserScanIds, getScan } from "@/lib/redis";
+import { getUserScanIds, getScan, getUser } from "@/lib/redis";
 import { TrendChart, type TrendPoint } from "./trend-chart";
 
 export default async function TrendsPage() {
   const session = await getServerSession(authOptions);
   const email = session?.user?.email;
+
+  const user = email ? await getUser(email) : null;
+  const tier = user?.tier || "free";
+
+  if (tier === "free") {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-extrabold text-ink">Trends</h1>
+        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 text-sm">
+          Trend charts require the Monitor plan or higher.{" "}
+          <a href="/dashboard/billing" className="text-blue-600 font-medium">
+            Upgrade on the Billing page
+          </a>
+          .
+        </div>
+      </div>
+    );
+  }
 
   const ids = email ? await getUserScanIds(email, 90) : [];
   const scans = (await Promise.all(ids.map((id) => getScan(id))))

@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { z } from "zod";
 import { authOptions } from "@/lib/auth";
-import { setSchedule, removeSchedule, getSchedule } from "@/lib/redis";
+import { setSchedule, removeSchedule, getSchedule, getUser } from "@/lib/redis";
+import { TIER_SCHEDULE_FREQUENCIES } from "@/lib/stripe";
 
 const ScheduleSchema = z.object({
   domain: z.string().min(1),
@@ -37,6 +38,21 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "validation_error", message: parsed.error.issues[0]?.message },
       { status: 400 }
+    );
+  }
+
+  const user = await getUser(email);
+  const allowedFrequencies = TIER_SCHEDULE_FREQUENCIES[user?.tier || "free"];
+  if (allowedFrequencies.length === 0) {
+    return NextResponse.json(
+      { error: "forbidden", message: "Scheduled re-scans require the Monitor plan or higher." },
+      { status: 403 }
+    );
+  }
+  if (!allowedFrequencies.includes(parsed.data.frequency)) {
+    return NextResponse.json(
+      { error: "forbidden", message: "Daily re-scans require the Monitor Pro plan." },
+      { status: 403 }
     );
   }
 

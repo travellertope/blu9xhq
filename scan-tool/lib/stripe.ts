@@ -21,3 +21,15 @@ export const TIER_SCAN_LIMITS: Record<"free" | "monitor" | "monitor_pro", number
   monitor: Infinity,
   monitor_pro: Infinity,
 };
+
+export const TIER_COMPETITOR_LIMITS: Record<"free" | "monitor" | "monitor_pro", number> = {
+  free: 0,
+  monitor: 3,
+  monitor_pro: 10,
+};
+
+export const TIER_SCHEDULE_FREQUENCIES: Record<"free" | "monitor" | "monitor_pro", Array<"weekly" | "daily">> = {
+  free: [],
+  monitor: ["weekly"],
+  monitor_pro: ["weekly", "daily"],
+};

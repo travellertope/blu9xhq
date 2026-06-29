@@ -171,8 +171,6 @@ export interface TrackedCompetitor {
   addedAt: string;
 }
 
-const MAX_TRACKED_COMPETITORS = 5;
-
 export async function getTrackedCompetitors(email: string): Promise<TrackedCompetitor[]> {
   const list = await getRedis().get<TrackedCompetitor[]>(`competitors:${email}`);
   return list || [];
@@ -180,14 +178,15 @@ export async function getTrackedCompetitors(email: string): Promise<TrackedCompe
 
 export async function addTrackedCompetitor(
   email: string,
-  domain: string
+  domain: string,
+  limit: number
 ): Promise<{ ok: boolean; error?: string }> {
   const existing = await getTrackedCompetitors(email);
   if (existing.some((c) => c.domain === domain)) {
     return { ok: false, error: "Already tracking this competitor." };
   }
-  if (existing.length >= MAX_TRACKED_COMPETITORS) {
-    return { ok: false, error: `You can track up to ${MAX_TRACKED_COMPETITORS} competitors.` };
+  if (existing.length >= limit) {
+    return { ok: false, error: `You can track up to ${limit} competitors on your plan.` };
   }
 
   const updated = [...existing, { domain, addedAt: new Date().toISOString() }];
