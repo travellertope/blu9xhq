@@ -12,6 +12,7 @@ function VerifyContent() {
   const email = searchParams.get("email");
 
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token || !email) {
@@ -22,9 +23,28 @@ function VerifyContent() {
     signIn("magic-link", { email, token, redirect: false })
       .then(async (result) => {
         if (!result?.ok || result.error) {
+          setErrorMessage(
+            result?.error === "CredentialsSignin"
+              ? "This link has expired or is invalid."
+              : `Sign-in failed (${result?.error || "unknown error"}).`
+          );
           setStatus("error");
           return;
         }
+
+        // signIn() resolving "ok" only means the credentials were accepted —
+        // it doesn't guarantee the session cookie was actually stored by the
+        // browser (e.g. cookie domain/secure mismatches). Confirm a session
+        // exists before navigating into the middleware-protected portal,
+        // otherwise the user gets silently bounced back to /portal-login
+        // with no explanation.
+        const session = await fetch("/api/auth/session").then((r) => r.json());
+        if (!session?.user) {
+          setErrorMessage("Signed in, but the session didn't persist. Check that cookies are enabled and try again.");
+          setStatus("error");
+          return;
+        }
+
         setStatus("success");
         try {
           const me = await fetch("/api/portal/me").then((r) => r.json());
@@ -33,7 +53,10 @@ function VerifyContent() {
           router.replace("/portal");
         }
       })
-      .catch(() => setStatus("error"));
+      .catch(() => {
+        setErrorMessage("Something went wrong while signing you in.");
+        setStatus("error");
+      });
   }, [token, email, router]);
 
   if (status === "verifying") {
@@ -56,7 +79,7 @@ function VerifyContent() {
           </div>
           <h1 className="text-xl font-bold text-slate-800">Link Expired</h1>
           <p className="text-slate-500 text-sm">
-            This link has expired or is invalid. Request a new one from the login page.
+            {errorMessage ?? "This link has expired or is invalid. Request a new one from the login page."}
           </p>
           <Link
             href="/portal-login"
