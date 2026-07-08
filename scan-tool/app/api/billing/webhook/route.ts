@@ -84,6 +84,29 @@ export async function POST(request: Request) {
       break;
     }
 
+    case "invoice.paid": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = typeof invoice.subscription === "string" ? invoice.subscription : null;
+      if (!subscriptionId) break;
+
+      const stripe = getStripe();
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const affiliateCode = subscription.metadata?.affiliate_code;
+
+      if (affiliateCode && invoice.amount_paid > 0) {
+        const grossAmount = invoice.amount_paid / 100;
+        await notifyPortalAffiliateEvent({
+          affiliateCode,
+          product:        "scan_tool",
+          conversionType: invoice.billing_reason === "subscription_create" ? "paid_subscription" : "paid_subscription",
+          grossAmount,
+          currency:       invoice.currency.toUpperCase(),
+          externalRef:    invoice.id,
+        }).catch((err) => console.error("[billing/invoice.paid] affiliate event failed:", err));
+      }
+      break;
+    }
+
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
       const customerId = typeof invoice.customer === "string" ? invoice.customer : null;
@@ -98,4 +121,29 @@ export async function POST(request: Request) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+async function notifyPortalAffiliateEvent(payload: {
+  affiliateCode:  string;
+  product:        string;
+  conversionType: string;
+  grossAmount:    number;
+  currency:       string;
+  externalRef:    string;
+}): Promise<void> {
+  const portalUrl  = process.env.PORTAL_URL ?? "https://portal.bluuhq.com";
+  const internalSecret = process.env.BLUU_INTERNAL_SECRET;
+  if (!internalSecret) {
+    console.warn("[billing] BLUU_INTERNAL_SECRET not set — skipping affiliate event");
+    return;
+  }
+  const res = await fetch(`${portalUrl}/api/affiliates/event`, {
+    method:  "POST",
+    headers: { "Content-Type": "application/json", "x-bluu-internal-secret": internalSecret },
+    body:    JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Portal event API responded ${res.status}: ${text}`);
+  }
 }

@@ -20,6 +20,10 @@ declare module "next-auth" {
       assignedClients?: number[];
       /** "active" | "deactivated" */
       status?: string;
+      /** Affiliate referral code (bluu_affiliate users only) */
+      affiliateCode?: string;
+      /** Affiliate account status: pending | active | suspended */
+      affiliateStatus?: string;
     } & DefaultSession["user"];
   }
 }
@@ -32,5 +36,7 @@ declare module "next-auth/jwt" {
     bluuhqRole?: string;
     assignedClients?: number[];
     status?: string;
+    affiliateCode?: string;
+    affiliateStatus?: string;
   }
 }

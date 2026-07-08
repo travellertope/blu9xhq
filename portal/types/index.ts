@@ -1,6 +1,6 @@
 // ─── Auth & Session ───────────────────────────────────────────────────────────
 
-export type UserRole = "bluu_admin" | "bluu_client";
+export type UserRole = "bluu_admin" | "bluu_client" | "bluu_affiliate";
 
 export interface BluuSession {
   id: string;
@@ -350,4 +350,65 @@ export interface BluuCommunication {
   followUpDue?: string;
   followUpCompleted?: boolean;
   emailStatus?: CommEmailStatus;
+}
+
+// ─── Affiliate ────────────────────────────────────────────────────────────────
+
+export type AffiliateStatus = "pending" | "active" | "suspended";
+export type AffiliateProduct =
+  | "scan_tool"
+  | "portal"
+  | "hosting_mgmt"
+  | "content_ops"
+  | "web_dev"
+  | "ai_integration";
+export type ConversionType = "saas_subscription" | "service_lead" | "project_signed";
+export type CommissionStatus = "pending" | "approved" | "paid" | "cancelled";
+export type PayoutStatus = "pending" | "processing" | "completed" | "failed";
+export type PayoutMethod = "stripe" | "paypal" | "bank";
+
+export interface AffiliateStats {
+  totalClicks: number;
+  totalConversions: number;
+  conversionRate: number;
+  thisMonthEarnings: number;
+  allTimeEarnings: number;
+  pendingPayout: number;
+  activeReferrals: number;
+}
+
+export interface AffiliateConversion {
+  id: string;
+  wpPostId: number;
+  product: AffiliateProduct;
+  conversionType: ConversionType;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string;
+  clientName?: string;
+  commissionAmount?: number;
+}
+
+export interface AffiliateCommission {
+  id: string;
+  wpPostId: number;
+  conversionId: string;
+  type: "initial" | "recurring";
+  period: string;
+  grossAmount: number;
+  commissionRate: number;
+  commissionAmount: number;
+  status: CommissionStatus;
+  paidAt?: string;
+  product: AffiliateProduct;
+}
+
+export interface AffiliatePayout {
+  id: string;
+  wpPostId: number;
+  totalAmount: number;
+  method: PayoutMethod;
+  status: PayoutStatus;
+  initiatedAt: string;
+  completedAt?: string;
+  transferRef?: string;
 }

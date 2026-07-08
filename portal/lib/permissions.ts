@@ -32,6 +32,7 @@ export const PERMISSIONS: Record<string, Role[]> = {
   approve_cancellations: ["super_admin", "billing_manager", "account_manager"],
   manage_team:           ["super_admin"],
   access_settings:       ["super_admin"],
+  manage_affiliates:     ["super_admin", "billing_manager"],
   send_portal_invites:   ["super_admin", "account_manager", "support_staff"],
   view_credentials:      ["super_admin", "account_manager", "support_staff"],
 };
