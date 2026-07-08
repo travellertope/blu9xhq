@@ -115,6 +115,48 @@ function bluuhq_register_cpts(): void {
                 'edit_item'     => 'Edit Template',
             ],
         ],
+
+        // ── Affiliate Network ─────────────────────────────────────────────────
+        'bluu_aff_click' => [
+            'label'               => 'Affiliate Clicks',
+            'menu_icon'           => 'dashicons-visibility',
+            'graphql_single_name' => 'BluuAffClick',
+            'graphql_plural_name' => 'BluuAffClicks',
+            'labels'              => [
+                'name'          => 'Affiliate Clicks',
+                'singular_name' => 'Click',
+            ],
+        ],
+        'bluu_aff_conversion' => [
+            'label'               => 'Affiliate Conversions',
+            'menu_icon'           => 'dashicons-chart-line',
+            'graphql_single_name' => 'BluuAffConversion',
+            'graphql_plural_name' => 'BluuAffConversions',
+            'labels'              => [
+                'name'          => 'Affiliate Conversions',
+                'singular_name' => 'Conversion',
+            ],
+        ],
+        'bluu_aff_commission' => [
+            'label'               => 'Affiliate Commissions',
+            'menu_icon'           => 'dashicons-money-alt',
+            'graphql_single_name' => 'BluuAffCommission',
+            'graphql_plural_name' => 'BluuAffCommissions',
+            'labels'              => [
+                'name'          => 'Affiliate Commissions',
+                'singular_name' => 'Commission',
+            ],
+        ],
+        'bluu_aff_payout' => [
+            'label'               => 'Affiliate Payouts',
+            'menu_icon'           => 'dashicons-bank',
+            'graphql_single_name' => 'BluuAffPayout',
+            'graphql_plural_name' => 'BluuAffPayouts',
+            'labels'              => [
+                'name'          => 'Affiliate Payouts',
+                'singular_name' => 'Payout',
+            ],
+        ],
     ];
 
     foreach ( $types as $slug => $args ) {
@@ -178,6 +220,35 @@ function bluuhq_register_post_meta_keys(): void {
     foreach ( [ 'comm_follow_up_needed', 'comm_follow_up_completed' ] as $key ) {
         register_post_meta( 'bluu_communication', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
     }
+
+    // bluu_aff_click
+    foreach ( [ 'affiliate_code', 'click_source', 'click_page', 'ip_hash', 'clicked_at' ] as $key ) {
+        register_post_meta( 'bluu_aff_click', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+
+    // bluu_aff_conversion
+    foreach ( [ 'affiliate_code', 'product', 'conversion_type', 'currency', 'external_ref',
+                'conversion_status', 'converted_at', 'metadata' ] as $key ) {
+        register_post_meta( 'bluu_aff_conversion', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'gross_amount', 'commission_amount', 'commission_rate' ] as $key ) {
+        register_post_meta( 'bluu_aff_conversion', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'number' ] );
+    }
+
+    // bluu_aff_commission
+    foreach ( [ 'affiliate_code', 'product', 'commission_type', 'period', 'commission_status',
+                'paid_at', 'conversion_id' ] as $key ) {
+        register_post_meta( 'bluu_aff_commission', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    foreach ( [ 'gross_amount', 'commission_amount', 'commission_rate' ] as $key ) {
+        register_post_meta( 'bluu_aff_commission', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'number' ] );
+    }
+
+    // bluu_aff_payout
+    foreach ( [ 'affiliate_code', 'payout_method', 'payout_status', 'initiated_at', 'completed_at', 'transfer_ref' ] as $key ) {
+        register_post_meta( 'bluu_aff_payout', $key, [ 'show_in_rest' => true, 'single' => true, 'type' => 'string' ] );
+    }
+    register_post_meta( 'bluu_aff_payout', 'total_amount', [ 'show_in_rest' => true, 'single' => true, 'type' => 'number' ] );
 }
 
 // ─── Enable meta_key / meta_value filtering via REST API ─────────────────────
@@ -195,6 +266,10 @@ foreach ( [
     'bluu_tkt_attachment',
     'bluu_seq_enrollment',
     'bluu_sequence',
+    'bluu_aff_click',
+    'bluu_aff_conversion',
+    'bluu_aff_commission',
+    'bluu_aff_payout',
 ] as $_bluuhq_cpt ) {
     add_filter( "rest_{$_bluuhq_cpt}_query", function ( array $args, WP_REST_Request $request ): array {
         $meta_key   = $request->get_param( 'meta_key' );

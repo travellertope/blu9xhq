@@ -101,7 +101,15 @@ function bluuhq_register_roles(): void {
             'read' => true,
         ] );
     }
+
+    // bluu_affiliate — affiliate partner; dashboard at portal.bluuhq.com/affiliate
+    if ( ! get_role( 'bluu_affiliate' ) ) {
+        add_role( 'bluu_affiliate', 'BluuHQ Affiliate', [
+            'read' => true,
+        ] );
+    }
 }
+
 
 // Also run on init so roles exist even if activation hook was missed
 add_action( 'init', 'bluuhq_register_roles' );
@@ -178,6 +186,45 @@ function bluuhq_register_user_meta(): void {
     ] ) );
 }
 
+
+    // ── Affiliate meta ────────────────────────────────────────────────────────
+
+    register_meta( 'user', 'bluu_affiliate_code', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'Unique referral code, e.g. JOHN7K2M',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'bluu_affiliate_status', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'Affiliate account status: pending|active|suspended',
+        'default'     => 'active',
+    ] ) );
+
+    register_meta( 'user', 'bluu_affiliate_website', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'Affiliate\'s website URL',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'bluu_affiliate_payout_method', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'Preferred payout method: stripe|paypal|bank',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'bluu_affiliate_payout_details', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'JSON-encoded payout details (Stripe account ID, PayPal email, etc.)',
+        'default'     => '',
+    ] ) );
+
+    register_meta( 'user', 'bluu_affiliate_agreed_at', array_merge( $base, [
+        'type'        => 'string',
+        'description' => 'ISO 8601 timestamp when affiliate accepted T&Cs',
+        'default'     => '',
+    ] ) );
+}
 
 // ─── Stamp last active on WP login (fallback — portal uses /ping endpoint) ───
 

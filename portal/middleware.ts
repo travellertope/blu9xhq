@@ -5,36 +5,56 @@ const secret = process.env.NEXTAUTH_SECRET;
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  // ── Affiliate referral cookie ────────────────────────────────────────────────
+  // Set on any page load with ?ref=CODE so attribution works across all Bluu
+  // properties. First-touch wins — we never overwrite an existing cookie.
+  const ref = req.nextUrl.searchParams.get("ref");
+  if (ref && !req.cookies.get("bluu_ref") && /^[A-Z0-9]{4,20}$/i.test(ref)) {
+    const res = NextResponse.next();
+    res.cookies.set("bluu_ref", ref.toUpperCase(), {
+      maxAge: 60 * 60 * 24 * 60, // 60 days
+      path: "/",
+      sameSite: "lax",
+      httpOnly: false,
+    });
+    return res;
+  }
+
   const token = await getToken({ req, secret });
 
   // ── Admin routes ────────────────────────────────────────────────────────────
   if (pathname.startsWith("/admin")) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/admin-login", req.url));
-    }
-    if ((token as any).role !== "bluu_admin") {
-      // Authenticated but wrong role — send to their portal or show forbidden
-      if ((token as any).role === "bluu_client") {
-        return NextResponse.redirect(new URL("/portal", req.url));
-      }
+    if (!token) return NextResponse.redirect(new URL("/admin-login", req.url));
+    const role = (token as any).role;
+    if (role !== "bluu_admin") {
+      if (role === "bluu_client")    return NextResponse.redirect(new URL("/portal", req.url));
+      if (role === "bluu_affiliate") return NextResponse.redirect(new URL("/affiliate", req.url));
       return NextResponse.redirect(new URL("/admin-login", req.url));
     }
   }
 
   // ── Client portal routes ────────────────────────────────────────────────────
   if (pathname.startsWith("/portal")) {
-    // /portal/verify is the magic-link / password-reset landing page — it must
-    // be reachable without a session so it can call signIn() to create one.
+    // /portal/verify must be reachable without a session (magic-link landing)
     if (pathname === "/portal/verify") return NextResponse.next();
-
-    if (!token) {
+    if (!token) return NextResponse.redirect(new URL("/portal-login", req.url));
+    const role = (token as any).role;
+    if (role !== "bluu_client") {
+      if (role === "bluu_admin")     return NextResponse.redirect(new URL("/admin", req.url));
+      if (role === "bluu_affiliate") return NextResponse.redirect(new URL("/affiliate", req.url));
       return NextResponse.redirect(new URL("/portal-login", req.url));
     }
-    if ((token as any).role !== "bluu_client") {
-      if ((token as any).role === "bluu_admin") {
-        return NextResponse.redirect(new URL("/admin", req.url));
-      }
-      return NextResponse.redirect(new URL("/portal-login", req.url));
+  }
+
+  // ── Affiliate routes ────────────────────────────────────────────────────────
+  if (pathname.startsWith("/affiliate")) {
+    if (!token) return NextResponse.redirect(new URL("/affiliate-login", req.url));
+    const role = (token as any).role;
+    if (role !== "bluu_affiliate") {
+      if (role === "bluu_admin")  return NextResponse.redirect(new URL("/admin", req.url));
+      if (role === "bluu_client") return NextResponse.redirect(new URL("/portal", req.url));
+      return NextResponse.redirect(new URL("/affiliate-login", req.url));
     }
   }
 
@@ -42,5 +62,11 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/portal/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/portal/:path*",
+    "/affiliate/:path*",
+    // Broad matcher for the ref cookie — excludes Next.js internals and static assets
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|icon.png).*)",
+  ],
 };
