@@ -1,8 +1,8 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { constructStripeWebhookEvent } from "@/lib/stripe";
-import { listInvoices, updateInvoice } from "@/lib/wp-api";
+import { constructStripeWebhookEvent, getStripe } from "@/lib/stripe";
+import { listInvoices, updateInvoice, wpRestFetch } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
 import type Stripe from "stripe";
 
@@ -54,9 +54,69 @@ async function processEvent(event: Stripe.Event): Promise<void> {
       const pi = event.data.object as Stripe.PaymentIntent;
       console.error("[stripe-webhook] payment failed:", pi.id, pi.last_payment_error?.message);
     }
+
+    if (event.type === "invoice.paid") {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subscriptionId = typeof invoice.subscription === "string" ? invoice.subscription : null;
+      if (subscriptionId && invoice.amount_paid > 0) {
+        try {
+          const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+          const affiliateCode = subscription.metadata?.affiliate_code;
+          if (affiliateCode) {
+            await recordAffiliateCommission({
+              affiliateCode,
+              product:        subscription.metadata?.bluu_product ?? "hosting_mgmt",
+              conversionType: "paid_subscription",
+              grossAmount:    invoice.amount_paid / 100,
+              currency:       invoice.currency.toUpperCase(),
+              externalRef:    invoice.id,
+            });
+          }
+        } catch (err) {
+          console.error("[stripe-webhook] affiliate commission error:", err);
+        }
+      }
+    }
   } catch (err) {
     console.error("[stripe-webhook] processEvent error:", err);
   }
+}
+
+const COMMISSION_RATES: Record<string, number> = {
+  scan_tool: 0.30, portal: 0.30, hosting_mgmt: 0.30, content_ops: 0.15, web_dev: 0.10, ai_integration: 0.10,
+};
+
+async function recordAffiliateCommission(params: {
+  affiliateCode:  string;
+  product:        string;
+  conversionType: string;
+  grossAmount:    number;
+  currency:       string;
+  externalRef:    string;
+}): Promise<void> {
+  const { affiliateCode, product, grossAmount, externalRef } = params;
+  const rate = COMMISSION_RATES[product] ?? 0.10;
+  const commissionAmount = parseFloat((grossAmount * rate).toFixed(2));
+  const period = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+  await wpRestFetch("/wp/v2/bluu_aff_commission", {
+    method: "POST",
+    body: JSON.stringify({
+      status: "publish",
+      title:  `Commission — ${affiliateCode} — ${product} — ${period}`,
+      meta: {
+        affiliate_code:    affiliateCode,
+        product,
+        commission_type:   "recurring",
+        period,
+        gross_amount:      grossAmount,
+        commission_rate:   rate,
+        commission_amount: commissionAmount,
+        commission_status: "pending",
+        external_ref:      externalRef,
+      },
+    }),
+  });
 }
 
 async function sendReceiptEmail(invoiceId: number, paymentRef: string): Promise<void> {

@@ -6,7 +6,8 @@ import { getStripe, TIER_PRICE_IDS } from "@/lib/stripe";
 import { getUser, setUserTier } from "@/lib/redis";
 
 const CheckoutSchema = z.object({
-  plan: z.enum(["monitor", "monitor_pro"]),
+  plan:          z.enum(["monitor", "monitor_pro"]),
+  affiliateCode: z.string().regex(/^[A-Z0-9]{4,20}$/i).optional(),
 });
 
 export async function POST(request: Request) {
@@ -53,7 +54,14 @@ export async function POST(request: Request) {
       success_url: `${appUrl}/dashboard/billing?success=1`,
       cancel_url: `${appUrl}/dashboard/billing?canceled=1`,
       client_reference_id: email,
-      metadata: { email, plan: parsed.data.plan },
+      metadata: {
+        email,
+        plan: parsed.data.plan,
+        ...(parsed.data.affiliateCode ? { affiliate_code: parsed.data.affiliateCode.toUpperCase() } : {}),
+      },
+      subscription_data: parsed.data.affiliateCode
+        ? { metadata: { affiliate_code: parsed.data.affiliateCode.toUpperCase() } }
+        : undefined,
     });
 
     if (checkoutSession.customer && typeof checkoutSession.customer === "string") {
