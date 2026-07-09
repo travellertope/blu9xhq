@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, Link2, TrendingUp, DollarSign, Wallet,
@@ -31,6 +31,12 @@ interface Props {
 
 function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate?: () => void }) {
   const pathname = usePathname();
+  const router   = useRouter();
+
+  async function handleSignOut() {
+    await fetch("/api/auth/signout", { method: "POST" });
+    router.replace("/affiliate-login");
+  }
 
   return (
     <div className="flex h-full flex-col bg-white border-r">
@@ -81,7 +87,7 @@ function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate
           variant="ghost"
           size="sm"
           className="w-full justify-start text-slate-500 hover:text-slate-800 gap-2"
-          onClick={() => signOut({ callbackUrl: "/affiliate-login" })}
+          onClick={handleSignOut}
         >
           <LogOut className="h-4 w-4" />
           Sign out

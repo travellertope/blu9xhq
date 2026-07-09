@@ -1,7 +1,6 @@
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { wpRestFetch, wpRestList, type WPCommunicationPost } from "@/lib/wp-api";
 import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommChannel, CommDirection, CommType, CommEmailStatus } from "@/types";
 import { z } from "zod";
@@ -44,7 +43,7 @@ function transform(post: WPCommunicationPost): BluuCommunication {
 // ─── GET /api/admin/communications ────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session?.user || (session.user as any)?.role !== "bluu_admin") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

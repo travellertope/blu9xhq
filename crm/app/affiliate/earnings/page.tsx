@@ -1,5 +1,6 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
+
+
 import { headers } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,7 +47,7 @@ function groupByProduct(commissions: AffiliateCommission[]) {
 export default async function EarningsPage() {
   const headersList = await headers();
   const cookieHeader = headersList.get("cookie");
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const commissions = await getCommissions(base, cookieHeader);
 
   const totalEarned = commissions.reduce((s, c) => s + c.commissionAmount, 0);

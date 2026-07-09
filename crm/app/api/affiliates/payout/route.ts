@@ -1,13 +1,12 @@
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { wpRestFetch } from "@/lib/wp-api";
 import { z } from "zod";
 import type { AffiliatePayout } from "@/types";
 
 async function requireAffiliate() {
-  const session = await getServerSession(authOptions);
-  const user = session?.user as any;
+  const session = await getSession();
+  const user = session?.user;
   if (!session || user?.role !== "bluu_affiliate" || !user?.affiliateCode) return null;
   return { session, user };
 }

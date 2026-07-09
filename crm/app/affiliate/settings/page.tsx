@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
@@ -27,8 +27,8 @@ const payoutSchema = z.discriminatedUnion("method", [
 type PayoutFormData = z.infer<typeof payoutSchema>;
 
 export default function SettingsPage() {
-  const { data: session } = useSession();
-  const user = session?.user as any;
+  const { user: session } = useBluuSession();
+  const user = session as any;
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [method, setMethod] = useState<"stripe" | "paypal" | "bank">("stripe");

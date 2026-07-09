@@ -8,7 +8,7 @@ import { ArrowLeft, Loader2, Send, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 import { formatStatus, formatPriority, statusBadgeColor, priorityBadgeColor } from "@/lib/ticket-utils";
 
 interface Reply {
@@ -50,8 +50,8 @@ function formatBytes(kb: number) {
 
 export default function PortalTicketDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { data: session } = useSession();
-  const wpUserId = (session?.user as { wpUserId?: number })?.wpUserId;
+  const { user: session } = useBluuSession();
+  const wpUserId = (session as { wpUserId?: number })?.wpUserId;
 
   const [ticket, setTicket] = useState<TicketDetail | null>(null);
   const [loading, setLoading] = useState(true);

@@ -2,62 +2,51 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get("token");
-  const email = searchParams.get("email");
+
+  // Supabase sends ?code= to this URL for magic-link (OTP) sign-in.
+  // The /api/auth/callback route exchanges the code for a session and
+  // then redirects back here with ?verified=1 so we can redirect into
+  // the portal without an extra fetch round-trip.
+  const code     = searchParams.get("code");
+  const verified = searchParams.get("verified");
+  const error    = searchParams.get("error");
 
   const [status, setStatus] = useState<"verifying" | "success" | "error">("verifying");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!token || !email) {
+    // If Supabase sent a code, forward to the server-side callback handler.
+    if (code) {
+      window.location.href = `/api/auth/callback?code=${encodeURIComponent(code)}&next=/portal/verify?verified=1`;
+      return;
+    }
+
+    if (error) {
+      setErrorMessage(decodeURIComponent(error));
       setStatus("error");
       return;
     }
 
-    signIn("magic-link", { email, token, redirect: false })
-      .then(async (result) => {
-        if (!result?.ok || result.error) {
-          setErrorMessage(
-            result?.error === "CredentialsSignin"
-              ? "This link has expired or is invalid."
-              : `Sign-in failed (${result?.error || "unknown error"}).`
-          );
-          setStatus("error");
-          return;
-        }
-
-        // signIn() resolving "ok" only means the credentials were accepted —
-        // it doesn't guarantee the session cookie was actually stored by the
-        // browser (e.g. cookie domain/secure mismatches). Confirm a session
-        // exists before navigating into the middleware-protected portal,
-        // otherwise the user gets silently bounced back to /portal-login
-        // with no explanation.
-        const session = await fetch("/api/auth/session").then((r) => r.json());
-        if (!session?.user) {
-          setErrorMessage("Signed in, but the session didn't persist. Check that cookies are enabled and try again.");
-          setStatus("error");
-          return;
-        }
-
-        setStatus("success");
-        try {
-          const me = await fetch("/api/portal/me").then((r) => r.json());
+    if (verified === "1") {
+      setStatus("success");
+      fetch("/api/portal/me")
+        .then((r) => r.json())
+        .then((me) => {
           router.replace(me.setupComplete === false ? "/portal/setup" : "/portal");
-        } catch {
-          router.replace("/portal");
-        }
-      })
-      .catch(() => {
-        setErrorMessage("Something went wrong while signing you in.");
-        setStatus("error");
-      });
-  }, [token, email, router]);
+        })
+        .catch(() => router.replace("/portal"));
+      return;
+    }
+
+    // No code, no verified flag — malformed link.
+    setErrorMessage("This link is invalid or has already been used.");
+    setStatus("error");
+  }, [code, verified, error, router]);
 
   if (status === "verifying") {
     return (

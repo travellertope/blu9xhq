@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,13 +34,13 @@ function AffiliateLoginForm() {
   async function onSubmit(data: FormData) {
     setLoading(true);
     setError(null);
-    const result = await signIn("affiliate-credentials", {
-      username: data.email,
-      password: data.password,
-      redirect: false,
+    const res = await fetch("/api/auth/signin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.email, password: data.password }),
     });
     setLoading(false);
-    if (result?.error) {
+    if (!res.ok) {
       setError("Incorrect email or password.");
       return;
     }

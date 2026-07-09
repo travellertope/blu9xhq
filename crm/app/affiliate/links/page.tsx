@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Copy, ExternalLink } from "lucide-react";
@@ -43,8 +43,8 @@ function CopyableLink({ url }: { url: string }) {
 }
 
 export default function LinksPage() {
-  const { data: session } = useSession();
-  const affiliateCode = (session?.user as any)?.affiliateCode ?? "";
+  const { user: session } = useBluuSession();
+  const affiliateCode = (session as any)?.affiliateCode ?? "";
 
   const links = PRODUCTS.map((p) => ({
     ...p,

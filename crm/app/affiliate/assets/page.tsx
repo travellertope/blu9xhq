@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Copy } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 
 function CopyBlock({ label, content }: { label: string; content: string }) {
   const [copied, setCopied] = useState(false);
@@ -35,8 +35,8 @@ function CopyBlock({ label, content }: { label: string; content: string }) {
 }
 
 export default function AssetsPage() {
-  const { data: session } = useSession();
-  const code = (session?.user as any)?.affiliateCode ?? "YOURCODE";
+  const { user: session } = useBluuSession();
+  const code = (session as any)?.affiliateCode ?? "YOURCODE";
   const link = `https://bluuhq.com/?ref=${code}`;
   const scanLink = `https://scan.bluuhq.com/?ref=${code}`;
 

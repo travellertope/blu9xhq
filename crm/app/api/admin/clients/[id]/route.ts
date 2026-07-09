@@ -1,6 +1,5 @@
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { decrypt, encrypt } from "@/lib/encryption";
 import {
   getClientPost, updateClientPost, listClientSubscriptions,
@@ -11,7 +10,7 @@ import { z } from "zod";
 import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommChannel, CommDirection, CommType } from "@/types";
 
 async function requireAdmin() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session || (session.user as any)?.role !== "bluu_admin") return null;
   return session;
 }

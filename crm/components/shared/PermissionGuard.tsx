@@ -2,7 +2,7 @@
 
 import { useEffect, type ReactNode, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 import { usePermissions } from "@/hooks/usePermissions";
 import { LoadingSpinner } from "@/components/shared/LoadingSpinner";
 
@@ -31,7 +31,7 @@ export function withPermission(permission: string) {
     function ProtectedPage(props: T) {
       const { can } = usePermissions();
       const router = useRouter();
-      const { status } = useSession();
+      const { status } = useBluuSession();
 
       useEffect(() => {
         if (status === "authenticated" && !can(permission)) {

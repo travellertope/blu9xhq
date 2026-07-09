@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -66,10 +65,10 @@ function EmptyState({ message }: { message: string }) {
 }
 
 export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session) redirect("/admin-login");
 
-  const user = session.user as any;
+  const user = session.user;
   const role = user.bluuhqRole ?? "viewer";
   const hideMetrics = role === "support_staff" || role === "viewer";
 

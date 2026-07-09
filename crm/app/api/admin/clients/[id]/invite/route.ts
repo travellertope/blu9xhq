@@ -1,6 +1,5 @@
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { getClientPost, updateClientPost, createWPUser, updateWPUser, getUserByEmail } from "@/lib/wp-api";
 import { findWPClientByEmail } from "@/lib/magicToken";
 import { sendPortalInvite } from "@/lib/resend";
@@ -8,7 +7,7 @@ import { decrypt } from "@/lib/encryption";
 import crypto from "crypto";
 
 async function requireAdmin() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   if (!session || (session.user as any)?.role !== "bluu_admin") return null;
   return session;
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useBluuSession } from "@/hooks/useBluuSession";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const CURRENCIES = ["USD", "GBP", "EUR", "GHS", "NGN"];
 
 export default function NewInvoicePage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { user: session, status } = useBluuSession();
   const user = session?.user as any;
   const role = user?.bluuhqRole ?? "viewer";
 

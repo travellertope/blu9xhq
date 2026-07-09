@@ -1,5 +1,4 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { headers } from "next/headers";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -44,14 +43,14 @@ function StatCard({
 }
 
 export default async function AffiliateDashboard() {
-  const session = await getServerSession(authOptions);
-  const user = session?.user as any;
+  const session = await getSession();
+  const user = session?.user;
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const affiliateCode = user?.affiliateCode ?? "";
 
   const headersList = await headers();
   const cookieHeader = headersList.get("cookie");
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
   const stats = await getStats(base, cookieHeader);
 

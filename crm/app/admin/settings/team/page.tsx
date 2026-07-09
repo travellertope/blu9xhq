@@ -3,7 +3,7 @@
 import { withPermission } from "@/components/shared/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useState, useEffect, useCallback } from "react";
-import { useSession } from "next-auth/react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RoleBadge } from "@/components/admin/RoleBadge";
 import { ROLES, ROLE_LABELS, type Role } from "@/lib/permissions";
 import { toast } from "sonner";
@@ -149,7 +149,7 @@ function AssignClientsModal({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const { update }                  = useSession();
+  const supabase                    = createSupabaseBrowserClient();
   const [clients, setClients]       = useState<Client[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState("");
@@ -197,7 +197,7 @@ function AssignClientsModal({
       const data = await res.json();
       toast.success(`Clients updated for ${member.name}`);
       // Refresh the team member's session so their assignedClients updates immediately
-      await update({ refreshAssignedClients: true }).catch(() => {});
+      await supabase.auth.refreshSession().catch(() => {});
       onSuccess();
       onClose();
     } catch (err: any) {

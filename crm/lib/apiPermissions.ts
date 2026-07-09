@@ -1,9 +1,9 @@
-import { getServerSession, type Session } from "next-auth";
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { authOptions } from "@/lib/auth";
 import { hasPermission, canAccessClient, type Role } from "@/lib/permissions";
+import type { BluuSession } from "@/lib/auth";
 
-export type AuthedSession = Session;
+export type AuthedSession = BluuSession;
 
 export type PermissionResult =
   | { ok: true; session: AuthedSession }
@@ -16,16 +16,13 @@ export type PermissionResult =
  *   const result = await requirePermission(req, 'create_invoices')
  *   if (result instanceof NextResponse) return result
  *   const { session } = result
- *
- * Pass `clientId` on routes that operate on a specific client so account_managers
- * cannot reach unassigned clients via direct API calls.
  */
 export async function requirePermission(
-  req: NextRequest,
+  _req: NextRequest,
   permission: string,
   clientId?: number
 ): Promise<PermissionResult> {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.user) {
     return NextResponse.json(
@@ -34,7 +31,7 @@ export async function requirePermission(
     );
   }
 
-  const user = session.user as any;
+  const user = session.user;
 
   if (user.status === "deactivated") {
     return NextResponse.json(
@@ -62,19 +59,19 @@ export async function requirePermission(
     }
   }
 
-  return { ok: true, session: session as AuthedSession };
+  return { ok: true, session };
 }
 
 /**
- * Lightweight session-only check (no permission key).
+ * Lightweight session-only check — no permission key.
  * Use for routes that only need an authenticated bluu_admin session.
  */
 export async function requireSession(_req: NextRequest): Promise<PermissionResult> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "bluu_admin") {
+  const session = await getSession();
+  if (!session?.user || session.user.role !== "bluu_admin") {
     return NextResponse.json({ error: "Unauthorized", code: "NO_SESSION" }, { status: 401 });
   }
-  return { ok: true, session: session as AuthedSession };
+  return { ok: true, session };
 }
 
 /**
@@ -82,9 +79,9 @@ export async function requireSession(_req: NextRequest): Promise<PermissionResul
  * Use for all portal API routes.
  */
 export async function requireClientSession(_req: NextRequest): Promise<PermissionResult> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user || (session.user as any).role !== "bluu_client") {
+  const session = await getSession();
+  if (!session?.user || session.user.role !== "bluu_client") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return { ok: true, session: session as AuthedSession };
+  return { ok: true, session };
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,11 +21,7 @@ function AdminLoginForm() {
   const callbackError = searchParams.get("error");
 
   const [error, setError] = useState<string | null>(
-    callbackError === "CredentialsSignin"
-      ? "Login failed — check your WordPress username and password."
-      : callbackError
-      ? `Auth error: ${callbackError}`
-      : null
+    callbackError ? "Sign-in failed — please try again." : null
   );
   const [loading, setLoading] = useState(false);
   const [debugInfo, setDebugInfo] = useState<string | null>(null);
@@ -40,22 +35,25 @@ function AdminLoginForm() {
     setError(null);
     setDebugInfo(null);
 
-    const result = await signIn("admin-credentials", {
-      username: data.username,
-      password: data.password,
-      redirect: false,
+    const res = await fetch("/api/auth/signin", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: data.username, password: data.password }),
     });
 
     setLoading(false);
 
-    if (!result) {
-      setError("No response from auth server — check NEXTAUTH_SECRET is set.");
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const msg = (body as { error?: string }).error ?? "Sign-in failed";
+      setError(`${msg} — check your credentials and that the BluuHQ plugin is active.`);
+      setDebugInfo(`HTTP ${res.status}`);
       return;
     }
 
-    if (result.error) {
-      setError(`Sign-in failed (${result.error}). Check your WordPress credentials and that the BluuHQ plugin is active.`);
-      setDebugInfo(`Status: ${result.status} | Error: ${result.error} | URL: ${result.url ?? "—"}`);
+    const result = await res.json();
+    if (result.user?.role !== "bluu_admin") {
+      setError("This account does not have admin access.");
       return;
     }
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, Users, Package, CalendarDays, FileText,
@@ -41,6 +41,12 @@ interface SidebarInnerProps {
 
 function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
   const pathname = usePathname();
+  const router   = useRouter();
+
+  async function handleSignOut() {
+    await fetch("/api/auth/signout", { method: "POST" });
+    router.replace("/admin-login");
+  }
 
   const visibleItems = NAV_ITEMS.filter(({ permission }) =>
     !permission || hasPermission(bluuhqRole as Role, permission)
@@ -95,7 +101,7 @@ function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
           <RoleBadge role={bluuhqRole as Role} />
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/admin-login" })}
+          onClick={handleSignOut}
           className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
         >
           <LogOut className="h-4 w-4 text-slate-400" />

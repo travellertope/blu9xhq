@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -27,8 +27,14 @@ const NAV_LINKS = [
 
 export default function PortalNav({ firstName }: PortalNavProps) {
   const pathname = usePathname();
+  const router   = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unpaidCount, setUnpaidCount] = useState(0);
+
+  async function handleSignOut() {
+    await fetch("/api/auth/signout", { method: "POST" });
+    router.replace("/portal-login");
+  }
 
   useEffect(() => {
     fetch("/api/portal/me")
@@ -84,7 +90,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
               variant="ghost"
               size="sm"
               className="text-sm text-slate-500 hover:text-slate-800"
-              onClick={() => signOut({ callbackUrl: "/portal-login" })}
+              onClick={handleSignOut}
             >
               Sign Out
             </Button>
@@ -129,7 +135,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
               variant="ghost"
               size="sm"
               className="text-sm text-slate-500"
-              onClick={() => signOut({ callbackUrl: "/portal-login" })}
+              onClick={handleSignOut}
             >
               Sign Out
             </Button>

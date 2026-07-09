@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { Sidebar } from "@/components/admin/Sidebar";
 import type { ReactNode } from "react";
 
@@ -9,22 +8,19 @@ export const metadata = {
 };
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
-  if (!session || (session.user as any)?.role !== "bluu_admin") {
+  if (!session || session.user.role !== "bluu_admin") {
     redirect("/admin-login");
   }
 
-  const user = session.user as any;
-  const userName   = user?.name ?? user?.email ?? "Team Member";
-  const bluuhqRole = user?.bluuhqRole ?? "super_admin";
+  const { name, email, bluuhqRole } = session.user;
 
   return (
     <div className="fixed inset-0 flex overflow-hidden bg-slate-50">
-      <Sidebar userName={userName} bluuhqRole={bluuhqRole} />
+      <Sidebar userName={name ?? email ?? "Team Member"} bluuhqRole={bluuhqRole ?? "super_admin"} />
 
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-        {/* Spacer for mobile top bar rendered inside Sidebar */}
         <div className="lg:hidden h-14 shrink-0" />
         <main className="flex-1 min-h-0 overflow-auto overscroll-none p-6">
           {children}

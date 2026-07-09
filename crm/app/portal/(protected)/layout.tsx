@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import type { ReactNode } from "react";
 import PortalNav from "./PortalNav";
 
@@ -10,13 +9,13 @@ export const metadata = {
 };
 
 export default async function PortalLayout({ children }: { children: ReactNode }) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
-  if (!session || (session.user as { role?: string })?.role !== "bluu_client") {
+  if (!session || session.user.role !== "bluu_client") {
     redirect("/portal-login");
   }
 
-  const firstName = session.user?.name?.split(" ")[0] ?? "Client";
+  const firstName = session.user.name?.split(" ")[0] ?? "Client";
 
   return (
     <div className="min-h-screen bg-[#FAFAF9] flex flex-col">

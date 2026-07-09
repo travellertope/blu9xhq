@@ -1,5 +1,6 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
+
+
 import { headers } from "next/headers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +38,7 @@ async function getConversions(base: string, cookieHeader: string | null): Promis
 export default async function ConversionsPage() {
   const headersList = await headers();
   const cookieHeader = headersList.get("cookie");
-  const base = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const conversions = await getConversions(base, cookieHeader);
 
   return (
