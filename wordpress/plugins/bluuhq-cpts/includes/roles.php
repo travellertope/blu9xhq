@@ -184,8 +184,6 @@ function bluuhq_register_user_meta(): void {
         'description' => 'ISO 8601 timestamp of the client\'s last portal login.',
         'default'     => '',
     ] ) );
-}
-
 
     // ── Affiliate meta ────────────────────────────────────────────────────────
 
