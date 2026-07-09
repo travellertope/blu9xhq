@@ -36,7 +36,7 @@ async function getConversions(base: string, cookieHeader: string | null): Promis
 }
 
 export default async function ConversionsPage() {
-  const headersList = await headers();
+  const headersList = headers();
   const cookieHeader = headersList.get("cookie");
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const conversions = await getConversions(base, cookieHeader);

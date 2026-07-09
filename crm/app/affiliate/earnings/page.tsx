@@ -45,7 +45,7 @@ function groupByProduct(commissions: AffiliateCommission[]) {
 }
 
 export default async function EarningsPage() {
-  const headersList = await headers();
+  const headersList = headers();
   const cookieHeader = headersList.get("cookie");
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const commissions = await getCommissions(base, cookieHeader);

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { sendEmailHtml } from "@/lib/resend";
-import { generateMagicToken, findWPClientByEmail } from "@/lib/magicToken";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 // Rate limit: 1 invite per email per hour (in-memory, resets on server restart)
 const inviteLog = new Map<string, number>();
@@ -19,45 +18,26 @@ export async function POST(req: NextRequest) {
 
   const lastSent = inviteLog.get(email);
   if (lastSent && Date.now() - lastSent < RATE_LIMIT_MS) {
-    // Silently rate-limit — don't reveal timing info
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true }); // silent rate-limit
   }
 
   try {
-    const user = await findWPClientByEmail(email);
-    if (!user) {
-      console.warn("[resend-invite] no bluu_client WP user found for:", email);
-      return NextResponse.json({ ok: true });
-    }
+    const supabase = createSupabaseAdminClient();
 
-    const token = generateMagicToken(email);
-    inviteLog.set(email, Date.now());
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-    const link = `${appUrl}/portal/verify?token=${encodeURIComponent(token)}&email=${encodeURIComponent(email)}`;
-
-    await sendEmailHtml({
-      to: email,
-      subject: "Your BluuHQ portal access link",
-      html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto;background:#fff">
-        <div style="padding:20px 32px;border-bottom:4px solid #1875F2">
-          <img src="https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png" alt="BluuHQ" height="32" style="display:block">
-        </div>
-        <div style="padding:32px">
-          <h2 style="color:#1e293b;margin:0 0 20px">Sign in to your BluuHQ portal</h2>
-          <p>Hi ${user.name},</p>
-          <p>Click the button below to sign in instantly — no password needed. This link is valid for 1 hour.</p>
-          <p style="margin:24px 0">
-            <a href="${link}" style="background:#1875F2;color:#fff;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">
-              Open My Portal
-            </a>
-          </p>
-          <p style="color:#64748b;font-size:13px">If you didn't request this, you can safely ignore it. This link can only be used once.</p>
-        </div>
-      </div>`,
-      text: `Sign in to your BluuHQ portal:\n${link}\n\nExpires in 1 hour. One-time use only.`,
-      tags: [{ name: "type", value: "portal_magic_link" }],
+    // Send OTP magic link — Supabase handles email delivery via its SMTP settings.
+    // shouldCreateUser: false means it silently no-ops if email is not registered,
+    // so we never leak whether an address is in the system.
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify`,
+      },
     });
+
+    if (!error) {
+      inviteLog.set(email, Date.now());
+    }
   } catch (err) {
     console.error("[resend-invite]", err);
   }

@@ -1,14 +1,13 @@
 import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
-import { getClientPost, updateClientPost, createWPUser, updateWPUser, getUserByEmail } from "@/lib/wp-api";
-import { findWPClientByEmail } from "@/lib/magicToken";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getClientPost, updateClientPost } from "@/lib/wp-api";
 import { sendPortalInvite } from "@/lib/resend";
 import { decrypt } from "@/lib/encryption";
-import crypto from "crypto";
 
 async function requireAdmin() {
   const session = await getSession();
-  if (!session || (session.user as any)?.role !== "bluu_admin") return null;
+  if (!session || session.user.role !== "bluu_admin") return null;
   return session;
 }
 
@@ -17,21 +16,21 @@ function tryDecrypt(value: string): string {
 }
 
 // POST /api/admin/clients/[id]/invite
-// Sends a portal invite email to the client's portal_email address.
-// Falls back to contact_email (decrypted) if portal_email is not set.
-// Also ensures a WP user with bluu_client role exists so magic-link login works.
+// Creates a Supabase auth user for the client (if they don't already have one),
+// inserts them into client_users, and sends the Supabase magic-link invite.
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const postId = parseInt(params.id, 10);
   if (isNaN(postId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
 
   try {
+    const supabase = createSupabaseAdminClient();
     const post = await getClientPost(postId);
     const { acf } = post;
 
-    // Prefer portal_email; fall back to decrypted contact_email
     const portalEmail =
       acf.portal_email ||
       (acf.contact_email ? tryDecrypt(acf.contact_email) : null);
@@ -47,53 +46,84 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       ? acf.contact_name.split(" ")[0]
       : post.title.rendered;
 
-    // Ensure the client has a WP user account with bluu_client role.
-    // Without this, findWPClientByEmail returns null and magic-link emails are never sent.
-    let wpUser = await findWPClientByEmail(portalEmail);
-    if (!wpUser) {
-      const tempPassword = crypto.randomBytes(16).toString("base64url");
-      wpUser = await createWPUser({
-        username: portalEmail,
-        email:    portalEmail,
-        password: tempPassword,
-        name:     acf.contact_name || post.title.rendered,
-        roles:    ["bluu_client"],
-      }).catch(async (err: Error) => {
-        if (!err.message?.includes("existing_user_email")) throw err;
-        // Email already registered under a different role — upgrade it
-        const existing = await getUserByEmail(portalEmail);
-        if (!existing) throw err;
-        return updateWPUser(existing.id, { roles: ["bluu_client"] });
-      });
+    // ── Ensure Supabase auth user exists ─────────────────────────────────────
+    let supaUserId: string;
 
-      // Link WP user ↔ client CPT post (both directions)
-      await updateClientPost(postId, { acf: { wp_user_id: wpUser.id } });
-      await fetch(
-        `${process.env.WORDPRESS_URL}/wp-json/wp/v2/users/${wpUser.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${Buffer.from(
-              `${process.env.WP_APP_USERNAME}:${process.env.WP_APP_PASSWORD}`
-            ).toString("base64")}`,
-          },
-          body: JSON.stringify({ meta: { bluu_client_post_id: String(postId) } }),
-        }
-      );
+    const { data: existing } = await supabase.auth.admin.listUsers();
+    const existingUser = existing?.users?.find(
+      (u) => u.email?.toLowerCase() === portalEmail.toLowerCase()
+    );
+
+    if (existingUser) {
+      supaUserId = existingUser.id;
+    } else {
+      // Create without confirming email — invite link will do that.
+      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
+        email:          portalEmail,
+        email_confirm:  false,
+        user_metadata:  { full_name: acf.contact_name || post.title.rendered },
+      });
+      if (createErr || !created.user) {
+        throw new Error(createErr?.message ?? "Failed to create Supabase user");
+      }
+      supaUserId = created.user.id;
     }
 
-    const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL}/portal-login`;
+    // ── Ensure client_users row exists (links auth user → tenant + client) ───
+    // Find the Supabase clients row by wp_post_id migration ref
+    const { data: clientRow } = await supabase
+      .from("clients")
+      .select("id, tenant_id")
+      .eq("wp_post_id", postId)
+      .maybeSingle();
 
-    await sendPortalInvite(portalEmail, {
-      clientName: contactName,
-      loginUrl:   portalUrl,
+    if (clientRow) {
+      await supabase
+        .from("client_users")
+        .upsert(
+          {
+            user_id:   supaUserId,
+            tenant_id: clientRow.tenant_id,
+            client_id: clientRow.id,
+            wp_user_id: null,
+          },
+          { onConflict: "tenant_id,user_id" }
+        );
+
+      // Back-fill portal_user_id on the clients row if not set
+      await supabase
+        .from("clients")
+        .update({ portal_user_id: supaUserId })
+        .eq("id", clientRow.id)
+        .is("portal_user_id", null);
+    }
+
+    // ── Send Supabase invite magic link ───────────────────────────────────────
+    const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+      type:       "invite",
+      email:      portalEmail,
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify`,
+      },
     });
 
+    if (linkErr || !linkData?.properties?.action_link) {
+      throw new Error(linkErr?.message ?? "Failed to generate invite link");
+    }
+
+    const inviteLink = linkData.properties.action_link;
+
+    // Send via Resend so it uses our branded template
+    await sendPortalInvite(portalEmail, {
+      clientName: contactName,
+      loginUrl:   inviteLink,
+    });
+
+    // Update WP CPT to record invite sent (still used by Phase 1 admin UI)
     await updateClientPost(postId, {
       acf: {
         portal_invited_at: new Date().toISOString(),
-        portal_email: portalEmail,
+        portal_email:      portalEmail,
       },
     });
 

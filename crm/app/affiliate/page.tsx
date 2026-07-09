@@ -48,7 +48,7 @@ export default async function AffiliateDashboard() {
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const affiliateCode = user?.affiliateCode ?? "";
 
-  const headersList = await headers();
+  const headersList = headers();
   const cookieHeader = headersList.get("cookie");
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
