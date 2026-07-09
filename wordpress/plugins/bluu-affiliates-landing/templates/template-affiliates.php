@@ -88,30 +88,10 @@ $faqs = [
 	  'a' => 'No. Anyone can join the affiliate program — you do not need to be a Bluu customer or have any prior relationship with us.' ],
 ];
 
-wp_head();
+get_header();
 ?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-<meta charset="<?php bloginfo( 'charset' ); ?>">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?php echo esc_html( baff_f( 'seo_title', 'Bluu Affiliate Program — Earn 30% Recurring Commissions' ) ); ?></title>
-<meta name="description" content="<?php echo esc_attr( baff_f( 'seo_desc', 'Join the Bluu affiliate program. Promote Bluu products and services and earn up to 30% recurring commissions with no cap and no expiry.' ) ); ?>">
-</head>
-<body <?php body_class(); ?>>
-<?php wp_body_open(); ?>
 
 <div class="baff-wrap">
-
-	<!-- ── NAV ────────────────────────────────────────────────────────────── -->
-	<nav class="baff-nav">
-		<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="baff-nav__logo">
-			<span class="baff-logo-mark">Bluu</span>
-		</a>
-		<a href="<?php echo esc_url( $portal_register_url ); ?>" class="baff-btn baff-btn--sm">
-			Join Free
-		</a>
-	</nav>
 
 	<!-- ── HERO ───────────────────────────────────────────────────────────── -->
 	<section class="baff-hero">
@@ -319,19 +299,6 @@ wp_head();
 		</div>
 	</section>
 
-	<!-- ── FOOTER ─────────────────────────────────────────────────────────── -->
-	<footer class="baff-footer">
-		<div class="baff-container">
-			<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="baff-footer__logo">Bluu</a>
-			<div class="baff-footer__links">
-				<a href="<?php echo esc_url( home_url( '/affiliates/terms' ) ); ?>">Affiliate Terms</a>
-				<a href="<?php echo esc_url( home_url( '/privacy-policy' ) ); ?>">Privacy</a>
-				<a href="<?php echo esc_url( home_url( '/contact' ) ); ?>">Contact</a>
-			</div>
-			<p class="baff-footer__copy">&copy; <?php echo esc_html( gmdate( 'Y' ) ); ?> BluuHQ. All rights reserved.</p>
-		</div>
-	</footer>
-
 </div><!-- .baff-wrap -->
 
 <!-- ── CALCULATOR SCRIPT ──────────────────────────────────────────────────── -->
@@ -375,6 +342,4 @@ wp_head();
 }());
 </script>
 
-<?php wp_footer(); ?>
-</body>
-</html>
+<?php get_footer(); ?>

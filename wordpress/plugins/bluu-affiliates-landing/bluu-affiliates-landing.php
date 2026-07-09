@@ -55,12 +55,6 @@ add_filter( 'template_include', function ( string $tpl ): string {
 	return $tpl;
 } );
 
-add_action( 'wp_body_open', function (): void {
-	if ( baff_active() ) {
-		remove_all_actions( 'wp_body_open' );
-	}
-}, PHP_INT_MIN );
-
 add_action( 'wp_enqueue_scripts', function (): void {
 	if ( ! baff_active() ) return;
 

@@ -24,7 +24,8 @@ export async function middleware(req: NextRequest) {
   const token = await getToken({ req, secret });
 
   // ── Admin routes ────────────────────────────────────────────────────────────
-  if (pathname.startsWith("/admin")) {
+  // Use === "/admin" || startsWith("/admin/") so /admin-login never matches.
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
     if (!token) return NextResponse.redirect(new URL("/admin-login", req.url));
     const role = (token as any).role;
     if (role !== "bluu_admin") {
@@ -35,7 +36,8 @@ export async function middleware(req: NextRequest) {
   }
 
   // ── Client portal routes ────────────────────────────────────────────────────
-  if (pathname.startsWith("/portal")) {
+  // Use === "/portal" || startsWith("/portal/") so /portal-login never matches.
+  if (pathname === "/portal" || pathname.startsWith("/portal/")) {
     // /portal/verify must be reachable without a session (magic-link landing)
     if (pathname === "/portal/verify") return NextResponse.next();
     if (!token) return NextResponse.redirect(new URL("/portal-login", req.url));
@@ -48,7 +50,9 @@ export async function middleware(req: NextRequest) {
   }
 
   // ── Affiliate routes ────────────────────────────────────────────────────────
-  if (pathname.startsWith("/affiliate")) {
+  // Use === "/affiliate" || startsWith("/affiliate/") so /affiliate-login and
+  // /affiliate-register never match.
+  if (pathname === "/affiliate" || pathname.startsWith("/affiliate/")) {
     if (!token) return NextResponse.redirect(new URL("/affiliate-login", req.url));
     const role = (token as any).role;
     if (role !== "bluu_affiliate") {
