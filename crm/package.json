@@ -1,5 +1,5 @@
 {
-  "name": "portal",
+  "name": "bluucrm",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -45,7 +45,8 @@
     "graphql": "^16.14.0",
     "lucide-react": "^1.17.0",
     "next": "14.2.35",
-    "next-auth": "^4.24.14",
+    "@supabase/supabase-js": "^2.50.2",
+    "@supabase/ssr": "^0.6.1",
     "next-nprogress-bar": "^2.4.7",
     "react": "^18",
     "react-dom": "^18",
