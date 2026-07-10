@@ -16,6 +16,13 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
+import { WebSocket } from "ws";
+
+// @supabase/supabase-js constructs a realtime client eagerly, which needs a
+// global WebSocket — only native on Node 22+. Polyfill it for older Node.
+if (typeof globalThis.WebSocket === "undefined") {
+  (globalThis as unknown as { WebSocket: unknown }).WebSocket = WebSocket;
+}
 
 const BLUU_TENANT_ID = "00000000-0000-0000-0000-000000000001";
 
