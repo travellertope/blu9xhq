@@ -18,7 +18,7 @@ export const PLAN_LIMITS = {
     sequences:        false,
     aiMoodAnalysis:   false,
     clientPortal:     true,
-    whiteLabel:       true,
+    whiteLabel:       false,
   },
   starter: {
     maxClients:       25,
