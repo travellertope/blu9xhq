@@ -34,6 +34,7 @@ function mapUser(supaUser: any): BluuUser | null {
     name:             meta.full_name ?? meta.name ?? supaUser.email ?? "",
     role,
     tenantId:         claims.tenant_id,
+    tenantPlan:       claims.tenant_plan,
     bluuhqRole:       claims.crm_role,
     assignedClients:  claims.assigned_clients,
     affiliateCode:    claims.affiliate_code,

@@ -17,13 +17,14 @@ security definer
 stable
 as $$
 declare
-  claims        jsonb;
-  uid           uuid;
-  v_tenant_id   uuid;
-  v_user_type   text;
-  v_crm_role    text;
-  v_aff_code    text;
-  v_aff_status  text;
+  claims         jsonb;
+  uid            uuid;
+  v_tenant_id    uuid;
+  v_user_type    text;
+  v_crm_role     text;
+  v_tenant_plan  text;
+  v_aff_code     text;
+  v_aff_status   text;
 begin
   uid    := (event ->> 'user_id')::uuid;
   claims := event -> 'claims';
@@ -37,10 +38,12 @@ begin
    limit 1;
 
   if found then
+    select t.plan into v_tenant_plan from tenants t where t.id = v_tenant_id;
     v_user_type := 'team';
-    claims := jsonb_set(claims, '{tenant_id}', to_jsonb(v_tenant_id::text));
-    claims := jsonb_set(claims, '{user_type}', '"team"');
-    claims := jsonb_set(claims, '{crm_role}',  to_jsonb(v_crm_role));
+    claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
+    claims := jsonb_set(claims, '{user_type}',   '"team"');
+    claims := jsonb_set(claims, '{crm_role}',    to_jsonb(v_crm_role));
+    claims := jsonb_set(claims, '{tenant_plan}', to_jsonb(v_tenant_plan));
     return jsonb_set(event, '{claims}', claims);
   end if;
 
@@ -52,9 +55,11 @@ begin
    limit 1;
 
   if found then
+    select t.plan into v_tenant_plan from tenants t where t.id = v_tenant_id;
     v_user_type := 'client';
-    claims := jsonb_set(claims, '{tenant_id}', to_jsonb(v_tenant_id::text));
-    claims := jsonb_set(claims, '{user_type}', '"client"');
+    claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
+    claims := jsonb_set(claims, '{user_type}',   '"client"');
+    claims := jsonb_set(claims, '{tenant_plan}', to_jsonb(v_tenant_plan));
     return jsonb_set(event, '{claims}', claims);
   end if;
 

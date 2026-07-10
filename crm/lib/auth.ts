@@ -28,6 +28,7 @@ export interface BluuUser {
   affiliateStatus?: string;
   // Supabase-native
   tenantId?: string;
+  tenantPlan?: import("@/lib/planLimits").TenantPlan;
 }
 
 export interface BluuSession {
@@ -69,6 +70,7 @@ export async function getSession(): Promise<BluuSession | null> {
       name:             userMeta.full_name ?? userMeta.name ?? session.user.email ?? "",
       role,
       tenantId:         claims.tenant_id,
+      tenantPlan:       claims.tenant_plan,
       bluuhqRole:       claims.crm_role,
       assignedClients:  claims.assigned_clients,
       affiliateCode:    claims.affiliate_code,

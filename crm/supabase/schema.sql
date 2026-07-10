@@ -15,7 +15,7 @@ create table if not exists tenants (
   id            uuid primary key default gen_random_uuid(),
   name          text not null,
   slug          text not null unique,          -- used in subdomain routing
-  plan          text not null default 'starter' check (plan in ('starter','pro','agency','white_label')),
+  plan          text not null default 'free' check (plan in ('free','starter','pro','agency','white_label')),
   status        text not null default 'active' check (status in ('active','suspended','churned')),
   logo_url      text,
   accent_colour text default '#2F5FE0',       -- for white-label
