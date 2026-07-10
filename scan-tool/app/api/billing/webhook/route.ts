@@ -131,7 +131,7 @@ async function notifyPortalAffiliateEvent(payload: {
   currency:       string;
   externalRef:    string;
 }): Promise<void> {
-  const portalUrl  = process.env.PORTAL_URL ?? "https://portal.bluuhq.com";
+  const portalUrl  = process.env.PORTAL_URL ?? "https://crm.bluuhq.com";
   const internalSecret = process.env.BLUU_INTERNAL_SECRET;
   if (!internalSecret) {
     console.warn("[billing] BLUU_INTERNAL_SECRET not set — skipping affiliate event");

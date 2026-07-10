@@ -7,7 +7,7 @@ import { Check, Copy, ExternalLink } from "lucide-react";
 
 const PRODUCTS = [
   { id: "scan",    label: "Scan Tool",              base: "https://scan.bluuhq.com" },
-  { id: "portal",  label: "Client Portal",          base: "https://portal.bluuhq.com/affiliate-register" },
+  { id: "portal",  label: "BluuCRM (Client Portal)", base: "https://crm.bluuhq.com/signup" },
   { id: "main",    label: "bluuhq.com (all products)", base: "https://bluuhq.com" },
   { id: "hosting", label: "Hosting & Management",   base: "https://bluuhq.com/hosting" },
   { id: "content", label: "Content Operations",     base: "https://bluuhq.com/what-we-produce" },

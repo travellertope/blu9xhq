@@ -1,4 +1,4 @@
-#!/usr/bin/env npx ts-node --esm
+#!/usr/bin/env npx tsx
 /**
  * BluuCRM — WordPress → Supabase migration script
  *
@@ -6,7 +6,7 @@
  * Idempotent: re-running skips rows that already have a matching wp_post_id.
  *
  * Usage (from repo root):
- *   cd crm && npx dotenv-cli -e .env.local -- npx ts-node --esm scripts/migrate-from-wp.ts
+ *   cd crm && npx dotenv-cli -e .env.local -- npx tsx scripts/migrate-from-wp.ts
  *
  * Flags:
  *   --dry-run           Print what would be inserted, make no DB writes

@@ -1,18 +1,18 @@
-#!/usr/bin/env npx ts-node --esm
+#!/usr/bin/env npx tsx
 /**
  * BluuCRM — first-admin setup script
  *
  * Creates the first Bluu Interactive team member in Supabase.
  * Run once after deploying schema.sql and functions.sql.
  *
- * Usage:
+ * Usage (from the crm/ directory):
  *   ADMIN_EMAIL=you@bluuhq.com ADMIN_NAME="Your Name" \
  *   NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co \
  *   SUPABASE_SERVICE_ROLE_KEY=... \
- *   npx ts-node --esm crm/scripts/setup-first-admin.ts
+ *   npx tsx scripts/setup-first-admin.ts
  *
  * Or set env vars in crm/.env.local and run from the crm/ directory:
- *   cd crm && npx dotenv-cli -e .env.local -- npx ts-node --esm scripts/setup-first-admin.ts
+ *   cd crm && npx dotenv-cli -e .env.local -- npx tsx scripts/setup-first-admin.ts
  */
 
 import { createClient } from "@supabase/supabase-js";

@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const HOSTNAME_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
+
 const schema = z.object({
   logoUrl:      z.string().url("Enter a valid URL").optional().or(z.literal("")),
   accentColour: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex colour"),
+  customDomain: z.string().regex(HOSTNAME_RE, "Enter a valid domain, e.g. crm.yourcompany.com").optional().or(z.literal("")),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -23,7 +26,7 @@ export default function BrandingPage() {
 
   const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { logoUrl: "", accentColour: "#2F5FE0" },
+    defaultValues: { logoUrl: "", accentColour: "#2F5FE0", customDomain: "" },
   });
 
   const watchedAccent = watch("accentColour");
@@ -36,7 +39,7 @@ export default function BrandingPage() {
       .then((r) => r.ok ? r.json() : null)
       .then((d) => {
         if (d) {
-          reset({ logoUrl: d.logoUrl ?? "", accentColour: d.accentColour ?? "#2F5FE0" });
+          reset({ logoUrl: d.logoUrl ?? "", accentColour: d.accentColour ?? "#2F5FE0", customDomain: d.customDomain ?? "" });
           setPreview(d.accentColour ?? "#2F5FE0");
         }
       })
@@ -51,7 +54,11 @@ export default function BrandingPage() {
       const res = await fetch("/api/admin/settings/branding", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ logoUrl: data.logoUrl || null, accentColour: data.accentColour }),
+        body: JSON.stringify({
+          logoUrl:      data.logoUrl || null,
+          accentColour: data.accentColour,
+          customDomain: data.customDomain || null,
+        }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error((body as { error?: string }).error ?? "Save failed");

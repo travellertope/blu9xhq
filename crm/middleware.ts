@@ -1,6 +1,23 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
+async function resolveCustomDomain(host: string): Promise<string | null> {
+  const url    = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !anonKey) return null;
+  try {
+    const res = await fetch(
+      `${url}/rest/v1/tenant_domain_lookup?custom_domain=eq.${encodeURIComponent(host)}&select=slug&limit=1`,
+      { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } }
+    );
+    if (!res.ok) return null;
+    const rows = (await res.json()) as { slug: string }[];
+    return rows[0]?.slug ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
@@ -25,6 +42,11 @@ export async function middleware(req: NextRequest) {
   let tenantSlug: string | null = null;
   if (crmDomain && host !== crmDomain && host.endsWith("." + crmDomain)) {
     tenantSlug = host.slice(0, host.length - crmDomain.length - 1);
+  } else if (crmDomain && host && host !== crmDomain) {
+    // Not our base domain or a subdomain of it — check if it's a tenant's
+    // custom white-label domain (only 1 network round-trip, and only for
+    // this rare case; normal subdomain/root traffic never hits it).
+    tenantSlug = await resolveCustomDomain(host);
   }
 
   // ── Build a response object that the Supabase client can write cookies to ───
