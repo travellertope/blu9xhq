@@ -5,14 +5,16 @@ import { z } from "zod";
 
 async function requireAdmin() {
   const session = await getSession();
-  if (!session || (session.user as any)?.role !== "bluu_admin") return null;
+  if (!session || session.user.role !== "bluu_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.tenantPlan !== "agency") return NextResponse.json({ error: "Agency plan required" }, { status: 403 });
   return session;
 }
 
 // ─── GET /api/admin/affiliates/[id] ──────────────────────────────────────────
 
 export async function GET(_req: NextRequest, { params }: { params: { id: string } }) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const user = await wpRestFetch<any>(`/wp/v2/users/${params.id}?context=edit`);
@@ -88,7 +90,8 @@ const patchSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   const body = await req.json().catch(() => ({}));
   const parsed = patchSchema.safeParse(body);

@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
-import { ArrowLeft, Send, CheckCircle, FileDown, Ban } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, FileDown, Ban, Pencil, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface Invoice {
@@ -124,6 +124,7 @@ export default function InvoiceDetailPage() {
   const [markPaidLoading, setMarkPaidLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [voiding, setVoiding] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -195,6 +196,21 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Delete this draft invoice? This cannot be undone.")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/admin/invoices/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete invoice");
+      toast.success("Invoice deleted");
+      router.replace("/admin/invoices");
+    } catch {
+      toast.error("Failed to delete invoice");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleVoid = async () => {
     if (!confirm("Are you sure you want to void this invoice?")) return;
     setVoiding(true);
@@ -223,8 +239,10 @@ export default function InvoiceDetailPage() {
   }
 
   const canSend = invoice.status === "draft";
+  const canEdit = invoice.status === "draft";
+  const canDelete = invoice.status === "draft";
   const canMarkPaid = invoice.status === "sent" || invoice.status === "overdue";
-  const canVoid = invoice.status !== "void" && invoice.status !== "paid";
+  const canVoid = invoice.status === "sent" || invoice.status === "overdue";
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -246,6 +264,18 @@ export default function InvoiceDetailPage() {
             <Button size="sm" onClick={handleSend} disabled={sending}>
               <Send className="h-4 w-4 mr-1.5" />
               {sending ? "Sending…" : "Send to Client"}
+            </Button>
+          )}
+          {canEdit && (
+            <Button size="sm" variant="outline" onClick={() => router.push(`/admin/invoices/${id}/edit`)}>
+              <Pencil className="h-4 w-4 mr-1.5" />
+              Edit
+            </Button>
+          )}
+          {canDelete && (
+            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-600" onClick={handleDelete} disabled={deleting}>
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              {deleting ? "Deleting…" : "Delete"}
             </Button>
           )}
         </PermissionGuard>

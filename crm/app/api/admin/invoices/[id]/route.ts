@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession, requirePermission } from "@/lib/apiPermissions";
-import { getInvoice, updateInvoice, type WPInvoicePost } from "@/lib/wp-api";
+import { getInvoice, updateInvoice, wpRestFetch, type WPInvoicePost } from "@/lib/wp-api";
 
 function mapInvoice(post: WPInvoicePost) {
   return {
@@ -72,13 +72,20 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  // Fetch the current invoice to get clientId
+  // Fetch the current invoice to get clientId and enforce draft-only field edits
   let clientId: number;
+  let currentStatus: string;
   try {
     const current = await getInvoice(postId);
     clientId = current.acf.inv_client;
+    currentStatus = current.acf.inv_status;
   } catch {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+  }
+
+  const isFieldEdit = body.lineItems !== undefined || body.currency !== undefined || body.dueDate !== undefined || body.notes !== undefined;
+  if (isFieldEdit && currentStatus !== "draft") {
+    return NextResponse.json({ error: "Only draft invoices can be edited" }, { status: 422 });
   }
 
   const permission = body.markAsPaid ? "mark_invoices_paid" : "create_invoices";
@@ -101,5 +108,37 @@ export async function PATCH(
   } catch (err) {
     console.error("[PATCH /api/admin/invoices/[id]]", err);
     return NextResponse.json({ error: "Failed to update invoice" }, { status: 502 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const postId = parseInt(params.id, 10);
+  if (isNaN(postId)) {
+    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  }
+
+  let clientId: number;
+  try {
+    const current = await getInvoice(postId);
+    if (current.acf.inv_status !== "draft") {
+      return NextResponse.json({ error: "Only draft invoices can be deleted" }, { status: 422 });
+    }
+    clientId = current.acf.inv_client;
+  } catch {
+    return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+  }
+
+  const auth = await requirePermission(req, "create_invoices", clientId);
+  if (auth instanceof NextResponse) return auth;
+
+  try {
+    await wpRestFetch(`/wp/v2/bluu_invoice/${postId}?force=true`, { method: "DELETE" });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE /api/admin/invoices/[id]]", err);
+    return NextResponse.json({ error: "Failed to delete invoice" }, { status: 502 });
   }
 }

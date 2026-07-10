@@ -4,14 +4,16 @@ import { wpRestFetch } from "@/lib/wp-api";
 
 async function requireAdmin() {
   const session = await getSession();
-  if (!session || (session.user as any)?.role !== "bluu_admin") return null;
+  if (!session || session.user.role !== "bluu_admin") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.tenantPlan !== "agency") return NextResponse.json({ error: "Agency plan required" }, { status: 403 });
   return session;
 }
 
 // ─── GET /api/admin/affiliates ────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  if (!await requireAdmin()) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requireAdmin();
+  if (auth instanceof NextResponse) return auth;
 
   const { searchParams } = new URL(req.url);
   const page    = parseInt(searchParams.get("page") ?? "1", 10);

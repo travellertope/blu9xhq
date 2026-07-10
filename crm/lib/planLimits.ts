@@ -8,6 +8,7 @@ export interface PlanLimits {
   aiMoodAnalysis: boolean;
   clientPortal: boolean;
   whiteLabel: boolean;
+  affiliates: boolean;
 }
 
 export const PLAN_LIMITS = {
@@ -19,6 +20,7 @@ export const PLAN_LIMITS = {
     aiMoodAnalysis:   false,
     clientPortal:     true,
     whiteLabel:       false,
+    affiliates:       false,
   },
   starter: {
     maxClients:       25,
@@ -28,6 +30,7 @@ export const PLAN_LIMITS = {
     aiMoodAnalysis:   false,
     clientPortal:     true,
     whiteLabel:       true,
+    affiliates:       false,
   },
   pro: {
     maxClients:       100,
@@ -37,6 +40,7 @@ export const PLAN_LIMITS = {
     aiMoodAnalysis:   true,
     clientPortal:     true,
     whiteLabel:       true,
+    affiliates:       false,
   },
   agency: {
     maxClients:       Infinity,
@@ -46,6 +50,7 @@ export const PLAN_LIMITS = {
     aiMoodAnalysis:   true,
     clientPortal:     true,
     whiteLabel:       true,
+    affiliates:       true,
   },
 } as const satisfies Record<TenantPlan, PlanLimits>;
 
@@ -55,7 +60,7 @@ export function getPlanLimits(plan: TenantPlan | undefined): PlanLimits {
 
 export function planAllows(
   plan: TenantPlan | undefined,
-  feature: keyof Pick<PlanLimits, "sequences" | "aiMoodAnalysis" | "clientPortal" | "whiteLabel">
+  feature: keyof Pick<PlanLimits, "sequences" | "aiMoodAnalysis" | "clientPortal" | "whiteLabel" | "affiliates">
 ): boolean {
   return getPlanLimits(plan)[feature];
 }

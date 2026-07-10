@@ -75,6 +75,14 @@ export async function middleware(req: NextRequest) {
       if (role === "bluu_affiliate") return NextResponse.redirect(new URL("/affiliate", req.url));
       return NextResponse.redirect(new URL("/admin-login", req.url));
     }
+    // Affiliate section is agency-plan only
+    const tenantPlan: string = claims.tenant_plan ?? "";
+    if (
+      (pathname === "/admin/affiliates" || pathname.startsWith("/admin/affiliates/")) &&
+      tenantPlan !== "agency"
+    ) {
+      return NextResponse.redirect(new URL("/admin/billing?upgrade=agency", req.url));
+    }
   }
 
   // ── Client portal routes ──────────────────────────────────────────────────────
