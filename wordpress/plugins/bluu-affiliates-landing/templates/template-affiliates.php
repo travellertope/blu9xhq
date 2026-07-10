@@ -31,7 +31,7 @@ function baff_rows( string $key, array $default ): array {
 
 // ─── Portal URL ───────────────────────────────────────────────────────────────
 
-$portal_register_url = baff_f( 'portal_register_url', 'https://portal.bluuhq.com/affiliate-register' );
+$portal_register_url = baff_f( 'portal_register_url', 'https://crm.bluuhq.com/affiliate-register' );
 
 // ─── Content defaults ─────────────────────────────────────────────────────────
 

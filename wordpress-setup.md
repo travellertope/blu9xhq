@@ -2,7 +2,7 @@
 
 This guide covers everything needed to turn your existing WordPress installation at
 **bluuhq.com** into the data layer for the headless CRM & client portal at
-**portal.bluuhq.com**.
+**crm.bluuhq.com**.
 
 ---
 

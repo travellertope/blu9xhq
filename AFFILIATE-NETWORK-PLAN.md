@@ -1,7 +1,7 @@
 # Bluu Affiliate Network — Full System Plan
 
 > Affiliate marketing network spanning all Bluu products and services.
-> Open enrollment · Native build · Dashboard at portal.bluuhq.com
+> Open enrollment · Native build · Dashboard at crm.bluuhq.com
 
 ---
 
@@ -28,7 +28,7 @@ bluuhq.com (WordPress)
 ├── /affiliates/register → portal       ← redirect with ?email= pre-fill
 └── WP REST API                         ← user creation for bluu_affiliate role
 
-portal.bluuhq.com (Next.js 14)
+crm.bluuhq.com (Next.js 14)
 ├── /affiliate/*                        ← affiliate dashboard (new section)
 ├── /affiliate-login                    ← dedicated login page
 ├── /api/affiliates/register            ← open enrollment sign-up
@@ -54,7 +54,7 @@ bluuhq.com (WordPress — all pages)
 3. Sets cookie:  bluu_ref=ALICE30  (domain: scan.bluuhq.com, 60 days, SameSite=Lax)
 4. Visitor subscribes → Stripe checkout → subscription created
 5. scan-tool /api/billing/webhook fires internal event to portal:
-   POST portal.bluuhq.com/api/affiliates/event
+   POST crm.bluuhq.com/api/affiliates/event
    { secret: BLUU_INTERNAL_SECRET, event: "new_subscription",
      ref: "ALICE30", product: "scan_tool",
      stripe_customer_id: "cus_xxx", stripe_subscription_id: "sub_xxx" }
@@ -271,7 +271,7 @@ Admin marks conversion as "project_signed" + enters contract_value
 | App | Cookie name | Domain | TTL | Set by |
 |---|---|---|---|---|
 | scan.bluuhq.com | `bluu_ref` | scan.bluuhq.com | 60 days | Next.js middleware |
-| portal.bluuhq.com | `bluu_ref` | portal.bluuhq.com | 60 days | Next.js middleware |
+| crm.bluuhq.com | `bluu_ref` | crm.bluuhq.com | 60 days | Next.js middleware |
 | bluuhq.com | `bluu_ref` | bluuhq.com | 60 days | WordPress functions.php hook |
 
 **First-touch wins.** If a `bluu_ref` cookie already exists, it is not overwritten.
@@ -335,7 +335,7 @@ at checkout creation time. On webhook, read `customer.metadata.bluu_ref`.
 1. HERO
    Headline: "Earn 30% recurring commissions promoting Bluu"
    Sub: "Share Bluu with your audience. Earn every month your referrals stay."
-   CTA: "Join Free — Apply Now" → portal.bluuhq.com/affiliate-register
+   CTA: "Join Free — Apply Now" → crm.bluuhq.com/affiliate-register
 
 2. HOW IT WORKS (3 steps)
    ① Sign up free in 60 seconds
@@ -372,7 +372,7 @@ at checkout creation time. On webhook, read `customer.metadata.bluu_ref`.
 
 8. FINAL CTA
    "Start earning today — it's free to join"
-   Button → portal.bluuhq.com/affiliate-register
+   Button → crm.bluuhq.com/affiliate-register
 ```
 
 ### Plugin file structure
@@ -440,7 +440,7 @@ Admin capabilities:
 - [ ] `bluu-affiliates-landing` WordPress plugin
 - [ ] Full landing page template with earnings calculator
 - [ ] CSS styles matching Bluu brand
-- [ ] Form CTA pointing to portal.bluuhq.com/affiliate-register
+- [ ] Form CTA pointing to crm.bluuhq.com/affiliate-register
 
 ### Phase 2 — Portal Auth + Registration (Week 1–2)
 - [ ] `bluu_affiliate` WP role in `bluuhq-cpts.php`
@@ -489,7 +489,7 @@ Admin capabilities:
 
 ## 11. Environment Variables
 
-### portal.bluuhq.com additions
+### crm.bluuhq.com additions
 
 ```
 BLUU_INTERNAL_SECRET=          # Shared secret for cross-app API calls
@@ -501,7 +501,7 @@ CRON_SECRET=                   # Guards /api/cron/* routes
 ### scan.bluuhq.com additions
 
 ```
-PORTAL_URL=https://portal.bluuhq.com
+PORTAL_URL=https://crm.bluuhq.com
 BLUU_INTERNAL_SECRET=          # Same value as portal
 ```
 
@@ -512,7 +512,7 @@ BLUU_INTERNAL_SECRET=          # Same value as portal
 | Decision | Choice | Reason |
 |---|---|---|
 | Enrollment | Open — anyone can sign up | Low friction; quality governed by commission structure |
-| Dashboard location | portal.bluuhq.com/affiliate/* | Reuses auth, UI, email, Stripe infrastructure |
+| Dashboard location | crm.bluuhq.com/affiliate/* | Reuses auth, UI, email, Stripe infrastructure |
 | Tracking | First-touch cookie, 60-day window | Fair, simple, industry standard |
 | Commission lifetime | No cap — earn forever on recurring | Most powerful affiliate motivator for SaaS |
 | Attribution store | WordPress CPTs | Consistent with existing portal data layer |

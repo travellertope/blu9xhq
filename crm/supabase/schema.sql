@@ -592,3 +592,19 @@ create index if not exists idx_aff_clicks_affiliate   on affiliate_clicks(affili
 create index if not exists idx_aff_conv_affiliate     on affiliate_conversions(affiliate_id);
 create index if not exists idx_aff_comm_affiliate     on affiliate_commissions(affiliate_id);
 create index if not exists idx_aff_payout_affiliate   on affiliate_payouts(affiliate_id);
+create unique index if not exists idx_tenants_custom_domain on tenants(custom_domain) where custom_domain is not null;
+
+-- =============================================================================
+-- PUBLIC DOMAIN LOOKUP
+-- Middleware resolves an inbound custom domain to a tenant slug before any
+-- JWT/session exists, so it can't go through the normal RLS-gated tenants
+-- table. This view runs with the privileges of its owner (bypassing RLS) and
+-- exposes only the columns needed for that lookup — never add sensitive
+-- columns (plan, stripe_customer_id, etc.) here.
+-- =============================================================================
+create or replace view public.tenant_domain_lookup as
+select id, slug, custom_domain
+from tenants
+where custom_domain is not null and status = 'active';
+
+grant select on public.tenant_domain_lookup to anon, authenticated;

@@ -102,7 +102,7 @@ function bluuhq_register_roles(): void {
         ] );
     }
 
-    // bluu_affiliate — affiliate partner; dashboard at portal.bluuhq.com/affiliate
+    // bluu_affiliate — affiliate partner; dashboard at crm.bluuhq.com/affiliate
     if ( ! get_role( 'bluu_affiliate' ) ) {
         add_role( 'bluu_affiliate', 'BluuHQ Affiliate', [
             'read' => true,

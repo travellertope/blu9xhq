@@ -35,7 +35,7 @@ add_action( 'acf/init', function (): void {
 			// ── Settings ──────────────────────────────────────────────────────
 			[ 'key' => 'field_baff_tab_settings', 'label' => 'Settings', 'type' => 'tab' ],
 			[ 'key' => 'field_baff_portal_url', 'label' => 'Portal Register URL', 'name' => 'portal_register_url', 'type' => 'text',
-			  'default_value' => 'https://portal.bluuhq.com/affiliate-register' ],
+			  'default_value' => 'https://crm.bluuhq.com/affiliate-register' ],
 
 			// ── Hero ──────────────────────────────────────────────────────────
 			[ 'key' => 'field_baff_tab_hero', 'label' => 'Hero', 'type' => 'tab' ],
