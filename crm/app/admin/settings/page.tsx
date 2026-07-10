@@ -107,6 +107,12 @@ export default function AdminSettingsPage() {
         >
           Team
         </Link>
+        <Link
+          href="/admin/settings/branding"
+          className="px-4 py-2 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          Branding
+        </Link>
       </div>
 
       {/* General tab */}

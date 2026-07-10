@@ -37,10 +37,12 @@ const NAV_ITEMS = [
 interface SidebarInnerProps {
   userName: string;
   bluuhqRole: string;
+  tenantLogo?: string;
+  accentColour?: string;
   onNavigate?: () => void;
 }
 
-function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
+function SidebarInner({ userName, bluuhqRole, tenantLogo, accentColour, onNavigate }: SidebarInnerProps) {
   const pathname = usePathname();
   const router   = useRouter();
 
@@ -53,11 +55,18 @@ function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
     !permission || hasPermission(bluuhqRole as Role, permission)
   );
 
+  const accent = accentColour ?? "#2F5FE0";
+
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Logo */}
       <div className="flex h-14 items-center px-5 border-b shrink-0">
-        <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
+        {tenantLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={tenantLogo} alt="Logo" className="h-8 max-w-[140px] object-contain" />
+        ) : (
+          <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
+        )}
       </div>
 
       {/* Navigation */}
@@ -76,15 +85,13 @@ function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-indigo-50 text-indigo-600"
+                    ? "text-white"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 )}
+                style={isActive ? { backgroundColor: accent, color: "#fff" } : undefined}
               >
                 <Icon
-                  className={cn(
-                    "h-4 w-4 shrink-0",
-                    isActive ? "text-indigo-600" : "text-slate-400"
-                  )}
+                  className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-slate-400")}
                 />
                 {label}
               </Link>
@@ -116,16 +123,18 @@ function SidebarInner({ userName, bluuhqRole, onNavigate }: SidebarInnerProps) {
 interface SidebarProps {
   userName: string;
   bluuhqRole: string;
+  tenantLogo?: string;
+  accentColour?: string;
 }
 
-export function Sidebar({ userName, bluuhqRole }: SidebarProps) {
+export function Sidebar({ userName, bluuhqRole, tenantLogo, accentColour }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-64 shrink-0 flex-col border-r">
-        <SidebarInner userName={userName} bluuhqRole={bluuhqRole} />
+        <SidebarInner userName={userName} bluuhqRole={bluuhqRole} tenantLogo={tenantLogo} accentColour={accentColour} />
       </aside>
 
       {/* Mobile top bar */}
@@ -138,7 +147,12 @@ export function Sidebar({ userName, bluuhqRole }: SidebarProps) {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <Image src="/logo.png" alt="BluuHQ" width={90} height={26} priority className="object-contain" />
+        {tenantLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={tenantLogo} alt="Logo" className="h-7 max-w-[110px] object-contain" />
+        ) : (
+          <Image src="/logo.png" alt="BluuHQ" width={90} height={26} priority className="object-contain" />
+        )}
       </div>
 
       {/* Mobile sheet */}
@@ -150,6 +164,8 @@ export function Sidebar({ userName, bluuhqRole }: SidebarProps) {
           <SidebarInner
             userName={userName}
             bluuhqRole={bluuhqRole}
+            tenantLogo={tenantLogo}
+            accentColour={accentColour}
             onNavigate={() => setMobileOpen(false)}
           />
         </SheetContent>
