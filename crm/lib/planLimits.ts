@@ -13,12 +13,12 @@ export interface PlanLimits {
 export const PLAN_LIMITS = {
   free: {
     maxClients:       5,
-    maxTeamMembers:   2,
+    maxTeamMembers:   1,
     fileStorageMB:    100,
     sequences:        false,
     aiMoodAnalysis:   false,
     clientPortal:     true,
-    whiteLabel:       false,
+    whiteLabel:       true,
   },
   starter: {
     maxClients:       25,
@@ -27,7 +27,7 @@ export const PLAN_LIMITS = {
     sequences:        true,
     aiMoodAnalysis:   false,
     clientPortal:     true,
-    whiteLabel:       false,
+    whiteLabel:       true,
   },
   pro: {
     maxClients:       100,
@@ -36,7 +36,7 @@ export const PLAN_LIMITS = {
     sequences:        true,
     aiMoodAnalysis:   true,
     clientPortal:     true,
-    whiteLabel:       false,
+    whiteLabel:       true,
   },
   agency: {
     maxClients:       Infinity,
@@ -45,7 +45,7 @@ export const PLAN_LIMITS = {
     sequences:        true,
     aiMoodAnalysis:   true,
     clientPortal:     true,
-    whiteLabel:       false,
+    whiteLabel:       true,
   },
   white_label: {
     maxClients:       Infinity,
