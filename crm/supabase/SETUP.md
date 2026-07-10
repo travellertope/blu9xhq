@@ -90,7 +90,9 @@ For Vercel, add these in **Project Settings → Environment Variables**.
 
 ## 7. Create the first admin user
 
-Run the setup script from the repository root:
+Run the setup script from the repository root. It uses `tsx` (a zero-config
+TypeScript runner) — `ts-node --esm` is flaky across Node versions and prone
+to `ERR_UNKNOWN_FILE_EXTENSION` errors, so avoid it:
 
 ```bash
 cd crm
@@ -100,14 +102,14 @@ ADMIN_NAME="Your Name" \
 NEXT_PUBLIC_SUPABASE_URL=https://<ref>.supabase.co \
 SUPABASE_SERVICE_ROLE_KEY=<service-role-key> \
 NEXT_PUBLIC_SITE_URL=https://crm.bluuhq.com \
-npx ts-node --esm scripts/setup-first-admin.ts
+npx tsx scripts/setup-first-admin.ts
 ```
 
 Or with a `.env.local` file already in place:
 
 ```bash
 cd crm
-npx dotenv-cli -e .env.local -- npx ts-node --esm scripts/setup-first-admin.ts
+npx dotenv-cli -e .env.local -- npx tsx scripts/setup-first-admin.ts
 ```
 
 The script:
