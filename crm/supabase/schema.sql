@@ -15,11 +15,11 @@ create table if not exists tenants (
   id            uuid primary key default gen_random_uuid(),
   name          text not null,
   slug          text not null unique,          -- used in subdomain routing
-  plan          text not null default 'free' check (plan in ('free','starter','pro','agency','white_label')),
+  plan          text not null default 'free' check (plan in ('free','starter','pro','agency')),
   status        text not null default 'active' check (status in ('active','suspended','churned')),
   logo_url      text,
-  accent_colour text default '#2F5FE0',       -- for white-label
-  custom_domain text unique,                   -- null unless white-label tier
+  accent_colour text default '#2F5FE0',
+  custom_domain text unique,
   stripe_customer_id text unique,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()

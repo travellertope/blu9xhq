@@ -1,4 +1,4 @@
-export type TenantPlan = "free" | "starter" | "pro" | "agency" | "white_label";
+export type TenantPlan = "free" | "starter" | "pro" | "agency";
 
 export interface PlanLimits {
   maxClients: number;       // Infinity = unlimited
@@ -39,15 +39,6 @@ export const PLAN_LIMITS = {
     whiteLabel:       true,
   },
   agency: {
-    maxClients:       Infinity,
-    maxTeamMembers:   Infinity,
-    fileStorageMB:    Infinity,
-    sequences:        true,
-    aiMoodAnalysis:   true,
-    clientPortal:     true,
-    whiteLabel:       true,
-  },
-  white_label: {
     maxClients:       Infinity,
     maxTeamMembers:   Infinity,
     fileStorageMB:    Infinity,
