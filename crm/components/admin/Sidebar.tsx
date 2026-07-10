@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, Users, Package, CalendarDays, FileText,
-  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare, TicketCheck, Users2,
+  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare, TicketCheck, Users2, CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/admin/services",      label: "Services",      icon: Package,         permission: "create_edit_services" },
   { href: "/admin/sequences",     label: "Sequences",     icon: Workflow,        permission: "build_sequences" },
   { href: "/admin/affiliates",    label: "Affiliates",    icon: Users2,          permission: "manage_affiliates" },
+  { href: "/admin/billing",       label: "Billing",       icon: CreditCard,      permission: "access_settings" },
   { href: "/admin/settings",      label: "Settings",      icon: Settings,        permission: "access_settings" },
 ] as const;
 

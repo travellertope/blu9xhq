@@ -17,8 +17,20 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // ── Subdomain / tenant detection ─────────────────────────────────────────────
+  // Injects x-tenant-slug so server components can brand by tenant without a
+  // DB round-trip (the JWT already carries tenant_id for RLS enforcement).
+  const host      = req.headers.get("host") ?? "";
+  const crmDomain = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/^https?:\/\//, "").replace(/:\d+$/, "");
+  let tenantSlug: string | null = null;
+  if (crmDomain && host !== crmDomain && host.endsWith("." + crmDomain)) {
+    tenantSlug = host.slice(0, host.length - crmDomain.length - 1);
+  }
+
   // ── Build a response object that the Supabase client can write cookies to ───
-  let res = NextResponse.next({ request: req });
+  const requestHeaders = new Headers(req.headers);
+  if (tenantSlug) requestHeaders.set("x-tenant-slug", tenantSlug);
+  let res = NextResponse.next({ request: { headers: requestHeaders } });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

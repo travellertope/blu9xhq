@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { constructStripeWebhookEvent, getStripe } from "@/lib/stripe";
 import { listInvoices, updateInvoice, wpRestFetch } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { getPlanFromPriceId } from "@/lib/stripe-products";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -53,6 +55,48 @@ async function processEvent(event: Stripe.Event): Promise<void> {
     if (event.type === "payment_intent.payment_failed") {
       const pi = event.data.object as Stripe.PaymentIntent;
       console.error("[stripe-webhook] payment failed:", pi.id, pi.last_payment_error?.message);
+    }
+
+    // ── Tenant plan lifecycle ────────────────────────────────────────────────
+    if (event.type === "checkout.session.completed") {
+      const cs = event.data.object as Stripe.Checkout.Session;
+      if (cs.mode === "subscription") {
+        const tenantId = cs.metadata?.tenant_id;
+        const plan     = cs.metadata?.target_plan;
+        if (tenantId && plan) {
+          const supabase = createSupabaseAdminClient();
+          await supabase
+            .from("tenants")
+            .update({ plan, stripe_customer_id: cs.customer as string })
+            .eq("id", tenantId);
+        }
+      }
+    }
+
+    if (event.type === "customer.subscription.updated") {
+      const sub      = event.data.object as Stripe.Subscription;
+      const tenantId = sub.metadata?.tenant_id;
+      if (tenantId) {
+        // Prefer metadata plan; fall back to reverse-lookup of current price
+        let plan: string | null = sub.metadata?.target_plan ?? null;
+        if (!plan) {
+          const priceId = sub.items.data[0]?.price?.id;
+          plan = priceId ? getPlanFromPriceId(priceId) : null;
+        }
+        if (plan) {
+          const supabase = createSupabaseAdminClient();
+          await supabase.from("tenants").update({ plan }).eq("id", tenantId);
+        }
+      }
+    }
+
+    if (event.type === "customer.subscription.deleted") {
+      const sub      = event.data.object as Stripe.Subscription;
+      const tenantId = sub.metadata?.tenant_id;
+      if (tenantId) {
+        const supabase = createSupabaseAdminClient();
+        await supabase.from("tenants").update({ plan: "free" }).eq("id", tenantId);
+      }
     }
 
     if (event.type === "invoice.paid") {
