@@ -99,9 +99,17 @@ create table if not exists clients (
 );
 
 -- Close the FK loop
-alter table client_users
-  add constraint client_users_client_id_fk
-    foreign key (client_id) references clients(id) on delete set null;
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'client_users_client_id_fk'
+  ) then
+    alter table client_users
+      add constraint client_users_client_id_fk
+        foreign key (client_id) references clients(id) on delete set null;
+  end if;
+end;
+$$;
 
 -- =============================================================================
 -- SERVICES  (service catalogue per tenant)
@@ -372,6 +380,7 @@ begin
     'invoices','files','communications','email_templates','sequences',
     'sequence_steps','affiliates','affiliate_commissions','affiliate_payouts'
   ] loop
+    execute format('drop trigger if exists trg_%s_updated_at on %s', tbl, tbl);
     execute format(
       'create trigger trg_%s_updated_at before update on %s
        for each row execute function set_updated_at()',
@@ -438,36 +447,44 @@ returns boolean language sql stable as $$
 $$;
 
 -- ── tenants ──────────────────────────────────────────────────────────────────
+drop policy if exists "team can read own tenant" on tenants;
 create policy "team can read own tenant"
   on tenants for select
   using (id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "super_admin can update own tenant" on tenants;
 create policy "super_admin can update own tenant"
   on tenants for update
   using (id = get_my_tenant_id() and get_my_crm_role() = 'super_admin');
 
 -- ── team_members ─────────────────────────────────────────────────────────────
+drop policy if exists "team can read own tenant members" on team_members;
 create policy "team can read own tenant members"
   on team_members for select
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "super_admin can manage team members" on team_members;
 create policy "super_admin can manage team members"
   on team_members for all
   using (tenant_id = get_my_tenant_id() and get_my_crm_role() = 'super_admin');
 
 -- ── clients ──────────────────────────────────────────────────────────────────
+drop policy if exists "team can read own tenant clients" on clients;
 create policy "team can read own tenant clients"
   on clients for select
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "team can insert clients" on clients;
 create policy "team can insert clients"
   on clients for insert
   with check (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "team can update clients" on clients;
 create policy "team can update clients"
   on clients for update
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "client users can read own record" on clients;
 create policy "client users can read own record"
   on clients for select
   using (
@@ -476,19 +493,23 @@ create policy "client users can read own record"
   );
 
 -- ── services ─────────────────────────────────────────────────────────────────
+drop policy if exists "team can manage services" on services;
 create policy "team can manage services"
   on services for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "client users can read active services" on services;
 create policy "client users can read active services"
   on services for select
   using (is_client_user() and is_active = true);
 
 -- ── subscriptions ─────────────────────────────────────────────────────────────
+drop policy if exists "team can manage subscriptions" on subscriptions;
 create policy "team can manage subscriptions"
   on subscriptions for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "client users can read own subscriptions" on subscriptions;
 create policy "client users can read own subscriptions"
   on subscriptions for select
   using (
@@ -499,10 +520,12 @@ create policy "client users can read own subscriptions"
   );
 
 -- ── invoices ──────────────────────────────────────────────────────────────────
+drop policy if exists "team can manage invoices" on invoices;
 create policy "team can manage invoices"
   on invoices for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "client users can read own invoices" on invoices;
 create policy "client users can read own invoices"
   on invoices for select
   using (
@@ -513,10 +536,12 @@ create policy "client users can read own invoices"
   );
 
 -- ── files ─────────────────────────────────────────────────────────────────────
+drop policy if exists "team can manage files" on files;
 create policy "team can manage files"
   on files for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "client users can read visible files" on files;
 create policy "client users can read visible files"
   on files for select
   using (
@@ -528,45 +553,55 @@ create policy "client users can read visible files"
   );
 
 -- ── communications ────────────────────────────────────────────────────────────
+drop policy if exists "team can manage communications" on communications;
 create policy "team can manage communications"
   on communications for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
 -- ── email_templates / sequences / sequence_steps ─────────────────────────────
+drop policy if exists "team can manage email_templates" on email_templates;
 create policy "team can manage email_templates"
   on email_templates for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "team can manage sequences" on sequences;
 create policy "team can manage sequences"
   on sequences for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
+drop policy if exists "team can manage sequence_steps" on sequence_steps;
 create policy "team can manage sequence_steps"
   on sequence_steps for all
   using (tenant_id = get_my_tenant_id() and is_team_member());
 
 -- ── affiliates ────────────────────────────────────────────────────────────────
+drop policy if exists "affiliate can read own record" on affiliates;
 create policy "affiliate can read own record"
   on affiliates for select
   using (user_id = auth.uid() and is_affiliate_user());
 
+drop policy if exists "affiliate can update own record" on affiliates;
 create policy "affiliate can update own record"
   on affiliates for update
   using (user_id = auth.uid() and is_affiliate_user());
 
 -- ── affiliate_clicks / conversions / commissions / payouts ───────────────────
+drop policy if exists "affiliate reads own clicks" on affiliate_clicks;
 create policy "affiliate reads own clicks"
   on affiliate_clicks for select
   using (affiliate_id in (select id from affiliates where user_id = auth.uid()));
 
+drop policy if exists "affiliate reads own conversions" on affiliate_conversions;
 create policy "affiliate reads own conversions"
   on affiliate_conversions for select
   using (affiliate_id in (select id from affiliates where user_id = auth.uid()));
 
+drop policy if exists "affiliate reads own commissions" on affiliate_commissions;
 create policy "affiliate reads own commissions"
   on affiliate_commissions for select
   using (affiliate_id in (select id from affiliates where user_id = auth.uid()));
 
+drop policy if exists "affiliate reads own payouts" on affiliate_payouts;
 create policy "affiliate reads own payouts"
   on affiliate_payouts for select
   using (affiliate_id in (select id from affiliates where user_id = auth.uid()));

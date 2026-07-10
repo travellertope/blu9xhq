@@ -22,7 +22,7 @@ Open **SQL Editor** (left sidebar) → New query → paste the full contents of 
 
 This creates all tables, RLS policies, helper functions, and indexes.
 
-> **Tip:** If you see "already exists" errors on a re-run, it's safe — all `CREATE` statements use `IF NOT EXISTS`.
+> **Tip:** The whole file is safe to re-run — tables use `IF NOT EXISTS`, and policies/triggers/the FK constraint drop-and-recreate themselves.
 
 ---
 
