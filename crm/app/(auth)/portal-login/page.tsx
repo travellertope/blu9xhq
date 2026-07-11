@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const LOGO =
   "https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png";
@@ -40,6 +41,22 @@ function PortalLoginForm() {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Supabase's default password-recovery / admin-generated links redirect to
+  // the bare Site URL with the session in a URL hash fragment. That fragment
+  // rides along through the server-side redirect from "/" to here, and the
+  // Supabase browser client auto-detects + consumes it on mount. If that just
+  // happened, hand off to the page that knows how to finish the flow instead
+  // of silently showing this login form.
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        router.replace("/reset-password");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [router]);
 
   async function onSubmit(data: LoginFormData) {
     setLoading(true);

@@ -113,7 +113,10 @@ async function main() {
   const { data: link, error: linkErr } = await supabase.auth.admin.generateLink({
     type:    "magiclink",
     email:   email as string,
-    options: { redirectTo: `${siteUrl}/admin` },
+    // Admin-API-generated links deliver the session via a URL hash fragment,
+    // which only client-side JS can read — /admin is a server-rendered route
+    // that can't see it. /reset-password detects it and forwards the user on.
+    options: { redirectTo: `${siteUrl}/reset-password` },
   });
   if (linkErr) {
     console.warn(`     ⚠ Could not generate magic link: ${linkErr.message}`);
