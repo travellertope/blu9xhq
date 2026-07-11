@@ -15,6 +15,7 @@ returns jsonb
 language plpgsql
 security definer
 stable
+set search_path = ''
 as $$
 declare
   claims         jsonb;
@@ -32,13 +33,13 @@ begin
   -- ── Team member? ─────────────────────────────────────────────────────────
   select tm.tenant_id, tm.crm_role
     into v_tenant_id, v_crm_role
-    from team_members tm
+    from public.team_members tm
    where tm.user_id = uid
      and tm.status  = 'active'
    limit 1;
 
   if found then
-    select t.plan into v_tenant_plan from tenants t where t.id = v_tenant_id;
+    select t.plan into v_tenant_plan from public.tenants t where t.id = v_tenant_id;
     v_user_type := 'team';
     claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
     claims := jsonb_set(claims, '{user_type}',   '"team"');
@@ -50,12 +51,12 @@ begin
   -- ── Client portal user? ──────────────────────────────────────────────────
   select cu.tenant_id
     into v_tenant_id
-    from client_users cu
+    from public.client_users cu
    where cu.user_id = uid
    limit 1;
 
   if found then
-    select t.plan into v_tenant_plan from tenants t where t.id = v_tenant_id;
+    select t.plan into v_tenant_plan from public.tenants t where t.id = v_tenant_id;
     v_user_type := 'client';
     claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
     claims := jsonb_set(claims, '{user_type}',   '"client"');
@@ -66,7 +67,7 @@ begin
   -- ── Affiliate? ───────────────────────────────────────────────────────────
   select a.affiliate_code, a.status
     into v_aff_code, v_aff_status
-    from affiliates a
+    from public.affiliates a
    where a.user_id = uid
    limit 1;
 
