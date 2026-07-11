@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -43,9 +44,35 @@ function VerifyContent() {
       return;
     }
 
-    // No code, no verified flag — malformed link.
-    setErrorMessage("This link is invalid or has already been used.");
-    setStatus("error");
+    // No ?code=. Admin-generated links (client invites, resent invites) are
+    // created via the Supabase Admin API, which delivers the session as a
+    // URL hash fragment instead of a ?code= param — only the browser can see
+    // that, so let the SDK auto-detect it and listen for the resulting event.
+    const supabase = createSupabaseBrowserClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY")) {
+        setStatus("success");
+        fetch("/api/portal/me")
+          .then((r) => r.json())
+          .then((me) => {
+            router.replace(me.setupComplete === false ? "/portal/setup" : "/portal");
+          })
+          .catch(() => router.replace("/portal"));
+      }
+    });
+
+    const timeout = setTimeout(() => {
+      setStatus((s) => {
+        if (s !== "verifying") return s;
+        setErrorMessage("This link is invalid or has already been used.");
+        return "error";
+      });
+    }, 4000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, [code, verified, error, router]);
 
   if (status === "verifying") {

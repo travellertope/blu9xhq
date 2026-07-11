@@ -46,8 +46,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       ? acf.contact_name.split(" ")[0]
       : post.title.rendered;
 
-    // ── Ensure Supabase auth user exists ─────────────────────────────────────
+    // ── Ensure Supabase auth user exists + generate their sign-in link ───────
+    // "invite" only works for emails with no existing user (it creates the
+    // user as part of generating the link) — calling createUser() first and
+    // then generateLink({type:"invite"}) always fails "already registered".
+    // For an existing user, "magiclink" is the correct type instead.
     let supaUserId: string;
+    let inviteLink: string;
 
     const { data: existing } = await supabase.auth.admin.listUsers();
     const existingUser = existing?.users?.find(
@@ -56,17 +61,29 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     if (existingUser) {
       supaUserId = existingUser.id;
-    } else {
-      // Create without confirming email — invite link will do that.
-      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-        email:          portalEmail,
-        email_confirm:  false,
-        user_metadata:  { full_name: acf.contact_name || post.title.rendered },
+      const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+        type:    "magiclink",
+        email:   portalEmail,
+        options: { redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify` },
       });
-      if (createErr || !created.user) {
-        throw new Error(createErr?.message ?? "Failed to create Supabase user");
+      if (linkErr || !linkData?.properties?.action_link) {
+        throw new Error(linkErr?.message ?? "Failed to generate sign-in link");
       }
-      supaUserId = created.user.id;
+      inviteLink = linkData.properties.action_link;
+    } else {
+      const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+        type:    "invite",
+        email:   portalEmail,
+        options: {
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify`,
+          data:       { full_name: acf.contact_name || post.title.rendered },
+        },
+      });
+      if (linkErr || !linkData?.properties?.action_link || !linkData.user) {
+        throw new Error(linkErr?.message ?? "Failed to generate invite link");
+      }
+      supaUserId = linkData.user.id;
+      inviteLink = linkData.properties.action_link;
     }
 
     // ── Ensure client_users row exists (links auth user → tenant + client) ───
@@ -97,21 +114,6 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         .eq("id", clientRow.id)
         .is("portal_user_id", null);
     }
-
-    // ── Send Supabase invite magic link ───────────────────────────────────────
-    const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
-      type:       "invite",
-      email:      portalEmail,
-      options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify`,
-      },
-    });
-
-    if (linkErr || !linkData?.properties?.action_link) {
-      throw new Error(linkErr?.message ?? "Failed to generate invite link");
-    }
-
-    const inviteLink = linkData.properties.action_link;
 
     // Send via Resend so it uses our branded template
     await sendPortalInvite(portalEmail, {

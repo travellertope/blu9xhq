@@ -105,19 +105,24 @@ async function main() {
   if (tmErr) throw new Error(`team_members upsert: ${tmErr.message}`);
   console.log("     ✓ team_members row ready");
 
-  // ── 4. Send magic-link invite so admin can log in ─────────────────────────
-  console.log("4/4  Sending invite link…");
+  // ── 4. Send magic link so admin can log in ────────────────────────────────
+  // "invite" only works for emails with no existing user — but step 2 above
+  // always creates (or finds) the user first, so this must be "magiclink".
+  console.log("4/4  Sending magic link…");
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const { data: link, error: linkErr } = await supabase.auth.admin.generateLink({
-    type:    "invite",
+    type:    "magiclink",
     email:   email as string,
-    options: { redirectTo: `${siteUrl}/admin` },
+    // Admin-API-generated links deliver the session via a URL hash fragment,
+    // which only client-side JS can read — /admin is a server-rendered route
+    // that can't see it. /reset-password detects it and forwards the user on.
+    options: { redirectTo: `${siteUrl}/reset-password` },
   });
   if (linkErr) {
-    console.warn(`     ⚠ Could not generate invite link: ${linkErr.message}`);
+    console.warn(`     ⚠ Could not generate magic link: ${linkErr.message}`);
     console.warn("     Set a password manually in the Supabase dashboard → Authentication → Users");
   } else {
-    console.log("\n     ✓ Invite link generated — share this with the admin:\n");
+    console.log("\n     ✓ Magic link generated — share this with the admin:\n");
     console.log("     " + link?.properties?.action_link);
     console.log();
   }
