@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 type Status = "verifying" | "ready" | "invalid";
 
@@ -13,8 +14,11 @@ function homeForUserType(userType: string | undefined): string {
        : "/admin-login";
 }
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isRecovery = searchParams.get("recovery") === "1";
+
   const [status, setStatus] = useState<Status>("verifying");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -23,28 +27,41 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
+    let resolved = false;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "PASSWORD_RECOVERY") {
-        // Recovery link — show the set-new-password form.
+    function handleSession(session: Session | null) {
+      if (!session || resolved) return;
+      resolved = true;
+      if (isRecovery) {
         setStatus("ready");
-      } else if (event === "SIGNED_IN" && session) {
-        // Plain magic link (e.g. admin invite) — no password step needed,
-        // just route them into the right section of the app.
+      } else {
         router.replace(homeForUserType(session.user.app_metadata?.user_type));
       }
+    }
+
+    // Direct admin-generated link (e.g. setup-first-admin.ts points straight
+    // here) — the hash fragment hasn't been consumed yet, so a fresh event
+    // fires as the SDK auto-detects and processes it.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleSession(session);
     });
+
+    // Forwarded from /portal-login, which already consumed the fragment —
+    // the session is already persisted, so just read it directly instead of
+    // waiting for an event that won't fire again for an already-established
+    // session (a fresh listener only replays a generic INITIAL_SESSION).
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
 
     // No valid link at all (expired, already used, or visited directly).
     const timeout = setTimeout(() => {
-      setStatus((s) => (s === "verifying" ? "invalid" : s));
+      if (!resolved) setStatus("invalid");
     }, 4000);
 
     return () => {
       subscription.unsubscribe();
       clearTimeout(timeout);
     };
-  }, [router]);
+  }, [isRecovery, router]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -141,5 +158,19 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-slate-50">
+          <p className="text-sm text-slate-500">Verifying your reset link…</p>
+        </div>
+      }
+    >
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

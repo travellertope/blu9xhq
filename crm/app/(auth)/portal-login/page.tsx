@@ -51,7 +51,13 @@ function PortalLoginForm() {
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+      // This client-side route change doesn't preserve which event fired —
+      // by the time /reset-password mounts a fresh listener, the token is
+      // already consumed and it only sees a generic INITIAL_SESSION. Pass
+      // the recovery flag along explicitly instead of relying on a re-fire.
+      if (event === "PASSWORD_RECOVERY") {
+        router.replace("/reset-password?recovery=1");
+      } else if (event === "SIGNED_IN") {
         router.replace("/reset-password");
       }
     });
