@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { updateEnrollment, wpRestFetch } from "@/lib/wp-api";
-import type { WPEnrollmentPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 const schema = z.object({
@@ -17,11 +16,7 @@ export async function PATCH(
 ) {
   const auth = await requirePermission(req, "build_sequences");
   if (auth instanceof NextResponse) return auth;
-
-  const enrollmentId = parseInt(params.id, 10);
-  if (isNaN(enrollmentId)) {
-    return NextResponse.json({ error: "Invalid enrollment ID" }, { status: 400 });
-  }
+  const tenantId = auth.session.user.tenantId!;
 
   const body = await req.json().catch(() => ({}));
   const parsed = schema.safeParse(body);
@@ -31,27 +26,38 @@ export async function PATCH(
   const { action } = parsed.data;
 
   try {
-    const enrollment = await wpRestFetch<WPEnrollmentPost>(
-      `/wp/v2/bluu_seq_enrollment/${enrollmentId}`
-    );
+    const supabase = createSupabaseServerClient();
+    const { data: enrollment, error: fetchErr } = await supabase
+      .from("sequence_enrollments")
+      .select("status")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!enrollment) return NextResponse.json({ error: "Enrollment not found" }, { status: 404 });
 
-    if (action === "pause" && enrollment.acf.enr_status !== "active") {
+    if (action === "pause" && enrollment.status !== "active") {
       return NextResponse.json({ error: "Enrollment is not active" }, { status: 409 });
     }
-    if (action === "resume" && enrollment.acf.enr_status !== "paused") {
+    if (action === "resume" && enrollment.status !== "paused") {
       return NextResponse.json({ error: "Enrollment is not paused" }, { status: 409 });
     }
 
-    const acfUpdate =
+    const update =
       action === "pause"
-        ? { enr_status: "paused", enr_paused_at: new Date().toISOString() }
-        : { enr_status: "active",  enr_paused_at: "" };
+        ? { status: "paused", paused_at: new Date().toISOString() }
+        : { status: "active",  paused_at: null };
 
-    await updateEnrollment(enrollmentId, { acf: acfUpdate });
+    const { error: updErr } = await supabase
+      .from("sequence_enrollments")
+      .update(update)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updErr) throw updErr;
 
     return NextResponse.json({ ok: true, status: action === "pause" ? "paused" : "active" });
   } catch (err) {
-    console.error(`[PATCH /api/admin/sequences/pause-resume/${enrollmentId}]`, err);
+    console.error(`[PATCH /api/admin/sequences/pause-resume/${params.id}]`, err);
     return NextResponse.json({ error: "Failed to update enrollment" }, { status: 500 });
   }
 }

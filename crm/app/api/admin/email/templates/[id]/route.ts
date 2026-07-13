@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { getEmailTemplate, updateEmailTemplate, deleteEmailTemplate } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { z } from "zod";
+
+function mapRow(row: any) {
+  return {
+    id:        row.id,
+    title:     row.title,
+    subject:   row.subject ?? "",
+    bodyHtml:  row.body_html ?? "",
+    bodyText:  row.body_text ?? "",
+    type:      row.tmpl_type ?? "general",
+  };
+}
 
 const patchSchema = z.object({
   title:     z.string().min(1).optional(),
@@ -12,23 +23,26 @@ const patchSchema = z.object({
   mergeTags: z.array(z.string()).optional(),
 });
 
-// ─── GET /api/admin/email/templates/[id] ──────────────────────────────────────
-
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const result = await requireSession(req);
   if (result instanceof NextResponse) return result;
-
-  const id = parseInt(params.id, 10);
-  if (isNaN(id)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = result.session.user.tenantId!;
 
   try {
-    const template = await getEmailTemplate(id);
-    return NextResponse.json({ template });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("email_templates")
+      .select("*")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+    return NextResponse.json({ template: mapRow(data) });
   } catch (err: unknown) {
     console.error("[GET /api/admin/email/templates/[id]]", err);
     return NextResponse.json(
@@ -38,19 +52,13 @@ export async function GET(
   }
 }
 
-// ─── PATCH /api/admin/email/templates/[id] ────────────────────────────────────
-
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const result = await requirePermission(req, "build_sequences");
   if (result instanceof NextResponse) return result;
-
-  const id = parseInt(params.id, 10);
-  if (isNaN(id)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = result.session.user.tenantId!;
 
   const rawBody = await req.json().catch(() => ({}));
   const parsed = patchSchema.safeParse(rawBody);
@@ -63,17 +71,25 @@ export async function PATCH(
   const d = parsed.data;
 
   try {
-    const template = await updateEmailTemplate(id, {
-      ...(d.title ? { title: d.title } : {}),
-      acf: {
-        ...(d.subject   ? { subject:    d.subject }          : {}),
-        ...(d.bodyHtml  ? { body_html:  d.bodyHtml }         : {}),
-        ...(d.bodyText  !== undefined ? { body_text: d.bodyText } : {}),
-        ...(d.type      ? { type:       d.type }              : {}),
-        ...(d.mergeTags ? { merge_tags: JSON.stringify(d.mergeTags) } : {}),
-      },
-    });
-    return NextResponse.json({ template });
+    const update: Record<string, unknown> = {};
+    if (d.title !== undefined)    update.title = d.title;
+    if (d.subject !== undefined)  update.subject = d.subject;
+    if (d.bodyHtml !== undefined) update.body_html = d.bodyHtml;
+    if (d.bodyText !== undefined) update.body_text = d.bodyText;
+    if (d.type !== undefined)     update.tmpl_type = d.type;
+    if (d.mergeTags !== undefined) update.merge_tags = d.mergeTags;
+
+    const supabase = createSupabaseServerClient();
+    const { data: updated, error } = await supabase
+      .from("email_templates")
+      .update(update)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json({ template: mapRow(updated) });
   } catch (err: unknown) {
     console.error("[PATCH /api/admin/email/templates/[id]]", err);
     return NextResponse.json(
@@ -83,22 +99,23 @@ export async function PATCH(
   }
 }
 
-// ─── DELETE /api/admin/email/templates/[id] ───────────────────────────────────
-
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const result = await requirePermission(req, "build_sequences");
   if (result instanceof NextResponse) return result;
-
-  const id = parseInt(params.id, 10);
-  if (isNaN(id)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = result.session.user.tenantId!;
 
   try {
-    await deleteEmailTemplate(id);
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+      .from("email_templates")
+      .delete()
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+
+    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("[DELETE /api/admin/email/templates/[id]]", err);

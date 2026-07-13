@@ -882,17 +882,24 @@ interface WPSequencePost {
   date: string;
   acf: {
     trigger: string;
+    trigger_delay_days?: number;
+    exit_conditions?: string; // JSON-encoded string[]
+    description?: string;
     is_active: unknown;
     steps?: Array<{
       step_number: number;
       delay_days: number;
+      subject?: string;
+      body_html?: string;
       email_template_id?: number;
     }>;
   };
 }
 
+// Real trigger vocabulary used by the sequence builder UI — the values below
+// are the only ones the app has ever sent.
 const SEQ_TRIGGER_VALS = new Set([
-  "client_onboarding","invoice_sent","invoice_overdue","subscription_expiring","manual",
+  "manual","subscription_assigned","invoice_overdue","client_inactive","cancellation_requested",
 ]);
 
 async function migrateSequences() {
@@ -903,12 +910,15 @@ async function migrateSequences() {
   for (const p of posts) {
     if (sequenceMap.has(p.id)) continue;
     const seqRow = {
-      tenant_id:  TENANT_ID,
-      title:      p.title.rendered,
-      trigger:    SEQ_TRIGGER_VALS.has(p.acf.trigger) ? p.acf.trigger : "manual",
-      is_active:  coerceBool(p.acf.is_active),
-      wp_post_id: p.id,
-      created_at: new Date(p.date).toISOString(),
+      tenant_id:          TENANT_ID,
+      title:              p.title.rendered,
+      trigger:            SEQ_TRIGGER_VALS.has(p.acf.trigger) ? p.acf.trigger : "manual",
+      description:        p.acf.description || null,
+      trigger_delay_days: p.acf.trigger_delay_days ?? 0,
+      exit_conditions:    parseJsonArray(p.acf.exit_conditions) as string[],
+      is_active:          coerceBool(p.acf.is_active),
+      wp_post_id:         p.id,
+      created_at:         new Date(p.date).toISOString(),
     };
 
     if (DRY_RUN) {
@@ -927,25 +937,91 @@ async function migrateSequences() {
     }
     sequenceMap.set(p.id, inserted.id);
 
-    // Insert steps
+    // Insert steps — content can be inline (subject/body_html) or a template
+    // reference; keep the step even when neither resolves, matching the WP
+    // model where a step is never dropped for lacking a template.
     const steps = parseJsonArray(p.acf.steps) as WPSequencePost["acf"]["steps"];
     if (steps && steps.length > 0) {
-      const stepRows = steps
-        .filter((s) => s.email_template_id && templateMap.has(s.email_template_id))
-        .map((s) => ({
-          sequence_id:       inserted.id,
-          tenant_id:         TENANT_ID,
-          step_number:       s.step_number,
-          delay_days:        s.delay_days ?? 0,
-          email_template_id: templateMap.get(s.email_template_id!)!,
-        }));
-      if (stepRows.length > 0) {
-        const { error: stepErr } = await supabase.from("sequence_steps").insert(stepRows);
-        if (stepErr) console.warn(`      ⚠ steps for seq ${inserted.id}: ${stepErr.message}`);
-      }
+      const stepRows = steps.map((s) => ({
+        sequence_id:       inserted.id,
+        tenant_id:         TENANT_ID,
+        step_number:       s.step_number,
+        delay_days:        s.delay_days ?? 0,
+        subject:           s.subject || null,
+        body_html:         s.body_html || null,
+        email_template_id: s.email_template_id ? templateMap.get(s.email_template_id) ?? null : null,
+      }));
+      const { error: stepErr } = await supabase.from("sequence_steps").insert(stepRows);
+      if (stepErr) console.warn(`      ⚠ steps for seq ${inserted.id}: ${stepErr.message}`);
     }
   }
   console.log(`      ✓ done`);
+}
+
+interface WPEnrollmentPost {
+  id: number;
+  date: string;
+  acf: {
+    enr_client_id: number;
+    enr_sequence_id: number;
+    enr_status: string;
+    enr_current_step: number;
+    enr_enrolled_at: string;
+    enr_next_send_at: string;
+    enr_exited_at?: string;
+    enr_exit_reason?: string;
+    enr_paused_at?: string;
+    enr_client_email: string;
+    enr_client_name?: string;
+  };
+}
+
+const ENR_STATUS_VALS = new Set(["active", "paused", "completed", "exited"]);
+
+async function migrateSequenceEnrollments() {
+  console.log("\n8c/10  Sequence enrollments…");
+  const posts = await wpFetchPaged<WPEnrollmentPost>("bluu_seq_enrollment");
+  console.log(`      Found ${posts.length} enrollment(s)`);
+
+  const alreadyPresent = new Set<number>();
+  if (!DRY_RUN) {
+    const { data } = await supabase
+      .from("sequence_enrollments")
+      .select("wp_post_id")
+      .eq("tenant_id", TENANT_ID)
+      .not("wp_post_id", "is", null);
+    for (const r of data ?? []) alreadyPresent.add(r.wp_post_id);
+  }
+
+  const toInsert: Record<string, unknown>[] = [];
+  for (const p of posts) {
+    if (alreadyPresent.has(p.id)) continue;
+    const clientId = clientMap.get(p.acf.enr_client_id);
+    const sequenceId = sequenceMap.get(p.acf.enr_sequence_id);
+    if (!clientId || !sequenceId) {
+      console.warn(`      ⚠ enrollment wp#${p.id}: missing client(${p.acf.enr_client_id}) or sequence(${p.acf.enr_sequence_id}) — skip`);
+      continue;
+    }
+    toInsert.push({
+      tenant_id:    TENANT_ID,
+      client_id:    clientId,
+      sequence_id:  sequenceId,
+      status:       ENR_STATUS_VALS.has(p.acf.enr_status) ? p.acf.enr_status : "active",
+      current_step: p.acf.enr_current_step ?? 0,
+      enrolled_at:  safeTimestamp(p.acf.enr_enrolled_at) ?? new Date(p.date).toISOString(),
+      next_send_at: safeTimestamp(p.acf.enr_next_send_at) ?? new Date(p.date).toISOString(),
+      paused_at:    safeTimestamp(p.acf.enr_paused_at),
+      exited_at:    safeTimestamp(p.acf.enr_exited_at),
+      exit_reason:  p.acf.enr_exit_reason || null,
+      client_email: p.acf.enr_client_email,
+      client_name:  p.acf.enr_client_name || null,
+      wp_post_id:   p.id,
+      created_at:   new Date(p.date).toISOString(),
+    });
+  }
+
+  await dbInsert("sequence_enrollments", toInsert);
+  console.log(`      ✓ ${toInsert.length} inserted, ${posts.length - toInsert.length} skipped`);
 }
 
 // ─── 9. Tickets + replies + status log + attachments ─────────────────────────
@@ -1212,6 +1288,7 @@ async function main() {
   if (!SKIP_FILES)     await migrateFiles();
   if (!SKIP_TEMPLATES) await migrateEmailTemplates();
   if (!SKIP_SEQUENCES) await migrateSequences();
+  if (!SKIP_SEQUENCES) await migrateSequenceEnrollments();
   if (!SKIP_TICKETS)   await migrateTickets();
   if (!SKIP_SETTINGS)  await migrateSettings();
 

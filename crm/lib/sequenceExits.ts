@@ -1,4 +1,5 @@
-import { listEnrollments, getSequence, updateEnrollment } from "@/lib/wp-api";
+import { getSession } from "@/lib/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 type ExitReason = "client_replied" | "invoice_paid" | "subscription_cancelled" | "manual";
 
@@ -10,52 +11,41 @@ type ExitReason = "client_replied" | "invoice_paid" | "subscription_cancelled" |
  * routes that shouldn't fail if sequence cleanup fails.
  */
 export async function exitEnrollmentsForClient(
-  clientId: number,
+  clientId: string,
   exitReason: ExitReason,
 ): Promise<void> {
-  let candidates;
+  const session = await getSession();
+  const tenantId = session?.user?.tenantId;
+  if (!tenantId) return;
+
   try {
-    const result = await listEnrollments({
-      per_page:   100,
-      meta_key:   "enr_client_id",
-      meta_value: clientId,
-    });
-    candidates = result.items;
+    const supabase = createSupabaseServerClient();
+    const { data: active, error } = await supabase
+      .from("sequence_enrollments")
+      .select("id, sequences(exit_conditions)")
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .eq("status", "active");
+
+    if (error) throw error;
+    if (!active?.length) return;
+
+    const now = new Date().toISOString();
+    const toExit = (active as any[]).filter((e) =>
+      (e.sequences?.exit_conditions ?? []).includes(exitReason)
+    );
+    if (!toExit.length) return;
+
+    const { error: updateErr } = await supabase
+      .from("sequence_enrollments")
+      .update({ status: "exited", exit_reason: exitReason, exited_at: now })
+      .in("id", toExit.map((e) => e.id));
+    if (updateErr) throw updateErr;
+
+    console.log(
+      `[sequenceExits] Exited ${toExit.length} enrollment(s) — reason: ${exitReason}, client: ${clientId}`,
+    );
   } catch (err) {
-    console.error(`[sequenceExits] Failed to list enrollments for client ${clientId}:`, err);
-    return;
-  }
-
-  const active = candidates.filter((e) => e.acf.enr_status === "active");
-  if (active.length === 0) return;
-
-  const now = new Date().toISOString();
-
-  for (const enrollment of active) {
-    try {
-      const sequence = await getSequence(enrollment.acf.enr_sequence_id);
-
-      let exitConditions: string[] = [];
-      try {
-        exitConditions = JSON.parse(sequence.acf.exit_conditions ?? "[]") as string[];
-      } catch {
-        exitConditions = [];
-      }
-
-      if (!exitConditions.includes(exitReason)) continue;
-
-      await updateEnrollment(enrollment.id, {
-        acf: {
-          enr_status:      "exited",
-          enr_exit_reason: exitReason,
-          enr_exited_at:   now,
-        },
-      });
-      console.log(
-        `[sequenceExits] Enrollment ${enrollment.id} exited — reason: ${exitReason}, client: ${clientId}`,
-      );
-    } catch (err) {
-      console.error(`[sequenceExits] Failed to exit enrollment ${enrollment.id}:`, err);
-    }
+    console.error(`[sequenceExits] Failed to exit enrollments for client ${clientId}:`, err);
   }
 }

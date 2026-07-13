@@ -29,6 +29,7 @@ export interface Database {
       email_templates: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       sequences: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       sequence_steps: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      sequence_enrollments: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       affiliates: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       affiliate_clicks: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       affiliate_conversions: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };

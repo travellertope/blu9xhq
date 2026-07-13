@@ -664,6 +664,70 @@ alter table tenants add column if not exists from_email_name text;
 alter table files add column if not exists subscription_id uuid references subscriptions(id);
 
 -- =============================================================================
+-- SEQUENCES — fields the admin sequence builder already sends but the table
+-- never had a column for (description, trigger_delay_days, exit_conditions),
+-- and the trigger vocabulary actually used by the app (the original
+-- constraint listed values the UI has never sent).
+-- =============================================================================
+alter table sequences add column if not exists description text;
+alter table sequences add column if not exists trigger_delay_days int not null default 0;
+alter table sequences add column if not exists exit_conditions text[] default '{}';
+alter table sequences drop constraint if exists sequences_trigger_check;
+alter table sequences add constraint sequences_trigger_check
+  check (trigger in ('manual','subscription_assigned','invoice_overdue',
+                      'client_inactive','cancellation_requested'));
+
+-- A sequence step can carry its content inline (subject/body_html, e.g. the
+-- one-off personalised sequences built from a client's profile) instead of
+-- referencing a saved template, so email_template_id is no longer required.
+alter table sequence_steps alter column email_template_id drop not null;
+alter table sequence_steps add column if not exists subject text;
+alter table sequence_steps add column if not exists body_html text;
+
+-- =============================================================================
+-- SEQUENCE ENROLLMENTS — per-client progress through a sequence. Was the
+-- bluu_seq_enrollment WP CPT; drives both the daily cron sender and the
+-- public one-click pause link.
+-- =============================================================================
+create table if not exists sequence_enrollments (
+  id            uuid primary key default gen_random_uuid(),
+  tenant_id     uuid not null references tenants(id) on delete cascade,
+  client_id     uuid not null references clients(id) on delete cascade,
+  sequence_id   uuid not null references sequences(id) on delete cascade,
+  status        text not null default 'active'
+                  check (status in ('active','paused','completed','exited')),
+  current_step  int not null default 0,
+  enrolled_at   timestamptz not null default now(),
+  next_send_at  timestamptz not null default now(),
+  paused_at     timestamptz,
+  exited_at     timestamptz,
+  exit_reason   text,
+  client_email  text not null,
+  client_name   text,
+  wp_post_id    int,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+alter table sequence_enrollments enable row level security;
+
+drop policy if exists "team can manage sequence_enrollments" on sequence_enrollments;
+create policy "team can manage sequence_enrollments"
+  on sequence_enrollments for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+create index if not exists idx_sequence_enrollments_tenant  on sequence_enrollments(tenant_id);
+create index if not exists idx_sequence_enrollments_client  on sequence_enrollments(client_id);
+create index if not exists idx_sequence_enrollments_sequence on sequence_enrollments(sequence_id);
+create index if not exists idx_sequence_enrollments_due
+  on sequence_enrollments(next_send_at) where status = 'active';
+
+drop trigger if exists trg_sequence_enrollments_updated_at on sequence_enrollments;
+create trigger trg_sequence_enrollments_updated_at
+  before update on sequence_enrollments
+  for each row execute function set_updated_at();
+
+-- =============================================================================
 -- COMMUNICATIONS — client_id becomes optional so audit-log events that aren't
 -- about one specific client (team/sequence-level actions) can still be
 -- written as channel='system' rows.

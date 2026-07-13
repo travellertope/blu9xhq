@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
-import { wpRestFetch, type WPCommunicationPost } from "@/lib/wp-api";
 import { z } from "zod";
 
 const bodySchema = z.object({
   to:           z.string().email(),
   subject:      z.string().min(1).max(500),
   htmlBody:     z.string().min(1),
-  clientId:     z.number().int().positive().optional(),
+  clientId:     z.string().uuid().optional(),
   scheduledFor: z.string().optional(),
 });
 
@@ -25,10 +25,11 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
-  const result = await requirePermission(req, "compose_send_emails", d.clientId);
+  const result = await requirePermission(req, "compose_send_emails");
   if (result instanceof NextResponse) return result;
   const { session } = result;
-  const actor = session.user as Record<string, unknown>;
+  const actor = session.user as any;
+  const tenantId = actor.tenantId!;
 
   try {
     const messageId = await sendEmailHtml({
@@ -37,45 +38,46 @@ export async function POST(req: NextRequest) {
       html:    d.htmlBody,
     });
 
-    // Log a bluu_communication record and return it so the UI can prepend it to the timeline
+    // Log a communications record and return it so the UI can prepend it to the timeline
     const now = new Date().toISOString();
     let entry: Record<string, unknown> | null = null;
     try {
-      const commPost = await wpRestFetch<WPCommunicationPost>("/wp/v2/bluu_communication", {
-        method: "POST",
-        body: JSON.stringify({
-          title:  d.subject.slice(0, 200),
-          status: "publish",
-          acf: {
-            comm_type:         "manual",
-            comm_channel:      "email",
-            comm_direction:    "outbound",
-            comm_subject:      d.subject,
-            comm_content:      d.htmlBody,
-            comm_occurred_at:  now,
-            ...(d.clientId ? { comm_client: d.clientId } : {}),
-            comm_logged_by:    actor.wpUserId as number,
-            comm_email_status: "sent",
-          },
-        }),
-      });
+      const supabase = createSupabaseServerClient();
+      const { data: commRow, error } = await supabase
+        .from("communications")
+        .insert({
+          tenant_id:    tenantId,
+          client_id:    d.clientId ?? null,
+          comm_type:    "manual",
+          channel:      "email",
+          direction:    "outbound",
+          subject:      d.subject,
+          body:         d.htmlBody,
+          occurred_at:  now,
+          logged_by:    actor.id,
+          email_status: "sent",
+        })
+        .select("*")
+        .single();
+      if (error) throw error;
+
       entry = {
-        id:             commPost.id,
-        date:           commPost.date,
-        clientId:       d.clientId ?? 0,
-        type:           "manual",
-        direction:      "outbound",
-        channel:        "email",
-        subject:        d.subject,
-        content:        d.htmlBody,
-        occurredAt:     commPost.acf?.comm_occurred_at || now,
-        loggedBy:       (actor.wpUserId as number) ?? 0,
-        mood:           undefined,
-        moodSource:     undefined,
-        redFlags:       [],
-        followUpNeeded: false,
+        id:                commRow.id,
+        date:              commRow.created_at,
+        clientId:          commRow.client_id ?? 0,
+        type:              "manual",
+        direction:         "outbound",
+        channel:           "email",
+        subject:           d.subject,
+        content:           d.htmlBody,
+        occurredAt:        commRow.occurred_at || now,
+        loggedBy:          actor.id ?? 0,
+        mood:              undefined,
+        moodSource:        undefined,
+        redFlags:          [],
+        followUpNeeded:    false,
         followUpCompleted: false,
-        emailStatus:    "sent",
+        emailStatus:       "sent",
       };
     } catch (logErr) {
       console.error("[email send] failed to log communication:", logErr);

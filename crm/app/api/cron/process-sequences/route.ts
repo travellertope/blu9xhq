@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { listEnrollments, getSequence, updateEnrollment } from "@/lib/wp-api";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendSequenceEmail } from "@/lib/resend";
 import { generatePauseToken } from "@/lib/sequencePauseToken";
 
@@ -8,8 +8,9 @@ export const maxDuration = 60;
 
 // ─── GET /api/cron/process-sequences ─────────────────────────────────────────
 // Runs daily (vercel.json: 0 7 * * *).
-// Finds active enrollments whose next_send_at is due, sends the current step,
-// and advances to the next step (or marks complete).
+// Finds active enrollments (across all tenants) whose next_send_at is due,
+// sends the current step, and advances to the next step (or marks complete).
+// Uses the service-role client since this has no per-tenant session context.
 
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
@@ -22,30 +23,29 @@ export async function GET(req: NextRequest) {
   const results = { checked: 0, sent: 0, completed: 0, errors: 0 };
 
   try {
-    const { items } = await listEnrollments({
-      per_page:   100,
-      meta_key:   "enr_status",
-      meta_value: "active",
-    });
+    const supabase = createSupabaseAdminClient();
+    const { data: due, error } = await supabase
+      .from("sequence_enrollments")
+      .select("*, sequences(sequence_steps(*))")
+      .eq("status", "active")
+      .lte("next_send_at", now.toISOString());
+    if (error) throw error;
 
-    // Guard against non-active slipping through if meta filter was previously missing
-    const due = items.filter(
-      (e) => e.acf.enr_status === "active" && new Date(e.acf.enr_next_send_at) <= now,
-    );
-    results.checked = due.length;
+    results.checked = due?.length ?? 0;
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
     await Promise.allSettled(
-      due.map(async (enrollment) => {
+      (due ?? []).map(async (enrollment: any) => {
         try {
-          const sequence = await getSequence(enrollment.acf.enr_sequence_id);
-          const steps = sequence.acf.steps ?? [];
-          const stepIndex = enrollment.acf.enr_current_step;
+          const steps = (enrollment.sequences?.sequence_steps ?? [])
+            .slice()
+            .sort((a: any, b: any) => a.step_number - b.step_number);
+          const stepIndex = enrollment.current_step;
           const step = steps[stepIndex];
 
           if (!step) {
-            await updateEnrollment(enrollment.id, { acf: { enr_status: "completed" } });
+            await supabase.from("sequence_enrollments").update({ status: "completed" }).eq("id", enrollment.id);
             results.completed++;
             return;
           }
@@ -54,11 +54,11 @@ export async function GET(req: NextRequest) {
             const token    = generatePauseToken(enrollment.id);
             const pauseUrl = `${appUrl}/api/sequences/pause?token=${token}`;
             await sendSequenceEmail({
-              to:      enrollment.acf.enr_client_email,
+              to:      enrollment.client_email,
               subject: step.subject,
               html:    step.body_html,
               pauseUrl,
-              tags:    [{ name: "sequence_id", value: String(enrollment.acf.enr_sequence_id) }],
+              tags:    [{ name: "sequence_id", value: enrollment.sequence_id }],
             });
             results.sent++;
           }
@@ -67,18 +67,20 @@ export async function GET(req: NextRequest) {
           const nextStep  = steps[nextIndex];
 
           if (!nextStep) {
-            await updateEnrollment(enrollment.id, {
-              acf: { enr_status: "completed", enr_current_step: nextIndex },
-            });
+            await supabase
+              .from("sequence_enrollments")
+              .update({ status: "completed", current_step: nextIndex })
+              .eq("id", enrollment.id);
             results.completed++;
           } else {
             const delayMs = (nextStep.delay_days ?? 1) * 86_400_000;
-            await updateEnrollment(enrollment.id, {
-              acf: {
-                enr_current_step: nextIndex,
-                enr_next_send_at: new Date(now.getTime() + delayMs).toISOString(),
-              },
-            });
+            await supabase
+              .from("sequence_enrollments")
+              .update({
+                current_step: nextIndex,
+                next_send_at: new Date(now.getTime() + delayMs).toISOString(),
+              })
+              .eq("id", enrollment.id);
           }
         } catch (err) {
           console.error(`[process-sequences] enrollment ${enrollment.id}:`, err);

@@ -1,56 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { listEnrollments, getSequence } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+
+const VISIBLE_STATUSES = ["active", "paused", "completed", "exited"];
 
 // ─── GET /api/admin/sequences/client-enrollments ─────────────────────────────
 
 export async function GET(req: NextRequest) {
   const result = await requireSession(req);
   if (result instanceof NextResponse) return result;
+  const tenantId = result.session.user.tenantId!;
 
   const sp = new URL(req.url).searchParams;
-  const clientIdStr = sp.get("clientId");
-  if (!clientIdStr) {
+  const clientId = sp.get("clientId");
+  if (!clientId) {
     return NextResponse.json({ error: "clientId query param is required" }, { status: 400 });
-  }
-  const clientId = parseInt(clientIdStr, 10);
-  if (isNaN(clientId)) {
-    return NextResponse.json({ error: "Invalid clientId" }, { status: 400 });
   }
 
   try {
-    const { items } = await listEnrollments({
-      per_page:   100,
-      meta_key:   "enr_client_id",
-      meta_value: clientId,
-    });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("sequence_enrollments")
+      .select("*, sequences(title, sequence_steps(step_number))")
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .in("status", VISIBLE_STATUSES);
 
-    const VISIBLE_STATUSES = ["active", "paused", "completed", "exited"];
-    const visible = items.filter((e) => VISIBLE_STATUSES.includes(e.acf.enr_status));
+    if (error) throw error;
 
-    const enrollments = await Promise.all(
-      visible.map(async (e) => {
-        let sequenceName = `Sequence #${e.acf.enr_sequence_id}`;
-        let totalSteps = 0;
-        try {
-          const seq = await getSequence(e.acf.enr_sequence_id);
-          sequenceName = seq.title.rendered;
-          totalSteps = seq.acf.steps?.length ?? 0;
-        } catch { /* sequence may have been deleted */ }
-        return {
-          enrollmentId: e.id,
-          sequenceId:   e.acf.enr_sequence_id,
-          sequenceName,
-          status:       e.acf.enr_status as "active" | "paused" | "completed" | "exited",
-          currentStep:  e.acf.enr_current_step,
-          totalSteps,
-          enrolledAt:   e.acf.enr_enrolled_at,
-          pausedAt:     e.acf.enr_paused_at ?? null,
-          exitedAt:     e.acf.enr_exited_at ?? null,
-          exitReason:   e.acf.enr_exit_reason ?? null,
-        };
-      })
-    );
+    const enrollments = (data ?? []).map((e: any) => ({
+      enrollmentId: e.id,
+      sequenceId:   e.sequence_id,
+      sequenceName: e.sequences?.title ?? `Sequence ${e.sequence_id}`,
+      status:       e.status as "active" | "paused" | "completed" | "exited",
+      currentStep:  e.current_step,
+      totalSteps:   e.sequences?.sequence_steps?.length ?? 0,
+      enrolledAt:   e.enrolled_at,
+      pausedAt:     e.paused_at ?? null,
+      exitedAt:     e.exited_at ?? null,
+      exitReason:   e.exit_reason ?? null,
+    }));
 
     return NextResponse.json({ enrollments });
   } catch (err: unknown) {

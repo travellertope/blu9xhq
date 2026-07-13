@@ -95,9 +95,8 @@ export async function POST(
       console.error("[mark-paid] Failed to send receipt email:", emailErr);
     }
 
-    // Exit sequences with invoice_paid condition (fire and forget) — no-op until
-    // sequences move off WP, same caveat as subscriptions/[id]/route.ts.
-    void exitEnrollmentsForClient(invoice.client_id as unknown as number, "invoice_paid").catch(console.error);
+    // Exit sequences with invoice_paid condition (fire and forget)
+    void exitEnrollmentsForClient(invoice.client_id, "invoice_paid").catch(console.error);
 
     await logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,

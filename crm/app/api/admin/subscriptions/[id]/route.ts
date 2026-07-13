@@ -69,11 +69,9 @@ export async function PATCH(
       .eq("tenant_id", tenantId);
     if (updateErr) throw updateErr;
 
-    // Exit sequences with subscription_cancelled condition when subscription is confirmed cancelled.
-    // No-op until sequences are migrated off WP (Task #9) — exitEnrollmentsForClient still queries
-    // WP by numeric client id, and existing.client_id is now a Supabase UUID.
+    // Exit sequences with subscription_cancelled condition when subscription is confirmed cancelled
     if (d.status === "cancelled") {
-      void exitEnrollmentsForClient(existing.client_id as unknown as number, "subscription_cancelled").catch(console.error);
+      void exitEnrollmentsForClient(existing.client_id, "subscription_cancelled").catch(console.error);
     }
 
     return NextResponse.json({ ok: true });
