@@ -9,6 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+// EMERGENCY DISABLE: see /api/auth/signup/route.ts — core data routes are not
+// yet tenant-scoped, so new signups would see every other tenant's data.
+const SIGNUPS_DISABLED = true;
+
 function toSlug(value: string): string {
   return value
     .toLowerCase()
@@ -74,6 +78,27 @@ export default function SignupPage() {
   }
 
   const crmDomain = "crm.bluuhq.com";
+
+  if (SIGNUPS_DISABLED) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-6">
+          <div className="flex justify-center">
+            <Image src="/logo.png" alt="BluuHQ" width={120} height={36} priority className="object-contain" />
+          </div>
+          <Card>
+            <CardContent className="p-6 space-y-3 text-center">
+              <h1 className="text-xl font-bold text-slate-900">Signups temporarily unavailable</h1>
+              <p className="text-sm text-slate-500">
+                We&apos;re not accepting new accounts right now. Please check back soon, or email{" "}
+                <a href="mailto:hello@bluuhq.com" className="text-blue-600 hover:underline">hello@bluuhq.com</a>.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
