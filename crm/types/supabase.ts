@@ -34,6 +34,10 @@ export interface Database {
       affiliate_conversions: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       affiliate_commissions: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
       affiliate_payouts: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      tickets: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      ticket_replies: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      ticket_status_log: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
+      ticket_attachments: { Row: Record<string, unknown>; Insert: Record<string, unknown>; Update: Record<string, unknown> };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

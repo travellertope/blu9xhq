@@ -643,3 +643,183 @@ from tenants
 where custom_domain is not null and status = 'active';
 
 grant select on public.tenant_domain_lookup to anon, authenticated;
+
+-- =============================================================================
+-- TENANT SETTINGS (bank details for invoices, business address, sender name)
+-- Was a single WP-wide options singleton; now per-tenant columns matching the
+-- existing logo_url/accent_colour pattern. bank_account_number and
+-- bank_sort_code are AES-256 encrypted at rest (see lib/encryption.ts) — same
+-- pattern as clients.contact_email/contact_phone.
+-- =============================================================================
+alter table tenants add column if not exists bank_name text;
+alter table tenants add column if not exists bank_account_name text;
+alter table tenants add column if not exists bank_account_number text;  -- encrypted
+alter table tenants add column if not exists bank_sort_code text;       -- encrypted
+alter table tenants add column if not exists address text;
+alter table tenants add column if not exists from_email_name text;
+
+-- =============================================================================
+-- FILES — optional subscription link (WP has an equivalent optional field)
+-- =============================================================================
+alter table files add column if not exists subscription_id uuid references subscriptions(id);
+
+-- =============================================================================
+-- TICKETS
+-- =============================================================================
+create table if not exists tickets (
+  id                   uuid primary key default gen_random_uuid(),
+  tenant_id            uuid not null references tenants(id) on delete cascade,
+  client_id            uuid not null references clients(id) on delete cascade,
+  submitted_by         uuid references auth.users(id),
+  assigned_to          uuid references auth.users(id),
+  tkt_number           text not null,
+  category             text not null default 'other'
+                          check (category in ('content_feedback','delivery_query','retainer_question','technical_issue','billing','other')),
+  priority             text not null default 'normal'
+                          check (priority in ('low','normal','high','urgent')),
+  status               text not null default 'open'
+                          check (status in ('open','in_progress','awaiting_client','awaiting_internal','resolved','closed')),
+  retainer_id          uuid references subscriptions(id),
+  sla_response_target  timestamptz,
+  sla_resolve_target   timestamptz,
+  sla_alerted_at       timestamptz,
+  first_response_at    timestamptz,
+  resolved_at          timestamptz,
+  closed_at            timestamptz,
+  wp_post_id           int,
+  created_at           timestamptz not null default now(),
+  updated_at           timestamptz not null default now(),
+  unique(tenant_id, tkt_number)
+);
+
+create table if not exists ticket_replies (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  author_id    uuid references auth.users(id),
+  body         text not null,
+  reply_type   text not null default 'reply' check (reply_type in ('reply','internal_note')),
+  wp_post_id   int,
+  created_at   timestamptz not null default now()
+);
+
+create table if not exists ticket_status_log (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  changed_by   uuid references auth.users(id),
+  from_status  text,
+  to_status    text not null,
+  note         text,
+  changed_at   timestamptz not null default now(),
+  wp_post_id   int
+);
+
+create table if not exists ticket_attachments (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  reply_id     uuid references ticket_replies(id) on delete set null,
+  uploaded_by  uuid references auth.users(id),
+  file_name    text not null,
+  r2_key       text not null,
+  mime_type    text not null,
+  size_kb      int not null default 0,
+  wp_post_id   int,
+  created_at   timestamptz not null default now()
+);
+
+alter table tickets            enable row level security;
+alter table ticket_replies     enable row level security;
+alter table ticket_status_log  enable row level security;
+alter table ticket_attachments enable row level security;
+
+-- ── tickets ──────────────────────────────────────────────────────────────────
+drop policy if exists "team can manage tickets" on tickets;
+create policy "team can manage tickets"
+  on tickets for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own tickets" on tickets;
+create policy "client users can read own tickets"
+  on tickets for select
+  using (
+    is_client_user()
+    and client_id in (select id from clients where portal_user_id = auth.uid())
+  );
+
+drop policy if exists "client users can create own tickets" on tickets;
+create policy "client users can create own tickets"
+  on tickets for insert
+  with check (
+    is_client_user()
+    and client_id in (select id from clients where portal_user_id = auth.uid())
+  );
+
+-- ── ticket_replies ───────────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket replies" on ticket_replies;
+create policy "team can manage ticket replies"
+  on ticket_replies for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own ticket replies" on ticket_replies;
+create policy "client users can read own ticket replies"
+  on ticket_replies for select
+  using (
+    is_client_user()
+    and reply_type = 'reply'
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "client users can reply to own tickets" on ticket_replies;
+create policy "client users can reply to own tickets"
+  on ticket_replies for insert
+  with check (
+    is_client_user()
+    and reply_type = 'reply'
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+-- ── ticket_status_log ────────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket status log" on ticket_status_log;
+create policy "team can manage ticket status log"
+  on ticket_status_log for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+-- ── ticket_attachments ───────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket attachments" on ticket_attachments;
+create policy "team can manage ticket attachments"
+  on ticket_attachments for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own ticket attachments" on ticket_attachments;
+create policy "client users can read own ticket attachments"
+  on ticket_attachments for select
+  using (
+    is_client_user()
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+drop trigger if exists trg_tickets_updated_at on tickets;
+create trigger trg_tickets_updated_at before update on tickets
+  for each row execute function set_updated_at();
+
+create index if not exists idx_tickets_tenant            on tickets(tenant_id);
+create index if not exists idx_tickets_client             on tickets(client_id);
+create index if not exists idx_tickets_status             on tickets(status);
+create index if not exists idx_ticket_replies_ticket      on ticket_replies(ticket_id);
+create index if not exists idx_ticket_replies_tenant      on ticket_replies(tenant_id);
+create index if not exists idx_ticket_status_log_ticket   on ticket_status_log(ticket_id);
+create index if not exists idx_ticket_attachments_ticket  on ticket_attachments(ticket_id);
