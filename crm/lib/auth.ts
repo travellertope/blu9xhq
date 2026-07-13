@@ -23,7 +23,7 @@ export interface BluuUser {
   wpUserId?: number;
   clientId?: string;
   bluuhqRole?: string;
-  assignedClients?: number[];
+  assignedClients?: string[];
   status?: string;
   affiliateCode?: string;
   affiliateStatus?: string;

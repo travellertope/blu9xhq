@@ -6,7 +6,7 @@ import { hasPermission, canAccessClient, getDashboardScope, ROLES, type Role } f
 export function usePermissions() {
   const { user } = useBluuSession();
   const role            = (user?.bluuhqRole ?? ROLES.VIEWER) as Role;
-  const assignedClients = (user?.assignedClients ?? []) as number[];
+  const assignedClients = (user?.assignedClients ?? []) as string[];
   const status          = (user?.status ?? "active") as string;
 
   return {
@@ -14,7 +14,7 @@ export function usePermissions() {
     status,
     assignedClients,
     can:             (permission: string) => hasPermission(role, permission),
-    canAccessClient: (clientId: number)   => canAccessClient(role, assignedClients, clientId),
+    canAccessClient: (clientId: string)   => canAccessClient(role, assignedClients, clientId),
     dashboardScope:  getDashboardScope(role),
     isSuper:         role === ROLES.SUPER_ADMIN,
     isAccountManager: role === ROLES.ACCOUNT_MANAGER,

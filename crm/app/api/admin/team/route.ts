@@ -1,23 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { wpRestFetch } from "@/lib/wp-api";
+import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { sendEmailHtml } from "@/lib/resend";
 import { z } from "zod";
-import crypto from "crypto";
 
 // ─── GET /api/admin/team ───────────────────────────────────────────────────────
-// Uses the custom WP endpoint that returns bluu_team + bluu_admin users with meta.
 
 export async function GET(req: NextRequest) {
   const result = await requirePermission(req, "manage_team");
   if (result instanceof NextResponse) return result;
+  const tenantId = result.session.user.tenantId!;
 
   try {
-    const members = await wpRestFetch<any[]>(
-      "/bluuhq/v1/team",
-      { cache: "no-store" } as any
-    );
+    const supabase = createSupabaseServerClient();
+    const admin = createSupabaseAdminClient();
+
+    const { data: rows, error } = await supabase
+      .from("team_members")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+
+    const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
+    const userMap = new Map(users.map((u) => [u.id, u]));
+
+    const members = (rows ?? []).map((m: any) => {
+      const u = userMap.get(m.user_id);
+      return {
+        id:                       m.id,
+        name:                     (u?.user_metadata as any)?.full_name ?? u?.email ?? "Unknown",
+        email:                    u?.email ?? "",
+        bluuhq_role:              m.crm_role,
+        bluuhq_status:            m.status,
+        bluuhq_assigned_clients:  m.assigned_clients ?? [],
+        bluuhq_last_active:       u?.last_sign_in_at ?? null,
+      };
+    });
+
     return NextResponse.json({ members });
   } catch (err: any) {
     console.error("[GET /api/admin/team]", err);
@@ -32,7 +53,7 @@ const inviteSchema = z.object({
   lastName:        z.string().min(1),
   email:           z.string().email(),
   role:            z.enum(["super_admin", "account_manager", "billing_manager", "support_staff", "viewer"]),
-  assignedClients: z.array(z.number()).optional().default([]),
+  assignedClients: z.array(z.string().uuid()).optional().default([]),
 });
 
 export async function POST(req: NextRequest) {
@@ -40,6 +61,7 @@ export async function POST(req: NextRequest) {
   if (result instanceof NextResponse) return result;
   const { session } = result;
   const actor = session.user as any;
+  const tenantId = actor.tenantId!;
 
   const parsed = inviteSchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
@@ -48,29 +70,67 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data;
   const fullName = `${d.firstName} ${d.lastName}`;
-  const tempPassword = crypto.randomBytes(16).toString("base64url");
 
   try {
-    // Create WP user with bluu_team role
-    const wpUser = await wpRestFetch<any>("/wp/v2/users", {
-      method: "POST",
-      body: JSON.stringify({
-        username:     d.email,
-        email:        d.email,
-        password:     tempPassword,
-        name:         fullName,
-        roles:        ["bluu_team"],
-        meta: {
-          bluuhq_role:             d.role,
-          bluuhq_status:           "active",
-          bluuhq_assigned_clients: JSON.stringify(d.assignedClients),
-          bluuhq_last_active:      new Date().toISOString(),
-        },
-      }),
-    });
+    const supabase = createSupabaseServerClient();
+    const admin = createSupabaseAdminClient();
 
-    // Send invite email via Resend
-    const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`;
+    // Find or invite the Supabase auth user (same pattern as the client-invite route)
+    const { data: existing } = await admin.auth.admin.listUsers();
+    const existingUser = existing?.users?.find((u) => u.email?.toLowerCase() === d.email.toLowerCase());
+
+    let userId: string;
+    let inviteLink: string;
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+
+    if (existingUser) {
+      // Already has a password — /reset-password just consumes the link's
+      // hash fragment and forwards them straight into /admin.
+      userId = existingUser.id;
+      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+        type:    "magiclink",
+        email:   d.email,
+        options: { redirectTo: `${siteUrl}/reset-password` },
+      });
+      if (linkErr || !linkData?.properties?.action_link) {
+        throw new Error(linkErr?.message ?? "Failed to generate sign-in link");
+      }
+      inviteLink = linkData.properties.action_link;
+    } else {
+      // Brand new account — force the "set a new password" UI, since
+      // admin-login is email+password (no magic-link sign-in there).
+      const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+        type:    "invite",
+        email:   d.email,
+        options: {
+          redirectTo: `${siteUrl}/reset-password?recovery=1`,
+          data:       { full_name: fullName },
+        },
+      });
+      if (linkErr || !linkData?.properties?.action_link || !linkData.user) {
+        throw new Error(linkErr?.message ?? "Failed to generate invite link");
+      }
+      userId = linkData.user.id;
+      inviteLink = linkData.properties.action_link;
+    }
+
+    const { data: member, error: tmErr } = await supabase
+      .from("team_members")
+      .upsert(
+        {
+          tenant_id:        tenantId,
+          user_id:          userId,
+          crm_role:         d.role,
+          status:           "active",
+          assigned_clients: d.assignedClients,
+        },
+        { onConflict: "tenant_id,user_id" }
+      )
+      .select("*")
+      .single();
+    if (tmErr) throw tmErr;
+
     await sendEmailHtml({
       to: d.email,
       subject: "You've been invited to the BluuHQ team workspace",
@@ -82,15 +142,10 @@ export async function POST(req: NextRequest) {
           <div style="padding:32px">
             <h2 style="color:#1e293b;margin:0 0 20px">Welcome to BluuHQ, ${d.firstName}!</h2>
             <p>You've been added to the BluuHQ CRM as <strong>${d.role.replace("_", " ")}</strong>.</p>
-            <p>Use the credentials below to sign in for the first time, then update your password in your profile.</p>
-            <table style="width:100%;border-collapse:collapse;margin:16px 0">
-              <tr><td style="padding:8px 0;color:#64748b">Email</td><td style="font-family:monospace">${d.email}</td></tr>
-              <tr><td style="padding:8px 0;color:#64748b">Temporary Password</td><td style="font-family:monospace">${tempPassword}</td></tr>
-            </table>
-            <a href="${loginUrl}" style="background:#1875F2;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block">
-              Sign in to BluuHQ
+            <p>Click the button below to set your password and sign in for the first time.</p>
+            <a href="${inviteLink}" style="background:#1875F2;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;display:inline-block;margin-top:8px">
+              Accept invite &amp; sign in
             </a>
-            <p style="color:#94a3b8;font-size:12px;margin-top:24px">Please change your password after signing in.</p>
           </div>
         </div>
       `,
@@ -98,13 +153,12 @@ export async function POST(req: NextRequest) {
     });
 
     await logAuditEvent({
-      action:       AUDIT_ACTIONS.TEAM_MEMBER_INVITED,
-      actorName:    actor.name ?? actor.email,
-      actorWpUserId: actor.wpUserId,
-      detail:       `Invited ${fullName} (${d.email}) as ${d.role}`,
+      action:    AUDIT_ACTIONS.TEAM_MEMBER_INVITED,
+      actorName: actor.name ?? actor.email,
+      detail:    `Invited ${fullName} (${d.email}) as ${d.role}`,
     });
 
-    return NextResponse.json({ member: wpUser }, { status: 201 });
+    return NextResponse.json({ member }, { status: 201 });
   } catch (err: any) {
     console.error("[POST /api/admin/team]", err);
     const msg = err instanceof Error ? err.message : "Failed to invite team member";

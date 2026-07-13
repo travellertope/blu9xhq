@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { wpRestFetch } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { z } from "zod";
 
 const patchSchema = z.object({
   role:            z.enum(["super_admin", "account_manager", "billing_manager", "support_staff", "viewer"]).optional(),
-  assignedClients: z.array(z.number()).optional(),
+  assignedClients: z.array(z.string().uuid()).optional(),
 });
 
 // PATCH /api/admin/team/[id]
@@ -15,30 +15,32 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (result instanceof NextResponse) return result;
   const { session } = result;
   const actor = session.user as any;
-
-  const userId = parseInt(params.id, 10);
-  if (isNaN(userId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  const tenantId = actor.tenantId!;
 
   const parsed = patchSchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
   }
 
-  const meta: Record<string, unknown> = {};
-  if (parsed.data.role            !== undefined) meta.bluuhq_role             = parsed.data.role;
-  // Store as JSON string to avoid WP PHP-serialization issues with array meta on repeated updates
-  if (parsed.data.assignedClients !== undefined) meta.bluuhq_assigned_clients = JSON.stringify(parsed.data.assignedClients);
+  const update: Record<string, unknown> = {};
+  if (parsed.data.role            !== undefined) update.crm_role         = parsed.data.role;
+  if (parsed.data.assignedClients !== undefined) update.assigned_clients = parsed.data.assignedClients;
 
   try {
-    const updated = await wpRestFetch<any>(`/wp/v2/users/${userId}`, {
-      method: "POST",
-      body: JSON.stringify({ meta }),
-    });
+    const supabase = createSupabaseServerClient();
+    const { data: updated, error } = await supabase
+      .from("team_members")
+      .update(update)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .select("*")
+      .single();
+
+    if (error) throw error;
 
     await logAuditEvent({
-      action:        AUDIT_ACTIONS.TEAM_MEMBER_ROLE_CHANGED,
-      actorName:     actor.name ?? actor.email,
-      actorWpUserId: actor.wpUserId,
+      action:    AUDIT_ACTIONS.TEAM_MEMBER_ROLE_CHANGED,
+      actorName: actor.name ?? actor.email,
       detail: parsed.data.role
         ? `Changed role to ${parsed.data.role}`
         : `Updated assigned clients`,
