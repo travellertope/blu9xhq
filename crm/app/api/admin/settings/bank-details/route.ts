@@ -1,29 +1,34 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { wpRestFetch } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { encrypt, decrypt } from "@/lib/encryption";
 
-interface WPSettings {
-  bluuhq_bank_name?: string;
-  bluuhq_bank_account_name?: string;
-  bluuhq_bank_account_number?: string;
-  bluuhq_bank_sort_code?: string;
-  bluuhq_address?: string;
-  bluuhq_from_email_name?: string;
+function tryDecrypt(value: string): string {
+  try { return decrypt(value); } catch { return value; }
 }
 
 export async function GET(req: NextRequest) {
   const auth = await requirePermission(req, "access_settings");
   if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const settings = await wpRestFetch<WPSettings>("/wp/v2/settings");
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("tenants")
+      .select("bank_name,bank_account_name,bank_account_number,bank_sort_code,address,from_email_name")
+      .eq("id", tenantId)
+      .single();
+
+    if (error) throw error;
+
     return NextResponse.json({
-      bankName: settings.bluuhq_bank_name ?? "",
-      accountName: settings.bluuhq_bank_account_name ?? "",
-      accountNumber: settings.bluuhq_bank_account_number ?? "",
-      sortCode: settings.bluuhq_bank_sort_code ?? "",
-      address: settings.bluuhq_address ?? "",
-      fromEmailName: settings.bluuhq_from_email_name ?? "",
+      bankName:      data.bank_name ?? "",
+      accountName:   data.bank_account_name ?? "",
+      accountNumber: data.bank_account_number ? tryDecrypt(data.bank_account_number) : "",
+      sortCode:      data.bank_sort_code ? tryDecrypt(data.bank_sort_code) : "",
+      address:       data.address ?? "",
+      fromEmailName: data.from_email_name ?? "",
     });
   } catch (err) {
     console.error("[GET /api/admin/settings/bank-details]", err);
@@ -34,6 +39,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const auth = await requirePermission(req, "access_settings");
   if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   let body: Record<string, string>;
   try {
@@ -43,17 +49,20 @@ export async function PATCH(req: NextRequest) {
   }
 
   const allowed: Record<string, string> = {
-    bankName: "bluuhq_bank_name",
-    accountName: "bluuhq_bank_account_name",
-    accountNumber: "bluuhq_bank_account_number",
-    sortCode: "bluuhq_bank_sort_code",
-    address: "bluuhq_address",
-    fromEmailName: "bluuhq_from_email_name",
+    bankName: "bank_name",
+    accountName: "bank_account_name",
+    accountNumber: "bank_account_number",
+    sortCode: "bank_sort_code",
+    address: "address",
+    fromEmailName: "from_email_name",
   };
 
   const update: Record<string, string> = {};
-  for (const [key, wpKey] of Object.entries(allowed)) {
-    if (key in body) update[wpKey] = String(body[key]);
+  for (const [key, column] of Object.entries(allowed)) {
+    if (key in body) {
+      const value = String(body[key]);
+      update[column] = (key === "accountNumber" || key === "sortCode") && value ? encrypt(value) : value;
+    }
   }
 
   if (!Object.keys(update).length) {
@@ -61,10 +70,13 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
-    await wpRestFetch("/wp/v2/settings", {
-      method: "POST",
-      body: JSON.stringify(update),
-    });
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+      .from("tenants")
+      .update(update)
+      .eq("id", tenantId);
+
+    if (error) throw error;
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[PATCH /api/admin/settings/bank-details]", err);
