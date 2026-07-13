@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // Rate limit: 1 invite per email per hour (in-memory, resets on server restart)
 const inviteLog = new Map<string, number>();
@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseAdminClient();
+    // Cookie-aware server client — NOT the admin client, whose cookie
+    // handlers are no-ops and would silently drop the PKCE code_verifier
+    // this flow needs to persist for the link to work when clicked.
+    const supabase = createSupabaseServerClient();
 
     // Send OTP magic link — Supabase handles email delivery via its SMTP settings.
     // shouldCreateUser: false means it silently no-ops if email is not registered,

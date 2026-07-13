@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient, createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function POST(req: NextRequest) {
   let email = "";
@@ -13,14 +13,17 @@ export async function POST(req: NextRequest) {
   if (!email.includes("@")) return NextResponse.json({ ok: true });
 
   try {
-    const supabase = createSupabaseAdminClient();
-
-    // Check user exists (don't reveal whether the email is registered)
-    const { data } = await supabase.auth.admin.listUsers();
+    // Admin client only for the existence check — it needs the service role
+    // for admin.listUsers(), but its cookie handlers are no-ops, which would
+    // silently drop the PKCE code_verifier signInWithOtp() needs to persist.
+    const adminSupabase = createSupabaseAdminClient();
+    const { data } = await adminSupabase.auth.admin.listUsers();
     const exists = data?.users?.some((u) => u.email?.toLowerCase() === email);
 
     if (exists) {
-      // Send a magic-link OTP — lands at /portal/verify?code=…
+      // Send via the cookie-aware server client so the PKCE verifier actually
+      // gets persisted — lands at /portal/verify?code=… when clicked.
+      const supabase = createSupabaseServerClient();
       await supabase.auth.signInWithOtp({
         email,
         options: {

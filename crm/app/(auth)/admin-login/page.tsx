@@ -10,7 +10,7 @@ const LOGO =
   "https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png";
 
 const schema = z.object({
-  username: z.string().min(1, "Username is required"),
+  email:    z.string().email("Enter a valid email"),
   password: z.string().min(1, "Password is required"),
 });
 type FormData = z.infer<typeof schema>;
@@ -38,7 +38,7 @@ function AdminLoginForm() {
     const res = await fetch("/api/auth/signin", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: data.username, password: data.password }),
+      body: JSON.stringify({ email: data.email, password: data.password }),
     });
 
     setLoading(false);
@@ -46,7 +46,7 @@ function AdminLoginForm() {
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
       const msg = (body as { error?: string }).error ?? "Sign-in failed";
-      setError(`${msg} — check your credentials and that the BluuHQ plugin is active.`);
+      setError(msg);
       setDebugInfo(`HTTP ${res.status}`);
       return;
     }
@@ -113,7 +113,7 @@ function AdminLoginForm() {
             {/* Header */}
             <div className="space-y-1">
               <h1 className="text-2xl font-bold text-slate-800">Admin sign in</h1>
-              <p className="text-sm text-slate-500">Sign in with your WordPress admin account</p>
+              <p className="text-sm text-slate-500">Sign in with your BluuHQ admin account</p>
             </div>
 
             {error && (
@@ -127,15 +127,16 @@ function AdminLoginForm() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Username</label>
+                <label className="text-sm font-medium text-slate-700">Email</label>
                 <input
-                  {...register("username")}
-                  placeholder="wp-username"
+                  {...register("email")}
+                  type="email"
+                  placeholder="you@bluuhq.com"
                   className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1875F2] focus:border-transparent transition"
-                  autoComplete="username"
+                  autoComplete="email"
                 />
-                {errors.username && (
-                  <p className="text-xs text-destructive">{errors.username.message}</p>
+                {errors.email && (
+                  <p className="text-xs text-destructive">{errors.email.message}</p>
                 )}
               </div>
               <div className="space-y-1.5">
