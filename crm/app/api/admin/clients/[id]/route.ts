@@ -61,6 +61,9 @@ function toWpSubscriptionShape(row: any) {
       payment_gateway:            row.payment_gateway ?? undefined,
       gateway_subscription_id:    row.gateway_subscription_id ?? undefined,
       notes:                      row.notes ?? undefined,
+      sub_cancellation_requested_at: row.sub_cancellation_requested_at ?? undefined,
+      sub_cancellation_reason:       row.sub_cancellation_reason ?? undefined,
+      sub_cancellation_note:         row.sub_cancellation_note ?? undefined,
     },
   };
 }

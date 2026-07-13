@@ -511,12 +511,16 @@ interface WPSubscriptionPost {
     payment_gateway?: string;
     gateway_subscription_id?: string;
     notes?: string;
+    sub_cancellation_requested_at?: string;
+    sub_cancellation_reason?: string;
+    sub_cancellation_note?: string;
   };
 }
 
 const SUB_STATUS_MAP: Record<string, string> = {
   active: "active", paused: "paused", cancelled: "cancelled",
   past_due: "past_due", trialing: "trialing",
+  pending: "pending", cancellation_pending: "cancellation_pending",
 };
 
 const GW_MAP: Record<string, string> = {
@@ -551,6 +555,9 @@ async function migrateSubscriptions() {
       payment_gateway:         GW_MAP[p.acf.payment_gateway ?? ""] ?? "manual",
       gateway_subscription_id: p.acf.gateway_subscription_id || null,
       notes:                   p.acf.notes || null,
+      sub_cancellation_requested_at: safeTimestamp(p.acf.sub_cancellation_requested_at),
+      sub_cancellation_reason:       p.acf.sub_cancellation_reason || null,
+      sub_cancellation_note:         p.acf.sub_cancellation_note || null,
       wp_post_id:              p.id,
       created_at:              new Date(p.date).toISOString(),
     });

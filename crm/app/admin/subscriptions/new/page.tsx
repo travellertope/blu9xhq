@@ -110,8 +110,8 @@ export default function NewSubscriptionPage() {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientId:       parseInt(clientId, 10),
-          serviceId:      parseInt(serviceId, 10),
+          clientId,
+          serviceId,
           status,
           amount:         parseFloat(amount),
           currency,

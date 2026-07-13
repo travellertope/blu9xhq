@@ -664,6 +664,18 @@ alter table tenants add column if not exists from_email_name text;
 alter table files add column if not exists subscription_id uuid references subscriptions(id);
 
 -- =============================================================================
+-- SUBSCRIPTIONS — status vocabulary + cancellation-request fields (WP ACF
+-- fields with no Supabase equivalent yet; written by the client portal's
+-- cancel flow, which stays on WordPress until that route is migrated)
+-- =============================================================================
+alter table subscriptions drop constraint if exists subscriptions_status_check;
+alter table subscriptions add constraint subscriptions_status_check
+  check (status in ('active','paused','cancelled','past_due','trialing','pending','cancellation_pending'));
+alter table subscriptions add column if not exists sub_cancellation_requested_at timestamptz;
+alter table subscriptions add column if not exists sub_cancellation_reason text;
+alter table subscriptions add column if not exists sub_cancellation_note text;
+
+-- =============================================================================
 -- CLIENTS — portal/health/follow-up fields (were WP ACF fields with no column
 -- equivalent yet; portal_email is denormalized from auth.users for cheap list
 -- rendering, kept in sync whenever portal_user_id is set)

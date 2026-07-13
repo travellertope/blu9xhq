@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession, requirePermission } from "@/lib/apiPermissions";
-import { listAllSubscriptions, createSubscription, getClientPost, getServicePost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendNewService } from "@/lib/resend";
 import { z } from "zod";
 
+// Admin UI billing-cycle values ("annual") vs the Supabase check constraint
+// ("annually") — same remap-in-the-route-layer pattern used for file categories.
+const BILLING_CYCLE_IN: Record<string, string> = {
+  monthly: "monthly", quarterly: "quarterly", annual: "annually", one_time: "one_time",
+};
+const BILLING_CYCLE_OUT: Record<string, string> = {
+  monthly: "monthly", quarterly: "quarterly", annually: "annual", one_time: "one_time",
+};
+
 const postSchema = z.object({
-  clientId:       z.number().int().positive(),
-  serviceId:      z.number().int().positive(),
+  clientId:       z.string().uuid(),
+  serviceId:      z.string().uuid(),
   status:         z.enum(["active", "paused", "cancelled", "pending"]).default("active"),
   amount:         z.number().min(0),
   currency:       z.string().min(1),
@@ -19,54 +28,50 @@ const postSchema = z.object({
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
+  const tenantId = session.user.tenantId!;
 
   const { searchParams } = new URL(req.url);
   const page       = parseInt(searchParams.get("page") ?? "1", 10);
+  const perPage    = 50;
   const statusFilter = searchParams.get("status") ?? null;
 
   try {
-    const result = await listAllSubscriptions({ per_page: 50, page });
+    const supabase = createSupabaseServerClient();
+    let query = supabase
+      .from("subscriptions")
+      .select("*, clients(company_name,contact_name), services(title)", { count: "exact" })
+      .eq("tenant_id", tenantId);
 
-    const items = result.items.filter((s) => {
-      if (statusFilter) return s.acf.status === statusFilter;
-      return true;
-    });
+    if (statusFilter) query = query.eq("status", statusFilter);
 
-    const enriched = await Promise.all(
-      items.map(async (s) => {
-        let clientName = `Client #${s.acf.client_id}`;
-        let serviceName = `Service #${s.acf.service_id}`;
+    const from = (page - 1) * perPage;
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, from + perPage - 1);
 
-        await Promise.all([
-          getClientPost(s.acf.client_id)
-            .then((c) => { clientName = c.acf.company_name || c.acf.contact_name; })
-            .catch(() => undefined),
-          getServicePost(s.acf.service_id)
-            .then((sv) => { serviceName = sv.title.rendered.replace(/<[^>]+>/g, ""); })
-            .catch(() => undefined),
-        ]);
+    if (error) throw error;
 
-        return {
-          id:              s.id,
-          clientId:        s.acf.client_id,
-          clientName,
-          serviceId:       s.acf.service_id,
-          serviceName,
-          status:          s.acf.status,
-          amount:          s.acf.amount,
-          currency:        s.acf.currency,
-          billingCycle:    s.acf.billing_cycle,
-          nextBillingDate: s.acf.next_billing_date ?? null,
-          startDate:       s.acf.start_date ?? null,
-          createdAt:       s.date,
-        };
-      })
-    );
+    const enriched = (data ?? []).map((s: any) => ({
+      id:              s.id,
+      clientId:        s.client_id,
+      clientName:      s.clients?.company_name || s.clients?.contact_name || `Client #${s.client_id}`,
+      serviceId:       s.service_id,
+      serviceName:     s.services?.title || `Service #${s.service_id}`,
+      status:          s.status,
+      amount:          s.amount,
+      currency:        s.currency,
+      billingCycle:    BILLING_CYCLE_OUT[s.billing_cycle] ?? s.billing_cycle,
+      nextBillingDate: s.next_billing_date ?? null,
+      startDate:       s.start_date ?? null,
+      createdAt:       s.created_at,
+    }));
 
+    const total = count ?? 0;
     return NextResponse.json({
       subscriptions: enriched,
-      total: result.total,
-      totalPages: result.totalPages,
+      total,
+      totalPages: Math.max(Math.ceil(total / perPage), 1),
       page,
     });
   } catch (err) {
@@ -80,6 +85,8 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const auth = await requirePermission(req, "assign_subscriptions");
   if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
+  const tenantId = session.user.tenantId!;
 
   const body = await req.json().catch(() => ({}));
   const parsed = postSchema.safeParse(body);
@@ -92,42 +99,47 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   try {
-    const [client, service] = await Promise.all([
-      getClientPost(d.clientId).catch(() => null),
-      getServicePost(d.serviceId).catch(() => null),
+    const supabase = createSupabaseServerClient();
+
+    const [{ data: client }, { data: service }] = await Promise.all([
+      supabase.from("clients").select("company_name,contact_name,contact_email,portal_email").eq("id", d.clientId).eq("tenant_id", tenantId).maybeSingle(),
+      supabase.from("services").select("title").eq("id", d.serviceId).eq("tenant_id", tenantId).maybeSingle(),
     ]);
 
-    const clientLabel  = client?.acf?.company_name || client?.acf?.contact_name || `Client #${d.clientId}`;
-    const serviceLabel = service?.title?.rendered?.replace(/<[^>]+>/g, "") || `Service #${d.serviceId}`;
+    const clientLabel  = client?.company_name || client?.contact_name || `Client #${d.clientId}`;
+    const serviceLabel = service?.title || `Service #${d.serviceId}`;
 
-    const post = await createSubscription({
-      title: `${clientLabel} — ${serviceLabel}`,
-      acf: {
+    const { data: inserted, error } = await supabase
+      .from("subscriptions")
+      .insert({
+        tenant_id:         tenantId,
         client_id:         d.clientId,
         service_id:        d.serviceId,
         status:            d.status,
         amount:            d.amount,
         currency:          d.currency,
-        billing_cycle:     d.billingCycle,
-        start_date:        d.startDate,
-        next_billing_date: d.nextBillingDate,
-        notes:             d.notes,
-      },
-    });
+        billing_cycle:     BILLING_CYCLE_IN[d.billingCycle] ?? d.billingCycle,
+        start_date:        d.startDate || undefined,
+        next_billing_date: d.nextBillingDate || undefined,
+        notes:             d.notes || null,
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
 
     // Notify client of new service (fire and forget)
-    const clientEmail = client?.acf?.portal_email ?? client?.acf?.contact_email;
-    const clientName  = client?.acf?.contact_name || client?.title?.rendered || `Client #${d.clientId}`;
-    const portalUrl   = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/subscriptions`;
+    const clientEmail = client?.portal_email ?? client?.contact_email;
+    const portalUrl    = `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/subscriptions`;
     if (clientEmail && d.status === "active") {
       void sendNewService(clientEmail, {
-        clientName,
+        clientName: clientLabel,
         serviceName: serviceLabel,
         portalUrl,
       }).catch((err) => console.error("[subscriptions] sendNewService failed:", err));
     }
 
-    return NextResponse.json({ subscription: post }, { status: 201 });
+    return NextResponse.json({ subscription: inserted }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/subscriptions]", err);
     return NextResponse.json({ error: "Failed to create subscription" }, { status: 500 });
