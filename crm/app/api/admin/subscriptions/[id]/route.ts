@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { getSubscription, updateSubscription } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { exitEnrollmentsForClient } from "@/lib/sequenceExits";
 import { z } from "zod";
+
+const BILLING_CYCLE_IN: Record<string, string> = {
+  monthly: "monthly", quarterly: "quarterly", annual: "annually", one_time: "one_time",
+};
 
 const patchSchema = z.object({
   status:             z.enum(["active", "paused", "cancelled", "pending", "cancellation_pending"]).optional(),
@@ -19,11 +23,6 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const id = parseInt(params.id, 10);
-  if (isNaN(id)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
-
   // Cancelling requires approve_cancellations; other edits require assign_subscriptions
   const rawBody = await req.json().catch(() => ({}));
   const parsed = patchSchema.safeParse(rawBody);
@@ -40,25 +39,39 @@ export async function PATCH(
 
   const auth = await requirePermission(req, requiredPermission);
   if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const existing = await getSubscription(id);
-    const clientId = existing.acf.client_id;
+    const supabase = createSupabaseServerClient();
 
-    await updateSubscription(id, {
-      acf: {
-        ...(d.status           !== undefined ? { status:             d.status }           : {}),
-        ...(d.amount           !== undefined ? { amount:             d.amount }           : {}),
-        ...(d.currency         !== undefined ? { currency:           d.currency }         : {}),
-        ...(d.billingCycle     !== undefined ? { billing_cycle:      d.billingCycle }     : {}),
-        ...(d.nextBillingDate  !== undefined ? { next_billing_date:  d.nextBillingDate }  : {}),
-        ...(d.notes            !== undefined ? { notes:              d.notes }            : {}),
-      },
-    });
+    const { data: existing, error: fetchErr } = await supabase
+      .from("subscriptions")
+      .select("client_id")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!existing) return NextResponse.json({ error: "Subscription not found" }, { status: 404 });
+
+    const update: Record<string, unknown> = {
+      ...(d.status          !== undefined ? { status:             d.status } : {}),
+      ...(d.amount          !== undefined ? { amount:             d.amount } : {}),
+      ...(d.currency        !== undefined ? { currency:           d.currency } : {}),
+      ...(d.billingCycle    !== undefined ? { billing_cycle:      BILLING_CYCLE_IN[d.billingCycle] ?? d.billingCycle } : {}),
+      ...(d.nextBillingDate !== undefined ? { next_billing_date:  d.nextBillingDate } : {}),
+      ...(d.notes           !== undefined ? { notes:              d.notes } : {}),
+    };
+
+    const { error: updateErr } = await supabase
+      .from("subscriptions")
+      .update(update)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     // Exit sequences with subscription_cancelled condition when subscription is confirmed cancelled
     if (d.status === "cancelled") {
-      void exitEnrollmentsForClient(clientId, "subscription_cancelled").catch(console.error);
+      void exitEnrollmentsForClient(existing.client_id, "subscription_cancelled").catch(console.error);
     }
 
     return NextResponse.json({ ok: true });

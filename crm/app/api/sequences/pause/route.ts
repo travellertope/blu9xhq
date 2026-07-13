@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPauseToken } from "@/lib/sequencePauseToken";
-import { updateEnrollment, wpRestFetch } from "@/lib/wp-api";
-import type { WPEnrollmentPost } from "@/lib/wp-api";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 function htmlPage(heading: string, body: string, isError = false): NextResponse {
   const color = isError ? "#DC2626" : "#1875F2";
@@ -55,30 +54,36 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const enrollment = await wpRestFetch<WPEnrollmentPost>(
-      `/wp/v2/bluu_seq_enrollment/${enrollmentId}`
-    );
+    const supabase = createSupabaseAdminClient();
+    const { data: enrollment, error } = await supabase
+      .from("sequence_enrollments")
+      .select("status")
+      .eq("id", enrollmentId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!enrollment) {
+      return htmlPage("Invalid link", "This pause link is invalid or has been tampered with.", true);
+    }
 
-    if (enrollment.acf.enr_status === "paused") {
+    if (enrollment.status === "paused") {
       return htmlPage(
         "Already paused",
         "These emails are already paused. Reach out to us if you'd like to resume them."
       );
     }
 
-    if (enrollment.acf.enr_status !== "active") {
+    if (enrollment.status !== "active") {
       return htmlPage(
         "Sequence ended",
         "This email sequence has already completed. There are no more emails to pause."
       );
     }
 
-    await updateEnrollment(enrollmentId, {
-      acf: {
-        enr_status:    "paused",
-        enr_paused_at: new Date().toISOString(),
-      },
-    });
+    const { error: updateErr } = await supabase
+      .from("sequence_enrollments")
+      .update({ status: "paused", paused_at: new Date().toISOString() })
+      .eq("id", enrollmentId);
+    if (updateErr) throw updateErr;
 
     return htmlPage(
       "Emails paused",

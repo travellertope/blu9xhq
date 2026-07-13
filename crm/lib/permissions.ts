@@ -59,8 +59,8 @@ export function hasPermission(role: Role | string, permission: string): boolean 
  */
 export function canAccessClient(
   role: Role | string,
-  assignedClients: number[],
-  clientId: number
+  assignedClients: string[],
+  clientId: string
 ): boolean {
   if (role !== ROLES.ACCOUNT_MANAGER) return true;
   return assignedClients.includes(clientId);

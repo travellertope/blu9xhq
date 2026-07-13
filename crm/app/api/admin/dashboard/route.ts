@@ -1,15 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import {
-  listInvoices,
-  listClientPosts,
-  listClientSubscriptions,
-  listFollowUpCommunications,
-  listServices,
-  wpRestList,
-  type WPCommunicationPost,
-  type WPSubscriptionPost,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getDashboardScope } from "@/lib/permissions";
 
 function isWithinDays(dateStr: string, days: number): boolean {
@@ -44,85 +35,84 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
+  const tenantId = user.tenantId!;
   const role = user.bluuhqRole ?? "viewer";
   const scope = getDashboardScope(role);
 
   const hideMetrics = role === "support_staff" || role === "viewer";
 
+  const supabase = createSupabaseServerClient();
+
   const [
-    outstandingInvoices,
-    overdueInvoicesResult,
-    clientsResult,
-    subscriptionsResult,
-    upcomingRenewalsResult,
-    followUpsResult,
-    recentActivityResult,
-    servicesResult,
-    sequencesResult,
-    cancellationQueueResult,
+    outstandingInvoicesQ,
+    overdueInvoicesQ,
+    upcomingRenewalsQ,
+    clientsQ,
+    atRiskClientsQ,
+    subscriptionsQ,
+    cancellationQueueQ,
+    followUpsQ,
+    recentActivityQ,
+    servicesCountQ,
+    sequencesCountQ,
+    tenantSettingsQ,
   ] = await Promise.all([
-    // Outstanding (sent)
+    // Outstanding (sent) invoices
     hideMetrics
-      ? Promise.resolve({ items: [], total: 0, totalPages: 1 })
-      : listInvoices({ status: "sent", per_page: 100 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      ? Promise.resolve({ data: [], count: 0 })
+      : supabase.from("invoices").select("total", { count: "exact" }).eq("tenant_id", tenantId).eq("status", "sent"),
 
-    // Overdue
-    listInvoices({ status: "overdue", per_page: 20 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Overdue invoices
+    supabase.from("invoices").select("*", { count: "exact" }).eq("tenant_id", tenantId).eq("status", "overdue").limit(20),
 
-    // Active clients
+    // Upcoming renewals — sent invoices due in the next 7 days
+    supabase.from("invoices").select("*").eq("tenant_id", tenantId).eq("status", "sent"),
+
+    // Active clients (count, and full rows for account_manager scoping)
     hideMetrics
-      ? Promise.resolve({ items: [], total: 0, totalPages: 1 })
-      : listClientPosts({ per_page: 100 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      ? Promise.resolve({ data: [], count: 0 })
+      : supabase.from("clients").select("id", { count: "exact" }).eq("tenant_id", tenantId),
+
+    // At-risk clients
+    supabase.from("clients").select("*").eq("tenant_id", tenantId).eq("health_status", "at_risk").limit(10),
 
     // Subscriptions for MRR
     hideMetrics
-      ? Promise.resolve({ items: [], total: 0, totalPages: 1 })
-      : listClientSubscriptions(0).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+      ? Promise.resolve({ data: [] })
+      : supabase.from("subscriptions").select("status,amount,billing_cycle").eq("tenant_id", tenantId),
 
-    // Upcoming renewals (all sent, filter in code)
-    listInvoices({ status: "sent", per_page: 100 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Cancellation queue
+    supabase.from("subscriptions").select("*, clients(company_name,contact_name), services(title)").eq("tenant_id", tenantId).not("sub_cancellation_requested_at", "is", null).limit(10),
 
-    // Follow-ups
-    listFollowUpCommunications().catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Follow-ups due
+    supabase.from("communications").select("*").eq("tenant_id", tenantId).eq("follow_up_needed", true).eq("follow_up_completed", false),
 
     // Recent activity (system communications)
-    wpRestList<WPCommunicationPost>("/wp/v2/bluu_communication", {
-      per_page: 20,
-      meta_key: "comm_channel",
-      meta_value: "system",
-      orderby: "date",
-      order: "desc",
-    }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    supabase.from("communications").select("*").eq("tenant_id", tenantId).eq("channel", "system").order("occurred_at", { ascending: false }).limit(20),
 
-    // Services count (for setup checklist)
-    listServices({ per_page: 1 }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Services count (setup checklist)
+    supabase.from("services").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId),
 
-    // Sequences count (for setup checklist)
-    wpRestList("/wp/v2/bluu_sequence", { per_page: 1, status: "publish" }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Sequences count (setup checklist)
+    supabase.from("sequences").select("id", { count: "exact", head: true }).eq("tenant_id", tenantId).eq("is_active", true),
 
-    // Cancellation queue — subscriptions where client has requested cancellation
-    // Filter client-side by sub_cancellation_requested_at being non-empty
-    wpRestList<WPSubscriptionPost>("/wp/v2/bluu_subscription", {
-      per_page: 50,
-      status: "publish",
-    }).catch(() => ({ items: [], total: 0, totalPages: 1 })),
+    // Bank details (setup checklist)
+    supabase.from("tenants").select("bank_account_number").eq("id", tenantId).maybeSingle(),
   ]);
 
   // Compute metrics
-  const outstandingTotal = (outstandingInvoices.items as any[]).reduce(
-    (sum: number, inv: any) => sum + (inv.acf?.inv_total ?? 0),
-    0
+  const outstandingTotal = ((outstandingInvoicesQ.data ?? []) as any[]).reduce(
+    (sum: number, inv: any) => sum + (inv.total ?? 0), 0
   );
-  const overdueTotal = (overdueInvoicesResult.items as any[]).reduce(
-    (sum: number, inv: any) => sum + (inv.acf?.inv_total ?? 0),
-    0
+  const overdueTotal = ((overdueInvoicesQ.data ?? []) as any[]).reduce(
+    (sum: number, inv: any) => sum + (inv.total ?? 0), 0
   );
 
-  const mrrTotal = (subscriptionsResult.items as any[])
-    .filter((s: any) => s.acf?.status === "active")
+  const mrrTotal = ((subscriptionsQ.data ?? []) as any[])
+    .filter((s: any) => s.status === "active")
     .reduce((sum: number, s: any) => {
-      const amount = s.acf?.amount ?? 0;
-      const cycle = s.acf?.billing_cycle ?? "monthly";
+      const amount = s.amount ?? 0;
+      const cycle = s.billing_cycle ?? "monthly";
       if (cycle === "monthly") return sum + amount;
       if (cycle === "quarterly") return sum + amount / 3;
       if (cycle === "annually" || cycle === "annual") return sum + amount / 12;
@@ -130,102 +120,97 @@ export async function GET(req: NextRequest) {
       return sum + amount;
     }, 0);
 
-  const activeClientsCount = scope === "scoped" && role === "account_manager"
-    ? (clientsResult.items as any[]).filter((c: any) =>
-        (user.assignedClients ?? []).includes(c.id)
-      ).length
-    : clientsResult.total;
+  let activeClientsCount = clientsQ.count ?? 0;
+  if (scope === "scoped" && role === "account_manager") {
+    const assigned: string[] = user.assignedClients ?? [];
+    activeClientsCount = ((clientsQ.data ?? []) as any[]).filter((c: any) => assigned.includes(c.id)).length;
+  }
 
   // Upcoming renewals: invoices due in next 7 days
-  const upcomingRenewals = (upcomingRenewalsResult.items as any[])
-    .filter((inv: any) => isWithinDays(inv.acf?.inv_due_date ?? "", 7))
+  const upcomingRenewals = ((upcomingRenewalsQ.data ?? []) as any[])
+    .filter((inv: any) => isWithinDays(inv.due_date ?? "", 7))
     .slice(0, 10)
     .map((inv: any) => ({
       id: inv.id,
-      number: inv.acf?.inv_number,
-      clientId: inv.acf?.inv_client,
-      total: inv.acf?.inv_total,
-      currency: inv.acf?.inv_currency,
-      dueDate: inv.acf?.inv_due_date,
-      status: inv.acf?.inv_status,
+      number: inv.invoice_number,
+      clientId: inv.client_id,
+      total: inv.total,
+      currency: inv.currency,
+      dueDate: inv.due_date,
+      status: inv.status,
     }));
 
   // At-risk clients
-  const atRiskClients = (clientsResult.items as any[])
-    .filter((c: any) => c.acf?.health_status === "at_risk")
+  const atRiskClients = ((atRiskClientsQ.data ?? []) as any[])
     .slice(0, 10)
     .map((c: any) => ({
       id: c.id,
-      name: c.acf?.contact_name || c.title?.rendered,
-      company: c.acf?.company_name,
-      healthStatus: c.acf?.health_status,
-      healthNote: c.acf?.health_note,
+      name: c.contact_name,
+      company: c.company_name,
+      healthStatus: c.health_status,
+      healthNote: c.health_note,
     }));
 
   // Follow-ups due today
-  const followUpsToday = (followUpsResult.items as any[])
-    .filter((c: any) => {
-      const notCompleted = !c.acf?.comm_follow_up_completed || c.acf?.comm_follow_up_completed === "0";
-      return isToday(c.acf?.comm_follow_up_due ?? "") && notCompleted;
-    })
+  const followUpsToday = ((followUpsQ.data ?? []) as any[])
+    .filter((c: any) => isToday(c.follow_up_due ?? ""))
     .map((c: any) => ({
       id: c.id,
-      clientId: c.acf?.comm_client,
-      subject: c.acf?.comm_subject,
-      followUpDue: c.acf?.comm_follow_up_due,
+      clientId: c.client_id,
+      subject: c.subject,
+      followUpDue: c.follow_up_due,
     }));
 
   // Recent activity
-  const recentActivity = (recentActivityResult.items as any[]).map((c: any) => ({
+  const recentActivity = ((recentActivityQ.data ?? []) as any[]).map((c: any) => ({
     id: c.id,
-    date: c.date,
-    clientId: c.acf?.comm_client,
-    subject: c.acf?.comm_subject,
-    content: c.acf?.comm_content,
+    date: c.occurred_at || c.created_at,
+    clientId: c.client_id,
+    subject: c.subject,
+    content: c.body,
   }));
 
   // Overdue invoices for display
-  const overdueInvoices = (overdueInvoicesResult.items as any[]).map((inv: any) => ({
+  const overdueInvoices = ((overdueInvoicesQ.data ?? []) as any[]).map((inv: any) => ({
     id: inv.id,
-    number: inv.acf?.inv_number,
-    clientId: inv.acf?.inv_client,
-    total: inv.acf?.inv_total,
-    currency: inv.acf?.inv_currency,
-    dueDate: inv.acf?.inv_due_date,
-    status: inv.acf?.inv_status,
-    lastReminderSent: inv.acf?.inv_last_reminder_sent,
+    number: inv.invoice_number,
+    clientId: inv.client_id,
+    total: inv.total,
+    currency: inv.currency,
+    dueDate: inv.due_date,
+    status: inv.status,
+    lastReminderSent: null,
   }));
 
-  // Cancellation queue — subscriptions where sub_cancellation_requested_at is set
-  const cancellationQueue = (cancellationQueueResult.items as any[])
-    .filter((s: any) => !!s.acf?.sub_cancellation_requested_at)
+  // Cancellation queue
+  const cancellationQueue = ((cancellationQueueQ.data ?? []) as any[])
     .slice(0, 10)
     .map((s: any) => ({
       id: s.id,
-      title: s.title?.rendered,
-      clientId: s.acf?.client_id,
-      status: s.acf?.status,
-      cancelledAt: s.acf?.sub_cancellation_requested_at,
+      title: `${s.clients?.company_name || s.clients?.contact_name || "Client"} — ${s.services?.title || "Service"}`,
+      clientId: s.client_id,
+      status: s.status,
+      cancelledAt: s.sub_cancellation_requested_at,
     }));
 
   // Setup checklist
   const setupChecklist = {
-    hasClient:      clientsResult.total > 0,
-    hasService:     servicesResult.total > 0,
-    hasBankDetails: !!(process.env.BANK_DETAILS),
-    hasStripe:      !!(process.env.STRIPE_SECRET_KEY),
-    hasPaystack:    !!(process.env.PAYSTACK_SECRET_KEY),
-    hasSequence:    sequencesResult.total > 0,
-    hasPortalInvite: !!(process.env.NEXT_PUBLIC_APP_URL),
+    hasClient:      activeClientsCount > 0,
+    hasService:     (servicesCountQ.count ?? 0) > 0,
+    hasBankDetails: !!tenantSettingsQ.data?.bank_account_number,
+    hasStripe:      !!process.env.STRIPE_SECRET_KEY,
+    hasPaystack:    !!process.env.PAYSTACK_SECRET_KEY,
+    hasSequence:    (sequencesCountQ.count ?? 0) > 0,
+    hasPortalInvite: !!process.env.NEXT_PUBLIC_APP_URL,
   };
 
   return NextResponse.json({
     metrics: hideMetrics
       ? null
       : {
-          outstandingCount: outstandingInvoices.total,
+          outstandingCount: outstandingInvoicesQ.count ?? 0,
           outstandingTotal,
-          overdueCount: overdueInvoicesResult.total,
+          overdueCount: overdueInvoicesQ.count ?? 0,
           overdueTotal,
           activeClients: activeClientsCount,
           mrr: Math.round(mrrTotal),

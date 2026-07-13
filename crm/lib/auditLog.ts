@@ -1,42 +1,45 @@
-import { wpRestFetch } from "@/lib/wp-api";
+import { getSession } from "@/lib/auth";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export interface AuditEventParams {
   action: string;
   actorName: string;
-  actorWpUserId: number;
+  /** @deprecated unused now that logged_by is a Supabase auth uuid taken from the session */
+  actorWpUserId?: number;
   detail?: string;
-  clientId?: number;
+  /** Supabase clients.id (uuid). Omit for tenant-wide events not tied to one client. */
+  clientId?: string;
   resourceType?: string;
 }
 
 /**
- * Persists an audit event as a bluu_communication post with comm_channel=system.
+ * Persists an audit event as a communications row with channel='system'.
  *
  * This is fire-and-forget on the happy path — log the error but never throw,
  * so a logging failure never blocks the primary operation.
  */
 export async function logAuditEvent(params: AuditEventParams): Promise<void> {
-  const { action, actorName, actorWpUserId, detail, clientId } = params;
+  const { action, actorName, detail, clientId } = params;
   const subject = `${action} by ${actorName}`;
   const now = new Date().toISOString();
 
   try {
-    await wpRestFetch("/wp/v2/bluu_communication", {
-      method: "POST",
-      body: JSON.stringify({
-        title: subject,
-        status: "publish",
-        acf: {
-          comm_direction: "internal",
-          comm_channel:   "system",
-          comm_subject:   subject,
-          comm_content:   detail ?? "",
-          comm_logged_by: actorWpUserId,
-          comm_occurred_at: now,
-          ...(clientId ? { comm_client: clientId } : {}),
-        },
-      }),
+    const session = await getSession();
+    if (!session?.user?.tenantId) return;
+
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.from("communications").insert({
+      tenant_id:   session.user.tenantId,
+      client_id:   clientId ?? null,
+      direction:   "internal",
+      channel:     "system",
+      comm_type:   "system",
+      subject,
+      body:        detail ?? "",
+      occurred_at: now,
+      logged_by:   session.user.id ?? null,
     });
+    if (error) throw error;
   } catch (err) {
     console.error("[auditLog] Failed to write audit event:", action, err);
   }

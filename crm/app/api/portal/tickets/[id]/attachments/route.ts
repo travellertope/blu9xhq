@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  resolveClientPost, getTicket,
-  listTicketAttachments,
-  createTicketAttachment,
-} from "@/lib/wp-api";
-import { uploadToR2 } from "@/lib/r2";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { uploadToR2, generateTicketAttachmentKey } from "@/lib/r2";
 import {
   TICKET_ALLOWED_MIME_TYPES,
   TICKET_MAX_ATTACHMENT_SIZE,
@@ -20,21 +16,16 @@ export async function POST(
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; clientId?: number | string };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-  if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  const userId = session.user.id;
+  if (!clientId) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let formData: FormData;
   try { formData = await req.formData(); } catch { return NextResponse.json({ error: "Invalid form data" }, { status: 400 }); }
 
   const file = formData.get("file") as File | null;
-  const replyIdStr = formData.get("replyId") as string | null;
-  const replyId = replyIdStr ? parseInt(replyIdStr, 10) : undefined;
+  const replyId = (formData.get("replyId") as string | null) || undefined;
 
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
 
@@ -46,40 +37,44 @@ export async function POST(
   }
 
   try {
-    const [clientPost, ticket] = await Promise.all([
-      resolveClientPost(sessionClientId, wpUserId),
-      getTicket(ticketId),
-    ]);
-    if (!clientPost) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const ticketAcf = ticket.acf as typeof ticket.acf | false;
-    if (ticketAcf && ticketAcf.tkt_client && ticketAcf.tkt_client !== clientPost.id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error: fetchErr } = await supabase
+      .from("tickets")
+      .select("id")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!ticket) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    // Enforce max 10 attachments per ticket
-    const existing = await listTicketAttachments(ticketId).catch(() => []);
-    if (existing.length >= TICKET_MAX_ATTACHMENTS) {
+    const { count } = await supabase
+      .from("ticket_attachments")
+      .select("id", { count: "exact", head: true })
+      .eq("ticket_id", params.id);
+    if ((count ?? 0) >= TICKET_MAX_ATTACHMENTS) {
       return NextResponse.json({ error: "Maximum 10 attachments per ticket" }, { status: 400 });
     }
 
-    const ext = file.name.split(".").pop() ?? "";
-    const safeFilename = `${crypto.randomUUID()}.${ext}`;
-    const key = `tickets/${ticketId}/attachments/${safeFilename}`;
-
+    const key = generateTicketAttachmentKey(tenantId, params.id, file.name);
     const buffer = Buffer.from(await file.arrayBuffer());
     await uploadToR2(key, buffer, file.type);
 
-    const attachment = await createTicketAttachment({
-      acf: {
-        att_ticket_id:    ticketId,
-        ...(replyId ? { att_reply_id: replyId } : {}),
-        att_uploaded_by:  wpUserId,
-        att_file_name:    file.name,
-        att_file_url:     key,
-        att_file_type:    file.type,
-        att_file_size_kb: Math.ceil(file.size / 1024),
-      },
-    });
+    const { data: attachment, error: insErr } = await supabase
+      .from("ticket_attachments")
+      .insert({
+        ticket_id:   params.id,
+        tenant_id:   tenantId,
+        reply_id:    replyId || null,
+        uploaded_by: userId,
+        file_name:   file.name,
+        r2_key:      key,
+        mime_type:   file.type,
+        size_kb:     Math.ceil(file.size / 1024),
+      })
+      .select("*")
+      .single();
+    if (insErr) throw insErr;
 
     return NextResponse.json({ id: attachment.id, fileName: file.name }, { status: 201 });
   } catch (err) {

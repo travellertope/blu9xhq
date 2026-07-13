@@ -26,8 +26,8 @@ import {
 } from "@/lib/ticket-utils";
 
 interface Reply {
-  id: number;
-  authorId: number;
+  id: string;
+  authorId: string;
   authorName?: string;
   replyType: "reply" | "internal_note";
   body: string;
@@ -35,30 +35,31 @@ interface Reply {
 }
 
 interface Attachment {
-  id: number;
+  id: string;
   fileName: string;
   fileUrl: string;
   fileType: string;
   fileSizeKb: number;
-  uploadedBy: number;
-  replyId?: number;
+  uploadedBy: string;
+  replyId?: string;
   createdAt: string;
 }
 
 interface TeamMember {
-  id: number;
+  id: string;
+  userId: string;
   name: string;
 }
 
 interface TicketDetail {
-  id: number;
+  id: string;
   ticketNumber: string;
   subject: string;
   category: string;
   priority: string;
   status: string;
-  assignedTo?: number;
-  submittedBy: number;
+  assignedTo?: string;
+  submittedBy: string;
   firstResponseAt: string | null;
   resolvedAt: string | null;
   slaResponseTarget: string | null;
@@ -167,7 +168,7 @@ export default function AdminTicketDetailPage() {
         body: JSON.stringify({
           status: editStatus || undefined,
           priority: editPriority || undefined,
-          assignedTo: editAssignedTo ? Number(editAssignedTo) : undefined,
+          assignedTo: editAssignedTo || undefined,
         }),
       });
       if (!res.ok) {
@@ -259,10 +260,10 @@ export default function AdminTicketDetailPage() {
     );
   }
 
-  const resolveAuthorName = (authorId: number): string => {
+  const resolveAuthorName = (authorId: string): string => {
     if (ticket && authorId === ticket.submittedBy) return ticket.clientName || "Client";
-    const member = teamMembers.find((m) => m.id === authorId);
-    return member?.name ?? `User #${authorId}`;
+    const member = teamMembers.find((m) => m.userId === authorId);
+    return member?.name ?? `User ${authorId}`;
   };
 
   const hasChanges =
@@ -330,8 +331,8 @@ export default function AdminTicketDetailPage() {
           {/* Unified conversation timeline */}
           {(() => {
             type TimelineItem =
-              | { kind: "reply"; id: number; authorId: number; replyType: "reply" | "internal_note"; body: string; createdAt: string; attachments: Attachment[] }
-              | { kind: "attachment"; id: number; uploadedBy: number; fileName: string; fileUrl: string; fileSizeKb: number; createdAt: string };
+              | { kind: "reply"; id: string; authorId: string; replyType: "reply" | "internal_note"; body: string; createdAt: string; attachments: Attachment[] }
+              | { kind: "attachment"; id: string; uploadedBy: string; fileName: string; fileUrl: string; fileSizeKb: number; createdAt: string };
 
             const timeline: TimelineItem[] = [
               ...ticket.replies.map((r): TimelineItem => ({
@@ -594,7 +595,7 @@ export default function AdminTicketDetailPage() {
                   <SelectContent>
                     <SelectItem value="__unassigned__">Unassigned</SelectItem>
                     {teamMembers.map((m) => (
-                      <SelectItem key={m.id} value={String(m.id)}>
+                      <SelectItem key={m.id} value={m.userId}>
                         {m.name}
                       </SelectItem>
                     ))}

@@ -1,51 +1,67 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSession, requirePermission } from "@/lib/apiPermissions";
-import { listInvoices, createInvoice, type WPInvoicePost } from "@/lib/wp-api";
+import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
-function mapInvoice(post: WPInvoicePost) {
+function mapInvoiceRow(row: any) {
   return {
-    id: post.id,
-    number: post.acf.inv_number,
-    clientId: post.acf.inv_client,
-    subscriptionId: post.acf.inv_subscription,
-    total: post.acf.inv_total,
-    currency: post.acf.inv_currency,
-    status: post.acf.inv_status,
-    dueDate: post.acf.inv_due_date,
-    issuedDate: post.acf.inv_issued_date,
-    paidAt: post.acf.inv_paid_at,
-    paymentMethod: post.acf.inv_payment_method,
-    notes: post.acf.inv_notes,
-    pdfUrl: post.acf.inv_pdf_url,
-    lineItems: (() => {
-      try {
-        return JSON.parse(post.acf.inv_line_items ?? "[]");
-      } catch {
-        return [];
-      }
-    })(),
+    id:             row.id,
+    number:         row.invoice_number,
+    clientId:       row.client_id,
+    subscriptionId: row.subscription_id ?? undefined,
+    total:          row.total,
+    currency:       row.currency,
+    status:         row.status,
+    dueDate:        row.due_date,
+    issuedDate:     row.issued_date,
+    paidAt:         row.paid_date ?? undefined,
+    paymentMethod:  row.payment_method ?? undefined,
+    notes:          row.notes ?? undefined,
+    pdfUrl:         row.pdf_url ?? undefined,
+    lineItems:      row.line_items ?? [],
   };
 }
 
 export async function GET(req: NextRequest) {
-  const auth = await requireSession(req);
+  const auth = await requirePermission(req, "view_invoices");
   if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
+  const tenantId = session.user.tenantId!;
 
   const { searchParams } = new URL(req.url);
-  const clientId = searchParams.get("clientId") ? parseInt(searchParams.get("clientId")!, 10) : undefined;
-  const status = searchParams.get("status") ?? undefined;
+  const clientId = searchParams.get("clientId") ?? undefined;
+  const status   = searchParams.get("status") ?? undefined;
   const dateFrom = searchParams.get("dateFrom") ?? undefined;
-  const dateTo = searchParams.get("dateTo") ?? undefined;
+  const dateTo   = searchParams.get("dateTo") ?? undefined;
   const currency = searchParams.get("currency") ?? undefined;
-  const page = parseInt(searchParams.get("page") ?? "1", 10);
+  const page     = parseInt(searchParams.get("page") ?? "1", 10);
+  const perPage  = 20;
 
   try {
-    const result = await listInvoices({ page, per_page: 20, clientId, status, dateFrom, dateTo, currency });
+    const supabase = createSupabaseServerClient();
+    let query = supabase
+      .from("invoices")
+      .select("*", { count: "exact" })
+      .eq("tenant_id", tenantId);
+
+    if (clientId) query = query.eq("client_id", clientId);
+    if (status)   query = query.eq("status", status);
+    if (currency) query = query.eq("currency", currency);
+    if (dateFrom) query = query.gte("due_date", dateFrom);
+    if (dateTo)   query = query.lte("due_date", dateTo);
+
+    const from = (page - 1) * perPage;
+    const { data, error, count } = await query
+      .order("created_at", { ascending: false })
+      .range(from, from + perPage - 1);
+
+    if (error) throw error;
+
+    const total = count ?? 0;
     return NextResponse.json({
-      invoices: result.items.map(mapInvoice),
-      total: result.total,
-      totalPages: result.totalPages,
+      invoices: (data ?? []).map(mapInvoiceRow),
+      total,
+      totalPages: Math.max(Math.ceil(total / perPage), 1),
     });
   } catch (err) {
     console.error("[GET /api/admin/invoices]", err);
@@ -58,10 +74,11 @@ export async function POST(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
+  const tenantId = user.tenantId!;
 
   let body: {
-    clientId: number;
-    subscriptionId?: number;
+    clientId: string;
+    subscriptionId?: string;
     lineItems: { description: string; amount: number }[];
     currency: string;
     dueDate: string;
@@ -79,29 +96,43 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const supabase = createSupabaseServerClient();
+
     // Auto-generate invoice number
-    const countResult = await listInvoices({ per_page: 1 });
-    const total = countResult.total;
-    const invNumber = `BLU-${new Date().getFullYear()}-${String(total + 1).padStart(4, "0")}`;
+    const { count } = await supabase
+      .from("invoices")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenantId);
+    const invNumber = `BLU-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(4, "0")}`;
 
     const lineTotal = body.lineItems.reduce((sum, item) => sum + item.amount, 0);
     const today = new Date().toISOString().split("T")[0];
 
-    const invoice = await createInvoice({
-      title: invNumber,
-      acf: {
-        inv_client: body.clientId,
-        inv_subscription: body.subscriptionId,
-        inv_number: invNumber,
-        inv_line_items: JSON.stringify(body.lineItems),
-        inv_total: lineTotal,
-        inv_currency: body.currency,
-        inv_status: "draft",
-        inv_due_date: body.dueDate,
-        inv_issued_date: today,
-        inv_notes: body.notes,
-      },
-    });
+    const { data: inserted, error } = await supabase
+      .from("invoices")
+      .insert({
+        tenant_id:       tenantId,
+        client_id:       body.clientId,
+        subscription_id: body.subscriptionId || null,
+        invoice_number:  invNumber,
+        line_items:      body.lineItems,
+        subtotal:        lineTotal,
+        total:           lineTotal,
+        currency:        body.currency,
+        status:          "draft",
+        due_date:        body.dueDate,
+        issued_date:     today,
+        notes:           body.notes || null,
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "Invoice number collision, please retry" }, { status: 409 });
+      }
+      throw error;
+    }
 
     await logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_CREATED,
@@ -111,7 +142,7 @@ export async function POST(req: NextRequest) {
       clientId: body.clientId,
     });
 
-    return NextResponse.json({ invoice: mapInvoice(invoice) }, { status: 201 });
+    return NextResponse.json({ invoice: mapInvoiceRow(inserted) }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/invoices]", err);
     return NextResponse.json({ error: "Failed to create invoice" }, { status: 502 });

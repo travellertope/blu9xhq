@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {resolveClientPost, wpRestFetch} from "@/lib/wp-api";
-import type { WPSubscriptionPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { decrypt } from "@/lib/encryption";
 import { logAuditEvent } from "@/lib/auditLog";
 
-// Rate limit: 5 copies per 60 seconds per wpUserId
-const copyLog = new Map<number, number[]>();
+// Rate limit: 5 copies per 60 seconds per user
+const copyLog = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60_000;
 const RATE_LIMIT = 5;
 
-function isRateLimited(wpUserId: number): boolean {
+function isRateLimited(userId: string): boolean {
   const now = Date.now();
-  const timestamps = (copyLog.get(wpUserId) ?? []).filter(
+  const timestamps = (copyLog.get(userId) ?? []).filter(
     (t) => now - t < RATE_WINDOW_MS
   );
   if (timestamps.length >= RATE_LIMIT) return true;
   timestamps.push(now);
-  copyLog.set(wpUserId, timestamps);
+  copyLog.set(userId, timestamps);
   return false;
 }
 
@@ -25,58 +24,49 @@ export async function POST(req: NextRequest) {
   const result = await requireClientSession(req);
   if (result instanceof NextResponse) return result;
   const { session } = result;
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  const userId = session.user.id;
 
-  const user = session.user as { wpUserId?: number; clientId?: number | string; name?: string | null };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-
-  if (!wpUserId) {
-    return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
+  if (!clientId) {
+    return NextResponse.json({ error: "Client not found" }, { status: 404 });
   }
 
-  if (isRateLimited(wpUserId)) {
+  if (isRateLimited(userId)) {
     return NextResponse.json(
       { error: "Please wait before copying again" },
       { status: 429 }
     );
   }
 
-  let subscriptionId: number;
+  let subscriptionId: string;
   let fieldLabel: string;
   try {
     const body = await req.json();
-    subscriptionId = parseInt(String(body.subscriptionId), 10);
+    subscriptionId = String(body.subscriptionId ?? "");
     fieldLabel = String(body.fieldLabel ?? "");
   } catch {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  if (isNaN(subscriptionId) || !fieldLabel) {
+  if (!subscriptionId || !fieldLabel) {
     return NextResponse.json({ error: "subscriptionId and fieldLabel are required" }, { status: 400 });
   }
 
   try {
-    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
-    if (!clientPost) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
+    const supabase = createSupabaseServerClient();
+    const { data: sub, error } = await supabase
+      .from("subscriptions")
+      .select("sensitive_field_labels, sensitive_field_values")
+      .eq("id", subscriptionId)
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!sub) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const sub = await wpRestFetch<WPSubscriptionPost>(
-      `/wp/v2/bluu_subscription/${subscriptionId}`
-    );
-
-    if (sub.acf.client_id !== clientPost.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
-    let labels: string[] = [];
-    let encryptedValues: string[] = [];
-    try {
-      labels = JSON.parse(sub.acf.sub_sensitive_field_labels ?? "[]");
-      encryptedValues = JSON.parse(sub.acf.sub_sensitive_field_values ?? "[]");
-    } catch {
-      return NextResponse.json({ error: "Failed to parse credentials" }, { status: 500 });
-    }
+    const labels: string[] = sub.sensitive_field_labels ?? [];
+    const encryptedValues: string[] = sub.sensitive_field_values ?? [];
 
     const fieldIndex = labels.indexOf(fieldLabel);
     if (fieldIndex === -1 || fieldIndex >= encryptedValues.length) {
@@ -87,10 +77,9 @@ export async function POST(req: NextRequest) {
 
     logAuditEvent({
       action: "portal.credential.copied",
-      actorName: user.name ?? "Client",
-      actorWpUserId: wpUserId,
-      detail: `Subscription #${subscriptionId} field "${fieldLabel}"`,
-      clientId: clientPost.id,
+      actorName: session.user.name ?? "Client",
+      detail: `Subscription ${subscriptionId} field "${fieldLabel}"`,
+      clientId,
     }).catch((err) => console.error("[copy] auditLog failed:", err));
 
     return NextResponse.json({ value: plaintext });

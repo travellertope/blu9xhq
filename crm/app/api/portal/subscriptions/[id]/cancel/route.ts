@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {resolveClientPost, updateSubscription, wpRestFetch, getServicePost} from "@/lib/wp-api";
-import type { WPSubscriptionPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendCancellationRequested } from "@/lib/resend";
 import { logAuditEvent } from "@/lib/auditLog";
 
@@ -12,25 +11,16 @@ export async function PATCH(
   const result = await requireClientSession(req);
   if (result instanceof NextResponse) return result;
   const { session } = result;
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  const userId = session.user.id;
+  const userName = session.user.name;
 
-  const user = session.user as {
-    wpUserId?: number;
-    clientId?: number | string;
-    name?: string | null;
-    email?: string | null;
-  };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-
-  if (!wpUserId && !sessionClientId) {
-    return NextResponse.json({ error: "No WP user ID in session" }, { status: 400 });
+  if (!clientId) {
+    return NextResponse.json({ error: "Client not found" }, { status: 404 });
   }
 
-  const { id: rawId } = await params;
-  const subscriptionId = parseInt(rawId, 10);
-  if (isNaN(subscriptionId)) {
-    return NextResponse.json({ error: "Invalid subscription ID" }, { status: 400 });
-  }
+  const { id: subscriptionId } = await params;
 
   let body: unknown;
   try {
@@ -49,83 +39,65 @@ export async function PATCH(
   }
 
   try {
-    let clientPostId: number | undefined = sessionClientId;
-    if (!clientPostId) {
-      const found = await resolveClientPost(sessionClientId, wpUserId).catch(() => null);
-      if (!found) return NextResponse.json({ error: "Client not found" }, { status: 404 });
-      clientPostId = found.id;
-    }
-    if (!clientPostId) return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    const clientPost = { id: clientPostId as number };
+    const supabase = createSupabaseServerClient();
 
-    // Fetch the subscription and verify ownership
-    const sub = await wpRestFetch<WPSubscriptionPost>(
-      `/wp/v2/bluu_subscription/${subscriptionId}`
-    );
-
-    if (sub.acf.client_id !== clientPost.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { data: sub, error: fetchErr } = await supabase
+      .from("subscriptions")
+      .select("*, services(title)")
+      .eq("id", subscriptionId)
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!sub) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const now = new Date().toISOString();
 
-    // Update subscription status
-    await updateSubscription(subscriptionId, {
-      acf: {
+    const { error: updateErr } = await supabase
+      .from("subscriptions")
+      .update({
         status: "cancellation_pending",
         sub_cancellation_reason: reason,
-        sub_cancellation_note: typeof note === "string" ? note : undefined,
+        sub_cancellation_note: typeof note === "string" ? note : null,
         sub_cancellation_requested_at: now,
-      },
-    });
+      })
+      .eq("id", subscriptionId)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     // Log audit event (fire and forget)
-    if (wpUserId) {
-      logAuditEvent({
-        action: "subscription_cancellation_requested",
-        actorName: user.name ?? "Client",
-        actorWpUserId: wpUserId,
-        detail: `Reason: ${reason}${typeof note === "string" && note ? ` | Note: ${note}` : ""}`,
-        clientId: clientPost.id,
-      }).catch((err) => console.error("[cancel] auditLog failed:", err));
-    }
+    logAuditEvent({
+      action: "subscription_cancellation_requested",
+      actorName: userName ?? "Client",
+      detail: `Reason: ${reason}${typeof note === "string" && note ? ` | Note: ${note}` : ""}`,
+      clientId,
+    }).catch((err) => console.error("[cancel] auditLog failed:", err));
 
     // Create communication entry (fire and forget)
-    wpRestFetch("/wp/v2/bluu_communication", {
-      method: "POST",
-      body: JSON.stringify({
-        title: `Cancellation request: subscription ${subscriptionId}`,
-        status: "publish",
-        acf: {
-          comm_direction: "inbound",
-          comm_channel: "system",
-          comm_type: "system",
-          comm_subject: `Cancellation request for subscription ${subscriptionId}`,
-          comm_content: `Reason: ${reason}${typeof note === "string" && note ? `\nNote: ${note}` : ""}`,
-          comm_occurred_at: now,
-          comm_client: clientPost.id,
-          comm_logged_by: wpUserId,
-        },
-      }),
-    }).catch((err) => console.error("[cancel] comm post failed:", err));
+    supabase.from("communications").insert({
+      tenant_id:   tenantId,
+      client_id:   clientId,
+      direction:   "inbound",
+      channel:     "other",
+      comm_type:   "manual",
+      subject:     `Cancellation request for subscription ${subscriptionId}`,
+      body:        `Reason: ${reason}${typeof note === "string" && note ? `\nNote: ${note}` : ""}`,
+      occurred_at: now,
+      logged_by:   userId,
+    }).then(({ error }) => { if (error) console.error("[cancel] comm insert failed:", error); });
 
-    // Send admin email (fire and forget) — fetch service name for a useful subject line
+    // Send admin email (fire and forget)
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
-    const clientName = user.name || "Client";
+    const clientName = userName || "Client";
     const appUrl     = process.env.NEXT_PUBLIC_APP_URL ?? "";
-    getServicePost(sub.acf.service_id)
-      .then((svc) => svc.title.rendered.replace(/<[^>]+>/g, ""))
-      .catch(() => `Subscription #${subscriptionId}`)
-      .then((serviceName) =>
-        sendCancellationRequested(adminEmail, {
-          clientName,
-          serviceName,
-          reason,
-          note: typeof note === "string" && note ? note : undefined,
-          reviewUrl: `${appUrl}/admin/clients/${clientPost.id}`,
-        })
-      )
-      .catch((err) => console.error("[cancel] sendCancellationRequested failed:", err));
+    const serviceName = sub.services?.title ?? `Subscription ${subscriptionId}`;
+    void sendCancellationRequested(adminEmail, {
+      clientName,
+      serviceName,
+      reason,
+      note: typeof note === "string" && note ? note : undefined,
+      reviewUrl: `${appUrl}/admin/clients/${clientId}`,
+    }).catch((err) => console.error("[cancel] sendCancellationRequested failed:", err));
 
     return NextResponse.json({ ok: true });
   } catch (err) {

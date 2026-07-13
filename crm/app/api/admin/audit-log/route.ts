@@ -1,48 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { wpRestList } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // GET /api/admin/audit-log
-// Fetches bluu_communication posts where comm_channel=system (internal audit events).
-// Supports: ?teamMemberId=, ?action=, ?dateFrom=, ?dateTo=, ?page=, ?perPage=
+// Fetches communications rows where channel=system (internal audit events).
+// Supports: ?dateFrom=, ?dateTo=, ?page=, ?perPage=
 
 export async function GET(req: NextRequest) {
   const result = await requirePermission(req, "manage_team");
   if (result instanceof NextResponse) return result;
+  const tenantId = result.session.user.tenantId!;
 
   const { searchParams } = new URL(req.url);
-  const page    = parseInt(searchParams.get("page")    ?? "1",  10);
-  const perPage = parseInt(searchParams.get("perPage") ?? "50", 10);
-
-  // Build WP REST query parameters
-  const qp: Record<string, string | number> = {
-    page,
-    per_page: Math.min(perPage, 100),
-    status:   "publish",
-    orderby:  "date",
-    order:    "desc",
-    // Filter to system audit entries via meta query
-    meta_key:   "comm_channel",
-    meta_value: "system",
-  };
+  const page     = parseInt(searchParams.get("page")    ?? "1",  10);
+  const perPage  = Math.min(parseInt(searchParams.get("perPage") ?? "50", 10), 100);
+  const dateFrom = searchParams.get("dateFrom");
+  const dateTo   = searchParams.get("dateTo");
 
   try {
-    const raw = await wpRestList<any>("/wp/v2/bluu_communication", qp);
+    const supabase = createSupabaseServerClient();
+    let query = supabase
+      .from("communications")
+      .select("*", { count: "exact" })
+      .eq("tenant_id", tenantId)
+      .eq("channel", "system");
 
-    // Transform WP post objects into clean audit entry objects
-    const entries = raw.items.map((post: any) => ({
-      id:             post.id,
-      date:           post.date,
-      action:         post.acf?.comm_subject ?? post.title?.rendered ?? "",
-      detail:         post.acf?.comm_content ?? "",
-      actorWpUserId:  post.acf?.comm_logged_by,
-      clientId:       post.acf?.comm_client ?? null,
+    if (dateFrom) query = query.gte("occurred_at", dateFrom);
+    if (dateTo)   query = query.lte("occurred_at", dateTo + "T23:59:59");
+
+    const from = (page - 1) * perPage;
+    const { data, error, count } = await query
+      .order("occurred_at", { ascending: false })
+      .range(from, from + perPage - 1);
+
+    if (error) throw error;
+
+    const entries = (data ?? []).map((row: any) => ({
+      id:            row.id,
+      date:          row.occurred_at || row.created_at,
+      action:        row.subject ?? "",
+      detail:        row.body ?? "",
+      actorWpUserId: row.logged_by,
+      clientId:      row.client_id ?? null,
     }));
 
+    const total = count ?? 0;
     return NextResponse.json({
       entries,
-      total:      raw.total,
-      totalPages: raw.totalPages,
+      total,
+      totalPages: Math.max(Math.ceil(total / perPage), 1),
       page,
     });
   } catch (err: any) {

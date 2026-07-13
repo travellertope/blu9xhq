@@ -1,30 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { listSequences, createSequence, type WPSequencePost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+function mapSequence(row: any) {
+  const steps = (row.sequence_steps ?? [])
+    .slice()
+    .sort((a: any, b: any) => a.step_number - b.step_number)
+    .map((s: any) => ({
+      step_number:        s.step_number,
+      delay_days:         s.delay_days,
+      subject:            s.subject ?? undefined,
+      body_html:          s.body_html ?? undefined,
+      email_template_id:  s.email_template_id ?? undefined,
+    }));
 
-function isTruthy(v: boolean | string | number | undefined): boolean {
-  return v === true || v === 1 || v === "1" || v === "true";
-}
-
-function transformSequence(post: WPSequencePost) {
-  const a = post.acf;
-  let exitConditions: string[] = [];
-  try { exitConditions = JSON.parse(a.exit_conditions ?? "[]") ?? []; } catch { /* ignore */ }
   return {
-    id:    post.id,
-    title: post.title.rendered,
+    id:    row.id,
+    title: row.title,
     acf: {
-      trigger:            a.trigger,
-      description:        a.description,
-      trigger_delay_days: a.trigger_delay_days ?? 0,
-      exit_conditions:    exitConditions,
-      is_active:          isTruthy(a.is_active),
-      seq_loops_id:       a.seq_loops_id,
-      seq_loops_synced_at: a.seq_loops_synced_at,
-      steps:              a.steps ?? [],
+      trigger:            row.trigger,
+      description:        row.description ?? undefined,
+      trigger_delay_days: row.trigger_delay_days ?? 0,
+      exit_conditions:    row.exit_conditions ?? [],
+      is_active:          row.is_active,
+      steps,
     },
   };
 }
@@ -34,7 +34,7 @@ const stepSchema = z.object({
   delayDays:       z.number().int().min(0),
   subject:         z.string().optional(),
   bodyHtml:        z.string().optional(),
-  emailTemplateId: z.number().int().positive().optional(),
+  emailTemplateId: z.string().uuid().optional(),
 });
 
 const postSchema = z.object({
@@ -52,11 +52,18 @@ const postSchema = z.object({
 export async function GET(req: NextRequest) {
   const result = await requireSession(req);
   if (result instanceof NextResponse) return result;
+  const tenantId = result.session.user.tenantId!;
 
   try {
-    const { items } = await listSequences();
-    const sequences = items.map(transformSequence);
-    return NextResponse.json({ sequences });
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase
+      .from("sequences")
+      .select("*, sequence_steps(*)")
+      .eq("tenant_id", tenantId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return NextResponse.json({ sequences: (data ?? []).map(mapSequence) });
   } catch (err: unknown) {
     console.error("[GET /api/admin/sequences]", err);
     return NextResponse.json(
@@ -71,6 +78,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const result = await requirePermission(req, "build_sequences");
   if (result instanceof NextResponse) return result;
+  const tenantId = result.session.user.tenantId!;
 
   const rawBody = await req.json().catch(() => ({}));
   const parsed = postSchema.safeParse(rawBody);
@@ -83,24 +91,45 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   try {
-    const post = await createSequence({
-      title: d.title,
-      acf: {
-        trigger:            d.trigger,
-        description:        d.description,
-        trigger_delay_days: d.triggerDelayDays,
-        exit_conditions:    JSON.stringify(d.exitConditions ?? []),
-        steps:              d.steps.map((s) => ({
-          step_number:       s.stepNumber,
-          delay_days:        s.delayDays,
-          ...(s.subject         !== undefined ? { subject:           s.subject         } : {}),
-          ...(s.bodyHtml        !== undefined ? { body_html:         s.bodyHtml        } : {}),
-          ...(s.emailTemplateId !== undefined ? { email_template_id: s.emailTemplateId } : {}),
-        })),
-        is_active:          d.isActive ? "1" : "0",
-      },
-    });
-    return NextResponse.json({ sequence: transformSequence(post) }, { status: 201 });
+    const supabase = createSupabaseServerClient();
+
+    const { data: sequence, error } = await supabase
+      .from("sequences")
+      .insert({
+        tenant_id:           tenantId,
+        title:               d.title,
+        trigger:             d.trigger,
+        description:         d.description || null,
+        trigger_delay_days:  d.triggerDelayDays ?? 0,
+        exit_conditions:     d.exitConditions ?? [],
+        is_active:           d.isActive ?? false,
+      })
+      .select("*")
+      .single();
+    if (error) throw error;
+
+    if (d.steps.length > 0) {
+      const { error: stepErr } = await supabase.from("sequence_steps").insert(
+        d.steps.map((s) => ({
+          sequence_id:        sequence.id,
+          tenant_id:          tenantId,
+          step_number:        s.stepNumber,
+          delay_days:         s.delayDays,
+          subject:            s.subject || null,
+          body_html:          s.bodyHtml || null,
+          email_template_id:  s.emailTemplateId || null,
+        }))
+      );
+      if (stepErr) throw stepErr;
+    }
+
+    const { data: full } = await supabase
+      .from("sequences")
+      .select("*, sequence_steps(*)")
+      .eq("id", sequence.id)
+      .single();
+
+    return NextResponse.json({ sequence: mapSequence(full ?? sequence) }, { status: 201 });
   } catch (err: unknown) {
     console.error("[POST /api/admin/sequences]", err);
     return NextResponse.json(

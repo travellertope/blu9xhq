@@ -104,7 +104,7 @@ export default function NewInvoicePage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          clientId: parseInt(clientId, 10),
+          clientId,
           lineItems: lineItems.map((li) => ({
             description: li.description,
             amount: parseFloat(String(li.amount)) || 0,

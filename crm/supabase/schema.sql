@@ -643,3 +643,299 @@ from tenants
 where custom_domain is not null and status = 'active';
 
 grant select on public.tenant_domain_lookup to anon, authenticated;
+
+-- =============================================================================
+-- TENANT SETTINGS (bank details for invoices, business address, sender name)
+-- Was a single WP-wide options singleton; now per-tenant columns matching the
+-- existing logo_url/accent_colour pattern. bank_account_number and
+-- bank_sort_code are AES-256 encrypted at rest (see lib/encryption.ts) — same
+-- pattern as clients.contact_email/contact_phone.
+-- =============================================================================
+alter table tenants add column if not exists bank_name text;
+alter table tenants add column if not exists bank_account_name text;
+alter table tenants add column if not exists bank_account_number text;  -- encrypted
+alter table tenants add column if not exists bank_sort_code text;       -- encrypted
+alter table tenants add column if not exists address text;
+alter table tenants add column if not exists from_email_name text;
+
+-- =============================================================================
+-- FILES — optional subscription link (WP has an equivalent optional field)
+-- =============================================================================
+alter table files add column if not exists subscription_id uuid references subscriptions(id);
+
+-- =============================================================================
+-- SEQUENCES — fields the admin sequence builder already sends but the table
+-- never had a column for (description, trigger_delay_days, exit_conditions),
+-- and the trigger vocabulary actually used by the app (the original
+-- constraint listed values the UI has never sent).
+-- =============================================================================
+alter table sequences add column if not exists description text;
+alter table sequences add column if not exists trigger_delay_days int not null default 0;
+alter table sequences add column if not exists exit_conditions text[] default '{}';
+alter table sequences drop constraint if exists sequences_trigger_check;
+alter table sequences add constraint sequences_trigger_check
+  check (trigger in ('manual','subscription_assigned','invoice_overdue',
+                      'client_inactive','cancellation_requested'));
+
+-- A sequence step can carry its content inline (subject/body_html, e.g. the
+-- one-off personalised sequences built from a client's profile) instead of
+-- referencing a saved template, so email_template_id is no longer required.
+alter table sequence_steps alter column email_template_id drop not null;
+alter table sequence_steps add column if not exists subject text;
+alter table sequence_steps add column if not exists body_html text;
+
+-- =============================================================================
+-- SEQUENCE ENROLLMENTS — per-client progress through a sequence. Was the
+-- bluu_seq_enrollment WP CPT; drives both the daily cron sender and the
+-- public one-click pause link.
+-- =============================================================================
+create table if not exists sequence_enrollments (
+  id            uuid primary key default gen_random_uuid(),
+  tenant_id     uuid not null references tenants(id) on delete cascade,
+  client_id     uuid not null references clients(id) on delete cascade,
+  sequence_id   uuid not null references sequences(id) on delete cascade,
+  status        text not null default 'active'
+                  check (status in ('active','paused','completed','exited')),
+  current_step  int not null default 0,
+  enrolled_at   timestamptz not null default now(),
+  next_send_at  timestamptz not null default now(),
+  paused_at     timestamptz,
+  exited_at     timestamptz,
+  exit_reason   text,
+  client_email  text not null,
+  client_name   text,
+  wp_post_id    int,
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+alter table sequence_enrollments enable row level security;
+
+drop policy if exists "team can manage sequence_enrollments" on sequence_enrollments;
+create policy "team can manage sequence_enrollments"
+  on sequence_enrollments for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+create index if not exists idx_sequence_enrollments_tenant  on sequence_enrollments(tenant_id);
+create index if not exists idx_sequence_enrollments_client  on sequence_enrollments(client_id);
+create index if not exists idx_sequence_enrollments_sequence on sequence_enrollments(sequence_id);
+create index if not exists idx_sequence_enrollments_due
+  on sequence_enrollments(next_send_at) where status = 'active';
+
+drop trigger if exists trg_sequence_enrollments_updated_at on sequence_enrollments;
+create trigger trg_sequence_enrollments_updated_at
+  before update on sequence_enrollments
+  for each row execute function set_updated_at();
+
+-- =============================================================================
+-- COMMUNICATIONS — client_id becomes optional so audit-log events that aren't
+-- about one specific client (team/sequence-level actions) can still be
+-- written as channel='system' rows.
+-- =============================================================================
+alter table communications alter column client_id drop not null;
+
+-- =============================================================================
+-- INVOICES — human-facing payment method (WP's inv_payment_method); distinct
+-- from payment_gateway, which stays constrained to the three gateway
+-- integrations. "Bank Transfer"/"Cash" aren't gateways, just how the admin
+-- recorded a manual payment, so they live here uncontrolled.
+-- =============================================================================
+alter table invoices add column if not exists payment_method text;
+
+-- =============================================================================
+-- SUBSCRIPTIONS — status vocabulary + cancellation-request fields (WP ACF
+-- fields with no Supabase equivalent yet; written by the client portal's
+-- cancel flow, which stays on WordPress until that route is migrated)
+-- =============================================================================
+alter table subscriptions drop constraint if exists subscriptions_status_check;
+alter table subscriptions add constraint subscriptions_status_check
+  check (status in ('active','paused','cancelled','past_due','trialing','pending','cancellation_pending'));
+alter table subscriptions add column if not exists sub_cancellation_requested_at timestamptz;
+alter table subscriptions add column if not exists sub_cancellation_reason text;
+alter table subscriptions add column if not exists sub_cancellation_note text;
+
+-- Portal "quick links" action buttons and the credentials vault — WP ACF
+-- fields with no Supabase equivalent yet. Parallel arrays (label[i] pairs
+-- with url[i]/value[i]), matching the WP JSON-array-as-string encoding.
+-- sensitive_field_values entries are AES-256 encrypted at rest, same as
+-- clients.contact_email/contact_phone.
+alter table subscriptions add column if not exists action_button_labels text[] default '{}';
+alter table subscriptions add column if not exists action_button_urls text[] default '{}';
+alter table subscriptions add column if not exists sensitive_field_labels text[] default '{}';
+alter table subscriptions add column if not exists sensitive_field_values text[] default '{}';
+
+-- =============================================================================
+-- CLIENTS — portal/health/follow-up fields (were WP ACF fields with no column
+-- equivalent yet; portal_email is denormalized from auth.users for cheap list
+-- rendering, kept in sync whenever portal_user_id is set)
+-- =============================================================================
+alter table clients add column if not exists portal_email text;
+alter table clients add column if not exists health_status text
+  check (health_status in ('healthy','needs_attention','at_risk'));
+alter table clients add column if not exists health_note text;
+alter table clients add column if not exists health_overridden_at timestamptz;
+alter table clients add column if not exists health_auto_score text;
+alter table clients add column if not exists active_subscription_count int not null default 0;
+alter table clients add column if not exists last_contacted_at timestamptz;
+alter table clients add column if not exists portal_invited_at timestamptz;
+
+-- =============================================================================
+-- TICKETS
+-- =============================================================================
+create table if not exists tickets (
+  id                   uuid primary key default gen_random_uuid(),
+  tenant_id            uuid not null references tenants(id) on delete cascade,
+  client_id            uuid not null references clients(id) on delete cascade,
+  submitted_by         uuid references auth.users(id),
+  assigned_to          uuid references auth.users(id),
+  tkt_number           text not null,
+  category             text not null default 'other'
+                          check (category in ('content_feedback','delivery_query','retainer_question','technical_issue','billing','other')),
+  priority             text not null default 'normal'
+                          check (priority in ('low','normal','high','urgent')),
+  status               text not null default 'open'
+                          check (status in ('open','in_progress','awaiting_client','awaiting_internal','resolved','closed')),
+  retainer_id          uuid references subscriptions(id),
+  sla_response_target  timestamptz,
+  sla_resolve_target   timestamptz,
+  sla_alerted_at       timestamptz,
+  first_response_at    timestamptz,
+  resolved_at          timestamptz,
+  closed_at            timestamptz,
+  wp_post_id           int,
+  created_at           timestamptz not null default now(),
+  updated_at           timestamptz not null default now(),
+  unique(tenant_id, tkt_number)
+);
+
+create table if not exists ticket_replies (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  author_id    uuid references auth.users(id),
+  body         text not null,
+  reply_type   text not null default 'reply' check (reply_type in ('reply','internal_note')),
+  wp_post_id   int,
+  created_at   timestamptz not null default now()
+);
+
+create table if not exists ticket_status_log (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  changed_by   uuid references auth.users(id),
+  from_status  text,
+  to_status    text not null,
+  note         text,
+  changed_at   timestamptz not null default now(),
+  wp_post_id   int
+);
+
+create table if not exists ticket_attachments (
+  id           uuid primary key default gen_random_uuid(),
+  ticket_id    uuid not null references tickets(id) on delete cascade,
+  tenant_id    uuid not null references tenants(id) on delete cascade,
+  reply_id     uuid references ticket_replies(id) on delete set null,
+  uploaded_by  uuid references auth.users(id),
+  file_name    text not null,
+  r2_key       text not null,
+  mime_type    text not null,
+  size_kb      int not null default 0,
+  wp_post_id   int,
+  created_at   timestamptz not null default now()
+);
+
+alter table tickets            enable row level security;
+alter table ticket_replies     enable row level security;
+alter table ticket_status_log  enable row level security;
+alter table ticket_attachments enable row level security;
+
+-- ── tickets ──────────────────────────────────────────────────────────────────
+drop policy if exists "team can manage tickets" on tickets;
+create policy "team can manage tickets"
+  on tickets for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own tickets" on tickets;
+create policy "client users can read own tickets"
+  on tickets for select
+  using (
+    is_client_user()
+    and client_id in (select id from clients where portal_user_id = auth.uid())
+  );
+
+drop policy if exists "client users can create own tickets" on tickets;
+create policy "client users can create own tickets"
+  on tickets for insert
+  with check (
+    is_client_user()
+    and client_id in (select id from clients where portal_user_id = auth.uid())
+  );
+
+-- ── ticket_replies ───────────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket replies" on ticket_replies;
+create policy "team can manage ticket replies"
+  on ticket_replies for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own ticket replies" on ticket_replies;
+create policy "client users can read own ticket replies"
+  on ticket_replies for select
+  using (
+    is_client_user()
+    and reply_type = 'reply'
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "client users can reply to own tickets" on ticket_replies;
+create policy "client users can reply to own tickets"
+  on ticket_replies for insert
+  with check (
+    is_client_user()
+    and reply_type = 'reply'
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+-- ── ticket_status_log ────────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket status log" on ticket_status_log;
+create policy "team can manage ticket status log"
+  on ticket_status_log for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+-- ── ticket_attachments ───────────────────────────────────────────────────────
+drop policy if exists "team can manage ticket attachments" on ticket_attachments;
+create policy "team can manage ticket attachments"
+  on ticket_attachments for all
+  using (tenant_id = get_my_tenant_id() and is_team_member());
+
+drop policy if exists "client users can read own ticket attachments" on ticket_attachments;
+create policy "client users can read own ticket attachments"
+  on ticket_attachments for select
+  using (
+    is_client_user()
+    and ticket_id in (
+      select t.id from tickets t
+      join clients c on c.id = t.client_id
+      where c.portal_user_id = auth.uid()
+    )
+  );
+
+drop trigger if exists trg_tickets_updated_at on tickets;
+create trigger trg_tickets_updated_at before update on tickets
+  for each row execute function set_updated_at();
+
+create index if not exists idx_tickets_tenant            on tickets(tenant_id);
+create index if not exists idx_tickets_client             on tickets(client_id);
+create index if not exists idx_tickets_status             on tickets(status);
+create index if not exists idx_ticket_replies_ticket      on ticket_replies(ticket_id);
+create index if not exists idx_ticket_replies_tenant      on ticket_replies(tenant_id);
+create index if not exists idx_ticket_status_log_ticket   on ticket_status_log(ticket_id);
+create index if not exists idx_ticket_attachments_ticket  on ticket_attachments(ticket_id);

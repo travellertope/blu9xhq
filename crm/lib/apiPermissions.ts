@@ -20,7 +20,7 @@ export type PermissionResult =
 export async function requirePermission(
   _req: NextRequest,
   permission: string,
-  clientId?: number
+  clientId?: string
 ): Promise<PermissionResult> {
   const session = await getSession();
 
@@ -50,7 +50,7 @@ export async function requirePermission(
   }
 
   if (clientId !== undefined) {
-    const assignedClients = (user.assignedClients ?? []) as number[];
+    const assignedClients = (user.assignedClients ?? []) as string[];
     if (!canAccessClient(role, assignedClients, clientId)) {
       return NextResponse.json(
         { error: "Client not assigned to you", code: "CLIENT_NOT_ASSIGNED" },

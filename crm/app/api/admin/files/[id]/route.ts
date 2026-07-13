@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { deleteFile } from "@/lib/r2";
-import { deleteFilePost, wpRestFetch, type WPFilePost } from "@/lib/wp-api";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function DELETE(
@@ -12,33 +12,37 @@ export async function DELETE(
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = user.tenantId!;
 
   try {
-    // Fetch post to get r2 key and client id
-    const filePost = await wpRestFetch<WPFilePost>(`/wp/v2/bluu_file/${postId}`);
-    const r2Key = filePost.acf.file_r2_key;
-    const clientId = filePost.acf.file_client;
-    const fileName = filePost.title.rendered;
+    const supabase = createSupabaseServerClient();
 
-    // Delete from R2
-    if (r2Key) {
-      await deleteFile(r2Key);
+    const { data: fileRow, error: fetchErr } = await supabase
+      .from("files")
+      .select("r2_key, client_id, title")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!fileRow) return NextResponse.json({ error: "File not found" }, { status: 404 });
+
+    if (fileRow.r2_key) {
+      await deleteFile(fileRow.r2_key);
     }
 
-    // Delete WP post
-    await deleteFilePost(postId);
+    const { error: deleteErr } = await supabase
+      .from("files")
+      .delete()
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (deleteErr) throw deleteErr;
 
     await logAuditEvent({
-      action: AUDIT_ACTIONS.FILE_DELETED,
+      action:    AUDIT_ACTIONS.FILE_DELETED,
       actorName: user.name ?? "Unknown",
-      actorWpUserId: user.wpUserId ?? 0,
-      detail: `Deleted file: ${fileName}`,
-      clientId,
+      detail:    `Deleted file: ${fileRow.title}`,
+      clientId:  fileRow.client_id,
     });
 
     return NextResponse.json({ ok: true });
