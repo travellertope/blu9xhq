@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { ALLOWED_MIME_TYPES, uploadFile, generateFileKey } from "@/lib/r2";
-import { createFilePost, getClientPost } from "@/lib/wp-api";
+import { CATEGORY_TO_DB, mapFileRow } from "@/lib/files";
 import { sendFileShared } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 export async function POST(req: NextRequest) {
+  // Note: per-client scoping for upload_manage_files is deferred — see
+  // subscriptions/[id]/route.ts comment on canAccessClient/assignedClients.
+  const result = await requirePermission(req, "upload_manage_files");
+  if (result instanceof NextResponse) return result;
+  const { session } = result;
+  const user = session.user as any;
+  const tenantId = user.tenantId!;
+
   let formData: FormData;
   try {
     formData = await req.formData();
@@ -13,19 +22,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid form data" }, { status: 400 });
   }
 
-  const clientIdStr = formData.get("clientId") as string | null;
-  if (!clientIdStr) {
+  const clientId = formData.get("clientId") as string | null;
+  if (!clientId) {
     return NextResponse.json({ error: "clientId is required" }, { status: 400 });
   }
-  const clientId = parseInt(clientIdStr, 10);
-  if (isNaN(clientId)) {
-    return NextResponse.json({ error: "Invalid clientId" }, { status: 400 });
-  }
-
-  const result = await requirePermission(req, "upload_manage_files", clientId);
-  if (result instanceof NextResponse) return result;
-  const { session } = result;
-  const user = session.user as any;
 
   const file = formData.get("file") as File | null;
   if (!file) {
@@ -36,8 +36,7 @@ export async function POST(req: NextRequest) {
   const category    = (formData.get("category") as string | null) ?? "general";
   const description = formData.get("description") as string | null;
   const visibility  = (formData.get("visibility") as string | null) ?? "internal";
-  const subscriptionIdStr = formData.get("subscriptionId") as string | null;
-  const subscriptionId = subscriptionIdStr ? parseInt(subscriptionIdStr, 10) : undefined;
+  const subscriptionId = (formData.get("subscriptionId") as string | null) || null;
 
   // Validate MIME type
   if (!(ALLOWED_MIME_TYPES as readonly string[]).includes(file.type)) {
@@ -50,56 +49,69 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    const supabase = createSupabaseServerClient();
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    const key = generateFileKey(clientId, file.name);
-    const publicUrl = await uploadFile(key, buffer, file.type);
+    const key = generateFileKey(tenantId, clientId, file.name);
+    await uploadFile(key, buffer, file.type);
 
-    const filePost = await createFilePost({
-      title: name,
-      acf: {
-        file_client:        clientId,
-        file_r2_key:        key,
-        file_original_name: file.name,
-        file_mime_type:     file.type,
-        file_size:          file.size,
-        file_category:      category,
-        file_description:   description ?? undefined,
-        file_visibility:    visibility,
-        file_uploaded_by:   user.wpUserId ?? 0,
-        file_subscription_id: subscriptionId,
-        file_public_url:    publicUrl,
-      },
-    });
+    const { data: inserted, error } = await supabase
+      .from("files")
+      .insert({
+        tenant_id:            tenantId,
+        client_id:            clientId,
+        title:                name,
+        description:          description || null,
+        category:             CATEGORY_TO_DB[category] ?? "other",
+        r2_key:               key,
+        r2_bucket:            process.env.R2_BUCKET_NAME ?? "",
+        mime_type:            file.type,
+        file_size:            file.size,
+        original_name:        file.name,
+        is_visible_to_client: visibility === "shared",
+        uploaded_by:          user.id,
+        subscription_id:      subscriptionId,
+      })
+      .select("*")
+      .single();
+
+    if (error) throw error;
 
     // If shared, send notification email to client
     if (visibility === "shared") {
-      void getClientPost(clientId)
-        .then((clientPost) => {
-          const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
-          const clientName  = clientPost.acf.contact_name || clientPost.title.rendered;
+      void (async () => {
+        try {
+          const { data: client } = await supabase
+            .from("clients")
+            .select("contact_name, company_name, contact_email, portal_email")
+            .eq("id", clientId)
+            .maybeSingle();
+          if (!client) return;
+          const clientEmail = client.portal_email ?? client.contact_email;
+          const clientName  = client.contact_name || client.company_name;
           if (!clientEmail) return;
-          return sendFileShared(clientEmail, {
+          await sendFileShared(clientEmail, {
             clientName,
             fileName:     name,
             fileCategory: category,
             sharedBy:     user.name ?? "BluuHQ",
             portalUrl:    `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/files`,
           });
-        })
-        .catch((err) => console.error("[upload] sendFileShared failed:", err));
+        } catch (err) {
+          console.error("[upload] sendFileShared failed:", err);
+        }
+      })();
     }
 
     await logAuditEvent({
-      action:        AUDIT_ACTIONS.FILE_UPLOADED,
-      actorName:     user.name ?? "Unknown",
-      actorWpUserId: user.wpUserId ?? 0,
-      detail:        `Uploaded file: ${name} (${category}, ${visibility})`,
+      action:    AUDIT_ACTIONS.FILE_UPLOADED,
+      actorName: user.name ?? "Unknown",
+      detail:    `Uploaded file: ${name} (${category}, ${visibility})`,
       clientId,
     });
 
-    return NextResponse.json({ file: filePost }, { status: 201 });
+    return NextResponse.json({ file: mapFileRow(inserted) }, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/files/upload]", err);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });

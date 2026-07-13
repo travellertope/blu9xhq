@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { r2SignedUrl } from "@/lib/r2";
-import { wpRestFetch, type WPFilePost } from "@/lib/wp-api";
 
 export async function GET(
   req: NextRequest,
@@ -9,21 +9,23 @@ export async function GET(
 ) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const filePost = await wpRestFetch<WPFilePost>(`/wp/v2/bluu_file/${postId}`);
-    const r2Key = filePost.acf.file_r2_key;
+    const supabase = createSupabaseServerClient();
+    const { data: fileRow, error } = await supabase
+      .from("files")
+      .select("r2_key")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
 
-    if (!r2Key) {
+    if (error) throw error;
+    if (!fileRow?.r2_key) {
       return NextResponse.json({ error: "File has no R2 key" }, { status: 404 });
     }
 
-    const signedUrl = await r2SignedUrl(r2Key, 60);
+    const signedUrl = await r2SignedUrl(fileRow.r2_key, 60);
     return NextResponse.json({ signedUrl });
   } catch (err) {
     console.error("[GET /api/admin/files/[id]/download]", err);

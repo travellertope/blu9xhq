@@ -84,13 +84,6 @@ export async function objectExists(key: string): Promise<boolean> {
   }
 }
 
-/** Build a consistent R2 key for client files. */
-export function buildFileKey(clientId: string, filename: string): string {
-  const timestamp = Date.now();
-  const sanitized = filename.replace(/[^a-zA-Z0-9._-]/g, "_");
-  return `clients/${clientId}/files/${timestamp}_${sanitized}`;
-}
-
 // ─── Batch 6 additions ────────────────────────────────────────────────────────
 
 export const ALLOWED_MIME_TYPES = [
@@ -134,12 +127,16 @@ export async function r2SignedUrl(key: string, expiresInSeconds: number): Promis
   return getPresignedDownloadUrl(key, expiresInSeconds);
 }
 
-/** Generate a unique R2 key for a client file: clients/{clientId}/{uuid}-{sanitised-filename} */
-export function generateFileKey(clientId: number, filename: string): string {
+/**
+ * Generate a unique R2 key for a client file, tenant-prefixed as defense in
+ * depth against cross-tenant key collisions/guessing:
+ *   tenants/{tenantId}/clients/{clientId}/{uuid}-{sanitised-filename}
+ */
+export function generateFileKey(tenantId: string, clientId: string, filename: string): string {
   const sanitised = filename
     .toLowerCase()
     .replace(/[^a-z0-9.]/g, "-")
     .replace(/-+/g, "-");
   const id = crypto.randomUUID();
-  return `clients/${clientId}/${id}-${sanitised}`;
+  return `tenants/${tenantId}/clients/${clientId}/${id}-${sanitised}`;
 }
