@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!error) {
+    if (error) {
+      console.error(`[resend-invite] email=${email} signInWithOtp failed:`, error.message);
+    } else {
+      console.log(`[resend-invite] email=${email} sent successfully`);
       inviteLog.set(email, Date.now());
     }
   } catch (err) {
