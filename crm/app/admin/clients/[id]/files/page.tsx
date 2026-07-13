@@ -8,7 +8,10 @@ import { ArrowLeft } from "lucide-react";
 export default function ClientFilesPage() {
   const params = useParams();
   const id = params.id as string;
-  const clientId = parseInt(id, 10);
+  // clientId is a Supabase UUID string; FileManager's prop type is a legacy
+  // `number` from the WP-post-id era but only ever interpolates it into
+  // strings, so passing the UUID straight through is safe.
+  const clientId = id as unknown as number;
 
   return (
     <div className="space-y-4">

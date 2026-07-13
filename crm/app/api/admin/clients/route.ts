@@ -1,26 +1,47 @@
-import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/encryption";
-import { createClientPost, createWPUser, updateWPUser, getUserByEmail, findClientByWpUserId, listClientPosts } from "@/lib/wp-api";
 import { sendPortalInvite } from "@/lib/resend";
 import { z } from "zod";
-import crypto from "crypto";
 
-// ─── Auth guard ───────────────────────────────────────────────────────────────
-
-async function requireAdmin() {
-  const session = await getSession();
-  if (!session || (session.user as any)?.role !== "bluu_admin") {
-    return null;
-  }
-  return session;
+// Shapes a Supabase `clients` row as a WP-post-like object so existing page
+// components (typed against WPClientPost) need no changes.
+function toWpShape(row: any) {
+  return {
+    id:       row.id,
+    title:    { rendered: row.contact_name },
+    date:     row.created_at,
+    modified: row.updated_at,
+    status:   "publish",
+    acf: {
+      contact_name:               row.contact_name,
+      contact_email:              row.contact_email,
+      contact_phone:              row.contact_phone,
+      company_name:               row.company_name,
+      company_website:            row.company_website ?? undefined,
+      industry:                   row.industry ?? undefined,
+      portal_email:                row.portal_email ?? "",
+      status:                     row.status,
+      health_status:               row.health_status ?? undefined,
+      health_note:                 row.health_note ?? undefined,
+      health_overridden_at:        row.health_overridden_at ?? undefined,
+      tags:                       (row.tags ?? []).join(","),
+      notes:                      row.notes ?? undefined,
+      last_contacted_at:           row.last_contacted_at ?? undefined,
+      portal_invited_at:           row.portal_invited_at ?? undefined,
+      active_subscription_count:   row.active_subscription_count ?? 0,
+      health_auto_score:           row.health_auto_score ?? undefined,
+    },
+  };
 }
 
 // ─── GET /api/admin/clients ───────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requirePermission(req, "view_all_clients");
+  if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
 
   const { searchParams } = new URL(req.url);
   const page    = parseInt(searchParams.get("page")     ?? "1",  10);
@@ -28,13 +49,33 @@ export async function GET(req: NextRequest) {
   const search  = searchParams.get("search") ?? undefined;
   const orderby = searchParams.get("orderby") ?? "date";
   const order   = (searchParams.get("order") ?? "desc") as "asc" | "desc";
+  const status  = searchParams.get("status") ?? undefined;
+
+  const ORDER_COL: Record<string, string> = { title: "contact_name", date: "created_at", modified: "updated_at" };
+  const orderCol = ORDER_COL[orderby] ?? "created_at";
 
   try {
-    const result = await listClientPosts({ page, per_page: perPage, search, orderby, order });
+    const supabase = createSupabaseServerClient();
+    let query = supabase
+      .from("clients")
+      .select("*", { count: "exact" })
+      .eq("tenant_id", session.user.tenantId!);
+
+    if (status) query = query.eq("status", status);
+    if (search) query = query.or(`contact_name.ilike.%${search}%,company_name.ilike.%${search}%`);
+
+    const from = (page - 1) * perPage;
+    const { data, error, count } = await query
+      .order(orderCol, { ascending: order === "asc" })
+      .range(from, from + perPage - 1);
+
+    if (error) throw error;
+
+    const total = count ?? 0;
     return NextResponse.json({
-      clients: result.items,
-      total: result.total,
-      totalPages: result.totalPages,
+      clients:    (data ?? []).map(toWpShape),
+      total,
+      totalPages: Math.max(Math.ceil(total / perPage), 1),
       page,
     });
   } catch (err) {
@@ -58,8 +99,9 @@ const createClientSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requirePermission(req, "create_edit_clients");
+  if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
 
   let body: unknown;
   try {
@@ -75,74 +117,49 @@ export async function POST(req: NextRequest) {
 
   const d = parsed.data;
   const fullName = `${d.firstName} ${d.lastName}`;
-  const tempPassword = crypto.randomBytes(16).toString("base64url");
+  const tenantId = session.user.tenantId!;
 
   try {
-    // 1. Create WP user with role bluu_client — or reuse an existing user
-    const wpUser = await createWPUser({
-      username: d.email,
-      email: d.email,
-      password: tempPassword,
-      name: fullName,
-      roles: ["bluu_client"],
-    }).catch(async (err: Error) => {
-      if (!err.message?.includes("existing_user_email")) throw err;
+    const supabase = createSupabaseServerClient();
 
-      // Email already registered — look up the existing WP user
-      const existing = await getUserByEmail(d.email);
-      if (!existing) throw err;
-
-      // Check whether they already have a bluu_client profile
-      const existingProfile = await findClientByWpUserId(existing.id).catch(() => null);
-      if (existingProfile) {
-        throw new Error("A client profile already exists for this email address.");
-      }
-
-      // Safe to reuse — ensure they have the bluu_client role
-      return updateWPUser(existing.id, { roles: ["bluu_client"] });
-    });
-
-    // 2. Create bluu_client CPT post (encrypt PII at rest)
-    const post = await createClientPost({
-      title: fullName,
-      acf: {
-        contact_name: fullName,
-        contact_email: encrypt(d.email),
-        contact_phone: d.phone ? encrypt(d.phone) : "",
-        company_name: d.company,
-        portal_email: d.email,
-        wp_user_id: wpUser.id,
-        status: d.status,
-        tags: (d.tags ?? []).join(","),
-        notes: d.notes ?? "",
+    const { data: inserted, error } = await supabase
+      .from("clients")
+      .insert({
+        tenant_id:                  tenantId,
+        contact_name:               fullName,
+        contact_email:              encrypt(d.email),
+        contact_phone:              d.phone ? encrypt(d.phone) : null,
+        company_name:               d.company,
+        portal_email:               d.email,
+        status:                     d.status,
+        tags:                       d.tags ?? [],
+        notes:                      d.notes ?? null,
         active_subscription_count: 0,
-      },
-    });
+      })
+      .select("*")
+      .single();
 
-    // 3. Link WP user → client post via user meta
-    // Requires `bluu_client_post_id` registered as a REST meta key in the WP plugin.
-    await fetch(
-      `${process.env.WORDPRESS_URL}/wp-json/wp/v2/users/${wpUser.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${Buffer.from(`${process.env.WP_APP_USERNAME}:${process.env.WP_APP_PASSWORD}`).toString("base64")}`,
-        },
-        body: JSON.stringify({ meta: { bluu_client_post_id: String(post.id) } }),
+    if (error) {
+      if (error.code === "23505") {
+        return NextResponse.json({ error: "A client with this email already exists." }, { status: 409 });
       }
-    ).catch(() => null); // non-fatal — meta registration may not be set up yet
+      throw error;
+    }
 
-    // 4. Send portal invite if requested
     if (d.sendInvite) {
       const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/portal-login`;
       await sendPortalInvite(d.email, {
         clientName: d.firstName,
         loginUrl: inviteLink,
       }).catch(console.error);
+
+      await supabase
+        .from("clients")
+        .update({ portal_invited_at: new Date().toISOString() })
+        .eq("id", inserted.id);
     }
 
-    return NextResponse.json({ client: post, wpUserId: wpUser.id }, { status: 201 });
+    return NextResponse.json({ client: toWpShape(inserted) }, { status: 201 });
   } catch (err: any) {
     console.error("[POST /api/admin/clients]", err);
     return NextResponse.json({ error: err.message ?? "Failed to create client" }, { status: 502 });

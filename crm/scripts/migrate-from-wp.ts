@@ -388,6 +388,13 @@ interface WPClientPost {
     status: string;
     notes?: string;
     tags?: string;
+    health_status?: string;
+    health_note?: string;
+    health_overridden_at?: string;
+    health_auto_score?: string;
+    active_subscription_count?: number;
+    last_contacted_at?: string;
+    portal_invited_at?: string;
   };
 }
 
@@ -445,6 +452,14 @@ async function migrateClients() {
       tags:            parseTags(p.acf.tags),
       wp_post_id:      p.id,
       created_at:      new Date(p.date).toISOString(),
+      portal_email:              p.acf.portal_email || null,
+      health_status:             p.acf.health_status || null,
+      health_note:               p.acf.health_note || null,
+      health_overridden_at:      safeTimestamp(p.acf.health_overridden_at),
+      health_auto_score:         p.acf.health_auto_score || null,
+      active_subscription_count: p.acf.active_subscription_count ?? 0,
+      last_contacted_at:         safeTimestamp(p.acf.last_contacted_at),
+      portal_invited_at:         safeTimestamp(p.acf.portal_invited_at),
     };
 
     if (DRY_RUN) {

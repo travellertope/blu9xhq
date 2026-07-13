@@ -1,108 +1,164 @@
-import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { requirePermission } from "@/lib/apiPermissions";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { decrypt, encrypt } from "@/lib/encryption";
-import {
-  getClientPost, updateClientPost, listClientSubscriptions,
-  listClientCommunications, type WPClientACF,
-} from "@/lib/wp-api";
 import { calculateHealthScore } from "@/lib/healthScore";
 import { z } from "zod";
-import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommChannel, CommDirection, CommType } from "@/types";
-
-async function requireAdmin() {
-  const session = await getSession();
-  if (!session || (session.user as any)?.role !== "bluu_admin") return null;
-  return session;
-}
-
-function isTruthy(v: boolean | string | number | undefined): boolean {
-  return v === true || v === 1 || v === "1" || v === "true";
-}
-
-function safeJson(s?: string): string[] {
-  if (!s) return [];
-  try { return JSON.parse(s); } catch { return []; }
-}
-
-// ─── GET /api/admin/clients/[id] ──────────────────────────────────────────────
-
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-
-  try {
-    const [post, subs, commsResult] = await Promise.all([
-      getClientPost(postId),
-      listClientSubscriptions(postId),
-      listClientCommunications(postId, { per_page: 90 }),
-    ]);
-
-    // Decrypt PII for admin consumption
-    const acf = post.acf;
-    const decrypted = {
-      ...acf,
-      contact_email: acf.contact_email ? tryDecrypt(acf.contact_email) : "",
-      contact_phone: acf.contact_phone ? tryDecrypt(acf.contact_phone) : "",
-    };
-
-    const activeSubscriptions = subs.items.filter(
-      (s) => s.acf.client_id === postId &&
-        !["cancelled", "expired"].includes(s.acf.status ?? "")
-    );
-
-    // Transform communications for health score calculation
-    const communications: BluuCommunication[] = commsResult.items.map(p => ({
-      id:           p.id,
-      date:         p.date,
-      clientId:     p.acf.comm_client,
-      type:         (p.acf.comm_type || "manual") as CommType,
-      direction:    (p.acf.comm_direction || "internal") as CommDirection,
-      channel:      (p.acf.comm_channel || "other") as CommChannel,
-      subject:      p.acf.comm_subject ?? "",
-      content:      p.acf.comm_content ?? "",
-      occurredAt:   p.acf.comm_occurred_at || p.date,
-      loggedBy:     p.acf.comm_logged_by ?? 0,
-      mood:         p.acf.comm_mood as CommMoodSentiment | undefined,
-      moodSource:   p.acf.comm_mood_source as CommMoodSource | undefined,
-      redFlags:     safeJson(p.acf.comm_red_flags),
-      followUpNeeded:    isTruthy(p.acf.comm_follow_up_needed),
-      followUpDue:       p.acf.comm_follow_up_due,
-      followUpCompleted: isTruthy(p.acf.comm_follow_up_completed),
-    }));
-
-    // Auto health score calculation — background update, never blocks response
-    const autoScore = calculateHealthScore(communications);
-    const hasManualOverride = !!acf.health_note;
-
-    if (!hasManualOverride && acf.health_status !== autoScore) {
-      // Background write — do not await
-      updateClientPost(postId, { acf: { health_status: autoScore, health_auto_score: autoScore } })
-        .catch(err => console.error("[health auto-update]", err));
-      decrypted.health_status = autoScore;
-    } else if (hasManualOverride && acf.health_auto_score !== autoScore) {
-      // Store auto score separately but keep manual override as current status
-      updateClientPost(postId, { acf: { health_auto_score: autoScore } })
-        .catch(err => console.error("[health auto-score store]", err));
-    }
-
-    return NextResponse.json({
-      post:              { ...post, acf: decrypted },
-      subscriptions:     activeSubscriptions,
-      subscriptionCount: activeSubscriptions.length,
-    });
-  } catch (err: any) {
-    console.error("[GET /api/admin/clients/[id]]", err);
-    return NextResponse.json({ error: err.message }, { status: 502 });
-  }
-}
+import type { BluuCommunication, CommMoodSentiment, CommMoodSource } from "@/types";
 
 function tryDecrypt(value: string): string {
   try {
     return decrypt(value);
   } catch {
     return value;
+  }
+}
+
+function toWpClientShape(row: any) {
+  return {
+    id:       row.id,
+    title:    { rendered: row.contact_name },
+    date:     row.created_at,
+    modified: row.updated_at,
+    status:   "publish",
+    acf: {
+      contact_name:               row.contact_name,
+      contact_email:              row.contact_email,
+      contact_phone:              row.contact_phone,
+      company_name:               row.company_name,
+      company_website:            row.company_website ?? undefined,
+      industry:                   row.industry ?? undefined,
+      portal_email:                row.portal_email ?? "",
+      status:                     row.status,
+      health_status:               row.health_status ?? undefined,
+      health_note:                 row.health_note ?? undefined,
+      health_overridden_at:        row.health_overridden_at ?? undefined,
+      tags:                       (row.tags ?? []).join(","),
+      notes:                      row.notes ?? undefined,
+      last_contacted_at:           row.last_contacted_at ?? undefined,
+      portal_invited_at:           row.portal_invited_at ?? undefined,
+      active_subscription_count:   row.active_subscription_count ?? 0,
+      health_auto_score:           row.health_auto_score ?? undefined,
+    },
+  };
+}
+
+function toWpSubscriptionShape(row: any) {
+  return {
+    id:   row.id,
+    title: { rendered: row.services?.title ?? "Subscription" },
+    date: row.created_at,
+    acf: {
+      client_id:                row.client_id,
+      service_id:                row.service_id,
+      status:                    row.status,
+      amount:                    row.amount,
+      currency:                  row.currency,
+      billing_cycle:              row.billing_cycle,
+      next_billing_date:          row.next_billing_date ?? undefined,
+      start_date:                 row.start_date ?? undefined,
+      end_date:                   row.end_date ?? undefined,
+      payment_gateway:            row.payment_gateway ?? undefined,
+      gateway_subscription_id:    row.gateway_subscription_id ?? undefined,
+      notes:                      row.notes ?? undefined,
+    },
+  };
+}
+
+// ─── GET /api/admin/clients/[id] ──────────────────────────────────────────────
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const auth = await requirePermission(req, "view_all_clients");
+  if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
+  const tenantId = session.user.tenantId!;
+
+  try {
+    const supabase = createSupabaseServerClient();
+
+    const { data: row, error: clientErr } = await supabase
+      .from("clients")
+      .select("*")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (clientErr) throw clientErr;
+    if (!row) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+    const [{ data: subRows, error: subErr }, { data: commRows, error: commErr }] = await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("*, services(title)")
+        .eq("tenant_id", tenantId)
+        .eq("client_id", row.id)
+        .not("status", "in", "(cancelled,expired)"),
+      supabase
+        .from("communications")
+        .select("*")
+        .eq("tenant_id", tenantId)
+        .eq("client_id", row.id)
+        .order("occurred_at", { ascending: false })
+        .limit(90),
+    ]);
+    if (subErr) throw subErr;
+    if (commErr) throw commErr;
+
+    const activeSubscriptions = (subRows ?? []).map(toWpSubscriptionShape);
+
+    const communications: BluuCommunication[] = (commRows ?? []).map((c: any) => ({
+      id:                c.id,
+      date:              c.created_at,
+      clientId:          c.client_id,
+      type:              c.comm_type,
+      direction:         c.direction,
+      channel:           c.channel,
+      subject:           c.subject ?? "",
+      content:           c.body ?? "",
+      occurredAt:        c.occurred_at || c.created_at,
+      loggedBy:          c.logged_by ?? 0,
+      mood:              c.mood as CommMoodSentiment | undefined,
+      moodSource:        c.mood_source as CommMoodSource | undefined,
+      redFlags:          c.red_flags ?? [],
+      followUpNeeded:    !!c.follow_up_needed,
+      followUpDue:       c.follow_up_due,
+      followUpCompleted: !!c.follow_up_completed,
+    }));
+
+    // Auto health score — background update, never blocks response
+    const autoScore = calculateHealthScore(communications);
+    const hasManualOverride = !!row.health_note;
+    const decorated = { ...row };
+
+    if (!hasManualOverride && row.health_status !== autoScore) {
+      supabase
+        .from("clients")
+        .update({ health_status: autoScore, health_auto_score: autoScore })
+        .eq("id", row.id)
+        .then(({ error }) => { if (error) console.error("[health auto-update]", error); });
+      decorated.health_status = autoScore;
+    } else if (hasManualOverride && row.health_auto_score !== autoScore) {
+      supabase
+        .from("clients")
+        .update({ health_auto_score: autoScore })
+        .eq("id", row.id)
+        .then(({ error }) => { if (error) console.error("[health auto-score store]", error); });
+    }
+
+    const decrypted = {
+      ...decorated,
+      contact_email: decorated.contact_email ? tryDecrypt(decorated.contact_email) : "",
+      contact_phone: decorated.contact_phone ? tryDecrypt(decorated.contact_phone) : "",
+    };
+
+    return NextResponse.json({
+      post:              toWpClientShape(decrypted),
+      subscriptions:     activeSubscriptions,
+      subscriptionCount: activeSubscriptions.length,
+    });
+  } catch (err: any) {
+    console.error("[GET /api/admin/clients/[id]]", err);
+    return NextResponse.json({ error: err.message }, { status: 502 });
   }
 }
 
@@ -125,52 +181,54 @@ const patchSchema = z.object({
 });
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  const auth = await requirePermission(req, "create_edit_clients");
+  if (auth instanceof NextResponse) return auth;
+  const { session } = auth;
+  const tenantId = session.user.tenantId!;
 
   const parsed = patchSchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Validation failed", details: parsed.error.flatten() }, { status: 422 });
 
   const d = parsed.data;
-  const acfUpdate: Partial<WPClientACF> = {};
+  const update: Record<string, unknown> = {};
 
   if (d.email) {
-    acfUpdate.contact_email = encrypt(d.email);
-    acfUpdate.portal_email  = d.email;
+    update.contact_email = encrypt(d.email);
+    update.portal_email  = d.email;
   }
-  if (d.portalEmail)               acfUpdate.portal_email   = d.portalEmail;
-  if (d.phone !== undefined)       acfUpdate.contact_phone  = d.phone ? encrypt(d.phone) : "";
-  if (d.company)                   acfUpdate.company_name   = d.company;
-  if (d.website  !== undefined)    acfUpdate.company_website = d.website;
-  if (d.industry !== undefined)    acfUpdate.industry       = d.industry;
-  if (d.status)                    acfUpdate.status         = d.status;
+  if (d.portalEmail)            update.portal_email    = d.portalEmail;
+  if (d.phone !== undefined)    update.contact_phone   = d.phone ? encrypt(d.phone) : null;
+  if (d.company)                update.company_name    = d.company;
+  if (d.website  !== undefined) update.company_website = d.website;
+  if (d.industry !== undefined) update.industry        = d.industry;
+  if (d.status)                 update.status          = d.status;
   if (d.healthStatus) {
-    acfUpdate.health_status       = d.healthStatus;
-    acfUpdate.health_overridden_at = new Date().toISOString();
+    update.health_status        = d.healthStatus;
+    update.health_overridden_at = new Date().toISOString();
   }
-  if (d.healthNote !== undefined) acfUpdate.health_note = d.healthNote;
-  if (d.tags)                acfUpdate.tags  = d.tags.join(",");
-  if (d.notes !== undefined) acfUpdate.notes = d.notes;
+  if (d.healthNote !== undefined) update.health_note = d.healthNote;
+  if (d.tags)                update.tags  = d.tags;
+  if (d.notes !== undefined) update.notes = d.notes;
 
-  const titleParts: string[] = [];
   if (d.firstName || d.lastName) {
     const current = d.firstName && d.lastName
       ? `${d.firstName} ${d.lastName}`
       : d.firstName ?? d.lastName ?? undefined;
-    if (current) {
-      titleParts.push(current);
-      acfUpdate.contact_name = current;
-    }
+    if (current) update.contact_name = current;
   }
 
   try {
-    const updated = await updateClientPost(postId, {
-      ...(titleParts.length ? { title: titleParts[0] } : {}),
-      acf: acfUpdate,
-    });
-    return NextResponse.json({ post: updated });
+    const supabase = createSupabaseServerClient();
+    const { data: updated, error } = await supabase
+      .from("clients")
+      .update(update)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .select("*")
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json({ post: toWpClientShape(updated) });
   } catch (err: any) {
     console.error("[PATCH /api/admin/clients/[id]]", err);
     return NextResponse.json({ error: err.message }, { status: 502 });
@@ -180,13 +238,19 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 // ─── DELETE /api/admin/clients/[id] ───────────────────────────────────────────
 
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  if (!(await requireAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+  const auth = await requirePermission(req, "delete_clients");
+  if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    await updateClientPost(postId, { acf: { status: "churned" } });
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase
+      .from("clients")
+      .update({ status: "churned" })
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+
+    if (error) throw error;
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("[DELETE /api/admin/clients/[id]]", err);

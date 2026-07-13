@@ -664,6 +664,21 @@ alter table tenants add column if not exists from_email_name text;
 alter table files add column if not exists subscription_id uuid references subscriptions(id);
 
 -- =============================================================================
+-- CLIENTS — portal/health/follow-up fields (were WP ACF fields with no column
+-- equivalent yet; portal_email is denormalized from auth.users for cheap list
+-- rendering, kept in sync whenever portal_user_id is set)
+-- =============================================================================
+alter table clients add column if not exists portal_email text;
+alter table clients add column if not exists health_status text
+  check (health_status in ('healthy','needs_attention','at_risk'));
+alter table clients add column if not exists health_note text;
+alter table clients add column if not exists health_overridden_at timestamptz;
+alter table clients add column if not exists health_auto_score text;
+alter table clients add column if not exists active_subscription_count int not null default 0;
+alter table clients add column if not exists last_contacted_at timestamptz;
+alter table clients add column if not exists portal_invited_at timestamptz;
+
+-- =============================================================================
 -- TICKETS
 -- =============================================================================
 create table if not exists tickets (
