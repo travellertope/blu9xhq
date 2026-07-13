@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { consumeAuthHash } from "@/lib/supabase/consumeAuthHash";
 import type { Session } from "@supabase/supabase-js";
 
 type Status = "verifying" | "ready" | "invalid";
@@ -29,10 +30,10 @@ function ResetPasswordContent() {
     const supabase = createSupabaseBrowserClient();
     let resolved = false;
 
-    function handleSession(session: Session | null) {
+    function handleSession(session: Session | null, recovery: boolean) {
       if (!session || resolved) return;
       resolved = true;
-      if (isRecovery) {
+      if (recovery) {
         setStatus("ready");
       } else {
         router.replace(homeForUserType(session.user.app_metadata?.user_type));
@@ -40,17 +41,20 @@ function ResetPasswordContent() {
     }
 
     // Direct admin-generated link (e.g. setup-first-admin.ts points straight
-    // here) — the hash fragment hasn't been consumed yet, so a fresh event
-    // fires as the SDK auto-detects and processes it.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleSession(session);
+    // here) — the hash fragment hasn't been consumed yet. Parse and apply it
+    // explicitly rather than relying on SDK auto-detection.
+    consumeAuthHash().then(({ session, type }) => {
+      handleSession(session, isRecovery || type === "recovery");
+    });
+
+    // Belt-and-suspenders in case SDK auto-detection does fire.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      handleSession(session, isRecovery || event === "PASSWORD_RECOVERY");
     });
 
     // Forwarded from /portal-login, which already consumed the fragment —
-    // the session is already persisted, so just read it directly instead of
-    // waiting for an event that won't fire again for an already-established
-    // session (a fresh listener only replays a generic INITIAL_SESSION).
-    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session));
+    // the session is already persisted, so just read it directly.
+    supabase.auth.getSession().then(({ data: { session } }) => handleSession(session, isRecovery));
 
     // No valid link at all (expired, already used, or visited directly).
     const timeout = setTimeout(() => {

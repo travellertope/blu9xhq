@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { consumeAuthHash } from "@/lib/supabase/consumeAuthHash";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -46,22 +47,33 @@ function VerifyContent() {
 
     // No ?code=. Admin-generated links (client invites, resent invites) are
     // created via the Supabase Admin API, which delivers the session as a
-    // URL hash fragment instead of a ?code= param — only the browser can see
-    // that, so let the SDK auto-detect it and listen for the resulting event.
+    // URL hash fragment instead of a ?code= param. Parse and apply it
+    // explicitly rather than relying on SDK auto-detection.
+    let resolved = false;
+    function onSession() {
+      if (resolved) return;
+      resolved = true;
+      setStatus("success");
+      fetch("/api/portal/me")
+        .then((r) => r.json())
+        .then((me) => {
+          router.replace(me.setupComplete === false ? "/portal/setup" : "/portal");
+        })
+        .catch(() => router.replace("/portal"));
+    }
+
+    consumeAuthHash().then(({ session }) => {
+      if (session) onSession();
+    });
+
+    // Belt-and-suspenders in case SDK auto-detection does fire.
     const supabase = createSupabaseBrowserClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY")) {
-        setStatus("success");
-        fetch("/api/portal/me")
-          .then((r) => r.json())
-          .then((me) => {
-            router.replace(me.setupComplete === false ? "/portal/setup" : "/portal");
-          })
-          .catch(() => router.replace("/portal"));
-      }
+      if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY")) onSession();
     });
 
     const timeout = setTimeout(() => {
+      if (resolved) return;
       setStatus((s) => {
         if (s !== "verifying") return s;
         setErrorMessage("This link is invalid or has already been used.");

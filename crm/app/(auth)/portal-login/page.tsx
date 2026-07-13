@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { consumeAuthHash } from "@/lib/supabase/consumeAuthHash";
 
 const LOGO =
   "https://mlgepubil2mw.i.optimole.com/w:742/h:157/q:mauto/g:sm/f:best/https://bluuhq.com/wp-content/uploads/2026/05/cropped-bluuhq.png";
@@ -44,17 +45,19 @@ function PortalLoginForm() {
 
   // Supabase's default password-recovery / admin-generated links redirect to
   // the bare Site URL with the session in a URL hash fragment. That fragment
-  // rides along through the server-side redirect from "/" to here, and the
-  // Supabase browser client auto-detects + consumes it on mount. If that just
-  // happened, hand off to the page that knows how to finish the flow instead
-  // of silently showing this login form.
+  // rides along through the server-side redirect from "/" to here. Parse and
+  // apply it explicitly (see consumeAuthHash) rather than relying on SDK
+  // auto-detection, then hand off to the page that finishes the flow.
   useEffect(() => {
+    consumeAuthHash().then(({ session, type }) => {
+      if (!session) return;
+      router.replace(type === "recovery" ? "/reset-password?recovery=1" : "/reset-password");
+    });
+
+    // Belt-and-suspenders: also listen in case a session gets established
+    // by some other path (e.g. SDK auto-detection working after all).
     const supabase = createSupabaseBrowserClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      // This client-side route change doesn't preserve which event fired —
-      // by the time /reset-password mounts a fresh listener, the token is
-      // already consumed and it only sees a generic INITIAL_SESSION. Pass
-      // the recovery flag along explicitly instead of relying on a re-fire.
       if (event === "PASSWORD_RECOVERY") {
         router.replace("/reset-password?recovery=1");
       } else if (event === "SIGNED_IN") {
