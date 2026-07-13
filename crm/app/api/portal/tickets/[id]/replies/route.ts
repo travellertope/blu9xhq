@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendTicketReply } from "@/lib/resend";
-import { logTicketToTimeline } from "@/lib/ticket-utils";
+import { logTicketToTimeline } from "@/lib/ticketServer";
 
 // POST /api/portal/tickets/[id]/replies — client adds a reply
 export async function POST(

@@ -3,7 +3,8 @@ import { requireSession } from "@/lib/apiPermissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { deleteFromR2 } from "@/lib/r2";
 import { sendTicketStatusChanged } from "@/lib/resend";
-import { isValidStatus, isValidPriority, logTicketToTimeline } from "@/lib/ticket-utils";
+import { isValidStatus, isValidPriority } from "@/lib/ticket-utils";
+import { logTicketToTimeline } from "@/lib/ticketServer";
 
 // GET /api/admin/tickets/[id] — full ticket with thread including internal notes
 export async function GET(
