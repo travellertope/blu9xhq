@@ -19,18 +19,24 @@ export async function POST(req: NextRequest) {
     const adminSupabase = createSupabaseAdminClient();
     const { data } = await adminSupabase.auth.admin.listUsers();
     const exists = data?.users?.some((u) => u.email?.toLowerCase() === email);
+    console.log(`[forgot-password] email=${email} exists=${!!exists}`);
 
     if (exists) {
       // Send via the cookie-aware server client so the PKCE verifier actually
       // gets persisted — lands at /portal/verify?code=… when clicked.
       const supabase = createSupabaseServerClient();
-      await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           shouldCreateUser: false,
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/portal/verify`,
         },
       });
+      if (error) {
+        console.error("[forgot-password] signInWithOtp failed:", error.message);
+      } else {
+        console.log("[forgot-password] signInWithOtp sent successfully");
+      }
     }
   } catch (err) {
     console.error("[forgot-password]", err);
