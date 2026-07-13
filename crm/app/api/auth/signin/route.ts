@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { decodeJwtClaims } from "@/lib/jwt";
 
 const schema = z.object({
   email:    z.string().email(),
@@ -40,7 +41,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
 
-  const claims = data.user.app_metadata ?? {};
+  // Custom claims (tenant_id, user_type, crm_role, ...) live at the top
+  // level of the JWT payload, not on data.user.app_metadata.
+  const claims = decodeJwtClaims(data.session.access_token);
   const userType = claims.user_type ?? "";
 
   // Return the same fields consuming code expects from the old NextAuth session.

@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { decodeJwtClaims } from "@/lib/jwt";
 import type { BluuUser } from "@/lib/auth";
+import type { Session } from "@supabase/supabase-js";
 import type { UserRole } from "@/types";
 
 export type SessionStatus = "loading" | "authenticated" | "unauthenticated";
@@ -14,9 +16,12 @@ export interface BluuSessionState {
   refresh: () => Promise<void>;
 }
 
-function mapUser(supaUser: any): BluuUser | null {
-  if (!supaUser) return null;
-  const claims  = supaUser.app_metadata ?? {};
+function mapUser(session: Session | null): BluuUser | null {
+  if (!session) return null;
+  const supaUser = session.user;
+  // Custom claims (tenant_id, user_type, crm_role, ...) live at the top
+  // level of the JWT payload, not on supaUser.app_metadata.
+  const claims  = decodeJwtClaims(session.access_token);
   const meta    = supaUser.user_metadata ?? {};
   const userType: string = claims.user_type ?? "";
 
@@ -62,14 +67,14 @@ export function useBluuSession(): BluuSessionState {
 
   async function load() {
     const { data: { session } } = await supabase.auth.getSession();
-    setUser(mapUser(session?.user ?? null));
+    setUser(mapUser(session));
     setStatus(session ? "authenticated" : "unauthenticated");
   }
 
   useEffect(() => {
     load();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(mapUser(session?.user ?? null));
+      setUser(mapUser(session));
       setStatus(session ? "authenticated" : "unauthenticated");
     });
     return () => subscription.unsubscribe();

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { decodeJwtClaims } from "@/lib/jwt";
 
 async function resolveCustomDomain(host: string): Promise<string | null> {
   const url    = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -80,8 +81,10 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  // Derive role from custom JWT claims (injected by the access token hook)
-  const claims = session?.user?.app_metadata ?? {};
+  // Derive role from custom JWT claims (injected by the access token hook).
+  // These live at the top level of the JWT payload, not on
+  // session.user.app_metadata — that only ever holds {provider, providers}.
+  const claims = session ? decodeJwtClaims(session.access_token) : {};
   const userType: string = claims.user_type ?? "";
   const role =
     userType === "team"      ? "bluu_admin"
