@@ -754,6 +754,16 @@ alter table subscriptions add column if not exists sub_cancellation_requested_at
 alter table subscriptions add column if not exists sub_cancellation_reason text;
 alter table subscriptions add column if not exists sub_cancellation_note text;
 
+-- Portal "quick links" action buttons and the credentials vault — WP ACF
+-- fields with no Supabase equivalent yet. Parallel arrays (label[i] pairs
+-- with url[i]/value[i]), matching the WP JSON-array-as-string encoding.
+-- sensitive_field_values entries are AES-256 encrypted at rest, same as
+-- clients.contact_email/contact_phone.
+alter table subscriptions add column if not exists action_button_labels text[] default '{}';
+alter table subscriptions add column if not exists action_button_urls text[] default '{}';
+alter table subscriptions add column if not exists sensitive_field_labels text[] default '{}';
+alter table subscriptions add column if not exists sensitive_field_values text[] default '{}';
+
 -- =============================================================================
 -- CLIENTS — portal/health/follow-up fields (were WP ACF fields with no column
 -- equivalent yet; portal_email is denormalized from auth.users for cheap list

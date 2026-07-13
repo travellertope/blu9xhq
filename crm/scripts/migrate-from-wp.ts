@@ -411,8 +411,10 @@ async function migrateClients() {
   for (const p of posts) {
     if (clientMap.has(p.id)) { skipped++; continue; }
 
-    const email   = tryDecrypt(p.acf.contact_email);
-    const phone   = tryDecrypt(p.acf.contact_phone);
+    // Decrypt WP's ciphertext then re-encrypt with our own encryption pass —
+    // never store plaintext PII, even transiently between the two.
+    const email   = tryEncrypt(tryDecrypt(p.acf.contact_email));
+    const phone   = p.acf.contact_phone ? tryEncrypt(tryDecrypt(p.acf.contact_phone)) : "";
     const company = p.acf.company_name || p.title.rendered;
     const contact = p.acf.contact_name || company;
 
@@ -514,6 +516,10 @@ interface WPSubscriptionPost {
     sub_cancellation_requested_at?: string;
     sub_cancellation_reason?: string;
     sub_cancellation_note?: string;
+    sub_action_button_labels?: string;
+    sub_action_button_urls?: string;
+    sub_sensitive_field_labels?: string;
+    sub_sensitive_field_values?: string;
   };
 }
 
@@ -558,6 +564,11 @@ async function migrateSubscriptions() {
       sub_cancellation_requested_at: safeTimestamp(p.acf.sub_cancellation_requested_at),
       sub_cancellation_reason:       p.acf.sub_cancellation_reason || null,
       sub_cancellation_note:         p.acf.sub_cancellation_note || null,
+      action_button_labels:   parseJsonArray(p.acf.sub_action_button_labels) as string[],
+      action_button_urls:     parseJsonArray(p.acf.sub_action_button_urls) as string[],
+      sensitive_field_labels: parseJsonArray(p.acf.sub_sensitive_field_labels) as string[],
+      sensitive_field_values: (parseJsonArray(p.acf.sub_sensitive_field_values) as string[])
+        .map((v) => tryEncrypt(tryDecrypt(v))),
       wp_post_id:              p.id,
       created_at:              new Date(p.date).toISOString(),
     });

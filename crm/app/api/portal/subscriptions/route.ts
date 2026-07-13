@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {resolveClientPost, listSubscriptionsByClient, getServicePost, listClientFiles, type WPFilePost} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 interface ActionButton {
   label: string;
@@ -11,95 +11,70 @@ export async function GET(req: NextRequest) {
   const result = await requireClientSession(req);
   if (result instanceof NextResponse) return result;
   const { session } = result;
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
 
-  const user = session.user as { wpUserId?: number; clientId?: number | string };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-
-  if (!wpUserId && !sessionClientId) {
+  if (!clientId) {
     return NextResponse.json({ subscriptions: [] });
   }
 
   try {
-    // Prefer clientId already in the JWT — avoids a WP meta query
-    let clientPostId = sessionClientId;
-    if (!clientPostId) {
-      const clientPost = await resolveClientPost(sessionClientId, wpUserId).catch((err) => {
-        console.error("[portal/subscriptions] resolveClientPost failed:", err);
-        return null;
-      });
-      if (!clientPost) {
-        return NextResponse.json({ subscriptions: [] });
-      }
-      clientPostId = clientPost.id;
-    }
-    // Shim so the rest of the code can keep using clientPost.id
-    const clientPost = { id: clientPostId };
+    const supabase = createSupabaseServerClient();
 
-    const subsResult = await listSubscriptionsByClient(clientPost.id).catch((err) => {
-      console.error("[portal/subscriptions] listSubscriptionsByClient failed:", err);
-      return { items: [], total: 0, totalPages: 0 };
-    });
-
-    // Fetch services (deduplicated) and all client files in parallel — one call each
-    const uniqueServiceIds = Array.from(
-      new Set(subsResult.items.map((s) => s.acf.service_id).filter(Boolean) as number[])
-    );
-    const [serviceEntries, allFilesResult] = await Promise.all([
-      Promise.all(
-        uniqueServiceIds.map(async (id) => [id, await getServicePost(id).catch(() => null)] as const)
-      ),
-      listClientFiles(clientPost.id).catch(() => ({ items: [] as WPFilePost[] })),
+    const [{ data: subs, error: subsErr }, { data: files, error: filesErr }] = await Promise.all([
+      supabase
+        .from("subscriptions")
+        .select("*, services(id,title,category,description,deliverables)")
+        .eq("tenant_id", tenantId)
+        .eq("client_id", clientId),
+      supabase
+        .from("files")
+        .select("subscription_id")
+        .eq("tenant_id", tenantId)
+        .eq("client_id", clientId)
+        .not("subscription_id", "is", null),
     ]);
-    const serviceMap = new Map<number, Awaited<ReturnType<typeof getServicePost>> | null>(serviceEntries);
-    const allFiles = allFilesResult.items;
+    if (subsErr) throw subsErr;
+    if (filesErr) throw filesErr;
 
-    const subscriptions = subsResult.items.map((sub) => {
-        const filesCount = allFiles.filter((f) => f.acf.file_subscription_id === sub.id).length;
-        const service = sub.acf.service_id ? (serviceMap.get(sub.acf.service_id) ?? null) : null;
+    const filesCountBySub = new Map<string, number>();
+    for (const f of files ?? []) {
+      const key = f.subscription_id as string;
+      filesCountBySub.set(key, (filesCountBySub.get(key) ?? 0) + 1);
+    }
 
-        let actionButtons: ActionButton[] = [];
-        try {
-          const labels: string[] = JSON.parse(sub.acf.sub_action_button_labels ?? "[]");
-          const urls: string[] = JSON.parse(sub.acf.sub_action_button_urls ?? "[]");
-          actionButtons = labels.map((label, i) => ({ label, url: urls[i] ?? "#" }));
-        } catch {
-          actionButtons = [];
-        }
+    const subscriptions = (subs ?? []).map((sub: any) => {
+      const actionButtons: ActionButton[] = (sub.action_button_labels ?? []).map(
+        (label: string, i: number) => ({ label, url: sub.action_button_urls?.[i] ?? "#" })
+      );
+      const sensitiveFieldLabels = (sub.sensitive_field_labels ?? []).map((label: string) => ({ label }));
 
-        let sensitiveFieldLabels: { label: string }[] = [];
-        try {
-          const labels: string[] = JSON.parse(sub.acf.sub_sensitive_field_labels ?? "[]");
-          sensitiveFieldLabels = labels.map((label) => ({ label }));
-        } catch {
-          sensitiveFieldLabels = [];
-        }
-
-        return {
-          id: sub.id,
-          title: sub.title.rendered,
-          status: sub.acf.status,
-          amount: sub.acf.amount,
-          currency: sub.acf.currency,
-          billingCycle: sub.acf.billing_cycle,
-          nextBillingDate: sub.acf.next_billing_date ?? null,
-          startDate: sub.acf.start_date ?? null,
-          endDate: sub.acf.end_date ?? null,
-          cancellationReason: sub.acf.sub_cancellation_reason ?? null,
-          cancellationRequestedAt: sub.acf.sub_cancellation_requested_at ?? null,
-          actionButtons,
-          sensitiveFieldLabels,
-          filesCount,
-          service: service
-            ? {
-                id: service.id,
-                name: service.title.rendered,
-                category: service.acf.category ?? null,
-                description: service.acf.description ?? null,
-              }
-            : null,
-        };
-      });
+      return {
+        id: sub.id,
+        title: sub.services?.title ?? "Subscription",
+        status: sub.status,
+        amount: sub.amount,
+        currency: sub.currency,
+        billingCycle: sub.billing_cycle,
+        nextBillingDate: sub.next_billing_date ?? null,
+        startDate: sub.start_date ?? null,
+        endDate: sub.end_date ?? null,
+        cancellationReason: sub.sub_cancellation_reason ?? null,
+        cancellationRequestedAt: sub.sub_cancellation_requested_at ?? null,
+        actionButtons,
+        sensitiveFieldLabels,
+        filesCount: filesCountBySub.get(sub.id) ?? 0,
+        service: sub.services
+          ? {
+              id: sub.services.id,
+              name: sub.services.title,
+              category: sub.services.category ?? null,
+              description: sub.services.description ?? null,
+              deliverables: (sub.services.deliverables ?? []).join(", ") || null,
+            }
+          : null,
+      };
+    });
 
     return NextResponse.json({ subscriptions });
   } catch (err) {
