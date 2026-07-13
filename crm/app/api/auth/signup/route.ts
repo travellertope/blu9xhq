@@ -3,16 +3,6 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/tenant";
 
 export async function POST(req: NextRequest) {
-  // EMERGENCY DISABLE: core data routes (clients, invoices, subscriptions,
-  // communications, etc.) still read/write the single shared WordPress
-  // backend with no tenant filtering — every tenant currently sees the same
-  // data. Signup is disabled until that's fixed. See conversation/commit log
-  // for context; re-enable only after the data layer is properly tenant-scoped.
-  return NextResponse.json(
-    { error: "Signups are temporarily unavailable. Please contact hello@bluuhq.com." },
-    { status: 503 }
-  );
-
   try {
     const body = await req.json();
     const name: string        = (body.name ?? "").trim();

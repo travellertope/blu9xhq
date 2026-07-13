@@ -9,9 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-// EMERGENCY DISABLE: see /api/auth/signup/route.ts — core data routes are not
-// yet tenant-scoped, so new signups would see every other tenant's data.
-const SIGNUPS_DISABLED = true;
+const SIGNUPS_DISABLED = false;
 
 function toSlug(value: string): string {
   return value
