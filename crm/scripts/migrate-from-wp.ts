@@ -705,10 +705,15 @@ async function migrateCommunications() {
   const toInsert: Record<string, unknown>[] = [];
   for (const p of posts) {
     if (alreadyPresent.has(p.id)) continue;
-    const clientId = clientMap.get(p.acf.comm_client);
-    if (!clientId) {
-      console.warn(`     ⚠ comm wp#${p.id}: missing client(${p.acf.comm_client}) — skip`);
-      continue;
+    // comm_client is unset for tenant-wide system/audit entries (team invites,
+    // sequence syncs) — those migrate with a null client_id rather than being skipped.
+    let clientId: string | null = null;
+    if (p.acf.comm_client) {
+      clientId = clientMap.get(p.acf.comm_client) ?? null;
+      if (!clientId) {
+        console.warn(`     ⚠ comm wp#${p.id}: missing client(${p.acf.comm_client}) — skip`);
+        continue;
+      }
     }
     const loggedBy = teamUserMap.get(p.acf.comm_logged_by) ?? null;
     const redFlags = (() => {

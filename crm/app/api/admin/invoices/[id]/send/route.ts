@@ -77,7 +77,7 @@ export async function POST(
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Sent invoice ${invNumber} to ${clientEmail}`,
-      clientId: invoice.client_id as unknown as number,
+      clientId: invoice.client_id,
     });
 
     return NextResponse.json({ ok: true });

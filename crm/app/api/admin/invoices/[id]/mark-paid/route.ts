@@ -104,7 +104,7 @@ export async function POST(
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Marked invoice ${invoice.invoice_number} as paid via ${body.paymentMethod}`,
-      clientId: invoice.client_id as unknown as number,
+      clientId: invoice.client_id,
     });
 
     return NextResponse.json({ ok: true });

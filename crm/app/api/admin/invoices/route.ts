@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Created invoice ${invNumber} for client ${body.clientId}`,
-      clientId: body.clientId as unknown as number,
+      clientId: body.clientId,
     });
 
     return NextResponse.json({ invoice: mapInvoiceRow(inserted) }, { status: 201 });

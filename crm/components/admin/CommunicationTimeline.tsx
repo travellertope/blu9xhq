@@ -217,7 +217,7 @@ function EntryCard({ entry }: { entry: BluuCommunication }) {
 
           {/* Footer meta */}
           <div className="flex items-center gap-3 pt-1 text-xs text-slate-400 border-t border-slate-50">
-            {entry.type === "manual" && entry.loggedBy > 0 && (
+            {entry.type === "manual" && !!entry.loggedBy && (
               <span>Logged by user #{entry.loggedBy}</span>
             )}
             {entry.emailStatus && (
