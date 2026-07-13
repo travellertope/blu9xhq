@@ -10,6 +10,7 @@
  */
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { decodeJwtClaims } from "@/lib/jwt";
 import type { UserRole } from "@/types";
 
 // ── Session shape (mirrors the old NextAuth session.user payload) ─────────────
@@ -50,7 +51,9 @@ export async function getSession(): Promise<BluuSession | null> {
 
   if (!session) return null;
 
-  const claims = session.user.app_metadata ?? {};
+  // Custom claims (tenant_id, user_type, crm_role, ...) live at the top
+  // level of the JWT payload, not on session.user.app_metadata.
+  const claims = decodeJwtClaims(session.access_token);
   const userMeta = session.user.user_metadata ?? {};
 
   const userType: string = claims.user_type ?? "";
