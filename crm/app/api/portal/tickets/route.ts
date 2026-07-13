@@ -1,13 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import {
-  generateTicketNumber,
-  calculateSlaTargets,
-  logTicketToTimeline,
-  isValidCategory,
-  isValidPriority,
-} from "@/lib/ticket-utils";
+import { calculateSlaTargets, isValidCategory, isValidPriority } from "@/lib/ticket-utils";
+import { generateTicketNumber, logTicketToTimeline } from "@/lib/ticketServer";
 import { sendTicketCreated, sendNewTicketAdmin } from "@/lib/resend";
 
 // GET /api/portal/tickets — list client's own tickets

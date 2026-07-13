@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendTicketReply } from "@/lib/resend";
-import { logTicketToTimeline } from "@/lib/ticket-utils";
+import { logTicketToTimeline } from "@/lib/ticketServer";
 
 // POST /api/admin/tickets/[id]/replies — admin reply or internal note
 export async function POST(
