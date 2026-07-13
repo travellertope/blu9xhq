@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import {
-  getTicket,
-  getClientPost,
-  updateTicket,
-  createTicketReply,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendTicketReply } from "@/lib/resend";
 import { logTicketToTimeline } from "@/lib/ticket-utils";
 
@@ -17,13 +12,8 @@ export async function POST(
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; name?: string | null };
-  const actorWpUserId = user.wpUserId;
-  if (!actorWpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const actorId = session.user.id;
+  const tenantId = session.user.tenantId!;
 
   let body: { body?: string; replyType?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
@@ -36,58 +26,70 @@ export async function POST(
   }
 
   try {
-    const ticket = await getTicket(ticketId);
-    const acf = ticket.acf as typeof ticket.acf | false;
-    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error: fetchErr } = await supabase
+      .from("tickets")
+      .select("*, clients(contact_name,portal_email)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
 
-    if (acf.tkt_status === "closed") {
+    if (ticket.status === "closed") {
       return NextResponse.json({ error: "Cannot reply to a closed ticket" }, { status: 400 });
     }
 
-    const reply = await createTicketReply({
-      acf: {
-        reply_ticket_id: ticketId,
-        reply_author_id: actorWpUserId,
-        reply_body:      replyBody,
-        reply_type:      replyType,
-      },
-    });
+    const { data: reply, error: replyErr } = await supabase
+      .from("ticket_replies")
+      .insert({
+        ticket_id:  params.id,
+        tenant_id:  tenantId,
+        author_id:  actorId,
+        body:       replyBody,
+        reply_type: replyType,
+      })
+      .select("*")
+      .single();
+    if (replyErr) throw replyErr;
 
     // Update ticket state on first team reply
-    const acfUpdates: Record<string, string> = {};
+    const updates: Record<string, unknown> = {};
     if (replyType === "reply") {
-      if (!acf.tkt_first_response_at) {
-        acfUpdates.tkt_first_response_at = new Date().toISOString();
+      if (!ticket.first_response_at) {
+        updates.first_response_at = new Date().toISOString();
       }
-      if (acf.tkt_status === "open" || acf.tkt_status === "in_progress") {
-        acfUpdates.tkt_status = "awaiting_client";
+      if (ticket.status === "open" || ticket.status === "in_progress") {
+        updates.status = "awaiting_client";
       }
     }
-    if (Object.keys(acfUpdates).length > 0) {
-      await updateTicket(ticketId, { acf: acfUpdates }).catch(console.error);
+    if (Object.keys(updates).length > 0) {
+      await supabase.from("tickets").update(updates).eq("id", params.id).then(({ error }) => {
+        if (error) console.error("[ticket update on reply]", error);
+      });
     }
 
     // Notify client only for visible replies (not internal notes)
     if (replyType === "reply") {
-      const clientPost = await getClientPost(acf.tkt_client).catch(() => null);
-      if (clientPost?.acf.portal_email) {
+      if (ticket.clients?.portal_email) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-        const authorName = user.name ?? "BluuHQ Team";
-        void sendTicketReply(clientPost.acf.portal_email, {
-          recipientName: clientPost.acf.contact_name,
-          ticketNumber:  acf.tkt_number,
-          subject:       ticket.title.rendered.replace(/<[^>]+>/g, ""),
+        const authorName = session.user.name ?? "BluuHQ Team";
+        void sendTicketReply(ticket.clients.portal_email, {
+          recipientName: ticket.clients.contact_name,
+          ticketNumber:  ticket.tkt_number,
+          subject:       ticket.tkt_number,
           authorName,
           replyPreview:  replyBody.slice(0, 300),
-          ticketUrl:     `${appUrl}/portal/tickets/${ticketId}`,
+          ticketUrl:     `${appUrl}/portal/tickets/${params.id}`,
         }).catch(console.error);
 
         void logTicketToTimeline({
-          clientPostId: clientPost.id,
-          wpUserId:     actorWpUserId,
-          ticketNumber: acf.tkt_number,
-          subject:      ticket.title.rendered.replace(/<[^>]+>/g, ""),
-          content:      `[Team reply on ticket ${acf.tkt_number}]\n\n${replyBody}`,
+          tenantId,
+          clientId:     ticket.client_id,
+          loggedBy:     actorId,
+          ticketNumber: ticket.tkt_number,
+          subject:      ticket.tkt_number,
+          content:      `[Team reply on ticket ${ticket.tkt_number}]\n\n${replyBody}`,
           direction:    "outbound",
         });
       }

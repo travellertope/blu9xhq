@@ -140,3 +140,10 @@ export function generateFileKey(tenantId: string, clientId: string, filename: st
   const id = crypto.randomUUID();
   return `tenants/${tenantId}/clients/${clientId}/${id}-${sanitised}`;
 }
+
+/** Generate a unique, tenant-prefixed R2 key for a ticket attachment. */
+export function generateTicketAttachmentKey(tenantId: string, ticketId: string, filename: string): string {
+  const ext = filename.split(".").pop() ?? "";
+  const id = crypto.randomUUID();
+  return `tenants/${tenantId}/tickets/${ticketId}/attachments/${id}.${ext}`;
+}

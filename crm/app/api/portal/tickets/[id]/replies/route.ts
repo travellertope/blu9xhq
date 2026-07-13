@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  resolveClientPost, getTicket,
-  updateTicket,
-  createTicketReply,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendTicketReply } from "@/lib/resend";
 import { logTicketToTimeline } from "@/lib/ticket-utils";
 
@@ -16,14 +12,10 @@ export async function POST(
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; clientId?: number | string };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-  if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  const userId = session.user.id;
+  if (!clientId) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   let body: { body?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
@@ -34,36 +26,37 @@ export async function POST(
   }
 
   try {
-    const [clientPost, ticket] = await Promise.all([
-      resolveClientPost(sessionClientId, wpUserId),
-      getTicket(ticketId),
-    ]);
-
-    if (!clientPost) return NextResponse.json({ error: "Not found" }, { status: 404 });
-    const acf = ticket.acf as typeof ticket.acf | false;
-    if (!acf || acf.tkt_client !== clientPost.id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-    if (acf.tkt_status === "closed") {
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error: fetchErr } = await supabase
+      .from("tickets")
+      .select("*, clients(contact_name)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!ticket) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (ticket.status === "closed") {
       return NextResponse.json({ error: "Cannot reply to a closed ticket" }, { status: 400 });
     }
 
-    const reply = await createTicketReply({
-      acf: {
-        reply_ticket_id: ticketId,
-        reply_author_id: wpUserId,
-        reply_body:      replyBody,
-        reply_type:      "reply",
-      },
-    });
+    const { data: reply, error: replyErr } = await supabase
+      .from("ticket_replies")
+      .insert({
+        ticket_id:  params.id,
+        tenant_id:  tenantId,
+        author_id:  userId,
+        body:       replyBody,
+        reply_type: "reply",
+      })
+      .select("*")
+      .single();
+    if (replyErr) throw replyErr;
 
     // Status transition: if awaiting_client → in_progress
-    const updates: Record<string, string> = {};
-    if (acf.tkt_status === "awaiting_client") {
-      updates.tkt_status = "in_progress";
-    }
-    if (Object.keys(updates).length > 0) {
-      await updateTicket(ticketId, { acf: updates }).catch(console.error);
+    if (ticket.status === "awaiting_client") {
+      await supabase.from("tickets").update({ status: "in_progress" }).eq("id", params.id)
+        .then(({ error }) => { if (error) console.error(error); });
     }
 
     const adminEmail = process.env.RESEND_REPLY_TO ?? process.env.RESEND_FROM_EMAIL;
@@ -71,20 +64,21 @@ export async function POST(
     if (adminEmail) {
       void sendTicketReply(adminEmail, {
         recipientName:  "BluuHQ Team",
-        ticketNumber:   acf.tkt_number,
-        subject:        ticket.title.rendered.replace(/<[^>]+>/g, ""),
-        authorName:     clientPost.acf.contact_name,
+        ticketNumber:   ticket.tkt_number,
+        subject:        ticket.tkt_number,
+        authorName:     ticket.clients?.contact_name ?? "Client",
         replyPreview:   replyBody.slice(0, 300),
-        ticketUrl:      `${appUrl}/admin/tickets/${ticketId}`,
+        ticketUrl:      `${appUrl}/admin/tickets/${params.id}`,
       }).catch(console.error);
     }
 
     void logTicketToTimeline({
-      clientPostId: clientPost.id,
-      wpUserId,
-      ticketNumber: acf.tkt_number,
-      subject: ticket.title.rendered.replace(/<[^>]+>/g, ""),
-      content: `[Client reply on ticket ${acf.tkt_number}]\n\n${replyBody}`,
+      tenantId,
+      clientId,
+      loggedBy: userId,
+      ticketNumber: ticket.tkt_number,
+      subject: ticket.tkt_number,
+      content: `[Client reply on ticket ${ticket.tkt_number}]\n\n${replyBody}`,
       direction: "inbound",
     });
 

@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { listTickets, getClientPost, wpRestFetch, type WPUser } from "@/lib/wp-api";
+import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
 
-// GET /api/admin/tickets/dashboard — v_open_tickets_dashboard equivalent
+// GET /api/admin/tickets/dashboard — ticket list + summary for the admin tickets page
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   const { searchParams } = new URL(req.url);
   const statusFilter   = searchParams.get("status")   ?? null;
@@ -13,63 +14,62 @@ export async function GET(req: NextRequest) {
 
   try {
     const now = new Date().toISOString();
+    const supabase = createSupabaseServerClient();
 
-    const result = await listTickets({ per_page: 100 });
-    // When no status filter is set, default to non-closed (dashboard view)
-    const openTickets = result.items.filter((t) => {
-      if (statusFilter) return t.acf.tkt_status === statusFilter;
-      return t.acf.tkt_status !== "closed";
-    }).filter((t) => {
-      if (priorityFilter) return t.acf.tkt_priority === priorityFilter;
-      return true;
-    });
+    let query = supabase
+      .from("tickets")
+      .select("*, clients(company_name,contact_name), ticket_replies(count)")
+      .eq("tenant_id", tenantId);
 
-    // Enrich with client names and assignee names
-    const enriched = await Promise.all(
-      openTickets.map(async (t) => {
-        let clientName = `Client #${t.acf.tkt_client}`;
-        let assignedToName: string | null = null;
+    if (statusFilter) query = query.eq("status", statusFilter);
+    else query = query.neq("status", "closed");
+    if (priorityFilter) query = query.eq("priority", priorityFilter);
 
-        try {
-          const client = await getClientPost(t.acf.tkt_client);
-          clientName = client.acf.company_name || client.acf.contact_name;
-        } catch { /* non-fatal */ }
+    const { data, error } = await query;
+    if (error) throw error;
 
-        if (t.acf.tkt_assigned_to) {
-          try {
-            const assignee = await wpRestFetch<WPUser>(`/wp/v2/users/${t.acf.tkt_assigned_to}`);
-            assignedToName = assignee.name ?? null;
-          } catch { /* non-fatal */ }
+    // Resolve assignee names in bulk via the admin auth API
+    const assigneeIds = Array.from(new Set((data ?? []).map((t: any) => t.assigned_to).filter(Boolean)));
+    const assigneeNames = new Map<string, string>();
+    if (assigneeIds.length > 0) {
+      const admin = createSupabaseAdminClient();
+      const { data: { users } } = await admin.auth.admin.listUsers({ perPage: 1000 });
+      for (const u of users) {
+        if (assigneeIds.includes(u.id)) {
+          assigneeNames.set(u.id, (u.user_metadata as any)?.full_name ?? u.email ?? "Unknown");
         }
+      }
+    }
 
-        const responseTarget = t.acf.tkt_sla_response_target;
-        const resolveTarget  = t.acf.tkt_sla_resolve_target;
-        const slaStatus =
-          !t.acf.tkt_first_response_at && responseTarget && now > responseTarget
-            ? "response_breached"
-            : !t.acf.tkt_resolved_at && resolveTarget && now > resolveTarget
-            ? "resolve_breached"
-            : "on_track";
+    const enriched = (data ?? []).map((t: any) => {
+      const responseTarget = t.sla_response_target;
+      const resolveTarget  = t.sla_resolve_target;
+      const slaStatus =
+        !t.first_response_at && responseTarget && now > responseTarget
+          ? "response_breached"
+          : !t.resolved_at && resolveTarget && now > resolveTarget
+          ? "resolve_breached"
+          : "on_track";
 
-        return {
-          id:               t.id,
-          ticketNumber:     t.acf.tkt_number,
-          subject:          t.title.rendered.replace(/<[^>]+>/g, ""),
-          status:           t.acf.tkt_status,
-          priority:         t.acf.tkt_priority,
-          category:         t.acf.tkt_category,
-          clientId:         t.acf.tkt_client,
-          clientName,
-          assignedTo:       t.acf.tkt_assigned_to ?? null,
-          assignedToName,
-          slaResponseTarget: responseTarget ?? null,
-          slaResolveTarget:  resolveTarget ?? null,
-          firstResponseAt:   t.acf.tkt_first_response_at ?? null,
-          slaStatus,
-          createdAt:         t.date,
-        };
-      })
-    );
+      return {
+        id:               t.id,
+        ticketNumber:     t.tkt_number,
+        subject:          t.tkt_number,
+        status:           t.status,
+        priority:         t.priority,
+        category:         t.category,
+        clientId:         t.client_id,
+        clientName:       t.clients?.company_name || t.clients?.contact_name || `Client ${t.client_id}`,
+        assignedTo:       t.assigned_to ?? null,
+        assignedToName:   t.assigned_to ? (assigneeNames.get(t.assigned_to) ?? null) : null,
+        slaResponseTarget: responseTarget ?? null,
+        slaResolveTarget:  resolveTarget ?? null,
+        firstResponseAt:   t.first_response_at ?? null,
+        slaStatus,
+        replyCount:        t.ticket_replies?.[0]?.count ?? 0,
+        createdAt:         t.created_at,
+      };
+    });
 
     // Sort: urgent → high → normal → low, then by createdAt asc
     const priorityOrder: Record<string, number> = { urgent: 1, high: 2, normal: 3, low: 4 };

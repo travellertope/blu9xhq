@@ -10,9 +10,10 @@ export async function GET(
 ) {
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
+  const tenantId = auth.session.user.tenantId!;
 
   const key = req.nextUrl.searchParams.get("key");
-  if (!key || !key.startsWith("tickets/")) {
+  if (!key || !key.startsWith(`tenants/${tenantId}/tickets/`)) {
     return NextResponse.json({ error: "Invalid key" }, { status: 400 });
   }
 

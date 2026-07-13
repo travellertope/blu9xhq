@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import {
-  getTicket,
-  updateTicket,
-  getClientPost,
-  listTicketReplies,
-  listTicketAttachments,
-  createTicketStatusLog,
-  deleteWPTicket,
-  type TicketReplyItem,
-  type TicketAttachmentItem,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { deleteFromR2 } from "@/lib/r2";
 import { sendTicketStatusChanged } from "@/lib/resend";
 import { isValidStatus, isValidPriority, logTicketToTimeline } from "@/lib/ticket-utils";
@@ -22,58 +12,59 @@ export async function GET(
 ) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const ticket = await getTicket(ticketId);
-    const acf = ticket.acf as typeof ticket.acf | false;
-    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error } = await supabase
+      .from("tickets")
+      .select("*, clients(company_name,contact_name,portal_email)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
 
-    const [repliesRaw, attachmentsRaw, clientPost] = await Promise.all([
-      listTicketReplies(ticketId).catch((): TicketReplyItem[] => []),
-      listTicketAttachments(ticketId).catch((): TicketAttachmentItem[] => []),
-      getClientPost(acf.tkt_client).catch(() => null),
+    const [{ data: replies }, { data: attachments }] = await Promise.all([
+      supabase.from("ticket_replies").select("*").eq("ticket_id", ticket.id).order("created_at", { ascending: true }),
+      supabase.from("ticket_attachments").select("*").eq("ticket_id", ticket.id).order("created_at", { ascending: true }),
     ]);
 
     return NextResponse.json({
-      id: ticket.id,
-      ticketNumber:         acf.tkt_number,
-      subject:              ticket.title.rendered.replace(/<[^>]+>/g, ""),
-      clientId:             acf.tkt_client,
-      clientName:           clientPost ? (clientPost.acf.company_name || clientPost.acf.contact_name) : null,
-      clientEmail:          clientPost?.acf.portal_email ?? null,
-      submittedBy:          acf.tkt_submitted_by,
-      assignedTo:           acf.tkt_assigned_to ?? null,
-      category:             acf.tkt_category,
-      priority:             acf.tkt_priority,
-      status:               acf.tkt_status,
-      retainerId:           acf.tkt_retainer_id ?? null,
-      slaResponseTarget:    acf.tkt_sla_response_target,
-      slaResolveTarget:     acf.tkt_sla_resolve_target,
-      firstResponseAt:      acf.tkt_first_response_at ?? null,
-      resolvedAt:           acf.tkt_resolved_at ?? null,
-      closedAt:             acf.tkt_closed_at ?? null,
-      createdAt:            ticket.date,
-      replies: repliesRaw
-        .filter((r) => r.reply_body)
-        .map((r) => ({
-          id:        r.id,
-          authorId:  r.reply_author_id,
-          body:      r.reply_body,
-          replyType: r.reply_type,
-          createdAt: r.date,
-        })),
-      attachments: attachmentsRaw.map((a) => ({
+      id:                   ticket.id,
+      ticketNumber:         ticket.tkt_number,
+      subject:              ticket.tkt_number,
+      clientId:             ticket.client_id,
+      clientName:           ticket.clients?.company_name || ticket.clients?.contact_name || null,
+      clientEmail:          ticket.clients?.portal_email ?? null,
+      submittedBy:          ticket.submitted_by,
+      assignedTo:           ticket.assigned_to ?? null,
+      category:             ticket.category,
+      priority:             ticket.priority,
+      status:               ticket.status,
+      retainerId:           ticket.retainer_id ?? null,
+      slaResponseTarget:    ticket.sla_response_target,
+      slaResolveTarget:     ticket.sla_resolve_target,
+      firstResponseAt:      ticket.first_response_at ?? null,
+      resolvedAt:           ticket.resolved_at ?? null,
+      closedAt:             ticket.closed_at ?? null,
+      createdAt:            ticket.created_at,
+      replies: (replies ?? []).map((r: any) => ({
+        id:        r.id,
+        authorId:  r.author_id,
+        body:      r.body,
+        replyType: r.reply_type,
+        createdAt: r.created_at,
+      })),
+      attachments: (attachments ?? []).map((a: any) => ({
         id:          a.id,
-        fileName:    a.att_file_name,
-        fileUrl:     a.att_file_url,
-        fileType:    a.att_file_type,
-        fileSizeKb:  a.att_file_size_kb,
-        uploadedBy:  a.att_uploaded_by,
-        replyId:     a.att_reply_id,
-        createdAt:   a.date,
+        fileName:    a.file_name,
+        fileUrl:     a.r2_key,
+        fileType:    a.mime_type,
+        fileSizeKb:  a.size_kb,
+        uploadedBy:  a.uploaded_by,
+        replyId:     a.reply_id,
+        createdAt:   a.created_at,
       })),
     });
   } catch (err) {
@@ -90,14 +81,10 @@ export async function PATCH(
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
+  const actorId = session.user.id;
+  const tenantId = session.user.tenantId!;
 
-  const user = session.user as { wpUserId?: number };
-  const actorWpUserId = user.wpUserId;
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
-
-  let body: { status?: string; priority?: string; assignedTo?: number; note?: string };
+  let body: { status?: string; priority?: string; assignedTo?: string; note?: string };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
 
   if (body.status && !isValidStatus(body.status)) {
@@ -108,61 +95,70 @@ export async function PATCH(
   }
 
   try {
-    const ticket = await getTicket(ticketId);
-    const acf = ticket.acf as typeof ticket.acf | false;
-    if (!acf) return NextResponse.json({ error: "Failed to load ticket" }, { status: 500 });
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error: fetchErr } = await supabase
+      .from("tickets")
+      .select("*, clients(contact_name,portal_email)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!ticket) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
 
-    const clientPost = await getClientPost(acf.tkt_client).catch(() => null);
-
-    const acfUpdates: Record<string, string | number> = {};
-    const prevStatus = acf.tkt_status;
+    const updates: Record<string, unknown> = {};
+    const prevStatus = ticket.status;
 
     if (body.status && body.status !== prevStatus) {
-      acfUpdates.tkt_status = body.status;
-      if (body.status === "resolved") acfUpdates.tkt_resolved_at = new Date().toISOString();
-      if (body.status === "closed")   acfUpdates.tkt_closed_at   = new Date().toISOString();
+      updates.status = body.status;
+      if (body.status === "resolved") updates.resolved_at = new Date().toISOString();
+      if (body.status === "closed")   updates.closed_at   = new Date().toISOString();
     }
-    if (body.priority) acfUpdates.tkt_priority  = body.priority;
-    if (body.assignedTo !== undefined) acfUpdates.tkt_assigned_to = body.assignedTo;
+    if (body.priority) updates.priority = body.priority;
+    if (body.assignedTo !== undefined) updates.assigned_to = body.assignedTo || null;
 
-    if (Object.keys(acfUpdates).length === 0) {
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json({ ok: true, message: "No changes" });
     }
 
-    await updateTicket(ticketId, { acf: acfUpdates });
+    const { error: updateErr } = await supabase
+      .from("tickets")
+      .update(updates)
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     // Log status change to audit trail
-    if (body.status && body.status !== prevStatus && actorWpUserId) {
-      await createTicketStatusLog({
-        acf: {
-          log_ticket_id:   ticketId,
-          log_changed_by:  actorWpUserId,
-          log_from_status: prevStatus,
-          log_to_status:   body.status,
-          log_note:        body.note ?? "",
-          log_changed_at:  new Date().toISOString(),
-        },
-      }).catch(console.error);
+    if (body.status && body.status !== prevStatus) {
+      await supabase.from("ticket_status_log").insert({
+        ticket_id:   params.id,
+        tenant_id:   tenantId,
+        changed_by:  actorId,
+        from_status: prevStatus,
+        to_status:   body.status,
+        note:        body.note ?? null,
+        changed_at:  new Date().toISOString(),
+      }).then(({ error }) => { if (error) console.error("[status log]", error); });
 
       // Notify client of status change
-      if (clientPost?.acf.portal_email) {
+      if (ticket.clients?.portal_email) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
-        void sendTicketStatusChanged(clientPost.acf.portal_email, {
-          clientName:  clientPost.acf.contact_name,
-          ticketNumber: acf.tkt_number,
-          subject:     ticket.title.rendered.replace(/<[^>]+>/g, ""),
+        void sendTicketStatusChanged(ticket.clients.portal_email, {
+          clientName:  ticket.clients.contact_name,
+          ticketNumber: ticket.tkt_number,
+          subject:     ticket.tkt_number,
           fromStatus:  prevStatus,
           toStatus:    body.status,
           note:        body.note,
-          ticketUrl:   `${appUrl}/portal/tickets/${ticketId}`,
+          ticketUrl:   `${appUrl}/portal/tickets/${params.id}`,
         }).catch(console.error);
 
         // Log status change to client timeline
         void logTicketToTimeline({
-          clientPostId: clientPost.id,
-          wpUserId:     actorWpUserId ?? 0,
-          ticketNumber: acf.tkt_number,
-          subject:      ticket.title.rendered.replace(/<[^>]+>/g, ""),
+          tenantId,
+          clientId:     ticket.client_id,
+          loggedBy:     actorId,
+          ticketNumber: ticket.tkt_number,
+          subject:      ticket.tkt_number,
           content:      `Ticket status updated: ${prevStatus} → ${body.status}${body.note ? `\n\n${body.note}` : ""}`,
           direction:    "outbound",
         });
@@ -183,14 +179,27 @@ export async function DELETE(
 ) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const { att_file_urls } = await deleteWPTicket(ticketId);
+    const supabase = createSupabaseServerClient();
+    const { data: attachments } = await supabase
+      .from("ticket_attachments")
+      .select("r2_key")
+      .eq("ticket_id", params.id)
+      .eq("tenant_id", tenantId);
+
+    const { error, count } = await supabase
+      .from("tickets")
+      .delete({ count: "exact" })
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (error) throw error;
+    if (!count) return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
+
     // Delete R2 files concurrently, best-effort (don't fail if one is missing)
-    await Promise.allSettled(att_file_urls.filter(Boolean).map((key) => deleteFromR2(key)));
+    await Promise.allSettled((attachments ?? []).map((a) => deleteFromR2(a.r2_key)));
+
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[DELETE /api/admin/tickets/[id]]", err);

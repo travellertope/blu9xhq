@@ -30,6 +30,7 @@ export async function GET(req: NextRequest) {
       const u = userMap.get(m.user_id);
       return {
         id:                       m.id,
+        userId:                   m.user_id,
         name:                     (u?.user_metadata as any)?.full_name ?? u?.email ?? "Unknown",
         email:                    u?.email ?? "",
         bluuhq_role:              m.crm_role,

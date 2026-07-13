@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  resolveClientPost, getTicket,
-  listTicketReplies,
-  listTicketAttachments,
-  type TicketReplyItem,
-  type TicketAttachmentItem,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 // GET /api/portal/tickets/[id] — get single ticket with thread (no internal notes)
 export async function GET(
@@ -16,59 +10,53 @@ export async function GET(
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; clientId?: number | string };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-  if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
-
-  const ticketId = parseInt(params.id, 10);
-  if (isNaN(ticketId)) return NextResponse.json({ error: "Invalid ticket ID" }, { status: 400 });
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  if (!clientId) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   try {
-    const [clientPost, ticket] = await Promise.all([
-      resolveClientPost(sessionClientId, wpUserId),
-      getTicket(ticketId),
-    ]);
+    const supabase = createSupabaseServerClient();
+    const { data: ticket, error } = await supabase
+      .from("tickets")
+      .select("*")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!ticket) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    if (!clientPost) return NextResponse.json({ error: "Not found" }, { status: 404 });
-
-    const acf = ticket.acf as typeof ticket.acf | false;
-    if (!acf || acf.tkt_client !== clientPost.id) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-
-    const [repliesRaw, attachmentsRaw] = await Promise.all([
-      listTicketReplies(ticketId).catch((): TicketReplyItem[] => []),
-      listTicketAttachments(ticketId).catch((): TicketAttachmentItem[] => []),
+    const [{ data: repliesRaw }, { data: attachmentsRaw }] = await Promise.all([
+      supabase.from("ticket_replies").select("*").eq("ticket_id", ticket.id).order("created_at", { ascending: true }),
+      supabase.from("ticket_attachments").select("*").eq("ticket_id", ticket.id).order("created_at", { ascending: true }),
     ]);
 
     // Filter out internal_note replies for client view
-    const replies = repliesRaw
-      .filter((r) => r.reply_type === "reply" && r.reply_body)
-      .map((r) => ({ id: r.id, authorId: r.reply_author_id, body: r.reply_body, replyType: r.reply_type, createdAt: r.date }));
+    const replies = (repliesRaw ?? [])
+      .filter((r: any) => r.reply_type === "reply" && r.body)
+      .map((r: any) => ({ id: r.id, authorId: r.author_id, body: r.body, replyType: r.reply_type, createdAt: r.created_at }));
 
-    const attachments = attachmentsRaw.map((a) => ({
+    const attachments = (attachmentsRaw ?? []).map((a: any) => ({
       id:         a.id,
-      fileName:   a.att_file_name,
-      fileUrl:    a.att_file_url,
-      fileType:   a.att_file_type,
-      fileSizeKb: a.att_file_size_kb,
-      uploadedBy: a.att_uploaded_by,
-      replyId:    a.att_reply_id,
-      createdAt:  a.date,
+      fileName:   a.file_name,
+      fileUrl:    a.r2_key,
+      fileType:   a.mime_type,
+      fileSizeKb: a.size_kb,
+      uploadedBy: a.uploaded_by,
+      replyId:    a.reply_id,
+      createdAt:  a.created_at,
     }));
 
     return NextResponse.json({
       id: ticket.id,
-      ticketNumber: acf.tkt_number,
-      subject: ticket.title.rendered.replace(/<[^>]+>/g, ""),
-      category: acf.tkt_category,
-      priority: acf.tkt_priority,
-      status: acf.tkt_status,
-      firstResponseAt: acf.tkt_first_response_at ?? null,
-      resolvedAt: acf.tkt_resolved_at ?? null,
-      createdAt: ticket.date,
+      ticketNumber: ticket.tkt_number,
+      subject: ticket.tkt_number,
+      category: ticket.category,
+      priority: ticket.priority,
+      status: ticket.status,
+      firstResponseAt: ticket.first_response_at ?? null,
+      resolvedAt: ticket.resolved_at ?? null,
+      createdAt: ticket.created_at,
       replies,
       attachments,
       // SLA fields intentionally omitted from client responses

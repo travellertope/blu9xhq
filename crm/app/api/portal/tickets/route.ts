@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireClientSession } from "@/lib/apiPermissions";
-import {
-  resolveClientPost, listTickets,
-  createTicket,
-  createTicketReply,
-  createTicketStatusLog,
-} from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   generateTicketNumber,
   calculateSlaTargets,
@@ -20,33 +15,36 @@ export async function GET(req: NextRequest) {
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; clientId?: number | string };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-  if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  if (!clientId) return NextResponse.json({ tickets: [] });
 
   try {
-    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
-    if (!clientPost) return NextResponse.json({ tickets: [] });
-
+    const supabase = createSupabaseServerClient();
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status") ?? undefined;
 
-    const result = await listTickets({ client_id: clientPost.id, per_page: 50 });
+    let query = supabase
+      .from("tickets")
+      .select("*")
+      .eq("tenant_id", tenantId)
+      .eq("client_id", clientId)
+      .order("created_at", { ascending: false });
+    if (status) query = query.eq("status", status);
 
-    const tickets = result.items
-      .filter((t) => !status || t.acf.tkt_status === status)
-      .map((t) => ({
-        id: t.id,
-        ticketNumber: t.acf.tkt_number,
-        subject: t.title.rendered.replace(/<[^>]+>/g, ""),
-        category: t.acf.tkt_category,
-        priority: t.acf.tkt_priority,
-        status: t.acf.tkt_status,
-        createdAt: t.date,
-        // Never expose SLA fields or sla_alerted_at to clients
-      }));
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const tickets = (data ?? []).map((t: any) => ({
+      id:           t.id,
+      ticketNumber: t.tkt_number,
+      subject:      t.tkt_number,
+      category:     t.category,
+      priority:     t.priority,
+      status:       t.status,
+      createdAt:    t.created_at,
+      // Never expose SLA fields or sla_alerted_at to clients
+    }));
 
     return NextResponse.json({ tickets });
   } catch (err) {
@@ -60,18 +58,17 @@ export async function POST(req: NextRequest) {
   const auth = await requireClientSession(req);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
-
-  const user = session.user as { wpUserId?: number; clientId?: number | string; email?: string | null };
-  const wpUserId = user.wpUserId;
-  const sessionClientId = user.clientId ? Number(user.clientId) : undefined;
-  if (!wpUserId) return NextResponse.json({ error: "No WP user ID" }, { status: 400 });
+  const clientId = session.user.clientId;
+  const tenantId = session.user.tenantId!;
+  const userId = session.user.id;
+  if (!clientId) return NextResponse.json({ error: "Client not found" }, { status: 404 });
 
   let body: {
     subject?: string;
     description?: string;
     category?: string;
     priority?: string;
-    retainerId?: number;
+    retainerId?: string;
   };
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid body" }, { status: 400 }); }
 
@@ -94,53 +91,61 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const clientPost = await resolveClientPost(sessionClientId, wpUserId);
-    if (!clientPost) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    const supabase = createSupabaseServerClient();
+    const { data: client } = await supabase
+      .from("clients")
+      .select("contact_name, company_name, portal_email")
+      .eq("id", clientId)
+      .maybeSingle();
 
-    const ticketNumber = await generateTicketNumber();
+    const ticketNumber = await generateTicketNumber(tenantId);
     const sla = calculateSlaTargets(priority);
 
-    const ticket = await createTicket({
-      title: ticketNumber,
-      acf: {
-        tkt_number:              ticketNumber,
-        tkt_client:              clientPost.id,
-        tkt_submitted_by:        wpUserId,
-        tkt_category:            category,
-        tkt_priority:            priority,
-        tkt_status:              "open",
-        tkt_sla_response_target: sla.sla_response_target,
-        tkt_sla_resolve_target:  sla.sla_resolve_target,
-        ...(body.retainerId ? { tkt_retainer_id: body.retainerId } : {}),
-      },
-    });
+    const { data: ticket, error } = await supabase
+      .from("tickets")
+      .insert({
+        tenant_id:           tenantId,
+        client_id:           clientId,
+        submitted_by:        userId,
+        tkt_number:          ticketNumber,
+        category,
+        priority,
+        status:              "open",
+        sla_response_target: sla.sla_response_target,
+        sla_resolve_target:  sla.sla_resolve_target,
+        retainer_id:         body.retainerId || null,
+      })
+      .select("*")
+      .single();
+    if (error) throw error;
 
     // Store initial description as first reply so it appears in the thread
-    await createTicketReply({
-      acf: {
-        reply_ticket_id: ticket.id,
-        reply_author_id: wpUserId,
-        reply_body:      description,
-        reply_type:      "reply",
-      },
-    }).catch((e) => console.error("[createTicket] Failed to store initial reply:", e));
+    await supabase.from("ticket_replies").insert({
+      ticket_id:  ticket.id,
+      tenant_id:  tenantId,
+      author_id:  userId,
+      body:       description,
+      reply_type: "reply",
+    }).then(({ error: replyErr }) => {
+      if (replyErr) console.error("[createTicket] Failed to store initial reply:", replyErr);
+    });
 
     // Log initial status to audit trail
-    await createTicketStatusLog({
-      acf: {
-        log_ticket_id:  ticket.id,
-        log_changed_by: wpUserId,
-        log_from_status: "",
-        log_to_status:  "open",
-        log_note:       "Ticket submitted by client",
-        log_changed_at: new Date().toISOString(),
-      },
-    }).catch(console.error);
+    await supabase.from("ticket_status_log").insert({
+      ticket_id:   ticket.id,
+      tenant_id:   tenantId,
+      changed_by:  userId,
+      from_status: null,
+      to_status:   "open",
+      note:        "Ticket submitted by client",
+      changed_at:  new Date().toISOString(),
+    }).then(({ error: logErr }) => { if (logErr) console.error(logErr); });
 
     // Log to communication timeline
     void logTicketToTimeline({
-      clientPostId: clientPost.id,
-      wpUserId,
+      tenantId,
+      clientId,
+      loggedBy: userId,
       ticketNumber,
       subject,
       content: `[Support ticket submitted]\n\n${description}`,
@@ -150,10 +155,10 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
     // Email confirmation to client
-    const email = clientPost.acf.portal_email;
+    const email = client?.portal_email;
     if (email) {
       void sendTicketCreated(email, {
-        clientName: clientPost.acf.contact_name,
+        clientName: client?.contact_name ?? "",
         ticketNumber,
         subject,
         category: category.replace(/_/g, " "),
@@ -165,8 +170,8 @@ export async function POST(req: NextRequest) {
     // Notify admin
     const adminEmail = process.env.ADMIN_EMAIL ?? "hello@bluuhq.com";
     void sendNewTicketAdmin(adminEmail, {
-      clientName:    clientPost.acf.contact_name || clientPost.title.rendered,
-      clientCompany: clientPost.acf.company_name,
+      clientName:    client?.contact_name || client?.company_name || "",
+      clientCompany: client?.company_name,
       ticketNumber,
       subject,
       category: category.replace(/_/g, " "),
