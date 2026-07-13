@@ -664,6 +664,14 @@ alter table tenants add column if not exists from_email_name text;
 alter table files add column if not exists subscription_id uuid references subscriptions(id);
 
 -- =============================================================================
+-- INVOICES — human-facing payment method (WP's inv_payment_method); distinct
+-- from payment_gateway, which stays constrained to the three gateway
+-- integrations. "Bank Transfer"/"Cash" aren't gateways, just how the admin
+-- recorded a manual payment, so they live here uncontrolled.
+-- =============================================================================
+alter table invoices add column if not exists payment_method text;
+
+-- =============================================================================
 -- SUBSCRIPTIONS — status vocabulary + cancellation-request fields (WP ACF
 -- fields with no Supabase equivalent yet; written by the client portal's
 -- cancel flow, which stays on WordPress until that route is migrated)

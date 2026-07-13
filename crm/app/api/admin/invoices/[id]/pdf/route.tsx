@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { uploadToR2 } from "@/lib/r2";
 import { type DocumentProps, Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React, { type ReactElement, type JSXElementConstructor } from "react";
@@ -229,15 +229,18 @@ export async function POST(
 ) {
   const auth = await requireSession(req);
   if (auth instanceof NextResponse) return auth;
-
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
+  const tenantId = auth.session.user.tenantId!;
 
   try {
-    const [invoice, clientPostResult] = await Promise.all([
-      getInvoice(postId),
+    const supabase = createSupabaseServerClient();
+
+    const [{ data: invoice, error: fetchErr }, logoSrc] = await Promise.all([
+      supabase
+        .from("invoices")
+        .select("*, clients(contact_name, company_name)")
+        .eq("id", params.id)
+        .eq("tenant_id", tenantId)
+        .maybeSingle(),
       // logo loaded in parallel — no await needed before createElement
       Promise.resolve((() => {
         try {
@@ -249,38 +252,38 @@ export async function POST(
         return undefined;
       })()),
     ]);
-    const clientPost = await getClientPost(invoice.acf.inv_client);
-    const logoSrc = clientPostResult;
+    if (fetchErr) throw fetchErr;
+    if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-    let lineItems: LineItem[] = [];
-    try {
-      lineItems = JSON.parse(invoice.acf.inv_line_items ?? "[]");
-    } catch {
-      lineItems = [];
-    }
+    const lineItems: LineItem[] = invoice.line_items ?? [];
 
     const pdfElement = React.createElement(InvoicePDF, {
-      invNumber: invoice.acf.inv_number,
-      issuedDate: invoice.acf.inv_issued_date,
-      dueDate: invoice.acf.inv_due_date,
-      clientName: clientPost.acf.contact_name || clientPost.title.rendered,
-      clientCompany: clientPost.acf.company_name,
+      invNumber: invoice.invoice_number,
+      issuedDate: invoice.issued_date,
+      dueDate: invoice.due_date,
+      clientName: invoice.clients?.contact_name || invoice.clients?.company_name || "",
+      clientCompany: invoice.clients?.company_name,
       lineItems,
-      total: invoice.acf.inv_total,
-      currency: invoice.acf.inv_currency,
-      notes: invoice.acf.inv_notes,
+      total: invoice.total,
+      currency: invoice.currency,
+      notes: invoice.notes,
       logoSrc,
     }) as unknown as ReactElement<DocumentProps, string | JSXElementConstructor<DocumentProps>>;
 
     const pdfBuffer = await renderToBuffer(pdfElement);
 
-    const invNumber = invoice.acf.inv_number.replace(/[^a-zA-Z0-9-]/g, "-");
-    const key = `invoices/${postId}/invoice-${invNumber}.pdf`;
+    const invNumber = invoice.invoice_number.replace(/[^a-zA-Z0-9-]/g, "-");
+    const key = `invoices/${invoice.id}/invoice-${invNumber}.pdf`;
 
     await uploadToR2(key, pdfBuffer, "application/pdf");
 
     // Store just the R2 object key — download routes generate presigned URLs from it
-    await updateInvoice(postId, { acf: { inv_pdf_url: key } });
+    const { error: updateErr } = await supabase
+      .from("invoices")
+      .update({ pdf_url: key })
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     return new Response(new Uint8Array(pdfBuffer), {
       status: 200,

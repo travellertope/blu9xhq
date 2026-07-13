@@ -1,31 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { exitEnrollmentsForClient } from "@/lib/sequenceExits";
+
+const GATEWAY_MAP: Record<string, string> = { stripe: "stripe", paystack: "paystack" };
 
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
-
-  let invoice;
-  try {
-    invoice = await getInvoice(postId);
-  } catch {
-    return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
-  }
-
-  const clientId = invoice.acf.inv_client;
-  const auth = await requirePermission(req, "mark_invoices_paid", clientId);
+  const auth = await requirePermission(req, "mark_invoices_paid");
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
+  const tenantId = user.tenantId!;
 
   let body: {
     paymentMethod: string;
@@ -44,25 +34,40 @@ export async function POST(
   }
 
   try {
-    await updateInvoice(postId, {
-      acf: {
-        inv_status: "paid",
-        inv_paid_at: body.paidAt,
-        inv_payment_method: body.paymentMethod,
-        inv_payment_gateway_ref: body.reference,
-      },
-    });
+    const supabase = createSupabaseServerClient();
+
+    const { data: invoice, error: fetchErr } = await supabase
+      .from("invoices")
+      .select("*, clients(contact_name, company_name, contact_email, portal_email)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+
+    const { error: updateErr } = await supabase
+      .from("invoices")
+      .update({
+        status:             "paid",
+        paid_date:          body.paidAt,
+        payment_method:     body.paymentMethod,
+        payment_gateway:    GATEWAY_MAP[body.paymentMethod] ?? "manual",
+        gateway_payment_id: body.reference || null,
+      })
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     // Send payment receipt email
     try {
-      const clientPost = await getClientPost(clientId);
-      const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
-      const clientName = clientPost.acf.contact_name || clientPost.title.rendered;
+      const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
+      const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
 
       if (clientEmail) {
-        const invNumber = invoice.acf.inv_number;
-        const total = invoice.acf.inv_total;
-        const currency = invoice.acf.inv_currency;
+        const invNumber = invoice.invoice_number;
+        const total = invoice.total;
+        const currency = invoice.currency;
 
         await sendEmailHtml({
           to: clientEmail,
@@ -90,15 +95,16 @@ export async function POST(
       console.error("[mark-paid] Failed to send receipt email:", emailErr);
     }
 
-    // Exit sequences with invoice_paid condition (fire and forget)
-    void exitEnrollmentsForClient(clientId, "invoice_paid").catch(console.error);
+    // Exit sequences with invoice_paid condition (fire and forget) — no-op until
+    // sequences move off WP, same caveat as subscriptions/[id]/route.ts.
+    void exitEnrollmentsForClient(invoice.client_id as unknown as number, "invoice_paid").catch(console.error);
 
     await logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
-      detail: `Marked invoice ${invoice.acf.inv_number} as paid via ${body.paymentMethod}`,
-      clientId,
+      detail: `Marked invoice ${invoice.invoice_number} as paid via ${body.paymentMethod}`,
+      clientId: invoice.client_id as unknown as number,
     });
 
     return NextResponse.json({ ok: true });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { getInvoice, updateInvoice, getClientPost } from "@/lib/wp-api";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
@@ -8,37 +8,36 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const postId = parseInt(params.id, 10);
-  if (isNaN(postId)) {
-    return NextResponse.json({ error: "Invalid id" }, { status: 400 });
-  }
-
-  let invoice;
-  try {
-    invoice = await getInvoice(postId);
-  } catch {
-    return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
-  }
-
-  const clientId = invoice.acf.inv_client;
-  const auth = await requirePermission(req, "create_invoices", clientId);
+  const auth = await requirePermission(req, "create_invoices");
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
+  const tenantId = user.tenantId!;
 
   try {
-    const clientPost = await getClientPost(clientId);
-    const clientEmail = clientPost.acf.portal_email ?? clientPost.acf.contact_email;
-    const clientName = clientPost.acf.contact_name || clientPost.title.rendered;
+    const supabase = createSupabaseServerClient();
+
+    const { data: invoice, error: fetchErr } = await supabase
+      .from("invoices")
+      .select("*, clients(contact_name, company_name, contact_email, portal_email)")
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId)
+      .maybeSingle();
+
+    if (fetchErr) throw fetchErr;
+    if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+
+    const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
+    const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
 
     if (!clientEmail) {
       return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
     }
 
-    const invNumber = invoice.acf.inv_number;
-    const total = invoice.acf.inv_total;
-    const currency = invoice.acf.inv_currency;
-    const dueDate = invoice.acf.inv_due_date;
+    const invNumber = invoice.invoice_number;
+    const total = invoice.total;
+    const currency = invoice.currency;
+    const dueDate = invoice.due_date;
     const portalUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
     await sendEmailHtml({
@@ -66,14 +65,19 @@ export async function POST(
       tags: [{ name: "type", value: "invoice_sent" }],
     });
 
-    await updateInvoice(postId, { acf: { inv_status: "sent" } });
+    const { error: updateErr } = await supabase
+      .from("invoices")
+      .update({ status: "sent" })
+      .eq("id", params.id)
+      .eq("tenant_id", tenantId);
+    if (updateErr) throw updateErr;
 
     await logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_SENT,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Sent invoice ${invNumber} to ${clientEmail}`,
-      clientId,
+      clientId: invoice.client_id as unknown as number,
     });
 
     return NextResponse.json({ ok: true });
