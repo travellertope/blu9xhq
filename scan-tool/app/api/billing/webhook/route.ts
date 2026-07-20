@@ -86,7 +86,8 @@ export async function POST(request: Request) {
 
     case "invoice.paid": {
       const invoice = event.data.object as Stripe.Invoice;
-      const subscriptionId = typeof invoice.subscription === "string" ? invoice.subscription : null;
+      const invoiceSubscription = invoice.parent?.subscription_details?.subscription;
+      const subscriptionId = typeof invoiceSubscription === "string" ? invoiceSubscription : null;
       if (!subscriptionId) break;
 
       const stripe = getStripe();
