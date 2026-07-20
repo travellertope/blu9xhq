@@ -651,14 +651,14 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     color: var(--md-accent);
 }
 
-/* Items with children: flex row so toggle button sits beside the link */
-.mobile-nav__menu > li.menu-item-has-children {
+/* Items with children: flex row so toggle button sits beside the link (any depth) */
+.mobile-nav__menu li.menu-item-has-children {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
 }
 
-.mobile-nav__menu > li.menu-item-has-children > a {
+.mobile-nav__menu li.menu-item-has-children > a {
     flex: 1;
 }
 
@@ -681,7 +681,7 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     color: var(--md-accent);
 }
 
-/* First-level sub-menu (industry pages) */
+/* Sub-menus (any depth) — each nests its own accordion, toggled independently */
 .mobile-nav__menu .sub-menu {
     display: none;
     width: 100%;
@@ -715,9 +715,15 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     background: rgba(0,0,0,0.04);
 }
 
-/* Hide 3rd level (sub-industry / use-case pages) from mobile nav */
-.mobile-nav__menu .sub-menu .sub-menu {
-    display: none !important;
+/* Deeper levels step their indent so the hierarchy stays readable */
+.mobile-nav__menu .sub-menu .sub-menu > li > a {
+    padding-left: var(--space-6);
+    background: rgba(0,0,0,0.02);
+}
+
+.mobile-nav__menu .sub-menu .sub-menu .sub-menu > li > a {
+    padding-left: var(--space-7);
+    background: rgba(0,0,0,0.04);
 }
 
 /* ── Mega Menu ──────────────────────────────────────────────────────────────── */
@@ -1064,6 +1070,92 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 }
 
 .mega-panel__simple-list li a:hover {
+    color: var(--md-accent);
+    background: var(--md-accent-container);
+}
+
+/* ── Flyout submenus (grandchildren+ inside the simple-list mega panel) ──────── */
+.mega-panel__simple-list li {
+    position: relative;
+}
+
+.mega-panel__simple-list .flyout-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.mega-panel__simple-list .flyout-chevron {
+    flex-shrink: 0;
+    color: var(--md-on-surface-variant);
+    transition: color var(--transition-fast);
+}
+
+.mega-panel__simple-list .has-flyout:hover > .flyout-trigger .flyout-chevron,
+.mega-panel__simple-list .has-flyout.is-open > .flyout-trigger .flyout-chevron {
+    color: var(--md-accent);
+}
+
+/* Each .sub-menu opens off its own trigger — works at any nesting depth */
+.mega-panel__simple-list .sub-menu {
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2);
+    position: absolute;
+    top: calc(-1 * var(--space-2));
+    left: 100%;
+    min-width: 220px;
+    background: #FFFFFF;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 8px;
+    box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.16), 0 4px 8px -2px rgba(0, 0, 0, 0.06);
+    z-index: 10;
+
+    opacity: 0;
+    transform: translateX(-6px);
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 160ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 160ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s 160ms;
+}
+
+.mega-panel__simple-list .has-flyout.is-open > .sub-menu {
+    opacity: 1;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition:
+        opacity 160ms cubic-bezier(0.4, 0, 0.2, 1),
+        transform 160ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0s 0s;
+}
+
+/* Flipped by JS when a flyout would overflow the right edge of the viewport */
+.mega-panel__simple-list .sub-menu.flyout-left {
+    left: auto;
+    right: 100%;
+    transform: translateX(6px);
+}
+
+.mega-panel__simple-list .has-flyout.is-open > .sub-menu.flyout-left {
+    transform: translateX(0);
+}
+
+.mega-panel__simple-list .sub-menu li a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.mega-panel__simple-list .sub-menu li a:hover {
     color: var(--md-accent);
     background: var(--md-accent-container);
 }

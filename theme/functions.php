@@ -279,6 +279,11 @@ function bluu_mega_chevron() {
     return '<svg class="mega-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>';
 }
 
+// Right-pointing indicator for nested flyout submenus (depth >= 1 with children)
+function bluu_flyout_chevron() {
+    return '<svg class="flyout-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>';
+}
+
 function bluu_mega_icon( $paths, $size = 16 ) {
     return sprintf(
         '<svg width="%1$d" height="%1$d" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">%2$s</svg>',
@@ -376,6 +381,14 @@ class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
             $class_str = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
             $output .= '<li' . ( $class_str ? ' class="' . esc_attr( $class_str ) . '"' : '' ) . '>';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+        } elseif ( $has_children ) {
+            // Nested item with its own children — render as a hover flyout to the side,
+            // recursing to whatever depth the WP menu actually has.
+            $filtered   = array_diff( $classes, array( 'menu-item-has-children' ) );
+            $filtered[] = 'has-flyout';
+            $class_str  = trim( implode( ' ', array_filter( array_map( 'sanitize_html_class', $filtered ) ) ) );
+            $output .= '<li class="' . esc_attr( $class_str ) . '">';
+            $output .= '<a href="' . $url . '" class="flyout-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_flyout_chevron() . '</a>';
         } else {
             $output .= '<li>';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
@@ -475,6 +488,11 @@ class Bluu_Mobile_Menu_Walker extends Walker_Nav_Menu {
             $output .= '</div>';
         } elseif ( $depth === 0 ) {
             $output .= '<li>';
+            $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
+        } elseif ( $has_children ) {
+            // Nested item with its own children — gets a toggle button injected by JS
+            // (see .mobile-sub-toggle in main.js) so accordions can nest to any depth.
+            $output .= '<li class="menu-item-has-children">';
             $output .= '<a href="' . $url . '">' . $lb . $title . $la . '</a>';
         } else {
             $output .= '<li>';
