@@ -7,7 +7,7 @@ import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import StorefrontContent from "@/components/storefront/storefront-content";
 import SocialLinks from "@/components/storefront/social-links";
-import type { Category, Product, Shop } from "@/types";
+import type { Category, DeliveryZone, Product, Shop } from "@/types";
 
 async function getShopData(slug: string) {
   const supabase = createSupabaseServerClient();
@@ -16,7 +16,7 @@ async function getShopData(slug: string) {
 
   if (!shop) return null;
 
-  const [{ data: categories }, { data: products }] = await Promise.all([
+  const [{ data: categories }, { data: products }, { data: deliveryZones }] = await Promise.all([
     supabase.from("categories").select("*").eq("shop_id", shop.id).order("sort_order"),
     supabase
       .from("products")
@@ -24,12 +24,14 @@ async function getShopData(slug: string) {
       .eq("shop_id", shop.id)
       .eq("active", true)
       .order("sort_order"),
+    supabase.from("delivery_zones").select("*").eq("shop_id", shop.id).order("sort_order"),
   ]);
 
   return {
     shop: shop as Shop,
     categories: (categories ?? []) as Category[],
     products: (products ?? []) as Product[],
+    deliveryZones: (deliveryZones ?? []) as DeliveryZone[],
   };
 }
 
@@ -46,7 +48,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
   const data = await getShopData(params.slug);
   if (!data) notFound();
 
-  const { shop, categories, products } = data;
+  const { shop, categories, products, deliveryZones } = data;
 
   return (
     <div className="min-h-screen bg-white">
@@ -93,6 +95,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
         shopName={shop.name}
         whatsappNumber={shop.whatsapp_number}
         currency={shop.currency}
+        deliveryZones={deliveryZones}
       />
 
       {!shop.branding_hidden && (

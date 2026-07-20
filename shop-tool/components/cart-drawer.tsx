@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useCart } from "@/lib/cart";
 import { cartSubtotal, formatMoney } from "@/lib/whatsapp";
 import CheckoutButton from "@/components/checkout-button";
+import type { DeliveryZone } from "@/types";
 
 export default function CartDrawer({
   shopId,
@@ -12,17 +13,22 @@ export default function CartDrawer({
   shopName,
   whatsappNumber,
   currency,
+  deliveryZones,
 }: {
   shopId: string;
   shopSlug: string;
   shopName: string;
   whatsappNumber: string;
   currency: string;
+  deliveryZones: DeliveryZone[];
 }) {
   const { cart, updateQty } = useCart(shopSlug);
   const [open, setOpen] = useState(false);
+  const [zoneId, setZoneId] = useState<string>(deliveryZones[0]?.id ?? "");
 
   const itemCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const selectedZone = deliveryZones.find((z) => z.id === zoneId) ?? null;
+  const total = cartSubtotal(cart) + (selectedZone?.fee ?? 0);
 
   return (
     <>
@@ -93,9 +99,25 @@ export default function CartDrawer({
 
             {cart.length > 0 && (
               <div className="p-4 border-t border-line space-y-3">
+                {deliveryZones.length > 0 && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-ink-soft">Delivery / pickup</label>
+                    <select
+                      value={zoneId}
+                      onChange={(e) => setZoneId(e.target.value)}
+                      className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      {deliveryZones.map((zone) => (
+                        <option key={zone.id} value={zone.id}>
+                          {zone.name} — {formatMoney(zone.fee, currency)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="flex items-center justify-between text-sm font-semibold">
                   <span>Total</span>
-                  <span>{formatMoney(cartSubtotal(cart), currency)}</span>
+                  <span>{formatMoney(total, currency)}</span>
                 </div>
                 <CheckoutButton
                   shopId={shopId}
@@ -103,6 +125,7 @@ export default function CartDrawer({
                   shopName={shopName}
                   whatsappNumber={whatsappNumber}
                   currency={currency}
+                  deliveryZone={selectedZone}
                 />
               </div>
             )}

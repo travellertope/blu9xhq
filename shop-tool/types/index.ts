@@ -57,6 +57,15 @@ export interface Product {
   updated_at: string;
 }
 
+export interface DeliveryZone {
+  id: string;
+  shop_id: string;
+  name: string;
+  fee: number;
+  sort_order: number;
+  created_at: string;
+}
+
 export type OrderIntentStatus = "new" | "contacted" | "confirmed" | "fulfilled" | "cancelled";
 
 export interface OrderIntentItem {
@@ -74,6 +83,8 @@ export interface OrderIntent {
   customer_phone: string | null;
   items: OrderIntentItem[];
   subtotal: number;
+  delivery_zone_name: string | null;
+  delivery_fee: number;
   status: OrderIntentStatus;
   whatsapp_message: string;
   ref_code: string | null;

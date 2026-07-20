@@ -6,7 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import ProductDetail from "@/components/storefront/product-detail";
-import type { Product, Shop } from "@/types";
+import type { DeliveryZone, Product, Shop } from "@/types";
 
 async function getData(slug: string, productId: string) {
   const supabase = createSupabaseServerClient();
@@ -14,17 +14,24 @@ async function getData(slug: string, productId: string) {
   const { data: shop } = await supabase.from("shops").select("*").eq("slug", slug).eq("active", true).maybeSingle();
   if (!shop) return null;
 
-  const { data: product } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", productId)
-    .eq("shop_id", shop.id)
-    .eq("active", true)
-    .maybeSingle();
+  const [{ data: product }, { data: deliveryZones }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*")
+      .eq("id", productId)
+      .eq("shop_id", shop.id)
+      .eq("active", true)
+      .maybeSingle(),
+    supabase.from("delivery_zones").select("*").eq("shop_id", shop.id).order("sort_order"),
+  ]);
 
   if (!product) return null;
 
-  return { shop: shop as Shop, product: product as Product };
+  return {
+    shop: shop as Shop,
+    product: product as Product,
+    deliveryZones: (deliveryZones ?? []) as DeliveryZone[],
+  };
 }
 
 export async function generateMetadata({
@@ -41,7 +48,7 @@ export default async function ProductPage({ params }: { params: { slug: string; 
   const data = await getData(params.slug, params.id);
   if (!data) notFound();
 
-  const { shop, product } = data;
+  const { shop, product, deliveryZones } = data;
   const image = product.images[0];
 
   return (
@@ -78,6 +85,7 @@ export default async function ProductPage({ params }: { params: { slug: string; 
         shopName={shop.name}
         whatsappNumber={shop.whatsapp_number}
         currency={shop.currency}
+        deliveryZones={deliveryZones}
       />
     </div>
   );
