@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getMyShop } from "@/lib/auth";
+import { getPlanLimits } from "@/lib/planLimits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProductRow from "@/components/dashboard/product-row";
 import { Button } from "@/components/ui/button";
@@ -16,12 +17,25 @@ export default async function ProductsPage() {
     .eq("shop_id", shop.id)
     .order("sort_order");
 
+  const { maxProducts } = getPlanLimits(shop.plan);
+  const productCount = products?.length ?? 0;
+  const atLimit = productCount >= maxProducts;
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold text-ink">Products</h1>
+        <div>
+          <h1 className="text-lg font-bold text-ink">Products</h1>
+          {Number.isFinite(maxProducts) && (
+            <p className="text-xs text-ink-soft">
+              {productCount} / {maxProducts} used
+            </p>
+          )}
+        </div>
         <Button asChild size="sm">
-          <Link href="/dashboard/products/new">+ Add product</Link>
+          <Link href={atLimit ? "/dashboard/billing" : "/dashboard/products/new"}>
+            {atLimit ? "Upgrade to add more" : "+ Add product"}
+          </Link>
         </Button>
       </div>
 

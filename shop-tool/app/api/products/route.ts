@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getMyShop } from "@/lib/auth";
+import { getPlanLimits } from "@/lib/planLimits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const variantSchema = z.object({
@@ -29,6 +30,20 @@ export async function POST(request: Request) {
   }
 
   const supabase = createSupabaseServerClient();
+
+  const { count } = await supabase
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("shop_id", shop.id);
+
+  const { maxProducts } = getPlanLimits(shop.plan);
+  if ((count ?? 0) >= maxProducts) {
+    return NextResponse.json(
+      { error: `You've hit your ${shop.plan} plan's ${maxProducts}-product limit. Upgrade to add more.` },
+      { status: 402 }
+    );
+  }
+
   const { data, error } = await supabase
     .from("products")
     .insert({ ...parsed.data, shop_id: shop.id })

@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { THEMES, FONT_PAIRINGS, type ShopThemeId } from "@/lib/theme";
+import { getPlanLimits } from "@/lib/planLimits";
 import type { Shop } from "@/types";
 
 export default function SettingsForm({ shop }: { shop: Shop }) {
   const router = useRouter();
+  const limits = getPlanLimits(shop.plan);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
@@ -101,7 +103,12 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
 
   return (
     <div className="max-w-sm mx-auto space-y-5 pb-8">
-      <h1 className="text-lg font-bold text-ink">Shop settings</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-lg font-bold text-ink">Shop settings</h1>
+        <a href="/dashboard/billing" className="text-sm font-semibold text-blue hover:underline">
+          Billing →
+        </a>
+      </div>
 
       {error && (
         <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>
@@ -219,44 +226,70 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
         </div>
 
         <div className="space-y-3 pt-2 border-t border-line">
-          <Label>Storefront look</Label>
+          <div className="flex items-center justify-between">
+            <Label>Storefront look</Label>
+            {(!limits.customBranding || limits.themes.length < THEMES.length) && (
+              <a href="/dashboard/billing" className="text-xs font-semibold text-blue hover:underline">
+                Upgrade to unlock all
+              </a>
+            )}
+          </div>
 
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-ink-soft">Layout theme</p>
             <div className="space-y-1.5">
-              {THEMES.map((t) => (
-                <button
-                  type="button"
-                  key={t.id}
-                  onClick={() => setThemeId(t.id)}
-                  className={`w-full text-left rounded-md border px-3 py-2 ${
-                    themeId === t.id ? "border-blue bg-blue-soft" : "border-line"
-                  }`}
-                >
-                  <p className="text-sm font-semibold text-ink">{t.label}</p>
-                  <p className="text-xs text-ink-soft">{t.description}</p>
-                </button>
-              ))}
+              {THEMES.map((t) => {
+                const locked = !limits.themes.includes(t.id);
+                return (
+                  <button
+                    type="button"
+                    key={t.id}
+                    disabled={locked}
+                    onClick={() => setThemeId(t.id)}
+                    className={`w-full text-left rounded-md border px-3 py-2 ${
+                      locked
+                        ? "border-line opacity-50 cursor-not-allowed"
+                        : themeId === t.id
+                          ? "border-blue bg-blue-soft"
+                          : "border-line"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-ink flex items-center gap-1.5">
+                      {t.label}
+                      {locked && (
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-blue bg-blue-soft rounded-full px-1.5 py-0.5">
+                          Starter+
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-ink-soft">{t.description}</p>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-ink-soft">Accent color</p>
+            <p className="text-xs font-medium text-ink-soft">
+              Accent color {!limits.customBranding && <span className="text-blue">— Starter+</span>}
+            </p>
             <div className="flex items-center gap-2">
               <input
                 type="color"
                 value={accentColor || "#2F5FE0"}
                 onChange={(e) => setAccentColor(e.target.value)}
-                className="h-9 w-12 rounded border border-line cursor-pointer bg-white"
+                disabled={!limits.customBranding}
+                className="h-9 w-12 rounded border border-line cursor-pointer bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Accent color"
               />
               <Input
                 value={accentColor}
                 onChange={(e) => setAccentColor(e.target.value)}
+                disabled={!limits.customBranding}
                 placeholder="#2F5FE0 (default)"
                 className="flex-1"
               />
-              {accentColor && (
+              {accentColor && limits.customBranding && (
                 <button
                   type="button"
                   onClick={() => setAccentColor("")}
@@ -269,11 +302,14 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           </div>
 
           <div className="space-y-1.5">
-            <p className="text-xs font-medium text-ink-soft">Font pairing</p>
+            <p className="text-xs font-medium text-ink-soft">
+              Font pairing {!limits.customBranding && <span className="text-blue">— Starter+</span>}
+            </p>
             <select
               value={fontId}
               onChange={(e) => setFontId(e.target.value)}
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              disabled={!limits.customBranding}
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {Object.entries(FONT_PAIRINGS).map(([id, pairing]) => (
                 <option key={id} value={id}>

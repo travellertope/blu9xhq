@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getSession } from "@/lib/auth";
+import { getMyShop, getSession } from "@/lib/auth";
+import { getPlanLimits } from "@/lib/planLimits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { toSlug } from "@/lib/utils";
 
@@ -69,18 +70,36 @@ const updateSchema = z.object({
 });
 
 export async function PATCH(request: Request) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
+  const shop = await getMyShop();
+  if (!shop) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   const parsed = updateSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid shop details" }, { status: 400 });
   }
 
+  const limits = getPlanLimits(shop.plan);
+  const updates = parsed.data;
+
+  if (updates.theme_id && !limits.themes.includes(updates.theme_id)) {
+    return NextResponse.json(
+      { error: `Upgrade to Starter or Pro to use the ${updates.theme_id} theme.` },
+      { status: 402 }
+    );
+  }
+  if (!limits.customBranding) {
+    if (updates.accent_color) {
+      return NextResponse.json({ error: "Custom accent colors need a Starter or Pro plan." }, { status: 402 });
+    }
+    if (updates.font_id && updates.font_id !== "inter") {
+      return NextResponse.json({ error: "Custom font pairings need a Starter or Pro plan." }, { status: 402 });
+    }
+  }
+
   const supabase = createSupabaseServerClient();
   // RLS ("owner can manage own shop") scopes this to the caller's shop already;
   // the .eq is defense in depth, not the only thing preventing cross-account writes.
-  const { error } = await supabase.from("shops").update(parsed.data).eq("owner_user_id", session.userId);
+  const { error } = await supabase.from("shops").update(updates).eq("owner_user_id", shop.owner_user_id);
 
   if (error) {
     return NextResponse.json({ error: "Couldn't save changes" }, { status: 400 });
