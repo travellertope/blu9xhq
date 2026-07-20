@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import VerifyCodeForm from "@/components/onboarding/verify-code-form";
 
 /**
  * Shop details + email in one step, for a visitor who isn't signed in yet.
  * The shop name/WhatsApp number ride along as Supabase auth user_metadata
- * on signInWithOtp, so /auth/callback can create the shop the moment the
- * magic link is clicked — no separate "finish setting up" step.
+ * on signInWithOtp, so completing sign-in (link or code) can create the
+ * shop immediately — no separate "finish setting up" step.
  */
 export default function CreateWithEmailForm() {
   const [name, setName] = useState("");
@@ -28,11 +29,7 @@ export default function CreateWithEmailForm() {
     if (!slugEdited) setSlug(toSlug(name));
   }, [name, slugEdited]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+  async function sendCode() {
     const supabase = createSupabaseBrowserClient();
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
@@ -45,10 +42,19 @@ export default function CreateWithEmailForm() {
         },
       },
     });
+    return { error: signInError?.message };
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const { error: signInError } = await sendCode();
 
     setLoading(false);
     if (signInError) {
-      setError(signInError.message);
+      setError(signInError);
       return;
     }
     setSent(true);
@@ -64,13 +70,7 @@ export default function CreateWithEmailForm() {
         <Card>
           <CardContent className="p-6 space-y-5">
             {sent ? (
-              <div className="text-center space-y-2">
-                <h1 className="text-lg font-bold text-ink">Check your email</h1>
-                <p className="text-sm text-ink-soft">
-                  We sent a link to <b>{email}</b>. Open it on this device and your shop
-                  will be ready.
-                </p>
-              </div>
+              <VerifyCodeForm email={email} onResend={sendCode} />
             ) : (
               <>
                 <div className="space-y-1">
@@ -151,9 +151,11 @@ export default function CreateWithEmailForm() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-ink-soft">
-          Already have a shop? <a href="/login" className="text-blue font-medium hover:underline">Log in</a>
-        </p>
+        {!sent && (
+          <p className="text-center text-sm text-ink-soft">
+            Already have a shop? <a href="/login" className="text-blue font-medium hover:underline">Log in</a>
+          </p>
+        )}
       </div>
     </div>
   );
