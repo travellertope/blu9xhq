@@ -101,7 +101,8 @@ async function processEvent(event: Stripe.Event): Promise<void> {
 
     if (event.type === "invoice.paid") {
       const invoice = event.data.object as Stripe.Invoice;
-      const subscriptionId = typeof invoice.subscription === "string" ? invoice.subscription : null;
+      const invoiceSubscription = invoice.parent?.subscription_details?.subscription;
+      const subscriptionId = typeof invoiceSubscription === "string" ? invoiceSubscription : null;
       if (subscriptionId && invoice.amount_paid > 0) {
         try {
           const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
