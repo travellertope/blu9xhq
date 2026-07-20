@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import type { AffiliateConversion, AffiliateProduct } from "@/types";
 
 const PRODUCT_LABELS: Record<AffiliateProduct, string> = {
-  scan_tool:     "Scan Tool",
+  scan_tool:     "BluuAudit",
   portal:        "Client Portal",
   hosting_mgmt:  "Hosting & Management",
   content_ops:   "Content Operations",

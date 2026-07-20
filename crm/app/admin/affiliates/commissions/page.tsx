@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 const PRODUCT_LABELS: Record<string, string> = {
-  scan_tool:      "Scan Tool",
+  scan_tool:      "BluuAudit",
   portal:         "Client Portal",
   hosting_mgmt:   "Hosting & Mgmt",
   content_ops:    "Content Ops",

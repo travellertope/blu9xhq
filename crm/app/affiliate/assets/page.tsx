@@ -54,12 +54,12 @@ export default function AssetsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <CopyBlock
-            label="Cold intro — Scan Tool"
+            label="Cold intro — BluuAudit"
             content={`Subject: Have you checked how AI sees your brand?
 
 Hey [Name],
 
-Quick one — there's a free tool called the Bluu Scan Tool that checks how discoverable your brand is to AI models like ChatGPT and Perplexity.
+Quick one — there's a free tool called BluuAudit that checks how discoverable your brand is to AI models like ChatGPT and Perplexity.
 
 Most businesses have no idea what AI says about them when people ask for recommendations. This tool shows you exactly where you stand.
 
@@ -93,10 +93,10 @@ Happy to make a proper intro if it's useful.
         </CardHeader>
         <CardContent className="space-y-4">
           <CopyBlock
-            label="LinkedIn — Scan Tool"
+            label="LinkedIn — BluuAudit"
             content={`Most businesses have no idea how AI describes them when someone asks for a recommendation.
 
-I ran my own brand through the Bluu Scan Tool and the results were eye-opening.
+I ran my own brand through BluuAudit and the results were eye-opening.
 
 It checks how discoverable you are across AI models and tells you exactly what to fix.
 
@@ -115,7 +115,7 @@ I've been recommending Bluu to clients for a while now. They're the rare agency 
 If you're currently weighing up who to work with for any of this, worth a look.`}
           />
           <CopyBlock
-            label="Twitter / X — Scan Tool"
+            label="Twitter / X — BluuAudit"
             content={`Just ran my brand through this AI visibility scanner
 
 It tells you how AI models perceive and recommend you — most people are invisible and don't know it
@@ -133,7 +133,7 @@ Free scan here: ${scanLink}`}
         <CardContent>
           <CopyBlock
             label="Bullet points"
-            content={`• The Bluu Scan Tool shows you how AI models like ChatGPT see your brand — and how to improve it
+            content={`• BluuAudit shows you how AI models like ChatGPT see your brand — and how to improve it
 • Bluu builds websites and mobile apps that actually work for the business, not just look good
 • Their hosting & management means your site is looked after by humans who understand it
 • They integrate AI into existing business systems — without rebuilding from scratch

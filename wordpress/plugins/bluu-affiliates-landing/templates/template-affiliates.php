@@ -42,7 +42,7 @@ $hero_cta      = baff_f( 'hero_cta_text', 'Join the Affiliate Program — Free' 
 $hero_meta     = baff_f( 'hero_meta', 'Open to everyone · Takes 60 seconds · No approval required' );
 
 $commissions = [
-	[ 'product' => 'Scan Tool',              'type' => 'SaaS',     'rate' => '30% recurring',   'when' => 'Every month the customer is active' ],
+	[ 'product' => 'BluuAudit',              'type' => 'SaaS',     'rate' => '30% recurring',   'when' => 'Every month the customer is active' ],
 	[ 'product' => 'Client Portal',          'type' => 'SaaS',     'rate' => '30% recurring',   'when' => 'Every month the customer is active' ],
 	[ 'product' => 'Hosting & Management',   'type' => 'Retainer', 'rate' => '30% recurring',   'when' => 'Every month the contract is active' ],
 	[ 'product' => 'Content Operations',     'type' => 'Retainer', 'rate' => '15% recurring',   'when' => 'Every month the retainer is active' ],
@@ -58,7 +58,7 @@ $steps = [
 
 $who = [
 	[ 'icon' => '🎨', 'title' => 'Freelance designers & developers',   'body' => 'Refer clients you can\'t fully serve to Bluu\'s dev and hosting teams.' ],
-	[ 'icon' => '📣', 'title' => 'Marketing consultants',              'body' => 'Your clients need the Scan Tool and content ops. Now you earn when you recommend them.' ],
+	[ 'icon' => '📣', 'title' => 'Marketing consultants',              'body' => 'Your clients need BluuAudit and content ops. Now you earn when you recommend them.' ],
 	[ 'icon' => '🏢', 'title' => 'Agency owners',                      'body' => 'Refer overflow work and earn on every project and retainer.' ],
 	[ 'icon' => '🎓', 'title' => 'Business coaches & advisors',        'body' => 'Your clients are always looking for trusted tools and services. Bluu gives you a recurring income stream.' ],
 	[ 'icon' => '✍️', 'title' => 'Newsletter writers & creators',      'body' => 'A Bluu referral link in your newsletter earns every time a reader subscribes.' ],
@@ -181,7 +181,7 @@ get_header();
 
 					<div class="baff-calc__row">
 						<div class="baff-calc__label-row">
-							<label for="calc-saas">SaaS referrals (Scan Tool / Portal / Hosting)</label>
+							<label for="calc-saas">SaaS referrals (BluuAudit / Portal / Hosting)</label>
 							<span class="baff-calc__val" id="calc-saas-val">5</span>
 						</div>
 						<input type="range" id="calc-saas" min="0" max="50" value="5" step="1">

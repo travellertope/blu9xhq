@@ -327,7 +327,7 @@ export default function ScanPage() {
               <circle cx="13" cy="13" r="4.5" fill="#2F5FE0" />
             </svg>
             Bluu<span className="text-blue">HQ</span>
-            <span className="text-ink-soft font-medium text-sm ml-1">/ scan</span>
+            <span className="text-ink-soft font-medium text-sm ml-1">/ audit</span>
           </a>
           <div className="flex items-center gap-6">
             <a

@@ -16,7 +16,7 @@ export async function sendScoreAlert(
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scan.bluuhq.com";
 
   await getResend().emails.send({
-    from: process.env.EMAIL_FROM || "BluuHQ Scan <scan@bluuhq.com>",
+    from: process.env.EMAIL_FROM || "BluuAudit <scan@bluuhq.com>",
     to: email,
     subject: `Your AI visibility score ${direction} ${Math.abs(delta)} points`,
     html: `

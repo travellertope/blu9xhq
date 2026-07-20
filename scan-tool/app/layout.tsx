@@ -11,7 +11,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "AI Visibility Scan | Bluu HQ",
+  title: "AI Visibility Scan | BluuAudit",
   description:
     "See if AI search tools and Google can actually find your brand. Check your AI visibility, site health, and content gaps.",
   icons: {

@@ -1,4 +1,4 @@
-# BluuHQ Scan Tool — Full Build Plan
+# BluuAudit — Full Build Plan
 
 > Four-phase roadmap from MVP scan engine to paid monitoring product.
 

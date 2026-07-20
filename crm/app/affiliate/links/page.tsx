@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Copy, ExternalLink } from "lucide-react";
 
 const PRODUCTS = [
-  { id: "scan",    label: "Scan Tool",              base: "https://scan.bluuhq.com" },
+  { id: "scan",    label: "BluuAudit",               base: "https://scan.bluuhq.com" },
   { id: "portal",  label: "BluuCRM (Client Portal)", base: "https://crm.bluuhq.com/signup" },
   { id: "main",    label: "bluuhq.com (all products)", base: "https://bluuhq.com" },
   { id: "hosting", label: "Hosting & Management",   base: "https://bluuhq.com/hosting" },
@@ -100,7 +100,7 @@ export default function LinksPage() {
         <CardContent>
           <ul className="space-y-2.5">
             {[
-              "The Scan Tool is the easiest first share — it's free to try and self-serve.",
+              "BluuAudit is the easiest first share — it's free to try and self-serve.",
               "For services (web dev, AI integration), a warm intro email converts far better than a cold link.",
               "Add your referral link to your email signature for passive, ongoing traffic.",
               "Share your link in the bio of any social profiles where you discuss business or marketing.",
