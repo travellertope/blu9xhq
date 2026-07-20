@@ -351,9 +351,6 @@ export default function ScanPage() {
         <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center">
           {/* Left: headline + the scan form itself as the hero CTA */}
           <div>
-            <span className="inline-block text-xs font-bold tracking-widest uppercase text-blue bg-blue-soft px-3 py-1.5 rounded-full mb-4">
-              Free AI visibility scan
-            </span>
             <h1 className="font-display text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
               See if <span className="text-blue">AI search</span> can find your brand.
             </h1>

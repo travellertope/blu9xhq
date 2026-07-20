@@ -31,7 +31,7 @@ export async function POST(request: Request) {
   const token = nanoid(32);
   await createMagicToken(email, token);
 
-  const appUrl = process.env.NEXTAUTH_URL || "https://scan.bluuhq.com";
+  const appUrl = process.env.NEXTAUTH_URL || "https://audit.bluuhq.com";
   const link = `${appUrl}/login/verify?email=${encodeURIComponent(email)}&token=${token}`;
 
   try {

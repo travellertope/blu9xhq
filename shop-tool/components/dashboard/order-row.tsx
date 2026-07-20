@@ -1,0 +1,67 @@
+"use client";
+
+import { useState } from "react";
+import { formatMoney } from "@/lib/whatsapp";
+import type { OrderIntent, OrderIntentStatus } from "@/types";
+
+const STATUS_STYLES: Record<OrderIntentStatus, string> = {
+  new: "bg-blue-soft text-blue",
+  contacted: "bg-amber/10 text-amber",
+  confirmed: "bg-green/10 text-green",
+  fulfilled: "bg-ink-soft/10 text-ink-soft",
+  cancelled: "bg-coral-soft text-coral",
+};
+
+export default function OrderRow({ order, currency }: { order: OrderIntent; currency: string }) {
+  const [status, setStatus] = useState(order.status);
+  const [updating, setUpdating] = useState(false);
+
+  async function handleStatusChange(next: OrderIntentStatus) {
+    setStatus(next);
+    setUpdating(true);
+    await fetch(`/api/order-intents/${order.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: next }),
+    });
+    setUpdating(false);
+  }
+
+  return (
+    <div className="bg-white border border-line rounded-site p-3.5 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-ink-soft">
+          {new Date(order.created_at).toLocaleString(undefined, {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          })}
+        </span>
+        <select
+          value={status}
+          disabled={updating}
+          onChange={(e) => handleStatusChange(e.target.value as OrderIntentStatus)}
+          className={`text-xs font-semibold rounded-full px-2.5 py-1 border-0 ${STATUS_STYLES[status]}`}
+        >
+          <option value="new">New</option>
+          <option value="contacted">Contacted</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="fulfilled">Fulfilled</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <ul className="text-sm text-ink space-y-0.5">
+        {order.items.map((item, i) => (
+          <li key={i}>
+            {item.qty}x {item.name}
+            {item.variant && ` (${Object.values(item.variant).join(", ")})`}
+          </li>
+        ))}
+      </ul>
+
+      <p className="text-sm font-semibold text-ink">Total: {formatMoney(order.subtotal, currency)}</p>
+    </div>
+  );
+}

@@ -19,7 +19,7 @@ export async function POST() {
     );
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scan.bluuhq.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://audit.bluuhq.com";
 
   try {
     const stripe = getStripe();

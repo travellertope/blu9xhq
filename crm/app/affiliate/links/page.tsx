@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Copy, ExternalLink } from "lucide-react";
 
 const PRODUCTS = [
-  { id: "scan",    label: "BluuAudit",               base: "https://scan.bluuhq.com" },
+  { id: "scan",    label: "BluuAudit",               base: "https://bluuhq.com/audit" },
   { id: "portal",  label: "BluuCRM (Client Portal)", base: "https://crm.bluuhq.com/signup" },
   { id: "main",    label: "bluuhq.com (all products)", base: "https://bluuhq.com" },
   { id: "hosting", label: "Hosting & Management",   base: "https://bluuhq.com/hosting" },
