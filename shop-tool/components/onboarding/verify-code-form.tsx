@@ -32,10 +32,14 @@ export default function VerifyCodeForm({
     setVerifying(true);
 
     const supabase = createSupabaseBrowserClient();
+    // "magiclink", not "email" — signInWithOtp is called with emailRedirectTo
+    // set (both call sites), which makes Supabase issue a magiclink-type
+    // token. Verifying it as the wrong type always comes back
+    // invalid/expired, even for the correct code.
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: code,
-      type: "email",
+      type: "magiclink",
     });
 
     if (verifyError) {
