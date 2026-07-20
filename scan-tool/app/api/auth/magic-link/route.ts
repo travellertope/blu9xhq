@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY || "");
     await resend.emails.send({
-      from: process.env.EMAIL_FROM || "BluuHQ Scan <scan@bluuhq.com>",
+      from: process.env.EMAIL_FROM || "BluuAudit <scan@bluuhq.com>",
       to: email,
       subject: "Your sign-in link",
       html: `

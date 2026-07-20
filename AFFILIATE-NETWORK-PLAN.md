@@ -9,7 +9,7 @@
 
 | Product / Service | Type | Commission | Trigger |
 |---|---|---|---|
-| Scan Tool | SaaS — recurring | **30% MRR** | Every Stripe `invoice.paid` while customer active |
+| BluuAudit | SaaS — recurring | **30% MRR** | Every Stripe `invoice.paid` while customer active |
 | Client Portal | SaaS — recurring | **30% MRR** | Every Stripe `invoice.paid` while customer active |
 | Hosting & Management | Managed retainer | **30% MRR** | Every invoice paid while contract active |
 | Content Operations | Service retainer | **15% MRR** | Every invoice paid while retainer active |
@@ -399,7 +399,7 @@ wordpress/plugins/bluu-affiliates-landing/
 |---|---|---|---|
 | 1 | Immediate | "Welcome to the Bluu affiliate program" | Dashboard link, referral code, quick-start guide |
 | 2 | Day 2 | "Your affiliate toolkit is ready" | Assets library walkthrough, copy-paste link |
-| 3 | Day 5 | "The easiest Bluu product to start with" | Scan Tool pitch — why it converts easily |
+| 3 | Day 5 | "The easiest Bluu product to start with" | BluuAudit pitch — why it converts easily |
 | 4 | Day 10 | "How to earn big with Bluu services" | Web dev + AI integration commission breakdown |
 | 5 | Day 21 | "Your first month check-in" | Stats summary, tips if no conversions yet |
 | 6 | Day 30 | "Top affiliates are doing this" | Playbook: content, LinkedIn, email to clients |

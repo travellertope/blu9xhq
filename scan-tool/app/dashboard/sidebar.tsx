@@ -43,7 +43,7 @@ export function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
     <div className="flex h-full flex-col bg-white">
       <div className="flex h-14 items-center px-5 border-b border-line shrink-0">
         <Link href="/dashboard" className="font-extrabold text-ink">
-          BluuHQ Scan
+          BluuAudit
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto py-4">

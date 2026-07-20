@@ -84,7 +84,7 @@ export function DashboardShell({
           >
             <IconMenu className="h-5 w-5" />
           </button>
-          <span className="lg:hidden font-extrabold text-ink">BluuHQ Scan</span>
+          <span className="lg:hidden font-extrabold text-ink">BluuAudit</span>
           <div className="ml-auto">
             <UserMenu email={email} />
           </div>

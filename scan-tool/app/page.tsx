@@ -327,7 +327,7 @@ export default function ScanPage() {
               <circle cx="13" cy="13" r="4.5" fill="#2F5FE0" />
             </svg>
             Bluu<span className="text-blue">HQ</span>
-            <span className="text-ink-soft font-medium text-sm ml-1">/ scan</span>
+            <span className="text-ink-soft font-medium text-sm ml-1">/ audit</span>
           </a>
           <div className="flex items-center gap-6">
             <a
@@ -346,100 +346,149 @@ export default function ScanPage() {
         </div>
       </header>
 
-      {/* ── Scan form ──────────────────────────────────────────── */}
-      <main className="max-w-3xl mx-auto px-7 py-16">
-        <div className="text-center mb-10">
-          <span className="inline-block text-xs font-bold tracking-widest uppercase text-blue bg-blue-soft px-3 py-1.5 rounded-full mb-4">
-            Free AI visibility scan
-          </span>
-          <h1 className="font-display text-3xl md:text-4xl font-extrabold leading-tight tracking-tight">
-            See if AI search can find your brand.
-          </h1>
-          <p className="mt-3 text-ink-soft text-base leading-relaxed max-w-lg mx-auto">
-            We test 12 real-world buyer queries, crawl up to 8 pages of your site, research your competitors, and write a strategic analysis. Takes about two minutes.
-          </p>
-        </div>
+      {/* ── Scan hero — split layout, form is the primary CTA ────── */}
+      <main className="max-w-site mx-auto px-7 py-16">
+        <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-12 items-center">
+          {/* Left: headline + the scan form itself as the hero CTA */}
+          <div>
+            <span className="inline-block text-xs font-bold tracking-widest uppercase text-blue bg-blue-soft px-3 py-1.5 rounded-full mb-4">
+              Free AI visibility scan
+            </span>
+            <h1 className="font-display text-4xl md:text-5xl font-extrabold leading-tight tracking-tight">
+              See if <span className="text-blue">AI search</span> can find your brand.
+            </h1>
+            <p className="mt-4 text-ink-soft text-base md:text-lg leading-relaxed max-w-lg">
+              We test 12 real-world buyer queries, crawl up to 8 pages of your site, research your competitors, and write a strategic analysis. Takes about two minutes.
+            </p>
 
-        <form
-          onSubmit={handleScan}
-          className="bg-white border border-line rounded-site p-6 shadow-sm max-w-2xl mx-auto"
-        >
-          <label className="flex items-center gap-2 text-sm text-ink-soft cursor-pointer select-none mb-4">
-            <input
-              type="checkbox"
-              checked={noSite}
-              onChange={() => {
-                setNoSite(!noSite);
-                setShowResults(false);
-                setShowEmailGate(false);
-                setStatusText("");
-                setScanError(null);
-              }}
-              className="accent-blue"
-            />
-            I don&apos;t have a website yet
-          </label>
-
-          <div className="flex gap-2.5 flex-wrap">
-            {!noSite ? (
-              <input
-                type="text"
-                value={domain}
-                onChange={(e) => setDomain(e.target.value)}
-                placeholder="yourdomain.com"
-                className="flex-1 min-w-[170px] px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
-              />
-            ) : (
-              <div className="flex gap-2.5 flex-1 min-w-[260px]">
-                <input
-                  type="text"
-                  value={bizName}
-                  onChange={(e) => setBizName(e.target.value)}
-                  placeholder="Business name"
-                  className="flex-1 px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
-                />
-                <input
-                  type="text"
-                  value={niche}
-                  onChange={(e) => setNiche(e.target.value)}
-                  placeholder="Niche, e.g. SaaS"
-                  className="flex-1 px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
-                />
-              </div>
-            )}
-            <button
-              type="submit"
-              disabled={scanning}
-              className="px-5 py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark hover:shadow-[0_10px_24px_-8px_rgba(47,95,224,0.55)] transition-all cursor-pointer border-none whitespace-nowrap disabled:opacity-70"
+            <form
+              onSubmit={handleScan}
+              className="mt-6 bg-white border border-line rounded-site p-6 shadow-sm"
             >
-              {scanning ? "Scanning…" : "Run free scan"}
-            </button>
-          </div>
+              <label className="flex items-center gap-2 text-sm text-ink-soft cursor-pointer select-none mb-4">
+                <input
+                  type="checkbox"
+                  checked={noSite}
+                  onChange={() => {
+                    setNoSite(!noSite);
+                    setShowResults(false);
+                    setShowEmailGate(false);
+                    setStatusText("");
+                    setScanError(null);
+                  }}
+                  className="accent-blue"
+                />
+                I don&apos;t have a website yet
+              </label>
 
-          {scanError && (
-            <div className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg">
-              {scanError}
-            </div>
-          )}
-
-          {statusText && !scanError && (
-            <div className="mt-3 text-sm text-ink-soft">
-              {statusText}
-              {scanning && (
-                <div className="progress-bar mt-1.5">
-                  <i
-                    className="progress-bar-fill"
-                    style={{ width: `${progress}%`, transition: "width 0.6s ease" }}
+              <div className="flex gap-2.5 flex-wrap">
+                {!noSite ? (
+                  <input
+                    type="text"
+                    value={domain}
+                    onChange={(e) => setDomain(e.target.value)}
+                    placeholder="yourdomain.com"
+                    className="flex-1 min-w-[170px] px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
                   />
+                ) : (
+                  <div className="flex gap-2.5 flex-1 min-w-[260px]">
+                    <input
+                      type="text"
+                      value={bizName}
+                      onChange={(e) => setBizName(e.target.value)}
+                      placeholder="Business name"
+                      className="flex-1 px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
+                    />
+                    <input
+                      type="text"
+                      value={niche}
+                      onChange={(e) => setNiche(e.target.value)}
+                      placeholder="Niche, e.g. SaaS"
+                      className="flex-1 px-4 py-3 rounded-[10px] border border-line bg-white text-ink text-sm placeholder:text-[#9AA3AF] focus:outline-2 focus:outline-blue focus:outline-offset-1"
+                    />
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={scanning}
+                  className="px-5 py-3 rounded-[10px] text-sm font-bold bg-blue text-white hover:bg-blue-dark hover:shadow-[0_10px_24px_-8px_rgba(47,95,224,0.55)] transition-all cursor-pointer border-none whitespace-nowrap disabled:opacity-70"
+                >
+                  {scanning ? "Scanning…" : "Run free scan"}
+                </button>
+              </div>
+
+              {scanError && (
+                <div className="mt-3 text-sm text-red-600 bg-red-50 px-4 py-2.5 rounded-lg">
+                  {scanError}
                 </div>
               )}
+
+              {statusText && !scanError && (
+                <div className="mt-3 text-sm text-ink-soft">
+                  {statusText}
+                  {scanning && (
+                    <div className="progress-bar mt-1.5">
+                      <i
+                        className="progress-bar-fill"
+                        style={{ width: `${progress}%`, transition: "width 0.6s ease" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </form>
+            <p className="mt-3.5 text-xs text-ink-soft">No credit card required &middot; Results in ~2 minutes</p>
+          </div>
+
+          {/* Right: sample report — illustrative, mirrors the bluuhq.com homepage hero */}
+          <div className="hidden lg:flex flex-col justify-between bg-navy rounded-[20px] p-7 text-white shadow-[0_30px_60px_-24px_rgba(14,26,46,0.45)] min-h-[460px]">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green shadow-[0_0_0_4px_rgba(47,158,99,0.25)]" />
+                  <span className="text-[12.5px] font-semibold text-[#9FB0C9]">SAMPLE REPORT</span>
+                </div>
+                <span className="text-[12.5px] font-semibold text-[#9FB0C9] opacity-60">yourbrand.com</span>
+              </div>
+
+              <div className="flex items-baseline gap-2.5 mb-4">
+                <span className="font-display text-[42px] font-extrabold text-amber">78</span>
+                <span className="text-[13px] text-[#9FB0C9]">/ 100 overall</span>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                {[
+                  { name: "AI discoverability", val: 64, color: "#D9A22A" },
+                  { name: "Site & tech health", val: 91, color: "#2F9E63" },
+                  { name: "Competitor intel", val: 79, color: "#2F9E63" },
+                ].map((p) => (
+                  <div key={p.name} className="flex items-center gap-3">
+                    <span className="w-32 flex-none text-[13px] text-[#C7D2E3]">{p.name}</span>
+                    <span className="flex-1 h-2 rounded-full bg-[#16243B] overflow-hidden">
+                      <span
+                        className="block h-full rounded-full"
+                        style={{ width: `${p.val}%`, background: p.color }}
+                      />
+                    </span>
+                    <span className="w-9 flex-none text-right text-[13px] font-bold">{p.val}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-5 p-3.5 rounded-site bg-[#16243B] text-[13.5px] leading-relaxed text-[#D7E0EE]">
+                <b className="text-white">Biggest opportunity:</b> AI discoverability — most AI tools can&apos;t find this brand yet.
+              </div>
             </div>
-          )}
-        </form>
+
+            <div className="text-xs text-[#7E8FA8] tracking-wide pt-4 mt-2 border-t border-[#16243B]">
+              Checked 42 pages &middot; 3 competitor sites &middot; 18 AI search prompts
+            </div>
+          </div>
+        </div>
 
         {/* ═══════════════ RESULTS ═══════════════ */}
         {showResults && (
-          <div ref={resultsRef} className="mt-8 animate-fadein space-y-6">
+          <div ref={resultsRef} className="mt-8 max-w-2xl mx-auto animate-fadein space-y-6">
 
             {/* ── Summary stats ──────────────────────────────── */}
             {summary && (
@@ -748,10 +797,6 @@ export default function ScanPage() {
 
           </div>
         )}
-
-        <p className="mt-4 text-center text-xs text-ink-soft">
-          No credit card required &middot; Results in ~2 minutes
-        </p>
       </main>
 
       {/* ── Footer ─────────────────────────────────────────────── */}

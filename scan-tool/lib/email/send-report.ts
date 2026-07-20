@@ -170,7 +170,7 @@ export async function sendScanReport(
 </html>`;
 
   await getResend().emails.send({
-    from: process.env.EMAIL_FROM || "BluuHQ Scan <scan@bluuhq.com>",
+    from: process.env.EMAIL_FROM || "BluuAudit <scan@bluuhq.com>",
     to: email,
     subject,
     html,

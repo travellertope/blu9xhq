@@ -46,6 +46,14 @@
             }
             if ( header ) { header.classList.remove( 'site-header--open' ); }
             document.body.style.overflow = '';
+
+            // Collapse any expanded submenu accordions (any depth) for next time
+            qsa( '.mobile-nav__menu .sub-menu.is-open', nav ).forEach( function ( sub ) {
+                sub.classList.remove( 'is-open' );
+            } );
+            qsa( '.mobile-nav__menu .mobile-sub-toggle[aria-expanded="true"]', nav ).forEach( function ( btn ) {
+                btn.setAttribute( 'aria-expanded', 'false' );
+            } );
         }
 
         toggle.addEventListener( 'click', function () {
@@ -64,8 +72,8 @@
             }
         } );
 
-        // Inject chevron toggle buttons for items with sub-menus
-        qsa( '.mobile-nav__menu > li.menu-item-has-children', nav ).forEach( function ( li ) {
+        // Inject chevron toggle buttons for items with sub-menus, at any nesting depth
+        qsa( '.mobile-nav__menu li.menu-item-has-children', nav ).forEach( function ( li ) {
             var subMenu = li.querySelector( ':scope > .sub-menu' );
             if ( ! subMenu ) return;
 
@@ -439,6 +447,15 @@
             li.classList.remove( 'is-open' );
             var trigger = qs( '.mega-trigger', li );
             if ( trigger ) { trigger.setAttribute( 'aria-expanded', 'false' ); }
+
+            // Reset any nested flyouts so the panel opens fresh next time
+            qsa( '.has-flyout.is-open', li ).forEach( function ( flyout ) {
+                flyout.classList.remove( 'is-open' );
+                var flyoutTrigger = qs( ':scope > .flyout-trigger', flyout );
+                if ( flyoutTrigger ) { flyoutTrigger.setAttribute( 'aria-expanded', 'false' ); }
+                var sub = qs( ':scope > .sub-menu', flyout );
+                if ( sub ) { sub.classList.remove( 'flyout-left' ); }
+            } );
         }
 
         function closeMegaAfterDelay( li ) {
@@ -499,6 +516,108 @@
         // Close all on Escape from anywhere
         document.addEventListener( 'keydown', function ( e ) {
             if ( e.key === 'Escape' ) { megaItems.forEach( closeMegaNow ); }
+        } );
+    }
+
+    /* ── Flyout Submenus (nested hierarchy inside the mega panel, any depth) ─── */
+    function initFlyoutMenu() {
+        var flyouts = qsa( '.mega-panel__simple-list .has-flyout' );
+        if ( ! flyouts.length ) { return; }
+
+        var closeTimers = new WeakMap();
+
+        function closeFlyoutNow( li ) {
+            li.classList.remove( 'is-open' );
+            var trigger = qs( ':scope > .flyout-trigger', li );
+            if ( trigger ) { trigger.setAttribute( 'aria-expanded', 'false' ); }
+            var sub = qs( ':scope > .sub-menu', li );
+            if ( sub ) { sub.classList.remove( 'flyout-left' ); }
+            // Collapse any flyouts nested inside this one too
+            qsa( '.has-flyout.is-open', li ).forEach( closeFlyoutNow );
+        }
+
+        function closeFlyoutAfterDelay( li ) {
+            var timer = closeTimers.get( li );
+            if ( timer ) { clearTimeout( timer ); }
+            timer = setTimeout( function () { closeFlyoutNow( li ); }, 120 );
+            closeTimers.set( li, timer );
+        }
+
+        function positionFlyout( li ) {
+            var sub = qs( ':scope > .sub-menu', li );
+            if ( ! sub ) { return; }
+            sub.classList.remove( 'flyout-left' );
+            var rect = sub.getBoundingClientRect();
+            if ( rect.right > window.innerWidth ) {
+                sub.classList.add( 'flyout-left' );
+            }
+        }
+
+        function openFlyout( li ) {
+            var timer = closeTimers.get( li );
+            if ( timer ) { clearTimeout( timer ); }
+
+            // Close sibling flyouts at the same level so only one branch is open
+            var parent = li.parentElement;
+            if ( parent ) {
+                qsa( ':scope > li.has-flyout', parent ).forEach( function ( sib ) {
+                    if ( sib !== li ) { closeFlyoutNow( sib ); }
+                } );
+            }
+
+            li.classList.add( 'is-open' );
+            var trigger = qs( ':scope > .flyout-trigger', li );
+            if ( trigger ) { trigger.setAttribute( 'aria-expanded', 'true' ); }
+            positionFlyout( li );
+        }
+
+        flyouts.forEach( function ( li ) {
+            var trigger = qs( ':scope > .flyout-trigger', li );
+            var sub     = qs( ':scope > .sub-menu', li );
+
+            li.addEventListener( 'mouseenter', function () { openFlyout( li ); } );
+            li.addEventListener( 'mouseleave', function () { closeFlyoutAfterDelay( li ); } );
+
+            if ( sub ) {
+                sub.addEventListener( 'mouseenter', function () {
+                    var timer = closeTimers.get( li );
+                    if ( timer ) { clearTimeout( timer ); }
+                } );
+                sub.addEventListener( 'mouseleave', function () { closeFlyoutAfterDelay( li ); } );
+            }
+
+            if ( trigger ) {
+                // First activation opens the flyout; the link itself still navigates on repeat
+                trigger.addEventListener( 'click', function ( e ) {
+                    if ( ! li.classList.contains( 'is-open' ) ) {
+                        e.preventDefault();
+                        openFlyout( li );
+                    }
+                } );
+
+                trigger.addEventListener( 'keydown', function ( e ) {
+                    if ( e.key === 'ArrowRight' || ( e.key === 'Enter' && ! li.classList.contains( 'is-open' ) ) ) {
+                        e.preventDefault();
+                        openFlyout( li );
+                        var firstLink = sub ? qs( 'a', sub ) : null;
+                        if ( firstLink ) { firstLink.focus(); }
+                    }
+                    if ( ( e.key === 'Escape' || e.key === 'ArrowLeft' ) && li.classList.contains( 'is-open' ) ) {
+                        e.preventDefault();
+                        closeFlyoutNow( li );
+                        trigger.focus();
+                    }
+                } );
+            }
+        } );
+
+        // Close a flyout branch when focus/click moves outside it
+        document.addEventListener( 'click', function ( e ) {
+            flyouts.forEach( function ( li ) {
+                if ( li.classList.contains( 'is-open' ) && ! li.contains( e.target ) ) {
+                    closeFlyoutNow( li );
+                }
+            } );
         } );
     }
 
@@ -649,6 +768,7 @@
         initHeaderHeight();   // must run first — positions mega panel + mobile nav
         initMobileNav();
         initMegaMenu();
+        initFlyoutMenu();
         initIndustriesMegaNav();
         initMobileMegaMenu();
         initMobileIndustriesAccordion();

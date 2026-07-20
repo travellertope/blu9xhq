@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 const PRODUCT_LABELS: Record<string, string> = {
-  scan_tool:      "Scan Tool",
+  scan_tool:      "BluuAudit",
   portal:         "Client Portal",
   hosting_mgmt:   "Hosting & Mgmt",
   content_ops:    "Content Ops",

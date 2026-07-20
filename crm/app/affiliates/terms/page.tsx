@@ -44,7 +44,7 @@ export default function AffiliateTermsPage() {
         <Section title="2. Commission structure">
           <p>Commissions are earned as a percentage of the gross amount paid by a referred customer, per the rates published on the affiliate program page:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Scan Tool, Client Portal, Hosting &amp; Management — 30% recurring, for the life of the subscription</li>
+            <li>BluuAudit, Client Portal, Hosting &amp; Management — 30% recurring, for the life of the subscription</li>
             <li>Content Operations — 15% recurring, for the life of the retainer</li>
             <li>Web / Mobile Development, AI Systems Integration — 10% of contract value, plus a $75 bonus per completed discovery call</li>
           </ul>
