@@ -35,16 +35,6 @@ const nextConfig = {
     ];
   },
 
-  async redirects() {
-    return [
-      {
-        source: "/",
-        destination: "/portal-login",
-        permanent: false,
-      },
-    ];
-  },
-
   images: {
     remotePatterns: [
       ...(r2Hostname
