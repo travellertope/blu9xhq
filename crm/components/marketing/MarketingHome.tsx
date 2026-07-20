@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
   Check,
@@ -124,91 +122,86 @@ export default function MarketingHome() {
   const [annual, setAnnual] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-white text-[#0a192f]">
       {/* ── Header ─────────────────────────────────────────────── */}
-      <header className="border-b border-slate-200">
-        <div className="max-w-site mx-auto px-6 flex items-center justify-between h-16">
+      <header className="border-b border-[#e9ecef]">
+        <div className="max-w-site mx-auto px-6 flex items-center justify-between h-[50px]">
           <Link href="/" className="flex items-center gap-1 font-extrabold text-lg">
             Bluu<span className="text-primary">HQ</span>
-            <span className="text-slate-400 font-medium text-sm ml-1">/ crm</span>
+            <span className="text-[#6c757d] font-medium text-sm ml-1">/ crm</span>
           </Link>
           <nav className="flex items-center gap-3">
             <Link
               href="/admin-login"
-              className="text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors hidden sm:inline-block"
+              className="text-sm font-semibold text-[#6c757d] hover:text-[#0a192f] transition-colors hidden sm:inline-block"
             >
               Log in
             </Link>
-            <Button asChild size="sm">
-              <Link href="/signup">Create free account</Link>
-            </Button>
+            <Link href="/signup" className="btn-primary btn-primary--small">
+              Create free account
+            </Link>
           </nav>
         </div>
       </header>
 
       {/* ── Hero ───────────────────────────────────────────────── */}
-      <section className="border-b border-slate-200 bg-slate-50/60">
-        <div className="max-w-site mx-auto px-6 py-20 text-center">
-          <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight max-w-2xl mx-auto">
-            Run your agency&apos;s clients, projects, and portal — all in one place.
+      <section className="border-b border-[#e9ecef] bg-[#f8f9fa]">
+        <div className="max-w-site mx-auto px-6 py-24 text-center">
+          <span className="eyebrow">Client CRM &amp; portal</span>
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-2xl mx-auto mt-5">
+            Run your agency&apos;s <span className="text-primary">clients, projects, and portal</span> — all in one place.
           </h1>
-          <p className="mt-5 text-lg text-slate-600 max-w-xl mx-auto">
+          <p className="mt-5 text-lg text-[#6c757d] max-w-xl mx-auto leading-relaxed">
             BluuCRM unifies client relationships, project management, invoicing, and a
             branded client portal so freelancers and agencies stop stitching tools together.
           </p>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <Button asChild size="lg">
-              <Link href="/signup">Create free account</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/admin-login">Log in</Link>
-            </Button>
+          <div className="mt-8 flex items-center justify-center gap-3.5 flex-wrap">
+            <Link href="/signup" className="btn-primary">Create free account</Link>
+            <Link href="/admin-login" className="btn-outline">Log in</Link>
           </div>
-          <p className="mt-4 text-sm text-slate-400">Free forever for your first 5 clients. No credit card required.</p>
+          <p className="mt-4 text-sm text-[#6c757d]">Free forever for your first 5 clients. No credit card required.</p>
         </div>
       </section>
 
       {/* ── Features ───────────────────────────────────────────── */}
-      <section className="max-w-site mx-auto px-6 py-20">
+      <section className="max-w-site mx-auto px-6 py-24">
         <div className="text-center max-w-xl mx-auto">
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">What&apos;s inside</span>
-          <h2 className="font-display text-3xl font-extrabold mt-2">Everything client work needs, none of the sprawl.</h2>
+          <span className="eyebrow">What&apos;s inside</span>
+          <h2 className="font-display text-4xl font-extrabold mt-4 leading-tight">Everything client work needs, none of the sprawl.</h2>
         </div>
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map(({ icon: Icon, title, body }) => (
-            <Card key={title} className="border-slate-200">
-              <CardContent className="pt-6">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="mt-4 font-semibold">{title}</h3>
-                <p className="mt-1.5 text-sm text-slate-500">{body}</p>
-              </CardContent>
-            </Card>
+            <div key={title} className="bg-white border border-[#e9ecef] border-t-[3px] border-t-primary rounded-[14px] p-6">
+              <div className="h-[42px] w-[42px] rounded-[12px] bg-[#EAF0FF] text-primary flex items-center justify-center">
+                <Icon className="h-5 w-5" />
+              </div>
+              <h3 className="mt-4 font-semibold font-display">{title}</h3>
+              <p className="mt-2 text-sm text-[#6c757d] leading-relaxed">{body}</p>
+            </div>
           ))}
         </div>
       </section>
 
       {/* ── Trust ──────────────────────────────────────────────── */}
-      <div className="border-y border-slate-200 bg-slate-50/60">
+      <div className="border-y border-[#e9ecef] bg-[#f8f9fa]">
         <div className="max-w-site mx-auto px-6 py-6 text-center">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[#6c757d]">
             Built and run by BluuHQ — we manage our own clients, invoices, and affiliate program on BluuCRM.
           </p>
         </div>
       </div>
 
       {/* ── Pricing ────────────────────────────────────────────── */}
-      <section className="max-w-site mx-auto px-6 py-20" id="pricing">
+      <section className="max-w-site mx-auto px-6 py-24" id="pricing">
         <div className="text-center max-w-xl mx-auto">
-          <span className="text-sm font-semibold text-primary uppercase tracking-wide">Pricing</span>
-          <h2 className="font-display text-3xl font-extrabold mt-2">Start free. Upgrade when your client list grows.</h2>
+          <span className="eyebrow">Pricing</span>
+          <h2 className="font-display text-4xl font-extrabold mt-4 leading-tight">Start free. Upgrade when your client list grows.</h2>
         </div>
 
         <div className="mt-8 flex items-center justify-center gap-3">
-          <span className={`text-sm font-medium ${!annual ? "text-slate-900" : "text-slate-400"}`}>Monthly</span>
+          <span className={`text-sm font-medium ${!annual ? "text-[#0a192f]" : "text-[#9AA0A6]"}`}>Monthly</span>
           <Switch checked={annual} onCheckedChange={setAnnual} aria-label="Toggle annual pricing" />
-          <span className={`text-sm font-medium ${annual ? "text-slate-900" : "text-slate-400"}`}>
+          <span className={`text-sm font-medium ${annual ? "text-[#0a192f]" : "text-[#9AA0A6]"}`}>
             Annual <span className="text-primary">(save ~17%)</span>
           </span>
         </div>
@@ -219,33 +212,39 @@ export default function MarketingHome() {
             const price = annual ? details.annualUsd : details.monthlyUsd;
             const isAgency = plan === "agency";
             return (
-              <Card key={plan} className={isAgency ? "border-primary shadow-md" : "border-slate-200"}>
-                <CardContent className="pt-6 flex flex-col h-full">
-                  <h3 className="font-semibold">{details.name}</h3>
-                  <p className="text-sm text-slate-500 mt-1 min-h-[2.5rem]">{details.description}</p>
-                  <div className="mt-4">
-                    <span className="text-3xl font-extrabold">${price}</span>
-                    <span className="text-sm text-slate-400">
-                      {price === 0 ? "" : annual ? "/yr" : "/mo"}
-                    </span>
-                  </div>
-                  <ul className="mt-5 space-y-2.5 flex-1">
-                    {PLAN_FEATURES[plan].map((f) => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-                        <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Button asChild className="mt-6" variant={isAgency ? "default" : "outline"}>
-                    <Link href="/signup">{plan === "free" ? "Create free account" : "Get started"}</Link>
-                  </Button>
-                </CardContent>
-              </Card>
+              <div
+                key={plan}
+                className={`flex flex-col rounded-[14px] p-6 border ${
+                  isAgency ? "border-primary shadow-[0_10px_20px_-5px_rgba(0,0,0,0.08)]" : "border-[#e9ecef]"
+                }`}
+              >
+                <h3 className="font-semibold font-display">{details.name}</h3>
+                <p className="text-sm text-[#6c757d] mt-1 min-h-[2.5rem]">{details.description}</p>
+                <div className="mt-4">
+                  <span className="text-3xl font-extrabold font-display">${price}</span>
+                  <span className="text-sm text-[#9AA0A6]">
+                    {price === 0 ? "" : annual ? "/yr" : "/mo"}
+                  </span>
+                </div>
+                <ul className="mt-5 space-y-2.5 flex-1">
+                  {PLAN_FEATURES[plan].map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm text-[#6c757d]">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/signup"
+                  className={isAgency ? "btn-primary mt-6 justify-center" : "btn-outline mt-6 justify-center"}
+                >
+                  {plan === "free" ? "Create free account" : "Get started"}
+                </Link>
+              </div>
             );
           })}
         </div>
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <p className="mt-6 text-center text-xs text-[#9AA0A6]">
           Storage limits: Free {formatStorage(PLAN_LIMITS.free.fileStorageMB)} · Starter{" "}
           {formatStorage(PLAN_LIMITS.starter.fileStorageMB)} · Pro {formatStorage(PLAN_LIMITS.pro.fileStorageMB)} · Agency{" "}
           {formatStorage(PLAN_LIMITS.agency.fileStorageMB)}
@@ -253,17 +252,17 @@ export default function MarketingHome() {
       </section>
 
       {/* ── FAQ ────────────────────────────────────────────────── */}
-      <section className="border-t border-slate-200 bg-slate-50/60">
-        <div className="max-w-site mx-auto px-6 py-20 max-w-2xl">
-          <h2 className="font-display text-3xl font-extrabold text-center">Questions worth answering up front.</h2>
+      <section className="border-t border-[#e9ecef] bg-[#f8f9fa]">
+        <div className="max-w-2xl mx-auto px-6 py-24">
+          <h2 className="font-display text-4xl font-extrabold text-center leading-tight">Questions worth answering up front.</h2>
           <div className="mt-10 space-y-3">
             {FAQS.map(({ q, a }) => (
-              <details key={q} className="group rounded-lg border border-slate-200 bg-white px-5 py-4">
+              <details key={q} className="group rounded-[14px] border border-[#e9ecef] bg-white px-5 py-4">
                 <summary className="cursor-pointer list-none flex items-center justify-between font-semibold text-sm">
                   {q}
-                  <span className="text-slate-400 group-open:rotate-45 transition-transform text-xl leading-none">+</span>
+                  <span className="text-primary group-open:rotate-45 transition-transform text-xl leading-none">+</span>
                 </summary>
-                <p className="mt-2.5 text-sm text-slate-500">{a}</p>
+                <p className="mt-2.5 text-sm text-[#6c757d] leading-relaxed">{a}</p>
               </details>
             ))}
           </div>
@@ -271,31 +270,27 @@ export default function MarketingHome() {
       </section>
 
       {/* ── Final CTA ──────────────────────────────────────────── */}
-      <section className="max-w-site mx-auto px-6 py-20 text-center">
-        <h2 className="font-display text-3xl font-extrabold">Ready to get your client work out of spreadsheets?</h2>
-        <div className="mt-6 flex items-center justify-center gap-3">
-          <Button asChild size="lg">
-            <Link href="/signup">Create free account</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="https://bluuhq.com/contact">Talk to us</Link>
-          </Button>
+      <section className="max-w-site mx-auto px-6 py-24 text-center">
+        <h2 className="font-display text-4xl font-extrabold leading-tight">Ready to get your client work out of spreadsheets?</h2>
+        <div className="mt-6 flex items-center justify-center gap-3.5 flex-wrap">
+          <Link href="/signup" className="btn-primary">Create free account</Link>
+          <Link href="https://bluuhq.com/contact" className="btn-outline">Talk to us</Link>
         </div>
       </section>
 
       {/* ── Footer ─────────────────────────────────────────────── */}
-      <footer className="border-t border-slate-200 bg-slate-900 text-slate-400 py-10">
+      <footer className="bg-[#0E1A2E] text-[#9FB0C9] py-10">
         <div className="max-w-site mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-1 font-extrabold text-white">
             Bluu<span className="text-primary">HQ</span>
-            <span className="text-slate-500 font-medium text-sm ml-1">/ crm</span>
+            <span className="text-[#7E8FA8] font-medium text-sm ml-1">/ crm</span>
           </div>
           <div className="flex items-center gap-6 text-sm">
             <Link href="https://bluuhq.com" className="hover:text-white transition-colors">bluuhq.com</Link>
             <Link href="https://scan.bluuhq.com" className="hover:text-white transition-colors">BluuAudit</Link>
             <Link href="/affiliate-register" className="hover:text-white transition-colors">Become an affiliate</Link>
           </div>
-          <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} BluuHQ. All rights reserved.</p>
+          <p className="text-xs text-[#7E8FA8]">&copy; {new Date().getFullYear()} BluuHQ. All rights reserved.</p>
         </div>
       </footer>
     </div>
