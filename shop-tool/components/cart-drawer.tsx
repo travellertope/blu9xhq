@@ -34,7 +34,7 @@ export default function CartDrawer({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-40 bg-blue text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
+        className="fixed bottom-5 right-5 z-40 bg-[var(--shop-accent)] text-white rounded-full h-14 w-14 shadow-lg flex items-center justify-center"
         aria-label="Open cart"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

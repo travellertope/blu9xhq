@@ -30,9 +30,9 @@ create table if not exists shops (
   x_url           text,
   plan            text not null default 'free'
                     check (plan in ('free', 'starter', 'pro')),
-  theme_id        text not null default 'minimal',        -- gated on Starter/Pro (Phase 2)
-  accent_color    text,                                   -- gated on Starter/Pro (Phase 2)
-  font_id         text not null default 'inter',           -- gated on Starter/Pro (Phase 2)
+  theme_id        text not null default 'minimal',        -- 'minimal' | 'boutique' | 'market'
+  accent_color    text,                                   -- hex, e.g. '#2F5FE0'; null = brand default
+  font_id         text not null default 'inter',           -- see FONT_PAIRINGS in lib/theme.ts
   custom_domain   text unique,                             -- Phase 3
   branding_hidden boolean not null default false,          -- Phase 3
   stripe_customer_id text unique,                          -- Phase 3

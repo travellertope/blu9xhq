@@ -35,7 +35,7 @@ export default function SocialLinks({ shop }: { shop: Shop }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`${shop.name} on ${label}`}
-          className="w-8 h-8 rounded-full bg-bg-soft flex items-center justify-center text-ink-soft hover:bg-blue-soft hover:text-blue transition-colors"
+          className="w-8 h-8 rounded-full bg-bg-soft flex items-center justify-center text-ink-soft hover:text-[var(--shop-accent)] transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             {ICONS[key]}

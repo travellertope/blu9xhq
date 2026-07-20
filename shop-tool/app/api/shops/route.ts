@@ -58,6 +58,14 @@ const updateSchema = z.object({
   tiktok_url: z.string().trim().url().nullable().optional(),
   facebook_url: z.string().trim().url().nullable().optional(),
   x_url: z.string().trim().url().nullable().optional(),
+  theme_id: z.enum(["minimal", "boutique", "market"]).optional(),
+  accent_color: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .nullable()
+    .optional(),
+  font_id: z.enum(["inter", "playfair", "space-grotesk", "manrope"]).optional(),
 });
 
 export async function PATCH(request: Request) {

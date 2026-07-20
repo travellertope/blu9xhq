@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { THEMES, FONT_PAIRINGS, type ShopThemeId } from "@/lib/theme";
 import type { Shop } from "@/types";
 
 export default function SettingsForm({ shop }: { shop: Shop }) {
@@ -23,6 +24,9 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
   const [tiktokUrl, setTiktokUrl] = useState(shop.tiktok_url ?? "");
   const [facebookUrl, setFacebookUrl] = useState(shop.facebook_url ?? "");
   const [xUrl, setXUrl] = useState(shop.x_url ?? "");
+  const [themeId, setThemeId] = useState<ShopThemeId>((shop.theme_id as ShopThemeId) || "minimal");
+  const [accentColor, setAccentColor] = useState(shop.accent_color ?? "");
+  const [fontId, setFontId] = useState(shop.font_id || "inter");
   const [logoUrl, setLogoUrl] = useState(shop.logo_url);
   const [coverUrl, setCoverUrl] = useState(shop.cover_url);
   const [uploadingKind, setUploadingKind] = useState<"logo" | "cover" | null>(null);
@@ -71,6 +75,9 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           tiktok_url: tiktokUrl || null,
           facebook_url: facebookUrl || null,
           x_url: xUrl || null,
+          theme_id: themeId,
+          accent_color: accentColor || null,
+          font_id: fontId,
         }),
       });
       if (!res.ok) {
@@ -209,6 +216,72 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
             placeholder="Facebook URL"
           />
           <Input value={xUrl} onChange={(e) => setXUrl(e.target.value)} type="url" placeholder="X (Twitter) URL" />
+        </div>
+
+        <div className="space-y-3 pt-2 border-t border-line">
+          <Label>Storefront look</Label>
+
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-ink-soft">Layout theme</p>
+            <div className="space-y-1.5">
+              {THEMES.map((t) => (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setThemeId(t.id)}
+                  className={`w-full text-left rounded-md border px-3 py-2 ${
+                    themeId === t.id ? "border-blue bg-blue-soft" : "border-line"
+                  }`}
+                >
+                  <p className="text-sm font-semibold text-ink">{t.label}</p>
+                  <p className="text-xs text-ink-soft">{t.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-ink-soft">Accent color</p>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                value={accentColor || "#2F5FE0"}
+                onChange={(e) => setAccentColor(e.target.value)}
+                className="h-9 w-12 rounded border border-line cursor-pointer bg-white"
+                aria-label="Accent color"
+              />
+              <Input
+                value={accentColor}
+                onChange={(e) => setAccentColor(e.target.value)}
+                placeholder="#2F5FE0 (default)"
+                className="flex-1"
+              />
+              {accentColor && (
+                <button
+                  type="button"
+                  onClick={() => setAccentColor("")}
+                  className="text-xs text-ink-soft shrink-0"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-ink-soft">Font pairing</p>
+            <select
+              value={fontId}
+              onChange={(e) => setFontId(e.target.value)}
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {Object.entries(FONT_PAIRINGS).map(([id, pairing]) => (
+                <option key={id} value={id}>
+                  {pairing.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={saving}>

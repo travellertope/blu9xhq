@@ -1,12 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import StorefrontContent from "@/components/storefront/storefront-content";
-import SocialLinks from "@/components/storefront/social-links";
+import ShopHeader from "@/components/storefront/shop-header";
+import { shopThemeStyle, type ShopThemeId } from "@/lib/theme";
 import type { Category, DeliveryZone, Product, Shop } from "@/types";
 
 async function getShopData(slug: string) {
@@ -49,35 +49,13 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
   if (!data) notFound();
 
   const { shop, categories, products, deliveryZones } = data;
+  const themeId = (shop.theme_id as ShopThemeId) || "minimal";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white shop-font-body" style={shopThemeStyle(shop.accent_color, shop.font_id)}>
       <AnalyticsTracker shopId={shop.id} />
 
-      <header className="relative">
-        <div className="h-28 sm:h-36 w-full relative bg-gradient-to-br from-blue to-navy">
-          {shop.cover_url && <Image src={shop.cover_url} alt="" fill className="object-cover" priority />}
-        </div>
-        <div className="max-w-site mx-auto px-4 pb-4">
-          {/* Only the avatar overlaps the cover — its own row, fixed height,
-              so a long shop name/tagline can never push it (or itself) back
-              up into the image. */}
-          <div className="-mt-8 w-20 h-20 rounded-full border-4 border-white bg-blue overflow-hidden relative flex items-center justify-center">
-            {shop.logo_url ? (
-              <Image src={shop.logo_url} alt={shop.name} fill className="object-cover" />
-            ) : (
-              <span className="font-display text-2xl font-extrabold text-white">
-                {shop.name.trim().charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
-          <div className="mt-3">
-            <h1 className="font-display text-xl font-extrabold text-ink">{shop.name}</h1>
-            {shop.tagline && <p className="text-sm text-ink-soft mt-0.5">{shop.tagline}</p>}
-            <SocialLinks shop={shop} />
-          </div>
-        </div>
-      </header>
+      <ShopHeader shop={shop} themeId={themeId} />
 
       <main className="max-w-site mx-auto px-4 py-6">
         <StorefrontContent
@@ -86,6 +64,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
           shopSlug={shop.slug}
           shopId={shop.id}
           currency={shop.currency}
+          themeId={themeId}
         />
       </main>
 

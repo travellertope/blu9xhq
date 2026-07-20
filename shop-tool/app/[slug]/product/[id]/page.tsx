@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import ProductDetail from "@/components/storefront/product-detail";
+import { shopThemeStyle } from "@/lib/theme";
 import type { DeliveryZone, Product, Shop } from "@/types";
 
 async function getData(slug: string, productId: string) {
@@ -52,7 +53,10 @@ export default async function ProductPage({ params }: { params: { slug: string; 
   const image = product.images[0];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className="min-h-screen bg-white shop-font-body"
+      style={shopThemeStyle(shop.accent_color, shop.font_id)}
+    >
       <AnalyticsTracker shopId={shop.id} productId={product.id} />
 
       <header className="border-b border-line">
@@ -73,7 +77,7 @@ export default async function ProductPage({ params }: { params: { slug: string; 
         </div>
 
         <div>
-          <h1 className="font-display text-2xl font-extrabold text-ink mb-2">{product.name}</h1>
+          <h1 className="shop-font-heading text-2xl font-extrabold text-ink mb-2">{product.name}</h1>
           {product.description && <p className="text-ink-soft mb-4 leading-relaxed">{product.description}</p>}
           <ProductDetail product={product} shopSlug={shop.slug} shopId={shop.id} currency={shop.currency} />
         </div>

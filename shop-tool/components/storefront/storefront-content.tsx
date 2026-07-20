@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/product-card";
+import type { ShopThemeId } from "@/lib/theme";
 import type { Category, Product } from "@/types";
+
+const GRID_CLASSES: Record<ShopThemeId, string> = {
+  minimal: "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4",
+  boutique: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6",
+  market: "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2",
+};
 
 export default function StorefrontContent({
   products,
@@ -10,12 +17,14 @@ export default function StorefrontContent({
   shopSlug,
   shopId,
   currency,
+  themeId,
 }: {
   products: Product[];
   categories: Category[];
   shopSlug: string;
   shopId: string;
   currency: string;
+  themeId: ShopThemeId;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -31,7 +40,9 @@ export default function StorefrontContent({
           <button
             onClick={() => setSelected(null)}
             className={`shrink-0 text-sm font-medium px-3 py-1.5 rounded-full border ${
-              selected === null ? "bg-blue text-white border-blue" : "border-line text-ink-soft"
+              selected === null
+                ? "bg-[var(--shop-accent)] text-white border-[var(--shop-accent)]"
+                : "border-line text-ink-soft"
             }`}
           >
             All
@@ -41,7 +52,9 @@ export default function StorefrontContent({
               key={cat.id}
               onClick={() => setSelected(cat.id)}
               className={`shrink-0 text-sm font-medium px-3 py-1.5 rounded-full border ${
-                selected === cat.id ? "bg-blue text-white border-blue" : "border-line text-ink-soft"
+                selected === cat.id
+                  ? "bg-[var(--shop-accent)] text-white border-[var(--shop-accent)]"
+                  : "border-line text-ink-soft"
               }`}
             >
               {cat.name}
@@ -53,7 +66,7 @@ export default function StorefrontContent({
       {filtered.length === 0 ? (
         <p className="text-center text-ink-soft py-16">No products here yet.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className={GRID_CLASSES[themeId]}>
           {filtered.map((product) => (
             <ProductCard
               key={product.id}
@@ -61,6 +74,7 @@ export default function StorefrontContent({
               shopSlug={shopSlug}
               shopId={shopId}
               currency={currency}
+              themeId={themeId}
             />
           ))}
         </div>
