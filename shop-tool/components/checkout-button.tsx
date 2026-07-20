@@ -5,6 +5,7 @@ import { useCart } from "@/lib/cart";
 import { buildOrderMessage, buildWhatsAppUrl, cartSubtotal } from "@/lib/whatsapp";
 import { trackEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
+import type { DeliveryZone } from "@/types";
 
 export default function CheckoutButton({
   shopId,
@@ -12,12 +13,14 @@ export default function CheckoutButton({
   shopName,
   whatsappNumber,
   currency,
+  deliveryZone,
 }: {
   shopId: string;
   shopSlug: string;
   shopName: string;
   whatsappNumber: string;
   currency: string;
+  deliveryZone: DeliveryZone | null;
 }) {
   const { cart, clear } = useCart(shopSlug);
   const [loading, setLoading] = useState(false);
@@ -28,7 +31,7 @@ export default function CheckoutButton({
     if (cart.length === 0) return;
     setLoading(true);
 
-    const message = buildOrderMessage(shopName, cart, currency);
+    const message = buildOrderMessage(shopName, cart, currency, deliveryZone);
     const refCode = new URLSearchParams(window.location.search).get("ref");
 
     trackEvent(shopId, "checkout_click");
@@ -47,6 +50,8 @@ export default function CheckoutButton({
             variant: item.variant,
           })),
           subtotal: cartSubtotal(cart),
+          delivery_zone_name: deliveryZone?.name ?? null,
+          delivery_fee: deliveryZone?.fee ?? 0,
           whatsapp_message: message,
           ref_code: refCode,
         }),

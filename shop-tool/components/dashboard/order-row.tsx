@@ -12,12 +12,21 @@ const STATUS_STYLES: Record<OrderIntentStatus, string> = {
   cancelled: "bg-coral-soft text-coral",
 };
 
-export default function OrderRow({ order, currency }: { order: OrderIntent; currency: string }) {
+export default function OrderRow({
+  order,
+  currency,
+  onStatusChange,
+}: {
+  order: OrderIntent;
+  currency: string;
+  onStatusChange?: (id: string, status: OrderIntentStatus) => void;
+}) {
   const [status, setStatus] = useState(order.status);
   const [updating, setUpdating] = useState(false);
 
   async function handleStatusChange(next: OrderIntentStatus) {
     setStatus(next);
+    onStatusChange?.(order.id, next);
     setUpdating(true);
     await fetch(`/api/order-intents/${order.id}`, {
       method: "PATCH",
@@ -61,7 +70,14 @@ export default function OrderRow({ order, currency }: { order: OrderIntent; curr
         ))}
       </ul>
 
-      <p className="text-sm font-semibold text-ink">Total: {formatMoney(order.subtotal, currency)}</p>
+      {order.delivery_zone_name && (
+        <p className="text-xs text-ink-soft">
+          Delivery: {order.delivery_zone_name} — {formatMoney(order.delivery_fee, currency)}
+        </p>
+      )}
+      <p className="text-sm font-semibold text-ink">
+        Total: {formatMoney(order.subtotal + order.delivery_fee, currency)}
+      </p>
     </div>
   );
 }

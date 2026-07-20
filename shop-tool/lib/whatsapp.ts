@@ -19,7 +19,12 @@ export function cartSubtotal(items: CartItem[]): number {
  * WhatsApp. This is the entire "checkout" — there is no payment step here,
  * just a clear summary so the merchant knows exactly what was ordered.
  */
-export function buildOrderMessage(shopName: string, items: CartItem[], currency: string): string {
+export function buildOrderMessage(
+  shopName: string,
+  items: CartItem[],
+  currency: string,
+  deliveryZone?: { name: string; fee: number } | null
+): string {
   const lines = items.map((item) => {
     const variantStr = item.variant
       ? ` (${Object.values(item.variant).join(", ")})`
@@ -27,13 +32,17 @@ export function buildOrderMessage(shopName: string, items: CartItem[], currency:
     return `${item.qty}x ${item.name}${variantStr} — ${formatMoney(item.price * item.qty, currency)}`;
   });
 
-  const total = cartSubtotal(items);
+  const subtotal = cartSubtotal(items);
+  const total = subtotal + (deliveryZone?.fee ?? 0);
 
   return [
     `New order from ${shopName} 🛍️`,
     "",
     ...lines,
     "",
+    ...(deliveryZone
+      ? [`Delivery: ${deliveryZone.name} — ${formatMoney(deliveryZone.fee, currency)}`, ""]
+      : []),
     `Total: ${formatMoney(total, currency)}`,
   ].join("\n");
 }

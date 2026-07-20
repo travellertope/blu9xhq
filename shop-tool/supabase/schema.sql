@@ -24,11 +24,15 @@ create table if not exists shops (
   cover_url       text,
   tagline         text,
   delivery_info   text,
+  instagram_url   text,
+  tiktok_url      text,
+  facebook_url    text,
+  x_url           text,
   plan            text not null default 'free'
                     check (plan in ('free', 'starter', 'pro')),
-  theme_id        text not null default 'minimal',        -- gated on Starter/Pro (Phase 2)
-  accent_color    text,                                   -- gated on Starter/Pro (Phase 2)
-  font_id         text not null default 'inter',           -- gated on Starter/Pro (Phase 2)
+  theme_id        text not null default 'minimal',        -- 'minimal' | 'boutique' | 'market'
+  accent_color    text,                                   -- hex, e.g. '#2F5FE0'; null = brand default
+  font_id         text not null default 'inter',           -- see FONT_PAIRINGS in lib/theme.ts
   custom_domain   text unique,                             -- Phase 3
   branding_hidden boolean not null default false,          -- Phase 3
   stripe_customer_id text unique,                          -- Phase 3
@@ -38,6 +42,14 @@ create table if not exists shops (
 );
 
 create index if not exists shops_owner_idx on shops(owner_user_id);
+
+-- Safe to re-run against a shop already created before these columns
+-- existed — `create table if not exists` above won't add columns to a
+-- table that's already there.
+alter table shops add column if not exists instagram_url text;
+alter table shops add column if not exists tiktok_url text;
+alter table shops add column if not exists facebook_url text;
+alter table shops add column if not exists x_url text;
 
 -- =============================================================================
 -- CATEGORIES
@@ -76,28 +88,51 @@ create index if not exists products_shop_idx on products(shop_id);
 create index if not exists products_category_idx on products(category_id);
 
 -- =============================================================================
+-- DELIVERY ZONES
+-- Structured delivery/pickup options with a flat fee, shown as a picker in
+-- the shopper's cart. Replaces relying solely on the freeform
+-- shops.delivery_info text (kept as a fallback for shops with no zones set).
+-- =============================================================================
+create table if not exists delivery_zones (
+  id         uuid primary key default gen_random_uuid(),
+  shop_id    uuid not null references shops(id) on delete cascade,
+  name       text not null,
+  fee        numeric(12, 2) not null default 0,
+  sort_order int not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists delivery_zones_shop_idx on delivery_zones(shop_id);
+
+-- =============================================================================
 -- ORDER INTENTS
 -- Logged when a shopper taps "Checkout" — NOT a confirmed sale. Status past
 -- "new" is always a manual update by the shop owner after the WhatsApp
 -- conversation plays out; there is no payment processor in this loop.
 -- =============================================================================
 create table if not exists order_intents (
-  id               uuid primary key default gen_random_uuid(),
-  shop_id          uuid not null references shops(id) on delete cascade,
-  customer_name    text,
-  customer_phone   text,
-  items            jsonb not null,   -- [{product_id, name, price, qty, variant}]
-  subtotal         numeric(12, 2) not null,
-  status           text not null default 'new'
-                     check (status in ('new', 'contacted', 'confirmed', 'fulfilled', 'cancelled')),
-  whatsapp_message text not null,
-  ref_code         text,             -- affiliate attribution, Phase 3
-  created_at       timestamptz not null default now(),
-  updated_at       timestamptz not null default now()
+  id                 uuid primary key default gen_random_uuid(),
+  shop_id            uuid not null references shops(id) on delete cascade,
+  customer_name      text,
+  customer_phone     text,
+  items              jsonb not null,   -- [{product_id, name, price, qty, variant}]
+  subtotal           numeric(12, 2) not null,
+  delivery_zone_name text,
+  delivery_fee       numeric(12, 2) not null default 0,
+  status             text not null default 'new'
+                       check (status in ('new', 'contacted', 'confirmed', 'fulfilled', 'cancelled')),
+  whatsapp_message   text not null,
+  ref_code           text,             -- affiliate attribution, Phase 3
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now()
 );
 
 create index if not exists order_intents_shop_idx on order_intents(shop_id);
 create index if not exists order_intents_status_idx on order_intents(shop_id, status);
+
+-- Safe to re-run against shops/orders already created before this column existed.
+alter table order_intents add column if not exists delivery_zone_name text;
+alter table order_intents add column if not exists delivery_fee numeric(12, 2) not null default 0;
 
 -- =============================================================================
 -- ANALYTICS EVENTS
@@ -142,6 +177,7 @@ create trigger order_intents_set_updated_at before update on order_intents
 alter table shops            enable row level security;
 alter table categories       enable row level security;
 alter table products         enable row level security;
+alter table delivery_zones   enable row level security;
 alter table order_intents    enable row level security;
 alter table analytics_events enable row level security;
 
@@ -184,6 +220,18 @@ create policy "owner can manage own products"
   on products for all
   using (exists (select 1 from shops where shops.id = products.shop_id and shops.owner_user_id = auth.uid()))
   with check (exists (select 1 from shops where shops.id = products.shop_id and shops.owner_user_id = auth.uid()));
+
+-- ── delivery_zones ───────────────────────────────────────────────────────────
+drop policy if exists "public can read delivery zones of active shops" on delivery_zones;
+create policy "public can read delivery zones of active shops"
+  on delivery_zones for select
+  using (exists (select 1 from shops where shops.id = delivery_zones.shop_id and shops.active = true));
+
+drop policy if exists "owner can manage own delivery zones" on delivery_zones;
+create policy "owner can manage own delivery zones"
+  on delivery_zones for all
+  using (exists (select 1 from shops where shops.id = delivery_zones.shop_id and shops.owner_user_id = auth.uid()))
+  with check (exists (select 1 from shops where shops.id = delivery_zones.shop_id and shops.owner_user_id = auth.uid()));
 
 -- ── order_intents ────────────────────────────────────────────────────────────
 -- Anyone (including anon shoppers) can create an order intent; only the
