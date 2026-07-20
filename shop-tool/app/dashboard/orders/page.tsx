@@ -1,6 +1,6 @@
 import { getMyShop } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import OrderRow from "@/components/dashboard/order-row";
+import OrderKanban from "@/components/dashboard/order-kanban";
 import type { OrderIntent } from "@/types";
 
 export default async function OrdersPage() {
@@ -25,11 +25,7 @@ export default async function OrdersPage() {
       {!orders || orders.length === 0 ? (
         <p className="text-center text-ink-soft py-16">No orders yet.</p>
       ) : (
-        <div className="space-y-2">
-          {(orders as OrderIntent[]).map((order) => (
-            <OrderRow key={order.id} order={order} currency={shop.currency} />
-          ))}
-        </div>
+        <OrderKanban initialOrders={orders as OrderIntent[]} currency={shop.currency} />
       )}
     </div>
   );
