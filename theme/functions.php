@@ -819,8 +819,8 @@ function bluu_softwares_data() {
             'icon'  => '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
         ),
         array(
-            'name'  => 'AirFTP',
-            'url'   => 'https://airftp.bluuhq.com',
+            'name'  => 'BluuSync',
+            'url'   => '/sync',
             'badge' => 'Infrastructure',
             'desc'  => 'Server-to-server large file transfer — fast, secure, and built for production teams.',
             'icon'  => '<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>',
