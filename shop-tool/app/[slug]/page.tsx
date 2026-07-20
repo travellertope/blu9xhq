@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -51,14 +52,18 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
       <AnalyticsTracker shopId={shop.id} />
 
       <header className="relative">
-        {shop.cover_url && (
-          <div className="h-32 sm:h-44 w-full relative bg-bg-soft">
-            <Image src={shop.cover_url} alt="" fill className="object-cover" priority />
-          </div>
-        )}
-        <div className="max-w-site mx-auto px-4 -mt-8 relative flex items-end gap-4 pb-4">
-          <div className="w-20 h-20 rounded-full border-4 border-white bg-bg-soft overflow-hidden flex-shrink-0 relative">
-            {shop.logo_url && <Image src={shop.logo_url} alt={shop.name} fill className="object-cover" />}
+        <div className="h-28 sm:h-36 w-full relative bg-gradient-to-br from-blue to-navy">
+          {shop.cover_url && <Image src={shop.cover_url} alt="" fill className="object-cover" priority />}
+        </div>
+        <div className="max-w-site mx-auto px-4 -mt-10 relative flex items-end gap-4 pb-3">
+          <div className="w-20 h-20 rounded-full border-4 border-white bg-blue overflow-hidden flex-shrink-0 relative flex items-center justify-center">
+            {shop.logo_url ? (
+              <Image src={shop.logo_url} alt={shop.name} fill className="object-cover" />
+            ) : (
+              <span className="font-display text-2xl font-extrabold text-white">
+                {shop.name.trim().charAt(0).toUpperCase()}
+              </span>
+            )}
           </div>
           <div className="pb-1">
             <h1 className="font-display text-xl font-extrabold text-ink">{shop.name}</h1>
@@ -87,7 +92,10 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
 
       {!shop.branding_hidden && (
         <footer className="text-center py-6 text-xs text-ink-soft">
-          Powered by <span className="font-semibold text-blue">BluuShop</span>
+          Powered by{" "}
+          <Link href="/" className="font-semibold text-blue hover:underline">
+            BluuShop
+          </Link>
         </footer>
       )}
     </div>
