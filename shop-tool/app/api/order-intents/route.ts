@@ -20,6 +20,8 @@ const createSchema = z.object({
   customer_phone: z.string().trim().max(30).nullable().optional(),
   items: z.array(itemSchema).min(1),
   subtotal: z.number().nonnegative(),
+  delivery_zone_name: z.string().trim().max(80).nullable().optional(),
+  delivery_fee: z.number().nonnegative().optional(),
   whatsapp_message: z.string().trim().min(1).max(4000),
   ref_code: z.string().trim().max(30).nullable().optional(),
 });

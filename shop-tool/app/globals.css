@@ -35,3 +35,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Shop storefront font pairing — the vars are set per-shop via inline style
+   from lib/theme.ts's shopThemeStyle(), based on the owner's font_id choice. */
+.shop-font-heading {
+  font-family: var(--shop-heading-font);
+}
+.shop-font-body {
+  font-family: var(--shop-body-font);
+}

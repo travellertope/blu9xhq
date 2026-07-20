@@ -54,7 +54,9 @@ export default function ProductDetail({
                   key={option}
                   onClick={() => setSelection((prev) => ({ ...prev, [variant.name]: option }))}
                   className={`text-sm font-medium px-3 py-1.5 rounded-full border ${
-                    isSelected ? "bg-blue text-white border-blue" : "border-line text-ink-soft"
+                    isSelected
+                      ? "bg-[var(--shop-accent)] text-white border-[var(--shop-accent)]"
+                      : "border-line text-ink-soft"
                   }`}
                 >
                   {option}

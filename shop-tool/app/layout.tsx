@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Manrope, Playfair_Display, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 
@@ -8,6 +8,17 @@ const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
   weight: ["500", "700", "800"],
+});
+// Loaded for shop storefronts' font-pairing option — see lib/theme.ts.
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  weight: ["600", "700"],
+});
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  weight: ["500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -21,7 +32,9 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${manrope.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${manrope.variable} ${playfair.variable} ${spaceGrotesk.variable} font-sans antialiased`}
+      >
         {children}
         <Toaster richColors position="top-center" closeButton />
       </body>

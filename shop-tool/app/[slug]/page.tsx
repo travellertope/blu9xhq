@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import StorefrontContent from "@/components/storefront/storefront-content";
-import type { Category, Product, Shop } from "@/types";
+import ShopHeader from "@/components/storefront/shop-header";
+import { shopThemeStyle, type ShopThemeId } from "@/lib/theme";
+import type { Category, DeliveryZone, Product, Shop } from "@/types";
 
 async function getShopData(slug: string) {
   const supabase = createSupabaseServerClient();
@@ -15,7 +16,7 @@ async function getShopData(slug: string) {
 
   if (!shop) return null;
 
-  const [{ data: categories }, { data: products }] = await Promise.all([
+  const [{ data: categories }, { data: products }, { data: deliveryZones }] = await Promise.all([
     supabase.from("categories").select("*").eq("shop_id", shop.id).order("sort_order"),
     supabase
       .from("products")
@@ -23,12 +24,14 @@ async function getShopData(slug: string) {
       .eq("shop_id", shop.id)
       .eq("active", true)
       .order("sort_order"),
+    supabase.from("delivery_zones").select("*").eq("shop_id", shop.id).order("sort_order"),
   ]);
 
   return {
     shop: shop as Shop,
     categories: (categories ?? []) as Category[],
     products: (products ?? []) as Product[],
+    deliveryZones: (deliveryZones ?? []) as DeliveryZone[],
   };
 }
 
@@ -45,32 +48,14 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
   const data = await getShopData(params.slug);
   if (!data) notFound();
 
-  const { shop, categories, products } = data;
+  const { shop, categories, products, deliveryZones } = data;
+  const themeId = (shop.theme_id as ShopThemeId) || "minimal";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white shop-font-body" style={shopThemeStyle(shop.accent_color, shop.font_id)}>
       <AnalyticsTracker shopId={shop.id} />
 
-      <header className="relative">
-        <div className="h-28 sm:h-36 w-full relative bg-gradient-to-br from-blue to-navy">
-          {shop.cover_url && <Image src={shop.cover_url} alt="" fill className="object-cover" priority />}
-        </div>
-        <div className="max-w-site mx-auto px-4 -mt-10 relative flex items-end gap-4 pb-3">
-          <div className="w-20 h-20 rounded-full border-4 border-white bg-blue overflow-hidden flex-shrink-0 relative flex items-center justify-center">
-            {shop.logo_url ? (
-              <Image src={shop.logo_url} alt={shop.name} fill className="object-cover" />
-            ) : (
-              <span className="font-display text-2xl font-extrabold text-white">
-                {shop.name.trim().charAt(0).toUpperCase()}
-              </span>
-            )}
-          </div>
-          <div className="pb-1">
-            <h1 className="font-display text-xl font-extrabold text-ink">{shop.name}</h1>
-            {shop.tagline && <p className="text-sm text-ink-soft">{shop.tagline}</p>}
-          </div>
-        </div>
-      </header>
+      <ShopHeader shop={shop} themeId={themeId} />
 
       <main className="max-w-site mx-auto px-4 py-6">
         <StorefrontContent
@@ -79,6 +64,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
           shopSlug={shop.slug}
           shopId={shop.id}
           currency={shop.currency}
+          themeId={themeId}
         />
       </main>
 
@@ -88,6 +74,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
         shopName={shop.name}
         whatsappNumber={shop.whatsapp_number}
         currency={shop.currency}
+        deliveryZones={deliveryZones}
       />
 
       {!shop.branding_hidden && (

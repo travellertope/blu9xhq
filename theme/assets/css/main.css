@@ -6762,6 +6762,245 @@ a.contact-info__value:hover {
     }
 }
 
+/* ── BluuShop marketing page (/shop) ──────────────────────────────────────── */
+.shop-hero {
+    padding-block: var(--space-9) var(--space-8);
+    text-align: center;
+    background: var(--md-surface-variant);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.shop-hero__headline {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.15;
+    font-family: var(--font-family-heading);
+    color: var(--md-primary);
+}
+.shop-hero__body {
+    margin: var(--space-5) auto 0;
+    max-width: 560px;
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-lg);
+    line-height: 1.65;
+}
+.shop-hero__actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
+    flex-wrap: wrap;
+}
+.shop-hero__note {
+    margin-top: var(--space-4);
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+}
+
+.shop-steps {
+    padding-block: var(--space-9);
+}
+.shop-steps__header {
+    text-align: center;
+    max-width: 600px;
+    margin-inline: auto;
+}
+.shop-steps__headline {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-steps__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+    margin-top: var(--space-8);
+}
+.shop-step {
+    position: relative;
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-5) var(--space-5);
+}
+.shop-step__number {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-5);
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-xl);
+    font-weight: 800;
+    color: var(--md-outline-variant);
+}
+.shop-step__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--md-corner);
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+.shop-step__title {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-2);
+}
+.shop-step__body {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.shop-features {
+    padding-block: var(--space-9);
+    background: var(--md-surface-variant);
+}
+.shop-features__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+}
+.shop-feature-card {
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-top: 3px solid var(--md-accent);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+}
+.shop-feature-card__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--md-corner);
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+.shop-feature-card__title {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-2);
+}
+.shop-feature-card__body {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.shop-faq {
+    padding-block: var(--space-9);
+}
+.shop-faq__headline {
+    text-align: center;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-faq__list {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+.shop-faq__item {
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-5);
+    background: #fff;
+}
+.shop-faq__question {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    font-weight: 700;
+    font-size: var(--font-size-base);
+}
+.shop-faq__question::-webkit-details-marker {
+    display: none;
+}
+.shop-faq__plus {
+    color: var(--md-accent);
+    font-size: 1.25rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+.shop-faq__item[open] .shop-faq__plus {
+    transform: rotate(45deg);
+}
+.shop-faq__answer {
+    margin-top: var(--space-3);
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
+.shop-cta {
+    padding-block: var(--space-9);
+    text-align: center;
+    background: var(--md-accent-container);
+}
+.shop-cta__headline {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+    color: var(--md-primary);
+}
+.shop-cta__body {
+    margin-top: var(--space-3);
+    color: var(--md-on-surface);
+    opacity: 0.85;
+    max-width: 480px;
+    margin-inline: auto;
+}
+.shop-cta__actions {
+    margin-top: var(--space-6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+}
+
+@media (max-width: 1024px) {
+    .shop-features__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .shop-steps__grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .shop-features__grid {
+        grid-template-columns: 1fr;
+    }
+    .shop-hero__actions,
+    .shop-cta__actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    .shop-hero__actions .btn-primary,
+    .shop-hero__actions .btn-outline,
+    .shop-cta__actions .btn-primary,
+    .shop-cta__actions .btn-outline {
+        width: 100%;
+    }
+}
+
 /* ── BluuSync marketing page (/sync) ───────────────────────────────────────── */
 .sync-hero {
     padding-block: var(--space-9) var(--space-8);

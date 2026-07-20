@@ -11,6 +11,10 @@ export interface Shop {
   cover_url: string | null;
   tagline: string | null;
   delivery_info: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  facebook_url: string | null;
+  x_url: string | null;
   plan: ShopPlan;
   theme_id: string;
   accent_color: string | null;
@@ -53,6 +57,15 @@ export interface Product {
   updated_at: string;
 }
 
+export interface DeliveryZone {
+  id: string;
+  shop_id: string;
+  name: string;
+  fee: number;
+  sort_order: number;
+  created_at: string;
+}
+
 export type OrderIntentStatus = "new" | "contacted" | "confirmed" | "fulfilled" | "cancelled";
 
 export interface OrderIntentItem {
@@ -70,6 +83,8 @@ export interface OrderIntent {
   customer_phone: string | null;
   items: OrderIntentItem[];
   subtotal: number;
+  delivery_zone_name: string | null;
+  delivery_fee: number;
   status: OrderIntentStatus;
   whatsapp_message: string;
   ref_code: string | null;

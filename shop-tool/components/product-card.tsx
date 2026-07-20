@@ -6,18 +6,39 @@ import { useCart } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { formatMoney } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
+import type { ShopThemeId } from "@/lib/theme";
 import type { Product } from "@/types";
+
+const CARD_CLASSES: Record<ShopThemeId, string> = {
+  minimal: "bg-white border border-line rounded-site overflow-hidden",
+  boutique: "bg-white rounded-2xl overflow-hidden shadow-sm",
+  market: "bg-white border border-line rounded-md overflow-hidden",
+};
+
+const IMAGE_ASPECT: Record<ShopThemeId, string> = {
+  minimal: "aspect-square",
+  boutique: "aspect-[4/5]",
+  market: "aspect-square",
+};
+
+const BODY_PADDING: Record<ShopThemeId, string> = {
+  minimal: "p-3",
+  boutique: "p-4",
+  market: "p-2",
+};
 
 export default function ProductCard({
   product,
   shopSlug,
   shopId,
   currency,
+  themeId,
 }: {
   product: Product;
   shopSlug: string;
   shopId: string;
   currency: string;
+  themeId: ShopThemeId;
 }) {
   const { add } = useCart(shopSlug);
   const hasVariants = product.variants.length > 0;
@@ -36,17 +57,22 @@ export default function ProductCard({
   }
 
   return (
-    <div className="bg-white border border-line rounded-site overflow-hidden">
-      <Link href={`/${shopSlug}/product/${product.id}`} className="block aspect-square bg-bg-soft relative">
+    <div className={CARD_CLASSES[themeId]}>
+      <Link
+        href={`/${shopSlug}/product/${product.id}`}
+        className={`block ${IMAGE_ASPECT[themeId]} bg-bg-soft relative`}
+      >
         {image ? (
           <Image src={image} alt={product.name} fill className="object-cover" sizes="(max-width: 640px) 50vw, 25vw" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-ink-soft text-sm">No photo</div>
         )}
       </Link>
-      <div className="p-3">
+      <div className={BODY_PADDING[themeId]}>
         <Link href={`/${shopSlug}/product/${product.id}`}>
-          <h3 className="text-sm font-semibold text-ink truncate">{product.name}</h3>
+          <h3 className={`text-sm font-semibold text-ink truncate ${themeId === "market" ? "text-xs" : ""}`}>
+            {product.name}
+          </h3>
         </Link>
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-bold text-ink">{formatMoney(product.price, currency)}</span>

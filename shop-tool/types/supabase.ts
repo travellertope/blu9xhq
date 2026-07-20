@@ -1,4 +1,4 @@
-import type { Shop, Category, Product, OrderIntent, AnalyticsEvent } from "./index";
+import type { Shop, Category, Product, DeliveryZone, OrderIntent, AnalyticsEvent } from "./index";
 
 // supabase-js's generic plumbing structurally checks Row/Insert/Update against
 // Record<string, unknown> — a plain `interface` fails that check even when
@@ -25,6 +25,10 @@ export interface Database {
         | "cover_url"
         | "tagline"
         | "delivery_info"
+        | "instagram_url"
+        | "tiktok_url"
+        | "facebook_url"
+        | "x_url"
         | "plan"
         | "theme_id"
         | "accent_color"
@@ -37,6 +41,7 @@ export interface Database {
         | "updated_at"
       >;
       categories: TableDef<Category, "shop_id" | "name", "id" | "sort_order" | "created_at">;
+      delivery_zones: TableDef<DeliveryZone, "shop_id" | "name" | "fee", "id" | "sort_order" | "created_at">;
       products: TableDef<
         Product,
         "shop_id" | "name" | "price",
@@ -58,6 +63,8 @@ export interface Database {
         | "id"
         | "customer_name"
         | "customer_phone"
+        | "delivery_zone_name"
+        | "delivery_fee"
         | "status"
         | "ref_code"
         | "created_at"
