@@ -38,7 +38,7 @@ export default function AssetsPage() {
   const { user: session } = useBluuSession();
   const code = (session as any)?.affiliateCode ?? "YOURCODE";
   const link = `https://bluuhq.com/?ref=${code}`;
-  const scanLink = `https://scan.bluuhq.com/?ref=${code}`;
+  const scanLink = `https://audit.bluuhq.com/?ref=${code}`;
 
   return (
     <div className="space-y-8 max-w-3xl">

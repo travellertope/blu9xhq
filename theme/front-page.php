@@ -4,14 +4,14 @@
  * Template Post Type: page
  *
  * New front page featuring the AI visibility scan tool as the hero,
- * with the scan form pointing to scan.bluuhq.com.
+ * with the scan form pointing to audit.bluuhq.com.
  *
  * @package bluu-interactive
  */
 
 get_header();
 
-$scan_url = 'https://scan.bluuhq.com';
+$scan_url = 'https://audit.bluuhq.com';
 ?>
 
 <!-- ═════════════════════════════ HERO ═════════════════════════════ -->

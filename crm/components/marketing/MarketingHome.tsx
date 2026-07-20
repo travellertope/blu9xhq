@@ -147,8 +147,7 @@ export default function MarketingHome() {
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="border-b border-[#e9ecef] bg-[#f8f9fa]">
         <div className="max-w-site mx-auto px-6 py-24 text-center">
-          <span className="eyebrow">Client CRM &amp; portal</span>
-          <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-2xl mx-auto mt-5">
+          <h1 className="font-display text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-2xl mx-auto">
             Run your agency&apos;s <span className="text-primary">clients, projects, and portal</span> — all in one place.
           </h1>
           <p className="mt-5 text-lg text-[#6c757d] max-w-xl mx-auto leading-relaxed">
@@ -166,8 +165,7 @@ export default function MarketingHome() {
       {/* ── Features ───────────────────────────────────────────── */}
       <section className="max-w-site mx-auto px-6 py-24">
         <div className="text-center max-w-xl mx-auto">
-          <span className="eyebrow">What&apos;s inside</span>
-          <h2 className="font-display text-4xl font-extrabold mt-4 leading-tight">Everything client work needs, none of the sprawl.</h2>
+          <h2 className="font-display text-4xl font-extrabold leading-tight">Everything client work needs, none of the sprawl.</h2>
         </div>
         <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {FEATURES.map(({ icon: Icon, title, body }) => (
@@ -182,20 +180,10 @@ export default function MarketingHome() {
         </div>
       </section>
 
-      {/* ── Trust ──────────────────────────────────────────────── */}
-      <div className="border-y border-[#e9ecef] bg-[#f8f9fa]">
-        <div className="max-w-site mx-auto px-6 py-6 text-center">
-          <p className="text-sm text-[#6c757d]">
-            Built and run by BluuHQ — we manage our own clients, invoices, and affiliate program on BluuCRM.
-          </p>
-        </div>
-      </div>
-
       {/* ── Pricing ────────────────────────────────────────────── */}
       <section className="max-w-site mx-auto px-6 py-24" id="pricing">
         <div className="text-center max-w-xl mx-auto">
-          <span className="eyebrow">Pricing</span>
-          <h2 className="font-display text-4xl font-extrabold mt-4 leading-tight">Start free. Upgrade when your client list grows.</h2>
+          <h2 className="font-display text-4xl font-extrabold leading-tight">Start free. Upgrade when your client list grows.</h2>
         </div>
 
         <div className="mt-8 flex items-center justify-center gap-3">
@@ -287,7 +275,7 @@ export default function MarketingHome() {
           </div>
           <div className="flex items-center gap-6 text-sm">
             <Link href="https://bluuhq.com" className="hover:text-white transition-colors">bluuhq.com</Link>
-            <Link href="https://scan.bluuhq.com" className="hover:text-white transition-colors">BluuAudit</Link>
+            <Link href="https://audit.bluuhq.com" className="hover:text-white transition-colors">BluuAudit</Link>
             <Link href="/affiliate-register" className="hover:text-white transition-colors">Become an affiliate</Link>
           </div>
           <p className="text-xs text-[#7E8FA8]">&copy; {new Date().getFullYear()} BluuHQ. All rights reserved.</p>

@@ -13,7 +13,7 @@
 ## Architecture Overview
 
 ```
-WordPress (bluuhq.com)          scan.bluuhq.com (Next.js 14)
+WordPress (bluuhq.com)          audit.bluuhq.com (Next.js 14)
 ┌──────────────────┐            ┌─────────────────────────────────┐
 │  front-page.php  │  ──form──▶ │  /                              │
 │  (scan hero)     │            │  Client: form → scan animation  │
@@ -264,7 +264,7 @@ RESEND_API_KEY=re_...
 EMAIL_FROM=scan@bluuhq.com
 
 # App
-NEXT_PUBLIC_APP_URL=https://scan.bluuhq.com
+NEXT_PUBLIC_APP_URL=https://audit.bluuhq.com
 SCAN_TTL_SECONDS=259200  # 72 hours
 ```
 
@@ -407,7 +407,7 @@ PAGESPEED_API_KEY=AIza...
 
 **Architecture:**
 ```
-scan.bluuhq.com                    bluuhq.com (WordPress)
+audit.bluuhq.com                    bluuhq.com (WordPress)
 ┌──────────────┐     magic link    ┌──────────────────────┐
 │ /api/auth/*  │ ◄──────────────── │ JWT plugin endpoint  │
 │              │     verify token  │ /wp-json/jwt/v1/     │
@@ -439,7 +439,7 @@ npm install next-auth
 **Environment variables:**
 ```env
 NEXTAUTH_SECRET=...
-NEXTAUTH_URL=https://scan.bluuhq.com
+NEXTAUTH_URL=https://audit.bluuhq.com
 WP_JWT_ENDPOINT=https://bluuhq.com/wp-json/bluu/v1/auth
 ```
 
@@ -825,4 +825,4 @@ api_keys     { id, userId, key, createdAt, lastUsedAt }
 | Payments | Stripe |
 | Charts | Recharts |
 | Hosting | Vercel |
-| Domain | scan.bluuhq.com |
+| Domain | audit.bluuhq.com |

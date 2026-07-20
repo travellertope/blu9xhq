@@ -37,7 +37,7 @@ crm.bluuhq.com (Next.js 14)
 ├── /api/affiliates/payout              ← payout request
 └── /api/cron/affiliate-commissions     ← monthly commission calculation job
 
-scan.bluuhq.com (Next.js)
+audit.bluuhq.com (Next.js)
 ├── middleware.ts                       ← reads ?ref= → sets bluu_ref cookie
 └── /api/billing/webhook/route.ts       ← fires to portal /api/affiliates/event
                                            on subscription created / invoice paid
@@ -49,9 +49,9 @@ bluuhq.com (WordPress — all pages)
 ### Cross-App Attribution Flow
 
 ```
-1. Affiliate shares:  https://scan.bluuhq.com/?ref=ALICE30
-2. Visitor lands on scan.bluuhq.com — middleware detects ?ref=ALICE30
-3. Sets cookie:  bluu_ref=ALICE30  (domain: scan.bluuhq.com, 60 days, SameSite=Lax)
+1. Affiliate shares:  https://audit.bluuhq.com/?ref=ALICE30
+2. Visitor lands on audit.bluuhq.com — middleware detects ?ref=ALICE30
+3. Sets cookie:  bluu_ref=ALICE30  (domain: audit.bluuhq.com, 60 days, SameSite=Lax)
 4. Visitor subscribes → Stripe checkout → subscription created
 5. scan-tool /api/billing/webhook fires internal event to portal:
    POST crm.bluuhq.com/api/affiliates/event
@@ -270,7 +270,7 @@ Admin marks conversion as "project_signed" + enters contract_value
 
 | App | Cookie name | Domain | TTL | Set by |
 |---|---|---|---|---|
-| scan.bluuhq.com | `bluu_ref` | scan.bluuhq.com | 60 days | Next.js middleware |
+| audit.bluuhq.com | `bluu_ref` | audit.bluuhq.com | 60 days | Next.js middleware |
 | crm.bluuhq.com | `bluu_ref` | crm.bluuhq.com | 60 days | Next.js middleware |
 | bluuhq.com | `bluu_ref` | bluuhq.com | 60 days | WordPress functions.php hook |
 
@@ -498,7 +498,7 @@ STRIPE_CONNECT_CLIENT_ID=      # For Stripe Connect affiliate payouts
 CRON_SECRET=                   # Guards /api/cron/* routes
 ```
 
-### scan.bluuhq.com additions
+### audit.bluuhq.com additions
 
 ```
 PORTAL_URL=https://crm.bluuhq.com

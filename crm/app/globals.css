@@ -124,15 +124,3 @@
   padding: 9px 14px;
   font-size: 13px;
 }
-
-.eyebrow {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  color: #2F5FE0;
-  background: #EAF0FF;
-  padding: 6px 12px;
-  border-radius: 9999px;
-}

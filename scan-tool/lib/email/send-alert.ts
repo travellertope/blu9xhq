@@ -13,7 +13,7 @@ export async function sendScoreAlert(
 ): Promise<void> {
   const delta = newScore - previousScore;
   const direction = delta > 0 ? "improved" : "dropped";
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://scan.bluuhq.com";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://audit.bluuhq.com";
 
   await getResend().emails.send({
     from: process.env.EMAIL_FROM || "BluuAudit <scan@bluuhq.com>",
