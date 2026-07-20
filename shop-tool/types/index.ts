@@ -11,6 +11,10 @@ export interface Shop {
   cover_url: string | null;
   tagline: string | null;
   delivery_info: string | null;
+  instagram_url: string | null;
+  tiktok_url: string | null;
+  facebook_url: string | null;
+  x_url: string | null;
   plan: ShopPlan;
   theme_id: string;
   accent_color: string | null;

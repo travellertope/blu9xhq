@@ -54,6 +54,10 @@ const updateSchema = z.object({
   delivery_info: z.string().trim().max(2000).nullable().optional(),
   logo_url: z.string().url().nullable().optional(),
   cover_url: z.string().url().nullable().optional(),
+  instagram_url: z.string().trim().url().nullable().optional(),
+  tiktok_url: z.string().trim().url().nullable().optional(),
+  facebook_url: z.string().trim().url().nullable().optional(),
+  x_url: z.string().trim().url().nullable().optional(),
 });
 
 export async function PATCH(request: Request) {

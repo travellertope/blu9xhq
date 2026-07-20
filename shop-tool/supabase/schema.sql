@@ -24,6 +24,10 @@ create table if not exists shops (
   cover_url       text,
   tagline         text,
   delivery_info   text,
+  instagram_url   text,
+  tiktok_url      text,
+  facebook_url    text,
+  x_url           text,
   plan            text not null default 'free'
                     check (plan in ('free', 'starter', 'pro')),
   theme_id        text not null default 'minimal',        -- gated on Starter/Pro (Phase 2)
@@ -38,6 +42,14 @@ create table if not exists shops (
 );
 
 create index if not exists shops_owner_idx on shops(owner_user_id);
+
+-- Safe to re-run against a shop already created before these columns
+-- existed — `create table if not exists` above won't add columns to a
+-- table that's already there.
+alter table shops add column if not exists instagram_url text;
+alter table shops add column if not exists tiktok_url text;
+alter table shops add column if not exists facebook_url text;
+alter table shops add column if not exists x_url text;
 
 -- =============================================================================
 -- CATEGORIES

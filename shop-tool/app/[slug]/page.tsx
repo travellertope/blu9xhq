@@ -6,6 +6,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import StorefrontContent from "@/components/storefront/storefront-content";
+import SocialLinks from "@/components/storefront/social-links";
 import type { Category, Product, Shop } from "@/types";
 
 async function getShopData(slug: string) {
@@ -55,8 +56,11 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
         <div className="h-28 sm:h-36 w-full relative bg-gradient-to-br from-blue to-navy">
           {shop.cover_url && <Image src={shop.cover_url} alt="" fill className="object-cover" priority />}
         </div>
-        <div className="max-w-site mx-auto px-4 -mt-10 relative flex items-end gap-4 pb-3">
-          <div className="w-20 h-20 rounded-full border-4 border-white bg-blue overflow-hidden flex-shrink-0 relative flex items-center justify-center">
+        <div className="max-w-site mx-auto px-4 pb-4">
+          {/* Only the avatar overlaps the cover — its own row, fixed height,
+              so a long shop name/tagline can never push it (or itself) back
+              up into the image. */}
+          <div className="-mt-8 w-20 h-20 rounded-full border-4 border-white bg-blue overflow-hidden relative flex items-center justify-center">
             {shop.logo_url ? (
               <Image src={shop.logo_url} alt={shop.name} fill className="object-cover" />
             ) : (
@@ -65,9 +69,10 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
               </span>
             )}
           </div>
-          <div className="pb-1">
+          <div className="mt-3">
             <h1 className="font-display text-xl font-extrabold text-ink">{shop.name}</h1>
-            {shop.tagline && <p className="text-sm text-ink-soft">{shop.tagline}</p>}
+            {shop.tagline && <p className="text-sm text-ink-soft mt-0.5">{shop.tagline}</p>}
+            <SocialLinks shop={shop} />
           </div>
         </div>
       </header>

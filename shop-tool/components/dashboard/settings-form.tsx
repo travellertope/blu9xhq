@@ -19,6 +19,10 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
   const [whatsapp, setWhatsapp] = useState(shop.whatsapp_number);
   const [currency, setCurrency] = useState(shop.currency);
   const [deliveryInfo, setDeliveryInfo] = useState(shop.delivery_info ?? "");
+  const [instagramUrl, setInstagramUrl] = useState(shop.instagram_url ?? "");
+  const [tiktokUrl, setTiktokUrl] = useState(shop.tiktok_url ?? "");
+  const [facebookUrl, setFacebookUrl] = useState(shop.facebook_url ?? "");
+  const [xUrl, setXUrl] = useState(shop.x_url ?? "");
   const [logoUrl, setLogoUrl] = useState(shop.logo_url);
   const [coverUrl, setCoverUrl] = useState(shop.cover_url);
   const [uploadingKind, setUploadingKind] = useState<"logo" | "cover" | null>(null);
@@ -63,6 +67,10 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           delivery_info: deliveryInfo || null,
           logo_url: logoUrl,
           cover_url: coverUrl,
+          instagram_url: instagramUrl || null,
+          tiktok_url: tiktokUrl || null,
+          facebook_url: facebookUrl || null,
+          x_url: xUrl || null,
         }),
       });
       if (!res.ok) {
@@ -178,6 +186,29 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
             placeholder="e.g. Free pickup in Lekki, delivery ₦2,000 within Lagos"
             className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
+        </div>
+
+        <div className="space-y-3 pt-2 border-t border-line">
+          <Label>Social links</Label>
+          <Input
+            value={instagramUrl}
+            onChange={(e) => setInstagramUrl(e.target.value)}
+            type="url"
+            placeholder="Instagram URL"
+          />
+          <Input
+            value={tiktokUrl}
+            onChange={(e) => setTiktokUrl(e.target.value)}
+            type="url"
+            placeholder="TikTok URL"
+          />
+          <Input
+            value={facebookUrl}
+            onChange={(e) => setFacebookUrl(e.target.value)}
+            type="url"
+            placeholder="Facebook URL"
+          />
+          <Input value={xUrl} onChange={(e) => setXUrl(e.target.value)} type="url" placeholder="X (Twitter) URL" />
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={saving}>
