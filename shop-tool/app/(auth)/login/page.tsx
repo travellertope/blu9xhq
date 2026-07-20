@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import VerifyCodeForm from "@/components/onboarding/verify-code-form";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -13,11 +14,7 @@ export default function LoginPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
+  async function sendCode() {
     const supabase = createSupabaseBrowserClient();
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
@@ -25,10 +22,19 @@ export default function LoginPage() {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+    return { error: signInError?.message };
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    const { error: signInError } = await sendCode();
 
     setLoading(false);
     if (signInError) {
-      setError(signInError.message);
+      setError(signInError);
       return;
     }
     setSent(true);
@@ -44,17 +50,12 @@ export default function LoginPage() {
         <Card>
           <CardContent className="p-6 space-y-5">
             {sent ? (
-              <div className="text-center space-y-2">
-                <h1 className="text-lg font-bold text-ink">Check your email</h1>
-                <p className="text-sm text-ink-soft">
-                  We sent a sign-in link to <b>{email}</b>. Open it on this device to continue.
-                </p>
-              </div>
+              <VerifyCodeForm email={email} onResend={sendCode} />
             ) : (
               <>
                 <div className="space-y-1">
                   <h1 className="text-xl font-bold text-ink">Log in to your shop</h1>
-                  <p className="text-sm text-ink-soft">We&apos;ll email you a magic link — no password needed.</p>
+                  <p className="text-sm text-ink-soft">We&apos;ll email you a code — no password needed.</p>
                 </div>
 
                 {error && (
@@ -77,7 +78,7 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Sending…" : "Send magic link"}
+                    {loading ? "Sending…" : "Send code"}
                   </Button>
                 </form>
               </>
@@ -85,9 +86,11 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-ink-soft">
-          No shop yet? <a href="/create" className="text-blue font-medium hover:underline">Create one free</a>
-        </p>
+        {!sent && (
+          <p className="text-center text-sm text-ink-soft">
+            No shop yet? <a href="/create" className="text-blue font-medium hover:underline">Create one free</a>
+          </p>
+        )}
       </div>
     </div>
   );
