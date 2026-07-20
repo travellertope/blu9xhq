@@ -3,14 +3,14 @@
  * Template Name: BluuSync Marketing Page
  * Template Post Type: page
  *
- * Marketing page for BluuSync, assigned to /sync. bluusync.bluuhq.com itself
+ * Marketing page for BluuSync, assigned to /sync. sync.bluuhq.com itself
  * is the app (register/login/dashboard) — this page is the public pitch,
  * with every CTA pointing back to the app.
  *
  * @package bluu-interactive
  */
 
-$sync_app_url = 'https://bluusync.bluuhq.com';
+$sync_app_url = 'https://sync.bluuhq.com';
 
 // ── ACF fields with defaults ────────────────────────────────────────────────
 $hero_headline = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_headline' ) : '' ) ?: 'Move massive files server-to-server, without routing them through your machine.';
