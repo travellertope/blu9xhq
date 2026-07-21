@@ -13,8 +13,14 @@
 $sync_app_url = 'https://sync.bluuhq.com';
 
 // ── ACF fields with defaults ────────────────────────────────────────────────
-$hero_headline = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_headline' ) : '' ) ?: 'Move massive files server-to-server, without routing them through your machine.';
-$hero_body     = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_body' )     : '' ) ?: 'BluuSync streams files directly between FTP, SFTP, Google Drive, OneDrive, and YouTube — no local download, no size-limit headaches, and credentials that are never stored.';
+$hero_headline = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_headline' ) : '' ) ?: "Move Massive Files\nBetween Servers";
+$hero_subhead  = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_subhead' )  : '' ) ?: 'without routing them through your machine';
+$hero_body     = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_body' )     : '' ) ?: 'Transfer multi-gigabyte files directly between FTP and SFTP servers — or to and from Google Drive, OneDrive, and YouTube. No downloading to your machine. Just a direct stream that keeps running even after you close the tab.';
+
+// Split headline on newline for two-line display (second line gets the accent color)
+$headline_parts = array_map( 'trim', explode( "\n", $hero_headline, 2 ) );
+$headline_1     = $headline_parts[0];
+$headline_2     = isset( $headline_parts[1] ) ? $headline_parts[1] : '';
 
 $cta_headline = ( function_exists( 'get_field' ) ? get_field( 'sync_cta_headline' ) : '' ) ?: 'Ready to stop babysitting file transfers?';
 $cta_body     = ( function_exists( 'get_field' ) ? get_field( 'sync_cta_body' )     : '' ) ?: '';
@@ -173,7 +179,15 @@ get_header();
     <div class="container">
         <div class="product-hero__grid">
             <div class="sync-hero__inner animate-on-scroll">
-                <h1 class="sync-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+                <h1 class="sync-hero__headline">
+                    <?php echo esc_html( $headline_1 ); ?>
+                    <?php if ( $headline_2 ) : ?>
+                        <br><span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
+                    <?php endif; ?>
+                </h1>
+                <?php if ( $hero_subhead ) : ?>
+                    <p class="sync-hero__subhead"><?php echo esc_html( $hero_subhead ); ?></p>
+                <?php endif; ?>
                 <p class="sync-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
                 <div class="sync-hero__actions">
                     <a href="<?php echo esc_url( $sync_app_url . '/register' ); ?>" class="btn-primary">

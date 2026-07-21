@@ -7580,14 +7580,25 @@ a.contact-info__value:hover {
     padding-block: var(--space-9) var(--space-8);
 }
 .sync-hero__headline {
-    font-size: clamp(2rem, 5vw, 3rem);
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
     font-weight: 800;
-    line-height: 1.15;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
     font-family: var(--font-family-heading);
     color: var(--md-primary);
 }
+.sync-hero__headline--accent {
+    color: var(--md-accent);
+}
+.sync-hero__subhead {
+    margin-top: var(--space-4);
+    max-width: 480px;
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+}
 .sync-hero__body {
-    margin-top: var(--space-5);
+    margin-top: var(--space-3);
     max-width: 480px;
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-lg);
@@ -7601,6 +7612,7 @@ a.contact-info__value:hover {
     flex-wrap: wrap;
 }
 @media (max-width: 900px) {
+    .sync-hero__subhead { margin-inline: auto; }
     .sync-hero__body { margin-inline: auto; }
     .sync-hero__actions { justify-content: center; }
 }
