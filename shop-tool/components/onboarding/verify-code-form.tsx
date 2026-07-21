@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 /**
- * The 6-digit code step after "check your email" — works from any device,
+ * The one-time code step after "check your email" — works from any device,
  * since verifyOtp just needs the code typed back in, not a secret stashed
  * in the browser that requested it (unlike the magic link itself, which
  * only completes sign-in in the same browser via PKCE).
@@ -15,6 +15,13 @@ import { Input } from "@/components/ui/input";
  * type is "email" per Supabase's own docs for verifying a signInWithOtp
  * code — "magiclink" (tried here previously) isn't the documented value
  * for this flow and didn't fix the "invalid or expired" reports.
+ *
+ * Not hardcoded to 6 digits — Supabase's documented default is 6, but the
+ * actual length depends on this project's mailer/OTP config (observed
+ * sending 8), and verifyOtp itself doesn't care about a specific length,
+ * only that the value matches what was issued. Accepting a range instead
+ * of an exact count means a project-side config change never silently
+ * breaks this form again.
  */
 export default function VerifyCodeForm({
   email,
@@ -71,8 +78,8 @@ export default function VerifyCodeForm({
       <div className="space-y-1">
         <h1 className="text-lg font-bold text-ink">Check your email</h1>
         <p className="text-sm text-ink-soft">
-          We sent a 6-digit code to <b>{email}</b>. Enter it below to continue — on
-          whatever device you&apos;re using right now.
+          We sent a code to <b>{email}</b>. Enter it below to continue — on whatever device
+          you&apos;re using right now.
         </p>
       </div>
 
@@ -86,10 +93,10 @@ export default function VerifyCodeForm({
         <Input
           inputMode="numeric"
           autoComplete="one-time-code"
-          maxLength={6}
-          placeholder="123456"
+          maxLength={10}
+          placeholder="Enter your code"
           value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 10))}
           className="text-center text-lg tracking-[0.3em] font-semibold"
           required
         />
