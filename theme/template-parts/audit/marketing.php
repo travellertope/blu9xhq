@@ -242,7 +242,8 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
-<!-- ═══════════════════════ ALSO FROM BLUU ════════════════════════ -->
+<?php if ( is_front_page() ) : ?>
+<!-- ═══════════════════ ALSO FROM BLUU (homepage-only) ════════════════ -->
 <?php
 $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
     return 'BluuAudit' !== $p['name'];
@@ -269,6 +270,7 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <?php if ( is_page_template( 'page-audit.php' ) ) : ?>
