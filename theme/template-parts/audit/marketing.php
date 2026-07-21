@@ -68,10 +68,10 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                     <path d="M220 200 Q150 260 96 308" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
                     <path d="M220 200 Q300 265 352 306" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
 
-                    <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.5" style="transform-origin:220px 200px;"/>
-                    <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.5" style="transform-origin:220px 200px;"/>
-
                     <?php if ( is_front_page() ) : ?>
+                        <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                        <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+
                         <g transform="translate(220,200)">
                             <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
                             <circle cx="0" cy="0" r="15" fill="#2F5FE0"/>
@@ -99,6 +99,16 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                             <path d="M337 296l15 12 15-12" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </g>
                     <?php else : ?>
+                        <!-- Radar sweep, not a static pulse: audit is a scan, not a broadcast. -->
+                        <defs>
+                            <linearGradient id="scanRadarFade" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#C68A1E" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="#C68A1E" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="220" cy="200" r="96" stroke="#C68A1E" stroke-width="1.5" opacity="0.3"/>
+                        <path class="scan-hero__ill-radar" d="M220,200 L307,159.4 A96,96 0 0,1 307,240.6 Z" fill="url(#scanRadarFade)" style="transform-origin:220px 200px;"/>
+
                         <g transform="translate(220,200)">
                             <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
                             <circle cx="0" cy="0" r="15" fill="#C68A1E"/>

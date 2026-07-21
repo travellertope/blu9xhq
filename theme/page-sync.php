@@ -146,19 +146,19 @@ get_header();
                 <p class="sync-hero__note"><?php esc_html_e( 'Free forever for occasional transfers. No credit card required.', 'bluu-interactive' ); ?></p>
             </div>
 
+            <!-- Directional source -> hub -> destination pipeline, not radial: BluuSync moves data one way, not outward in every direction. -->
             <div class="product-hero__illustration" aria-hidden="true">
                 <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M220 200 Q150 140 110 100" stroke="#0E7C86" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                    <path d="M220 200 Q300 130 348 92" stroke="#0E7C86" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                    <path d="M220 200 Q150 260 96 308" stroke="#0E7C86" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                    <path d="M220 200 Q300 265 352 306" stroke="#0E7C86" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-
-                    <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#0E7C86" stroke-width="1.5" style="transform-origin:220px 200px;"/>
-                    <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#0E7C86" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                    <line x1="132" y1="120" x2="192" y2="174" stroke="#0E7C86" stroke-width="2" opacity="0.5"/>
+                    <line x1="250" y1="224" x2="329" y2="287" stroke="#0E7C86" stroke-width="2" opacity="0.5"/>
+                    <polygon points="192,174 179,169 187,182" fill="#0E7C86" opacity="0.7"/>
+                    <polygon points="329,287 314,284 320,298" fill="#0E7C86" opacity="0.7"/>
 
                     <g transform="translate(220,200)">
-                        <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
-                        <circle cx="0" cy="0" r="15" fill="#0E7C86"/>
+                        <rect x="-38" y="-38" width="76" height="76" rx="18" fill="#0a192f"/>
+                        <g transform="scale(1.35) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </g>
                     </g>
 
                     <g class="scan-hero__ill-node" style="animation-delay:0s;">
@@ -168,21 +168,7 @@ get_header();
                         </g>
                     </g>
 
-                    <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
-                        <circle cx="348" cy="92" r="30" fill="#E3F3F4"/>
-                        <g transform="translate(348,92) scale(0.72) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="2">
-                            <line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/>
-                        </g>
-                    </g>
-
-                    <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
-                        <circle cx="96" cy="308" r="30" fill="#E3F3F4"/>
-                        <g transform="translate(96,308) scale(0.72) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        </g>
-                    </g>
-
-                    <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                    <g class="scan-hero__ill-node" style="animation-delay:1s;">
                         <circle cx="352" cy="306" r="30" fill="#E3F3F4"/>
                         <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="2">
                             <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>

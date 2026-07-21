@@ -2065,7 +2065,8 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     }
     .hero-pulse,
     .hero__float-card,
-    .scan-hero__ill-node {
+    .scan-hero__ill-node,
+    .scan-hero__ill-radar {
         animation: none;
     }
 }
@@ -6753,6 +6754,16 @@ a.contact-info__value:hover {
 @keyframes scanIllFloat {
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-6px); }
+}
+
+/* /audit's radar sweep, replacing the homepage's static pulse rings */
+.scan-hero__ill-radar {
+    animation: scanRadarSweep 4s linear infinite;
+    transform-box: fill-box;
+}
+@keyframes scanRadarSweep {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 /* CTA group (used in hero & final CTA) */

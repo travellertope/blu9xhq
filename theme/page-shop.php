@@ -117,8 +117,10 @@ get_header();
                     <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#1F9D55" stroke-width="1.5" style="transform-origin:220px 200px;"/>
 
                     <g transform="translate(220,200)">
-                        <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
-                        <circle cx="0" cy="0" r="15" fill="#1F9D55"/>
+                        <rect x="-40" y="-40" width="80" height="80" rx="18" fill="#0a192f"/>
+                        <g transform="scale(1.5) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="1.8">
+                            <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/>
+                        </g>
                     </g>
 
                     <g class="scan-hero__ill-node" style="animation-delay:0s;">
