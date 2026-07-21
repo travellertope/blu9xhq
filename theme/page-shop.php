@@ -89,7 +89,7 @@ get_header();
 ?>
 
 <!-- ── Shop Hero ────────────────────────────────────────────────────────────── -->
-<section class="shop-hero" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
+<section class="shop-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
     <div class="container container--narrow">
         <div class="shop-hero__inner animate-on-scroll">
             <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
@@ -103,6 +103,51 @@ get_header();
                 </a>
             </div>
             <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
+        </div>
+    </div>
+    <div class="container">
+        <div class="pm-frame pm-frame--hero animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">shop.bluuhq.com/lumo-retail</div>
+            </div>
+            <div class="shop-mockup">
+                <div class="shop-mockup__cover">
+                    <div class="shop-mockup__avatar">LR</div>
+                </div>
+                <div class="shop-mockup__head">
+                    <div>
+                        <div class="shop-mockup__name">Lumo Retail</div>
+                        <div class="shop-mockup__tagline">Home fragrance &amp; candles, made in Lagos</div>
+                    </div>
+                    <span class="shop-mockup__cart">🛒 Cart · 3</span>
+                </div>
+                <div class="shop-mockup__grid">
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#E6F4EC;">🕯️</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Amber Musk Candle</div><div class="shop-mockup-product__price">₦12,500</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#EAF0FF;">🧴</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Room Mist — Bergamot</div><div class="shop-mockup-product__price">₦7,000</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#FBF1DE;">🪔</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Diffuser Set</div><div class="shop-mockup-product__price">₦18,000</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#E3F3F4;">🎁</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Gift Bundle</div><div class="shop-mockup-product__price">₦25,000</div></div>
+                    </div>
+                </div>
+                <div class="shop-mockup__checkout">
+                    <div>
+                        <div class="shop-mockup__checkout-text">Checkout on WhatsApp</div>
+                        <div class="shop-mockup__checkout-sub">No login. Order opens as a message to Lumo Retail.</div>
+                    </div>
+                    <span class="shop-mockup__checkout-btn">Send order →</span>
+                </div>
+            </div>
         </div>
     </div>
 </section>

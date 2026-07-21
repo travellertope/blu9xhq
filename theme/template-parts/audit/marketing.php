@@ -18,19 +18,24 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 ?>
 
 <!-- ═════════════════════════════ HERO ═════════════════════════════ -->
-<section class="scan-hero" id="top" aria-label="AI visibility scan">
+<section class="scan-hero bluu-hero-bg" id="top" aria-label="AI visibility scan">
     <div class="container">
         <div class="scan-hero__grid">
 
             <!-- Left: copy + form -->
             <div class="scan-hero__content">
                 <h1 class="scan-hero__headline">
-                    Most brands are invisible to AI search. <span class="scan-hero__headline--accent">See your AI visibility score — free.</span>
+                    Show up <span class="scan-hero__headline--accent">everywhere</span> your customers are already looking.
                 </h1>
 
                 <p class="scan-hero__sub">
-                    Run a quick scan to check your AI discoverability, site health, and content gaps — then get a clear next step, whether that's content, your site, or both.
+                    Search, AI tools, social, email — Bluu builds your site, runs your content, and keeps your brand visible across every channel that matters.
                 </p>
+
+                <div class="scan-hero__form-intro">
+                    <p class="scan-hero__form-kicker">See where you stand.</p>
+                    <p class="scan-hero__form-hint">Enter your domain below to see how visible your brand is across search, AI tools, and against your competitors.</p>
+                </div>
 
                 <form class="scan-hero__form" action="<?php echo esc_url( $scan_url ); ?>" method="GET">
                     <?php if ( $audit_ref ) : ?>
@@ -54,49 +59,142 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                 </p>
             </div>
 
-            <!-- Right: sample report -->
-            <div class="scan-hero__demo" aria-hidden="true">
-                <div class="scan-hero__demo-top">
-                    <div class="scan-hero__demo-status">
-                        <span class="scan-hero__demo-dot"></span>
-                        <span class="scan-hero__demo-label">SAMPLE REPORT</span>
-                    </div>
-                    <span class="scan-hero__demo-url">audit.bluuhq.com</span>
-                </div>
+            <?php if ( is_front_page() ) : ?>
+                <!-- Right: brand-reach illustration -->
+                <div class="scan-hero__illustration" aria-hidden="true">
+                    <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path class="scan-hero__ill-link" d="M220 200 Q150 140 110 100" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                        <path class="scan-hero__ill-link" d="M220 200 Q300 130 348 92" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                        <path class="scan-hero__ill-link" d="M220 200 Q150 260 96 308" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                        <path class="scan-hero__ill-link" d="M220 200 Q300 265 352 306" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
 
-                <div class="scan-hero__demo-body">
-                    <div class="scan-hero__score-row">
-                        <span class="scan-hero__score-big" style="color: var(--md-warning, #D9A22A)">78</span>
-                        <span class="scan-hero__score-tag">/ 100 overall</span>
-                    </div>
-                    <div class="scan-hero__pillars">
-                        <div class="scan-hero__pillar">
-                            <span class="scan-hero__pillar-name">AI discoverability</span>
-                            <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:64%; background:#D9A22A;"></span></span>
-                            <span class="scan-hero__pillar-val">64</span>
-                        </div>
-                        <div class="scan-hero__pillar">
-                            <span class="scan-hero__pillar-name">Site &amp; tech health</span>
-                            <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:91%; background:#2F9E63;"></span></span>
-                            <span class="scan-hero__pillar-val">91</span>
-                        </div>
-                        <div class="scan-hero__pillar">
-                            <span class="scan-hero__pillar-name">Competitor intel</span>
-                            <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:79%; background:#2F9E63;"></span></span>
-                            <span class="scan-hero__pillar-val">79</span>
-                        </div>
-                    </div>
-                    <div class="scan-hero__verdict">
-                        <b>Biggest opportunity:</b> AI discoverability — most AI tools can't find this brand yet.
-                        <a href="<?php echo esc_url( home_url( '/content-ops' ) ); ?>">See Content Ops →</a>
-                    </div>
-                </div>
+                        <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                        <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
 
-                <div class="scan-hero__demo-meta">Checked 42 pages · 3 competitor sites · 18 AI search prompts</div>
-            </div>
+                        <g transform="translate(220,200)">
+                            <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
+                            <circle cx="0" cy="0" r="15" fill="#2F5FE0"/>
+                        </g>
+
+                        <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                            <circle cx="110" cy="100" r="30" fill="#EAF0FF"/>
+                            <circle cx="103" cy="100" r="8" fill="none" stroke="#2F5FE0" stroke-width="2"/>
+                            <line x1="109" y1="106" x2="118" y2="115" stroke="#2F5FE0" stroke-width="2" stroke-linecap="round"/>
+                        </g>
+
+                        <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
+                            <circle cx="348" cy="92" r="30" fill="#FBF1DE"/>
+                            <path d="M348 78l4.5 10.5L363 93l-10.5 4.5L348 108l-4.5-10.5L333 93l10.5-4.5z" fill="#C68A1E"/>
+                        </g>
+
+                        <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
+                            <circle cx="96" cy="308" r="30" fill="#E6F4EC"/>
+                            <path d="M83 297h26a5 5 0 015 5v10a5 5 0 01-5 5H91l-8 6v-6a5 5 0 01-5-5v-10a5 5 0 015-5z" fill="#1F9D55"/>
+                        </g>
+
+                        <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                            <circle cx="352" cy="306" r="30" fill="#E3F3F4"/>
+                            <rect x="337" y="294" width="30" height="22" rx="3" fill="none" stroke="#0E7C86" stroke-width="2"/>
+                            <path d="M337 296l15 12 15-12" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </g>
+                    </svg>
+                    <p class="scan-hero__illustration-caption">Search · AI tools · social · email — one brand, everywhere.</p>
+                </div>
+            <?php else : ?>
+                <!-- Right: sample report -->
+                <div class="scan-hero__demo" aria-hidden="true">
+                    <div class="scan-hero__demo-top">
+                        <div class="scan-hero__demo-status">
+                            <span class="scan-hero__demo-dot"></span>
+                            <span class="scan-hero__demo-label">SAMPLE REPORT</span>
+                        </div>
+                        <span class="scan-hero__demo-url">audit.bluuhq.com</span>
+                    </div>
+
+                    <div class="scan-hero__demo-body">
+                        <div class="scan-hero__score-row">
+                            <span class="scan-hero__score-big" style="color: var(--md-warning, #D9A22A)">78</span>
+                            <span class="scan-hero__score-tag">/ 100 overall</span>
+                        </div>
+                        <div class="scan-hero__pillars">
+                            <div class="scan-hero__pillar">
+                                <span class="scan-hero__pillar-name">AI discoverability</span>
+                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:64%; background:#D9A22A;"></span></span>
+                                <span class="scan-hero__pillar-val">64</span>
+                            </div>
+                            <div class="scan-hero__pillar">
+                                <span class="scan-hero__pillar-name">Site &amp; tech health</span>
+                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:91%; background:#2F9E63;"></span></span>
+                                <span class="scan-hero__pillar-val">91</span>
+                            </div>
+                            <div class="scan-hero__pillar">
+                                <span class="scan-hero__pillar-name">Competitor intel</span>
+                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:79%; background:#2F9E63;"></span></span>
+                                <span class="scan-hero__pillar-val">79</span>
+                            </div>
+                        </div>
+                        <div class="scan-hero__verdict">
+                            <b>Biggest opportunity:</b> AI discoverability — most AI tools can't find this brand yet.
+                            <a href="<?php echo esc_url( home_url( '/content-ops' ) ); ?>">See Content Ops →</a>
+                        </div>
+                    </div>
+
+                    <div class="scan-hero__demo-meta">Checked 42 pages · 3 competitor sites · 18 AI search prompts</div>
+                </div>
+            <?php endif; ?>
 
         </div>
     </div>
+
+    <?php if ( ! is_front_page() ) : ?>
+    <div class="container">
+        <div class="pm-frame pm-frame--hero animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">audit.bluuhq.com/report/8841</div>
+            </div>
+            <div class="audit-mockup">
+                <div class="audit-mockup__top">
+                    <span class="audit-mockup__domain">northbridgeco.com</span>
+                    <span class="audit-mockup__badge">Sample report</span>
+                </div>
+                <div class="audit-mockup-score-row">
+                    <span class="audit-mockup-score-big">78</span>
+                    <span class="audit-mockup-score-tag">/ 100 overall</span>
+                </div>
+                <div class="audit-mockup-pillars">
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">AI discoverability</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:64%; background:#C68A1E;"></span></span>
+                        <span class="audit-mockup-pillar__val">64</span>
+                    </div>
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">Site &amp; tech health</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:91%; background:#1F9D55;"></span></span>
+                        <span class="audit-mockup-pillar__val">91</span>
+                    </div>
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">Competitor intel</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:79%; background:#1F9D55;"></span></span>
+                        <span class="audit-mockup-pillar__val">79</span>
+                    </div>
+                </div>
+                <div class="audit-mockup-grid">
+                    <div class="audit-mockup-verdict">
+                        <b>Biggest opportunity</b>
+                        AI discoverability — most AI tools can't find this brand yet. Structured data and clearer product pages would close most of the gap.
+                    </div>
+                    <div class="audit-mockup-competitors">
+                        <div class="audit-mockup-competitors__title">Competitor intel</div>
+                        <div class="audit-mockup-competitor-row"><span>You</span><span>64</span></div>
+                        <div class="audit-mockup-competitor-row"><span>Competitor A</span><span>82</span></div>
+                        <div class="audit-mockup-competitor-row"><span>Competitor B</span><span>58</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
 </section>
 
 

@@ -420,22 +420,30 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 }
 
 /* ── Site Header / Navigation ───────────────────────────────────────────────── */
+/*
+ * Transparent by default so it blends into a hero's .bluu-hero-bg pattern
+ * (see the overlay rule below); solid white only once scrolled past it.
+ * On pages without a patterned hero this just reveals the white body
+ * background, so it reads the same as an opaque header.
+ */
 .site-header {
     position: sticky;
     top: 0;
     z-index: 900;
-    background: #FFFFFF;
+    background: transparent;
     color: var(--md-on-surface);
     padding-top: 6px;
     padding-bottom: 6px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--md-outline-variant);
-    box-shadow: var(--shadow-1);
-    transition: box-shadow var(--transition-medium);
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    transition: background var(--transition-medium), box-shadow var(--transition-medium), border-color var(--transition-medium);
 }
 
 .site-header--scrolled {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-2);
 }
 
@@ -751,7 +759,7 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     position: fixed;
     left: 0;
     right: 0;
-    top: var(--header-height);
+    top: calc(var(--header-height) + 10px);
     z-index: 890;
     background: #FFFFFF;
     border-top: 3px solid var(--md-accent);
@@ -2056,7 +2064,8 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
         transition: none;
     }
     .hero-pulse,
-    .hero__float-card {
+    .hero__float-card,
+    .scan-hero__ill-node {
         animation: none;
     }
 }
@@ -5945,79 +5954,550 @@ a.contact-info__value:hover {
 .mega-svc-cta:hover { text-decoration: underline; }
 
 /* =============================================================================
-   Softwares product-grid mega panel
+   Products mega panel — Zoho-style card grid
    ============================================================================= */
 
-.mega-panel--product-grid .mega-panel__inner { padding: 0; }
+.mega-panel__inner--full { padding: 0; }
 
 .mega-product-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    padding: var(--space-7) var(--space-6);
 }
 
 .mega-product-card {
+    --card-accent: var(--md-accent);
+    --card-tint: var(--md-accent-container);
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-6) var(--space-6);
+    gap: var(--space-3);
+    padding: var(--space-6);
     text-decoration: none;
     color: var(--md-on-surface);
-    border-right: 1px solid var(--md-outline-variant);
-    transition: background var(--transition-fast);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.mega-product-card:last-child { border-right: none; }
-.mega-product-card:hover { background: var(--md-accent-container); }
-
-.mega-product-card__icon {
-    width: 44px;
-    height: 44px;
+.mega-product-card:hover {
     background: var(--md-surface-variant);
+    border-color: var(--card-accent);
+    box-shadow: 0 10px 24px -14px rgba(10,25,47,0.22);
+}
+
+.mpc-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--card-tint);
+    color: var(--card-accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    color: var(--md-accent);
     flex-shrink: 0;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: transform var(--transition-fast);
 }
-.mega-product-card:hover .mega-product-card__icon {
-    background: var(--md-accent);
-    color: #fff;
-}
-.mega-product-card__icon svg { display: block; }
+.mega-product-card:hover .mpc-icon { transform: translateY(-2px); }
+.mpc-icon svg { display: block; }
 
-.mega-product-card__body {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.mega-product-card__badge {
-    font-size: 10px;
-    font-weight: 700;
+.mpc-badge {
+    font-size: 10.5px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--md-accent);
+    letter-spacing: 0.09em;
+    color: var(--card-accent);
 }
 
-.mega-product-card__name {
+.mpc-name {
+    display: block;
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--md-on-surface);
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.mpc-desc {
     display: block;
     font-size: var(--font-size-sm);
-    font-weight: 700;
-    color: var(--md-on-surface);
-    line-height: 1.3;
+    color: var(--md-on-surface-variant);
+    line-height: 1.6;
+    margin-top: 2px;
 }
 
-.mega-product-card__desc {
-    display: block;
+.mpc-cta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: var(--space-3);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--card-accent);
+}
+.mpc-cta svg { transition: transform var(--transition-fast); }
+.mega-product-card:hover .mpc-cta svg { transform: translateX(3px); }
+
+/* =============================================================================
+   Bluu Studios mega panel — tabs (Content Ops/Development/Management Studio)
+   + a per-studio search/industry-list/case-study-list left column, with a
+   Zoho-style card grid on the right. Content is entirely menu/ACF-driven —
+   see bluu_get_studios_menu_tree() in functions.php.
+   ============================================================================= */
+
+.studio-tabrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-7);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.studio-tabs { display: flex; }
+.studio-tab {
+    padding: var(--space-4) 4px;
+    margin-right: var(--space-6);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--md-on-surface-variant);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.studio-tab:hover { color: var(--md-on-surface); }
+.studio-tab.is-active { color: var(--md-accent); border-bottom-color: var(--md-accent); }
+
+.studio-explore-all {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--md-accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.studio-body { display: none; }
+.studio-body.is-active { display: block; }
+
+.studio-wrap { display: flex; min-height: 380px; }
+
+.studio-left-col {
+    width: 260px;
+    flex-shrink: 0;
+    padding: var(--space-5) var(--space-3);
+    display: flex;
+    flex-direction: column;
+}
+
+.studio-search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 9px var(--space-3);
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-sm);
+    color: var(--md-on-surface-variant);
+}
+.studio-search input {
+    border: none;
+    outline: none;
+    background: none;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface);
+    width: 100%;
+}
+.studio-search input::placeholder { color: var(--md-on-surface-variant); }
+
+.studio-list-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin: 0 0 6px;
+    padding: 0 var(--space-3);
+}
+.studio-list-label--secondary { margin-top: var(--space-4); }
+
+.studio-left { display: flex; flex-direction: column; gap: 2px; }
+.studio-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.studio-btn:hover { background: var(--md-surface-variant); color: var(--md-on-surface); }
+.studio-btn.is-active { background: var(--md-accent-container); color: var(--md-accent-dark); font-weight: 800; }
+.studio-btn .arrow { font-size: 12px; opacity: 0; transition: opacity var(--transition-fast); }
+.studio-btn:hover .arrow, .studio-btn.is-active .arrow { opacity: 0.6; }
+.studio-btn.is-hidden { display: none; }
+.studio-btn--small { padding: 8px var(--space-3); font-size: 13px; font-weight: 500; }
+
+.studio-panels { flex: 1; padding: var(--space-6) var(--space-7); border-left: 1px solid var(--md-outline-variant); }
+.studio-panel { display: none; }
+.studio-panel.is-active { display: block; }
+
+.studio-panels__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+.studio-panel__title { font-family: var(--font-family-heading); font-size: var(--font-size-xl); font-weight: 800; }
+.studio-panel__desc { font-size: var(--font-size-sm); color: var(--md-on-surface-variant); line-height: 1.6; max-width: 620px; margin: 8px 0 var(--space-4); }
+
+.studio-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin: 0 0 var(--space-3);
+}
+
+.studio-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: var(--space-3);
+}
+.studio-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--md-surface-variant);
+    text-decoration: none;
+    color: var(--md-on-surface);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.studio-card:hover { border-color: var(--card-accent, var(--md-accent)); background: var(--md-surface); }
+.studio-card__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-tint, var(--md-accent-container));
+    color: var(--card-accent, var(--md-accent));
+    flex-shrink: 0;
+}
+.studio-card__icon svg { display: block; }
+.studio-card__name { font-family: var(--font-family-heading); font-weight: 800; font-size: 13.5px; line-height: 1.3; }
+.studio-card__desc { font-size: 12px; color: var(--md-on-surface-variant); line-height: 1.5; }
+.studio-card__cta { margin-top: auto; padding-top: 4px; font-size: 11.5px; font-weight: 800; color: var(--card-accent, var(--md-accent)); display: flex; align-items: center; gap: 4px; }
+
+.studio-quicklinks { display: flex; gap: var(--space-2); margin-top: var(--space-6); }
+.studio-link {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+    text-decoration: none;
+    padding: 6px var(--space-3);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 99px;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.studio-link:hover { color: var(--md-accent-dark); border-color: var(--md-accent); background: var(--md-accent-container); }
+
+/* =============================================================================
+   Shared hero background — subtle crosshatch + dual glow (approved Pattern A).
+   Applied alongside each product's own hero class (.scan-hero, .crm-hero,
+   .shop-hero, .sync-hero) rather than replacing it. Uses only colors already
+   in the palette (accent blue, the AI-score amber) — no new tokens.
+   ============================================================================= */
+.bluu-hero-bg {
+    position: relative;
+    background:
+        radial-gradient(720px 420px at 88% -8%, rgba(47, 95, 224, 0.10), transparent 60%),
+        radial-gradient(600px 360px at 6% 106%, rgba(217, 162, 42, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfcfe 0%, #f7f9fd 100%);
+}
+.bluu-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        repeating-linear-gradient(45deg, rgba(47, 95, 224, 0.05) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(-45deg, rgba(47, 95, 224, 0.05) 0 1px, transparent 1px 34px);
+    pointer-events: none;
+}
+.bluu-hero-bg > .container {
+    position: relative;
+    z-index: 1;
+}
+
+/*
+ * Pull each hero up by exactly the header's height and add the same amount
+ * back as padding-top, so the transparent .site-header floats over the top
+ * of the pattern instead of sitting on a solid bar above it — everything
+ * below the hero lands in the same place it always did. Scoped to these 4
+ * heroes only; every other page's layout is untouched.
+ */
+.crm-hero.bluu-hero-bg,
+.shop-hero.bluu-hero-bg,
+.sync-hero.bluu-hero-bg {
+    margin-top: calc(-1 * var(--header-height));
+    padding-top: calc(var(--header-height) + var(--space-9));
+}
+.scan-hero.bluu-hero-bg {
+    margin-top: calc(-1 * var(--header-height));
+    padding-top: calc(var(--header-height) + 64px);
+}
+
+/* =============================================================================
+   Product mockups — one per marketing page (/crm, /audit, /shop, /sync),
+   sitting right after each hero. Shared "browser frame" chrome, product-
+   specific content beneath. Per-product accent hexes match
+   bluu_mega_accent_colors() in functions.php (blue/amber/green/teal) so the
+   mega menu and these mockups stay visually consistent.
+   ============================================================================= */
+/* Browser chrome frame — sits directly inside each hero as its visual extension */
+.pm-frame {
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(10,25,47,0.04), 0 16px 40px -20px rgba(10,25,47,0.22);
+}
+.pm-frame--hero {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-2);
+}
+.pm-chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: var(--md-surface-variant);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.pm-chrome__dots { display: flex; gap: 6px; }
+.pm-chrome__dots span { width: 9px; height: 9px; border-radius: 50%; background: var(--md-outline-variant); }
+.pm-chrome__bar {
+    flex: 1;
+    height: 24px;
+    border-radius: var(--radius-full);
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    display: flex;
+    align-items: center;
+    padding: 0 var(--space-3);
     font-size: var(--font-size-xs);
     color: var(--md-on-surface-variant);
-    line-height: 1.5;
+    font-family: ui-monospace, SFMono-Regular, monospace;
 }
 
-.mega-product-card:hover .mega-product-card__name,
-.mega-product-card:hover .mega-product-card__badge { color: var(--md-accent); }
-.mega-product-card:hover .mega-product-card__desc  { color: var(--md-on-surface-variant); }
+/* ── BluuCRM dashboard mockup ─────────────────────────────────────────── */
+.crm-mockup { display: flex; min-height: 400px; font-size: 13px; }
+.crm-mockup__sidebar {
+    width: 168px;
+    flex: none;
+    background: var(--md-navy, #0a192f);
+    color: #cbd5e8;
+    padding: var(--space-4) var(--space-3);
+}
+.crm-mockup__logo {
+    font-family: var(--font-family-heading);
+    font-weight: 800;
+    font-size: 13.5px;
+    color: #fff;
+    padding: 0 6px var(--space-4);
+}
+.crm-mockup__logo b { color: var(--md-accent); }
+.crm-mockup__nav { display: flex; flex-direction: column; gap: 1px; }
+.crm-mockup__nav span {
+    padding: 7px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #a9b6cf;
+}
+.crm-mockup__nav span.is-active { background: var(--md-accent); color: #fff; font-weight: 600; }
+
+.crm-mockup__main { flex: 1; padding: var(--space-6); background: var(--md-surface-variant); }
+.crm-mockup__title { font-family: var(--font-family-heading); font-weight: 800; font-size: 17px; margin-bottom: 2px; }
+.crm-mockup__sub { font-size: 12px; color: var(--md-on-surface-variant); margin-bottom: var(--space-5); }
+
+.crm-mockup-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); margin-bottom: var(--space-5); }
+.crm-mockup-stat {
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-md, 10px);
+    padding: var(--space-3) var(--space-4);
+}
+.crm-mockup-stat__label { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--md-on-surface-variant); }
+.crm-mockup-stat__value { font-family: var(--font-family-heading); font-size: 19px; font-weight: 800; margin-top: 4px; }
+.crm-mockup-stat__sub { font-size: 10.5px; color: var(--md-on-surface-variant); margin-top: 2px; }
+
+.crm-mockup-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.crm-mockup-card {
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-md, 10px);
+    padding: 13px 15px;
+}
+.crm-mockup-card__title {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin-bottom: 9px;
+}
+.crm-mockup-card__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-top: 1px solid var(--md-outline-variant);
+    font-size: 12px;
+}
+.crm-mockup-card__row:first-of-type { border-top: none; }
+.crm-mockup-card__row-sub { color: var(--md-on-surface-variant); font-size: 10.5px; }
+.crm-mockup-pill { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full); white-space: nowrap; }
+.crm-mockup-pill--red { background: #FBE7E4; color: #C0402C; }
+.crm-mockup-pill--amber { background: #FBF1DE; color: #8f6414; }
+
+/* ── BluuAudit report mockup ──────────────────────────────────────────── */
+.audit-mockup { padding: var(--space-6); background: var(--md-surface-variant); font-size: 13px; }
+.audit-mockup__top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-5); }
+.audit-mockup__domain { font-family: ui-monospace, monospace; font-size: 12px; color: var(--md-on-surface-variant); }
+.audit-mockup__badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    color: #8f6414; background: #FBF1DE; padding: 3px 9px; border-radius: var(--radius-full);
+}
+.audit-mockup-score-row { display: flex; align-items: baseline; gap: 10px; margin-bottom: var(--space-5); }
+.audit-mockup-score-big { font-family: var(--font-family-heading); font-size: 46px; font-weight: 800; color: #8f6414; line-height: 1; }
+.audit-mockup-score-tag { font-size: 13px; color: var(--md-on-surface-variant); }
+
+.audit-mockup-pillars { display: flex; flex-direction: column; gap: var(--space-3); margin-bottom: var(--space-5); }
+.audit-mockup-pillar { display: grid; grid-template-columns: 150px 1fr 34px; align-items: center; gap: var(--space-3); }
+.audit-mockup-pillar__name { font-size: 12px; font-weight: 600; }
+.audit-mockup-pillar__track { height: 7px; border-radius: var(--radius-full); background: var(--md-outline-variant); overflow: hidden; }
+.audit-mockup-pillar__fill { height: 100%; border-radius: var(--radius-full); }
+.audit-mockup-pillar__val { font-family: var(--font-family-heading); font-size: 12px; font-weight: 800; text-align: right; }
+
+.audit-mockup-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: var(--space-4); }
+.audit-mockup-verdict {
+    background: #fff; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-md, 10px);
+    padding: var(--space-4); font-size: 12.5px; line-height: 1.6;
+}
+.audit-mockup-verdict b { display: block; font-size: 10.5px; letter-spacing: 0.04em; text-transform: uppercase; color: #8f6414; margin-bottom: 5px; }
+.audit-mockup-competitors {
+    background: #fff; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-md, 10px); padding: var(--space-4);
+}
+.audit-mockup-competitors__title { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--md-on-surface-variant); margin-bottom: var(--space-3); }
+.audit-mockup-competitor-row { display: flex; justify-content: space-between; font-size: 12px; padding: 5px 0; }
+.audit-mockup-competitor-row span:last-child { font-family: var(--font-family-heading); font-weight: 800; }
+
+/* ── BluuShop storefront mockup ───────────────────────────────────────── */
+.shop-mockup { background: #fff; }
+.shop-mockup__cover {
+    height: 92px;
+    background: linear-gradient(120deg, #1F9D55 0%, #0f5c33 100%);
+    position: relative;
+}
+.shop-mockup__avatar {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: #fff; border: 3px solid #fff;
+    position: absolute; left: var(--space-5); bottom: -28px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-family-heading); font-weight: 800; font-size: 18px; color: #157a41;
+    box-shadow: 0 1px 3px rgba(10,25,47,0.12);
+}
+.shop-mockup__head { padding: 36px var(--space-6) var(--space-4); display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: var(--space-3); }
+.shop-mockup__name { font-family: var(--font-family-heading); font-weight: 800; font-size: 17px; }
+.shop-mockup__tagline { font-size: 12px; color: var(--md-on-surface-variant); margin-top: 2px; }
+.shop-mockup__cart {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 700; color: #157a41;
+    background: #E6F4EC; padding: 7px 13px; border-radius: var(--radius-full);
+}
+.shop-mockup__grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); padding: 4px var(--space-6) var(--space-6); }
+.shop-mockup-product { border: 1px solid var(--md-outline-variant); border-radius: var(--radius-md, 10px); overflow: hidden; }
+.shop-mockup-product__img { height: 74px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+.shop-mockup-product__body { padding: 9px 10px 11px; }
+.shop-mockup-product__name { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+.shop-mockup-product__price { font-family: var(--font-family-heading); font-size: 13px; font-weight: 800; color: #157a41; }
+
+.shop-mockup__checkout {
+    margin: 0 var(--space-6) var(--space-6);
+    display: flex; align-items: center; justify-content: space-between;
+    background: #25D366;
+    border-radius: var(--radius-md, 10px);
+    padding: var(--space-3) var(--space-5);
+    color: #fff;
+}
+.shop-mockup__checkout-text { font-size: 12.5px; font-weight: 700; }
+.shop-mockup__checkout-sub { font-size: 11px; opacity: 0.9; font-weight: 500; }
+.shop-mockup__checkout-btn {
+    background: #fff; color: #1c7a3f; font-size: 12px; font-weight: 800;
+    padding: 7px 14px; border-radius: var(--radius-full); white-space: nowrap;
+}
+
+/* ── BluuSync transfer mockup (concept — no app source in this repo) ─────── */
+.sync-mockup { padding: var(--space-6); background: var(--md-surface-variant); font-size: 13px; }
+.sync-mockup-endpoints { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: center; gap: var(--space-2); margin-bottom: var(--space-5); }
+.sync-mockup-endpoint {
+    background: #fff; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-md, 10px);
+    padding: var(--space-3) var(--space-4); display: flex; align-items: center; gap: var(--space-3);
+}
+.sync-mockup-endpoint__icon {
+    width: 30px; height: 30px; border-radius: 8px; flex: none;
+    background: #E3F3F4; color: #0a5c63;
+    display: flex; align-items: center; justify-content: center;
+}
+.sync-mockup-endpoint__label { font-size: 10px; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--md-on-surface-variant); }
+.sync-mockup-endpoint__value { font-size: 12.5px; font-weight: 700; margin-top: 1px; }
+.sync-mockup-arrow { display: flex; align-items: center; justify-content: center; color: #0E7C86; }
+
+.sync-mockup-progress-card {
+    background: #fff; border: 1px solid var(--md-outline-variant); border-radius: var(--radius-md, 10px); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-4);
+}
+.sync-mockup-progress-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-2); }
+.sync-mockup-progress-name { font-size: 12.5px; font-weight: 700; font-family: ui-monospace, monospace; }
+.sync-mockup-progress-pct { font-family: var(--font-family-heading); font-size: 15px; font-weight: 800; color: #0a5c63; }
+.sync-mockup-progress-track { height: 8px; border-radius: var(--radius-full); background: var(--md-outline-variant); overflow: hidden; margin-bottom: var(--space-2); }
+.sync-mockup-progress-fill { height: 100%; width: 63%; border-radius: var(--radius-full); background: linear-gradient(90deg, #0E7C86, #16a8a4); }
+.sync-mockup-progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--md-on-surface-variant); }
+
+.sync-mockup-history { display: flex; flex-direction: column; gap: 1px; }
+.sync-mockup-history-row {
+    display: grid; grid-template-columns: 1fr auto auto; gap: var(--space-3); align-items: center;
+    padding: 9px 0; border-top: 1px solid var(--md-outline-variant); font-size: 12px;
+}
+.sync-mockup-history-row:first-child { border-top: none; }
+.sync-mockup-history-name { font-family: ui-monospace, monospace; font-size: 11.5px; color: var(--md-on-surface-variant); }
+.sync-mockup-history-size { color: var(--md-on-surface-variant); font-size: 11.5px; }
+.sync-mockup-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-full); }
+.sync-mockup-badge--done { background: #E6F4EC; color: #157a41; }
+
+@media (max-width: 720px) {
+    .crm-mockup { flex-direction: column; }
+    .crm-mockup__sidebar { width: 100%; }
+    .crm-mockup-stats,
+    .shop-mockup__grid { grid-template-columns: repeat(2, 1fr); }
+    .audit-mockup-grid { grid-template-columns: 1fr; }
+    .sync-mockup-endpoints { grid-template-columns: 1fr; }
+    .sync-mockup-arrow { transform: rotate(90deg); }
+}
 
 /* =============================================================================
    Scan Homepage — Hero, Checks, Next Steps, FAQ, Trust
@@ -6047,9 +6527,11 @@ a.contact-info__value:hover {
     margin-bottom: 18px;
 }
 .scan-hero__headline {
-    font-size: 46px;
+    font-size: clamp(2.25rem, 4.4vw, 3.75rem);
     font-weight: 800;
-    line-height: 1.12;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
 }
 .scan-hero__headline--accent {
     color: var(--md-accent);
@@ -6062,9 +6544,28 @@ a.contact-info__value:hover {
     margin: 18px 0 0;
 }
 
+/* Compact lead-in that bridges the pitch above to the form below */
+.scan-hero__form-intro {
+    margin-top: var(--space-6);
+    max-width: 420px;
+}
+.scan-hero__form-kicker {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--md-primary);
+    margin: 0 0 2px;
+}
+.scan-hero__form-hint {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* Form row */
 .scan-hero__form {
-    margin-top: 24px;
+    margin-top: 14px;
 }
 .scan-hero__toggle {
     font-size: 13px;
@@ -6233,6 +6734,32 @@ a.contact-info__value:hover {
     padding-top: 16px;
     border-top: 1px solid #16243B;
     margin-top: 8px;
+}
+
+/* Homepage-only brand-reach illustration, in place of the sample-report demo */
+.scan-hero__illustration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+}
+.scan-hero__illustration svg {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+}
+.scan-hero__ill-node {
+    animation: scanIllFloat 4.5s ease-in-out infinite;
+}
+@keyframes scanIllFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+.scan-hero__illustration-caption {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    text-align: center;
+    max-width: 320px;
 }
 
 /* CTA group (used in hero & final CTA) */
@@ -6503,8 +7030,6 @@ a.contact-info__value:hover {
 .crm-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .crm-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -6777,8 +7302,6 @@ a.contact-info__value:hover {
 .shop-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .shop-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -7016,8 +7539,6 @@ a.contact-info__value:hover {
 .sync-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .sync-hero__headline {
     font-size: clamp(2.5rem, 7vw, 4.5rem);

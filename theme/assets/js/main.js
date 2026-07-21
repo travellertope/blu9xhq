@@ -704,6 +704,61 @@
         } );
     }
 
+    /* ── Bluu Studios mega panel — tabs / industry list / search ──────────── */
+    function initStudiosMegaPanel() {
+        var wraps = qsa( '.studio-wrap' );
+        if ( ! wraps.length ) { return; }
+
+        wraps.forEach( function ( wrap ) {
+            var tabs   = qsa( '.studio-tab[data-studio]', wrap );
+            var bodies = qsa( '.studio-body[data-studio]', wrap );
+
+            function activateTab( tab ) {
+                tabs.forEach( function ( t ) { t.classList.remove( 'is-active' ); } );
+                bodies.forEach( function ( b ) { b.classList.remove( 'is-active' ); } );
+                tab.classList.add( 'is-active' );
+                var body = wrap.querySelector( '.studio-body[data-studio="' + tab.getAttribute( 'data-studio' ) + '"]' );
+                if ( body ) { body.classList.add( 'is-active' ); }
+            }
+
+            tabs.forEach( function ( tab ) {
+                tab.addEventListener( 'mouseenter', function () { activateTab( tab ); } );
+                tab.addEventListener( 'click', function () { activateTab( tab ); } );
+            } );
+
+            bodies.forEach( function ( body ) {
+                var industryButtons = qsa( '.studio-btn[data-industry]', body );
+                var industryPanels  = qsa( '.studio-panel[data-industry]', body );
+                var leftCol         = qs( '.studio-left-col', body );
+
+                function activateIndustry( key ) {
+                    industryButtons.forEach( function ( b ) { b.classList.toggle( 'is-active', b.getAttribute( 'data-industry' ) === key ); } );
+                    industryPanels.forEach( function ( p ) { p.classList.toggle( 'is-active', p.getAttribute( 'data-industry' ) === key ); } );
+                }
+
+                industryButtons.forEach( function ( btn ) {
+                    btn.addEventListener( 'mouseenter', function () { activateIndustry( btn.getAttribute( 'data-industry' ) ); } );
+                    btn.addEventListener( 'click', function () { activateIndustry( btn.getAttribute( 'data-industry' ) ); } );
+                } );
+
+                if ( leftCol ) {
+                    leftCol.addEventListener( 'mouseleave', function () { activateIndustry( '__default' ); } );
+                }
+
+                var search = qs( '.studio-search input', body );
+                if ( search ) {
+                    search.addEventListener( 'input', function () {
+                        var q = search.value.trim().toLowerCase();
+                        industryButtons.forEach( function ( b ) {
+                            var text = b.textContent.toLowerCase();
+                            b.classList.toggle( 'is-hidden', q.length > 0 && text.indexOf( q ) === -1 );
+                        } );
+                    } );
+                }
+            } );
+        } );
+    }
+
     /* ── Pricing table sticky thead (JS — overflow-x:auto breaks CSS sticky) ── */
     function initPricingTableSticky() {
         var wrap  = qs( '.pricing-table-wrap' );
@@ -745,17 +800,13 @@
         if ( ! header ) { return; }
 
         function sync() {
-            var inner = header.querySelector( '.site-header__inner' );
-            var target = inner || header;
-            var css = getComputedStyle( target );
-            var declared = parseInt( css.height, 10 );
-            if ( declared > 0 && css.height !== 'auto' ) {
-                document.documentElement.style.setProperty( '--header-height', declared + 'px' );
-            } else {
-                var h = Math.round( header.getBoundingClientRect().height );
-                if ( h > 0 ) {
-                    document.documentElement.style.setProperty( '--header-height', h + 'px' );
-                }
+            // Measure the header itself, not .site-header__inner — the inner
+            // row's own height excludes .site-header's top/bottom padding and
+            // border, which under-measured the real height enough to leave a
+            // visible gap above transparent-header heroes.
+            var h = Math.round( header.getBoundingClientRect().height );
+            if ( h > 0 ) {
+                document.documentElement.style.setProperty( '--header-height', h + 'px' );
             }
         }
 
@@ -770,6 +821,7 @@
         initMegaMenu();
         initFlyoutMenu();
         initIndustriesMegaNav();
+        initStudiosMegaPanel();
         initMobileMegaMenu();
         initMobileIndustriesAccordion();
         initScrollAnimations();

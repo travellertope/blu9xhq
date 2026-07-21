@@ -1726,3 +1726,51 @@ acf_add_local_field_group( array(
     'menu_order' => 35,
     'active'     => true,
 ) );
+
+// ── MEGA MENU CARD (any Page used in the Bluu Studios mega menu) ───────────────
+// bluu_studios_mega_panel() in functions.php reads these three fields to build
+// each card in the Products/Studios dropdown, keyed off the real page behind
+// each nav menu item — no separate content to maintain, just these fields on
+// whichever Page you've already added to the "Bluu Studios" menu branch.
+acf_add_local_field_group( array(
+    'key'    => 'group_mega_menu_card',
+    'title'  => 'Mega Menu Card',
+    'fields' => array(
+        array(
+            'key'          => 'field_mega_summary',
+            'label'        => 'Mega Menu Summary',
+            'name'         => 'mega_summary',
+            'type'         => 'text',
+            'maxlength'    => 100,
+            'instructions' => 'One short line shown on this page\'s card in the Bluu Studios / Products dropdown. Leave blank to hide the card\'s description line.',
+        ),
+        array(
+            'key'          => 'field_mega_icon',
+            'label'        => 'Mega Menu Icon',
+            'name'         => 'mega_icon',
+            'type'         => 'select',
+            'choices'      => bluu_mega_icon_choices(),
+            'default_value' => 'briefcase',
+            'ui'           => 1,
+            'instructions' => 'Icon shown on this page\'s card.',
+        ),
+        array(
+            'key'           => 'field_mega_accent',
+            'label'         => 'Mega Menu Accent Color',
+            'name'          => 'mega_accent',
+            'type'          => 'select',
+            'choices'       => array(
+                'blue'  => 'Blue',
+                'amber' => 'Amber',
+                'green' => 'Green',
+                'teal'  => 'Teal',
+            ),
+            'default_value' => 'blue',
+            'ui'            => 1,
+            'instructions'  => 'Card icon/accent color — rotate through these to keep the grid visually varied.',
+        ),
+    ),
+    'location'   => array( array( array( 'param' => 'post_type', 'operator' => '==', 'value' => 'page' ) ) ),
+    'menu_order' => 5,
+    'active'     => true,
+) );

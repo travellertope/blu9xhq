@@ -111,20 +111,20 @@ function bluu_fallback_nav() {
     // Home
     echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( 'Home', 'bluu-interactive' ) . '</a></li>';
 
-    // ── Services mega panel ───────────────────────────────────────────────────
-    echo '<li class="has-mega has-mega--services">';
-    echo '<a href="' . esc_url( home_url( '/services' ) ) . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">';
-    echo esc_html__( 'Services', 'bluu-interactive' ) . bluu_mega_chevron();
-    echo '</a>';
-    echo bluu_services_mega_panel();
-    echo '</li>';
-
-    // ── Softwares mega panel ──────────────────────────────────────────────────
+    // ── Products mega panel ───────────────────────────────────────────────────
     echo '<li class="has-mega has-mega--softwares">';
     echo '<a href="#" class="mega-trigger" aria-haspopup="true" aria-expanded="false">';
-    echo esc_html__( 'Softwares', 'bluu-interactive' ) . bluu_mega_chevron();
+    echo esc_html__( 'Products', 'bluu-interactive' ) . bluu_mega_chevron();
     echo '</a>';
     echo bluu_softwares_mega_panel();
+    echo '</li>';
+
+    // ── Bluu Studios mega panel ───────────────────────────────────────────────
+    echo '<li class="has-mega has-mega--services">';
+    echo '<a href="' . esc_url( home_url( '/studios' ) ) . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">';
+    echo esc_html__( 'Bluu Studios', 'bluu-interactive' ) . bluu_mega_chevron();
+    echo '</a>';
+    echo bluu_services_mega_panel();
     echo '</li>';
 
     // Insights
@@ -141,22 +141,22 @@ function bluu_fallback_mobile_nav() {
 
     echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">' . esc_html__( 'Home', 'bluu-interactive' ) . '</a></li>';
 
-    // Services accordion
-    echo '<li class="has-mega has-mega--services">';
-    echo '<div class="mobile-mega-header">';
-    echo '<a href="' . esc_url( home_url( '/services' ) ) . '">' . esc_html__( 'Services', 'bluu-interactive' ) . '</a>';
-    echo '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . esc_attr__( 'Expand Services submenu', 'bluu-interactive' ) . '">' . bluu_mega_chevron() . '</button>';
-    echo '</div>';
-    echo bluu_services_mobile_accordion();
-    echo '</li>';
-
-    // Softwares accordion
+    // Products accordion
     echo '<li class="has-mega has-mega--softwares">';
     echo '<div class="mobile-mega-header">';
-    echo '<a href="#">' . esc_html__( 'Softwares', 'bluu-interactive' ) . '</a>';
-    echo '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . esc_attr__( 'Expand Softwares submenu', 'bluu-interactive' ) . '">' . bluu_mega_chevron() . '</button>';
+    echo '<a href="#">' . esc_html__( 'Products', 'bluu-interactive' ) . '</a>';
+    echo '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . esc_attr__( 'Expand Products submenu', 'bluu-interactive' ) . '">' . bluu_mega_chevron() . '</button>';
     echo '</div>';
     echo bluu_softwares_mobile_list();
+    echo '</li>';
+
+    // Bluu Studios accordion
+    echo '<li class="has-mega has-mega--services">';
+    echo '<div class="mobile-mega-header">';
+    echo '<a href="' . esc_url( home_url( '/studios' ) ) . '">' . esc_html__( 'Bluu Studios', 'bluu-interactive' ) . '</a>';
+    echo '<button class="mobile-mega-btn" aria-expanded="false" aria-label="' . esc_attr__( 'Expand Bluu Studios submenu', 'bluu-interactive' ) . '">' . bluu_mega_chevron() . '</button>';
+    echo '</div>';
+    echo bluu_services_mobile_accordion();
     echo '</li>';
 
     echo '<li><a href="' . esc_url( home_url( '/insights' ) ) . '">' . esc_html__( 'Insights', 'bluu-interactive' ) . '</a></li>';
