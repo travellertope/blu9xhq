@@ -6251,18 +6251,6 @@ a.contact-info__value:hover {
 .scan-checks__header {
     text-align: center;
 }
-.scan-checks__eyebrow {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--md-accent);
-    background: var(--md-accent-container);
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-    margin-bottom: 18px;
-}
 .scan-checks__headline {
     font-size: 38px;
     font-weight: 800;
@@ -6282,6 +6270,9 @@ a.contact-info__value:hover {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     margin-top: 56px;
+}
+.scan-checks__grid--4up {
+    grid-template-columns: repeat(3, 1fr) 1.4fr;
 }
 .scan-checks__card {
     background: #fff;
@@ -6316,30 +6307,14 @@ a.contact-info__value:hover {
     line-height: 1.6;
 }
 
-/* No-website callout */
-.scan-checks__callout {
-    margin-top: 56px;
+/* No-website callout — 4th (wider) card in the scan-checks grid */
+.scan-checks__card--callout {
     background: #FBEAE6;
-    border: 1px solid #F2C9BE;
-    border-left: 4px solid #E2543D;
-    border-radius: var(--radius-lg);
-    padding: 26px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
+    border-color: #F2C9BE;
+    border-top-color: #E2543D;
 }
-.scan-checks__callout h3 {
-    font-size: 17px;
-    margin-bottom: 6px;
-    font-family: var(--font-family-heading);
-}
-.scan-checks__callout p {
-    color: var(--md-on-surface-variant);
-    font-size: 14.5px;
-    max-width: 560px;
-    line-height: 1.55;
+.scan-checks__card--callout p {
+    margin-bottom: 18px;
 }
 
 /* ── After your scan — next steps ──────────────────────────────────────────── */
@@ -6436,17 +6411,6 @@ a.contact-info__value:hover {
     margin-bottom: 14px;
 }
 
-/* ── Trust strip ───────────────────────────────────────────────────────────── */
-.scan-trust {
-    padding: 48px 0;
-    text-align: center;
-}
-.scan-trust p {
-    color: var(--md-on-surface-variant);
-    font-size: 14.5px;
-    font-weight: 600;
-}
-
 /* ── FAQ ───────────────────────────────────────────────────────────────────── */
 .scan-faq {
     padding: 96px 0;
@@ -6519,10 +6483,6 @@ a.contact-info__value:hover {
     }
     .scan-checks__headline {
         font-size: 30px;
-    }
-    .scan-checks__callout {
-        flex-direction: column;
-        align-items: flex-start;
     }
     .scan-hero__form-row {
         flex-direction: column;
