@@ -9,12 +9,15 @@ import { CheckCircle2, Users, Building2, HardDrive } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PLAN_LIMITS, type TenantPlan } from "@/lib/planLimits";
 import { PLAN_DETAILS } from "@/lib/stripe-products";
+import { PAYSTACK_PLAN_DETAILS, type PaidPlan } from "@/lib/paystack-products";
 
 interface Props {
   plan: TenantPlan;
   clientCount: number;
   teamCount: number;
   hasStripeCustomer: boolean;
+  billingProvider: string | null;
+  showPaystack: boolean;
 }
 
 const PLAN_ORDER: TenantPlan[] = ["free", "starter", "pro", "agency"];
@@ -49,25 +52,38 @@ function UsageBar({ used, max, label }: { used: number; max: number; label: stri
   );
 }
 
-export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer }: Props) {
+export function BillingClient({
+  plan,
+  clientCount,
+  teamCount,
+  hasStripeCustomer,
+  billingProvider,
+  showPaystack,
+}: Props) {
   const searchParams  = useSearchParams();
   const justUpgraded  = searchParams.get("upgraded") === "1";
+  // Paystack is monthly-only (annual/discounted billing stays a Stripe/USD
+  // option), so a Nigerian visitor never sees the annual toggle.
   const [billing, setBilling]   = useState<"monthly" | "annual">("monthly");
   const [loading, setLoading]   = useState<TenantPlan | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const limits = PLAN_LIMITS[plan];
 
   async function upgrade(targetPlan: TenantPlan) {
     if (targetPlan === "free") return;
     setLoading(targetPlan);
     try {
-      const res  = await fetch("/api/billing/checkout", {
+      const endpoint = showPaystack ? "/api/billing/paystack/checkout" : "/api/billing/checkout";
+      const res  = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan: targetPlan, billing }),
       });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } finally {
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.error ?? "Couldn't start checkout");
+      window.location.href = data.url;
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Something went wrong");
       setLoading(null);
     }
   }
@@ -83,6 +99,22 @@ export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer 
     }
   }
 
+  async function cancelPaystack() {
+    if (!window.confirm("Cancel your Paystack subscription? You'll move to the Free plan.")) return;
+    setCancelling(true);
+    try {
+      const res = await fetch("/api/billing/paystack/cancel", { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? "Couldn't cancel subscription");
+      alert("Subscription cancelled. This can take a minute to reflect here.");
+      window.location.reload();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   const planIndex = PLAN_ORDER.indexOf(plan);
 
   return (
@@ -93,10 +125,16 @@ export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer 
           <h1 className="text-2xl font-bold text-slate-900">Billing & Plan</h1>
           <p className="text-sm text-slate-500 mt-1">Manage your subscription and usage.</p>
         </div>
-        {hasStripeCustomer && (
-          <Button variant="outline" onClick={openPortal} disabled={loading !== null}>
-            Manage billing
+        {billingProvider === "paystack" ? (
+          <Button variant="outline" onClick={cancelPaystack} disabled={cancelling}>
+            {cancelling ? "Cancelling…" : "Cancel subscription"}
           </Button>
+        ) : (
+          hasStripeCustomer && (
+            <Button variant="outline" onClick={openPortal} disabled={loading !== null}>
+              Manage billing
+            </Button>
+          )
         )}
       </div>
 
@@ -131,24 +169,28 @@ export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer 
         </CardContent>
       </Card>
 
-      {/* Billing cycle toggle */}
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-slate-700">Plans</span>
-        <div className="flex items-center rounded-lg border bg-white p-0.5 gap-0.5">
-          {(["monthly", "annual"] as const).map((b) => (
-            <button
-              key={b}
-              onClick={() => setBilling(b)}
-              className={cn(
-                "px-3 py-1 text-xs font-medium rounded-md transition-colors",
-                billing === b ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900"
-              )}
-            >
-              {b === "monthly" ? "Monthly" : "Annual (2 months free)"}
-            </button>
-          ))}
+      {/* Billing cycle toggle — Paystack is monthly-only, so Nigerian
+          visitors never see the annual option (annual/discounted billing
+          stays a Stripe/USD option for diaspora users). */}
+      {!showPaystack && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-slate-700">Plans</span>
+          <div className="flex items-center rounded-lg border bg-white p-0.5 gap-0.5">
+            {(["monthly", "annual"] as const).map((b) => (
+              <button
+                key={b}
+                onClick={() => setBilling(b)}
+                className={cn(
+                  "px-3 py-1 text-xs font-medium rounded-md transition-colors",
+                  billing === b ? "bg-slate-900 text-white" : "text-slate-500 hover:text-slate-900"
+                )}
+              >
+                {b === "monthly" ? "Monthly" : "Annual (2 months free)"}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Plan cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -183,13 +225,20 @@ export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer 
                 <div>
                   {details.monthlyUsd === 0 ? (
                     <span className="text-2xl font-bold text-slate-900">Free</span>
+                  ) : showPaystack ? (
+                    <div className="flex items-end gap-1">
+                      <span className="text-2xl font-bold text-slate-900">
+                        ₦{PAYSTACK_PLAN_DETAILS[p as PaidPlan].monthlyNgn.toLocaleString()}
+                      </span>
+                      <span className="text-sm text-slate-500 mb-0.5">/mo</span>
+                    </div>
                   ) : (
                     <div className="flex items-end gap-1">
                       <span className="text-2xl font-bold text-slate-900">${price}</span>
                       <span className="text-sm text-slate-500 mb-0.5">/mo</span>
                     </div>
                   )}
-                  {billing === "annual" && details.annualUsd > 0 && (
+                  {!showPaystack && billing === "annual" && details.annualUsd > 0 && (
                     <p className="text-xs text-emerald-600 mt-0.5">${details.annualUsd}/year</p>
                   )}
                 </div>
@@ -221,7 +270,7 @@ export function BillingClient({ plan, clientCount, teamCount, hasStripeCustomer 
                     onClick={() => upgrade(p)}
                     disabled={loading !== null}
                   >
-                    {loading === p ? "Loading…" : "Upgrade"}
+                    {loading === p ? "Redirecting…" : showPaystack ? "Pay with Paystack" : "Upgrade"}
                   </Button>
                 ) : (
                   <Button variant="outline" size="sm" className="w-full text-slate-400" disabled>
