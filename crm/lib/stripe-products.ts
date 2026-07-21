@@ -8,10 +8,10 @@ export interface PlanDetails {
 }
 
 export const PLAN_DETAILS: Record<TenantPlan, PlanDetails> = {
-  free:    { name: "Free",    description: "Try BluuCRM with up to 5 clients",       monthlyUsd: 0,   annualUsd: 0 },
-  starter: { name: "Starter", description: "For freelancers and small agencies",     monthlyUsd: 29,  annualUsd: 290 },
-  pro:     { name: "Pro",     description: "AI insights + more team members",        monthlyUsd: 79,  annualUsd: 790 },
-  agency:  { name: "Agency",  description: "Unlimited clients, team, and storage",   monthlyUsd: 199, annualUsd: 1990 },
+  free:    { name: "Free",    description: "Try BluuCRM with up to 5 clients",       monthlyUsd: 0,  annualUsd: 0 },
+  starter: { name: "Starter", description: "For freelancers and small agencies",     monthlyUsd: 14, annualUsd: 140 },
+  pro:     { name: "Pro",     description: "AI insights + more team members",        monthlyUsd: 39, annualUsd: 390 },
+  agency:  { name: "Agency",  description: "Unlimited clients, team, and storage",   monthlyUsd: 99, annualUsd: 990 },
 };
 
 const PLAN_ENV_KEY: Partial<Record<TenantPlan, string>> = {
