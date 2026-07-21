@@ -292,6 +292,61 @@ function bluu_mega_icon( $paths, $size = 16 ) {
     );
 }
 
+// Curated icon library for mega-menu cards — a site editor picks a name from
+// this list in the "Mega Menu Icon" field instead of touching SVG/code. Add
+// new entries here (and to bluu_mega_icon_choices() stays in sync since it
+// reads the same array) when a new icon concept is needed.
+function bluu_mega_icon_library() {
+    return array(
+        'briefcase'     => array( 'Briefcase',      '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>' ),
+        'megaphone'     => array( 'Megaphone',      '<path d="M3 11l18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 11-5.8-1.6"/>' ),
+        'target'        => array( 'Target',         '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>' ),
+        'chart'         => array( 'Chart',          '<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>' ),
+        'speech-bubble' => array( 'Speech bubble',  '<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>' ),
+        'people'        => array( 'People',         '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>' ),
+        'compass'       => array( 'Compass',        '<circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>' ),
+        'palette'       => array( 'Palette / Design', '<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>' ),
+        'grid'          => array( 'Grid / Layout',  '<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>' ),
+        'rocket'        => array( 'Rocket',         '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/>' ),
+        'document'      => array( 'Document',       '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>' ),
+        'award'         => array( 'Award',          '<circle cx="12" cy="8" r="6"/><path d="M15.5 13.5L17 22l-5-3-5 3 1.5-8.5"/>' ),
+        'shopping-bag'  => array( 'Shopping bag',   '<path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/>' ),
+        'globe'         => array( 'Globe',          '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20 15.3 15.3 0 010-20z"/>' ),
+        'shield'        => array( 'Shield',         '<path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4z"/>' ),
+        'code'          => array( 'Code / Tech',    '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>' ),
+        'server'        => array( 'Server / Cloud', '<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>' ),
+    );
+}
+
+// ACF "choices" array (icon key => human label) for the Mega Menu Icon select field.
+function bluu_mega_icon_choices() {
+    $choices = array();
+    foreach ( bluu_mega_icon_library() as $key => $icon ) {
+        $choices[ $key ] = $icon[0];
+    }
+    return $choices;
+}
+
+// Renders the SVG for a given icon key from the library, falling back to
+// "briefcase" for an unrecognized/blank key so a card never renders with no icon.
+function bluu_mega_icon_by_key( $key, $size = 18 ) {
+    $library = bluu_mega_icon_library();
+    $icon    = $library[ $key ] ?? $library['briefcase'];
+    return bluu_mega_icon( $icon[1], $size );
+}
+
+// Maps the ACF "Mega Menu Accent Color" choice to the hex pair (accent, tint)
+// used as inline --card-accent/--card-tint custom properties on each card.
+function bluu_mega_accent_colors( $key ) {
+    $palette = array(
+        'blue'  => array( '#2F5FE0', '#EAF0FF' ),
+        'amber' => array( '#C68A1E', '#FBF1DE' ),
+        'green' => array( '#1F9D55', '#E6F4EC' ),
+        'teal'  => array( '#0E7C86', '#E3F3F4' ),
+    );
+    return $palette[ $key ] ?? $palette['blue'];
+}
+
 function bluu_mega_item( $url, $icon_paths, $title, $desc = '' ) {
     $icon = bluu_mega_icon( $icon_paths );
     return '<li><a href="' . esc_url( $url ) . '" class="mega-panel__item">' .
@@ -311,13 +366,16 @@ class Bluu_Mega_Menu_Walker extends Walker_Nav_Menu {
 
     private function _try_inject( &$output, $item, $title, $url, $lb, $la ) {
         $t = strtolower( strip_tags( $title ) );
-        if ( false !== strpos( $t, 'services' ) ) {
+        // Matches "Bluu Studios" (was "Services") — content is read live from
+        // this item's actual menu children, see bluu_get_studios_menu_tree().
+        if ( false !== strpos( $t, 'studio' ) ) {
             $output .= '<li class="has-mega has-mega--services">';
             $output .= '<a href="' . $url . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_mega_chevron() . '</a>';
             $output .= bluu_services_mega_panel();
             return true;
         }
-        if ( false !== strpos( $t, 'software' ) ) {
+        // Matches "Products" (was "Softwares").
+        if ( false !== strpos( $t, 'product' ) ) {
             $output .= '<li class="has-mega has-mega--softwares">';
             $output .= '<a href="' . $url . '" class="mega-trigger" aria-haspopup="true" aria-expanded="false">' . $lb . $title . $la . bluu_mega_chevron() . '</a>';
             $output .= bluu_softwares_mega_panel();
@@ -669,119 +727,213 @@ function bluu_industries_mobile_accordion() {
     return $html;
 }
 
-// ── Services mega panel ────────────────────────────────────────────────────────
+// ── Bluu Studios mega panel — built from the real "primary" WP menu ────────────
+//
+// Nothing here is hardcoded content: it's read live from whatever you've built
+// in Appearance → Menus under the "Bluu Studios" top-level item. Two menu-item
+// titles are treated as transparent grouping labels, never rendered
+// themselves — a child titled exactly "Industries" passes through to ITS
+// children as that studio's industry list, and a child titled exactly
+// "Case Studies" passes through to ITS children as that studio's case-study
+// list. Every other item is real, clickable content (a Page or Custom Link).
+// Icon/summary/accent color come from the "Mega Menu Card" ACF fields on
+// whichever Page each item points to (see inc/acf-fields.php) — add a new
+// industry/sub-niche/case study by creating the Page, filling in those 3
+// fields, and adding it to the menu in the right spot. No code required.
+function bluu_get_studios_menu_tree() {
+    static $tree = null;
+    if ( null !== $tree ) {
+        return $tree;
+    }
+    $tree = array( 'url' => home_url( '/' ), 'tabs' => array() );
 
-function bluu_services_data() {
-    return array(
-        array(
-            'key'  => 'content-ops',
-            'name' => 'Content Operations',
-            'url'  => '/content-ops',
-            'desc' => 'Authority content, thought leadership, and content strategy — fully managed.',
-            'industries' => array(
-                array( 'Agencies &amp; Consultants', '/industries/agencies-consultants' ),
-                array( 'E-commerce &amp; DTC',       '/industries/ecommerce-dtc' ),
-                array( 'Professional Services',      '/industries/professional-services' ),
-                array( 'Tech &amp; SaaS',            '/industries/tech-saas' ),
-            ),
-            'links' => array(
-                array( 'Use Cases', '/use-cases' ),
-                array( 'Pricing',   '/pricing' ),
-                array( 'FAQs',      '/faqs' ),
-            ),
-        ),
-        array(
-            'key'  => 'web-mobile-dev',
-            'name' => 'Web &amp; Mobile Dev',
-            'url'  => '/services/web-mobile-development',
-            'desc' => 'Custom web and mobile applications built to scale — from MVP to full product launch.',
-            'cta'  => array( 'Start a project', '/contact' ),
-        ),
-        array(
-            'key'  => 'web-tech-mgmt',
-            'name' => 'Web Technology Management',
-            'url'  => '/services/web-technology-management',
-            'desc' => 'Managed hosting, maintenance, and technology operations so your team stays focused on growth.',
-            'cta'  => array( 'Get a quote', '/contact' ),
-        ),
-    );
+    $locations = get_nav_menu_locations();
+    if ( empty( $locations['primary'] ) ) {
+        return $tree;
+    }
+    $menu = wp_get_nav_menu_object( $locations['primary'] );
+    if ( ! $menu ) {
+        return $tree;
+    }
+    $items = wp_get_nav_menu_items( $menu->term_id );
+    if ( ! $items ) {
+        return $tree;
+    }
+
+    $children_of = array();
+    foreach ( $items as $item ) {
+        $children_of[ (int) $item->menu_item_parent ][] = $item;
+    }
+    foreach ( $children_of as &$group ) {
+        usort( $group, function ( $a, $b ) { return $a->menu_order <=> $b->menu_order; } );
+    }
+    unset( $group );
+
+    $studios_item = null;
+    foreach ( ( $children_of[0] ?? array() ) as $item ) {
+        if ( false !== strpos( strtolower( $item->title ), 'studio' ) ) {
+            $studios_item = $item;
+            break;
+        }
+    }
+    if ( ! $studios_item ) {
+        return $tree;
+    }
+    $tree['url'] = $studios_item->url;
+
+    $card = function ( $item ) {
+        return array(
+            'id'      => $item->ID,
+            'title'   => $item->title,
+            'url'     => $item->url,
+            'summary' => get_field( 'mega_summary', $item->object_id ) ?: '',
+            'icon'    => get_field( 'mega_icon', $item->object_id ) ?: 'briefcase',
+            'accent'  => get_field( 'mega_accent', $item->object_id ) ?: 'blue',
+        );
+    };
+
+    foreach ( ( $children_of[ $studios_item->ID ] ?? array() ) as $tab_item ) {
+        $tab                 = $card( $tab_item );
+        $tab['industries']   = array();
+        $tab['case_studies'] = array();
+
+        foreach ( ( $children_of[ $tab_item->ID ] ?? array() ) as $child ) {
+            $label = strtolower( trim( $child->title ) );
+
+            if ( 'industries' === $label ) {
+                foreach ( ( $children_of[ $child->ID ] ?? array() ) as $industry_item ) {
+                    $industry               = $card( $industry_item );
+                    $industry['sub_niches'] = array();
+                    foreach ( ( $children_of[ $industry_item->ID ] ?? array() ) as $sub_item ) {
+                        $industry['sub_niches'][] = $card( $sub_item );
+                    }
+                    $tab['industries'][] = $industry;
+                }
+            } elseif ( 'case studies' === $label ) {
+                foreach ( ( $children_of[ $child->ID ] ?? array() ) as $cs_item ) {
+                    $tab['case_studies'][] = $card( $cs_item );
+                }
+            }
+        }
+
+        $tree['tabs'][] = $tab;
+    }
+
+    return $tree;
+}
+
+// Renders one card <a>: icon + name + optional one-line summary.
+function bluu_studios_render_card( $entry, $extra_class = '' ) {
+    list( $accent, $tint ) = bluu_mega_accent_colors( $entry['accent'] );
+    return '<a href="' . esc_url( $entry['url'] ) . '" class="studio-card' . ( $extra_class ? ' ' . esc_attr( $extra_class ) : '' ) . '" style="--card-accent:' . esc_attr( $accent ) . '; --card-tint:' . esc_attr( $tint ) . ';">'
+        . '<span class="studio-card__icon">' . bluu_mega_icon_by_key( $entry['icon'], 17 ) . '</span>'
+        . '<span class="studio-card__name">' . esc_html( $entry['title'] ) . '</span>'
+        . ( $entry['summary'] ? '<span class="studio-card__desc">' . esc_html( $entry['summary'] ) . '</span>' : '' )
+        . '</a>';
 }
 
 function bluu_services_mega_panel() {
-    $services = bluu_services_data();
-
-    $left  = '<nav class="mega-ind-left" aria-label="Services">';
-    $first = true;
-    foreach ( $services as $svc ) {
-        $active = $first ? ' is-active' : '';
-        $left  .= '<button class="mega-ind-btn' . $active . '" data-panel="' . esc_attr( $svc['key'] ) . '" type="button">';
-        $left  .= '<span>' . $svc['name'] . '</span>';
-        $left  .= '</button>';
-        $first  = false;
+    $data = bluu_get_studios_menu_tree();
+    if ( empty( $data['tabs'] ) ) {
+        return '';
     }
-    $left .= '</nav>';
 
-    $panels = '<div class="mega-ind-panels">';
-    $first  = true;
-    foreach ( $services as $svc ) {
-        $active  = $first ? ' is-active' : '';
-        $panels .= '<div class="mega-ind-panel' . $active . '" id="mega-ind-panel-' . esc_attr( $svc['key'] ) . '">';
-        $panels .= '<p class="mega-ind-panel__desc">' . esc_html( $svc['desc'] ) . '</p>';
+    $tabs_html   = '';
+    $bodies_html = '';
 
-        if ( ! empty( $svc['industries'] ) ) {
-            $panels .= '<p class="mega-ind-section-label">Industries we serve</p><div class="mega-chip-grid">';
-            foreach ( $svc['industries'] as $ind ) {
-                $panels .= '<a href="' . esc_url( home_url( $ind[1] ) ) . '" class="mega-chip">' . $ind[0] . '</a>';
+    foreach ( $data['tabs'] as $i => $studio ) {
+        $tab_key     = 'studio-' . $studio['id'];
+        $tabs_html  .= '<button class="studio-tab' . ( 0 === $i ? ' is-active' : '' ) . '" data-studio="' . esc_attr( $tab_key ) . '" type="button">' . esc_html( $studio['title'] ) . '</button>';
+
+        $left_industries  = '';
+        $left_casestudies = '';
+        $right_panels     = '';
+
+        foreach ( $studio['industries'] as $industry ) {
+            $key               = 'ind-' . $industry['id'];
+            $left_industries  .= '<button class="studio-btn" type="button" data-industry="' . esc_attr( $key ) . '"><span>' . esc_html( $industry['title'] ) . '</span><span class="arrow">→</span></button>';
+
+            $cards = '';
+            foreach ( $industry['sub_niches'] as $sub ) {
+                $cards .= bluu_studios_render_card( $sub );
             }
-            $panels .= '</div>';
-            if ( ! empty( $svc['links'] ) ) {
-                $panels .= '<div class="mega-svc-links">';
-                foreach ( $svc['links'] as $lnk ) {
-                    $panels .= '<a href="' . esc_url( home_url( $lnk[1] ) ) . '" class="mega-svc-link">' . esc_html( $lnk[0] ) . '</a>';
-                }
-                $panels .= '</div>';
-            }
+
+            $right_panels .= '<div class="studio-panel" data-industry="' . esc_attr( $key ) . '">'
+                . '<div class="studio-panels__head"><h3 class="studio-panel__title">' . esc_html( $industry['title'] ) . '</h3></div>'
+                . ( $industry['summary'] ? '<p class="studio-panel__desc">' . esc_html( $industry['summary'] ) . '</p>' : '' )
+                . ( $cards
+                    ? '<p class="studio-section-label">Who We Help</p><div class="studio-card-grid">' . $cards . '</div>'
+                    : '<p class="studio-panel__desc"><a href="' . esc_url( $industry['url'] ) . '">Learn more →</a></p>' )
+                . '</div>';
         }
 
-        if ( ! empty( $svc['cta'] ) ) {
-            $panels .= '<a href="' . esc_url( home_url( $svc['cta'][1] ) ) . '" class="mega-svc-cta">' . esc_html( $svc['cta'][0] ) . ' →</a>';
+        foreach ( $studio['case_studies'] as $cs ) {
+            $key                = 'cs-' . $cs['id'];
+            $left_casestudies  .= '<button class="studio-btn studio-btn--small" type="button" data-industry="' . esc_attr( $key ) . '"><span>' . esc_html( $cs['title'] ) . '</span></button>';
+            $right_panels      .= '<div class="studio-panel" data-industry="' . esc_attr( $key ) . '">'
+                . '<div class="studio-panels__head"><h3 class="studio-panel__title">' . esc_html( $cs['title'] ) . '</h3></div>'
+                . ( $cs['summary'] ? '<p class="studio-panel__desc">' . esc_html( $cs['summary'] ) . '</p>' : '' )
+                . '<p class="studio-panel__desc"><a href="' . esc_url( $cs['url'] ) . '">Read case study →</a></p>'
+                . '</div>';
         }
 
-        $panels .= '</div>';
-        $first   = false;
+        $featured_cards = '';
+        foreach ( array_slice( $studio['case_studies'], 0, 3 ) as $cs ) {
+            $featured_cards .= bluu_studios_render_card( $cs );
+        }
+        $default_panel = '<div class="studio-panel is-active" data-industry="__default">'
+            . '<div class="studio-panels__head"><h3 class="studio-panel__title">' . esc_html( $studio['title'] ) . '</h3></div>'
+            . ( $studio['summary'] ? '<p class="studio-panel__desc">' . esc_html( $studio['summary'] ) . '</p>' : '' )
+            . '<p class="studio-section-label">Featured Case Studies</p>'
+            . ( $featured_cards ? '<div class="studio-card-grid">' . $featured_cards . '</div>' : '<p class="studio-panel__desc">Nothing published yet.</p>' )
+            . '</div>';
+
+        $search = '<div class="studio-search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="I\'m looking for…"></div>';
+
+        $left_col = '<div class="studio-left-col">' . $search
+            . ( $left_industries ? '<p class="studio-list-label">Industries</p><nav class="studio-left studio-industry-list">' . $left_industries . '</nav>' : '' )
+            . ( $left_casestudies ? '<p class="studio-list-label studio-list-label--secondary">Case Studies</p><nav class="studio-left studio-casestudy-list">' . $left_casestudies . '</nav>' : '' )
+            . '</div>';
+
+        $bodies_html .= '<div class="studio-body' . ( 0 === $i ? ' is-active' : '' ) . '" data-studio="' . esc_attr( $tab_key ) . '">'
+            . '<div class="studio-wrap">' . $left_col . '<div class="studio-panels">' . $default_panel . $right_panels . '</div></div>'
+            . '</div>';
     }
-    $panels .= '</div>';
 
-    $left_col = '<div class="mega-ind-left-col">' . $left
-        . '<a href="' . esc_url( home_url( '/services' ) ) . '" class="mega-ind-all-link">All services →</a>'
-        . '</div>';
+    $tab_row = '<div class="studio-tabrow"><div class="studio-tabs">' . $tabs_html . '</div>'
+        . '<a href="' . esc_url( $data['url'] ) . '" class="studio-explore-all">Explore all Studios ' . bluu_flyout_chevron() . '</a></div>';
 
-    return '<div class="mega-panel mega-panel--left-nav"><div class="mega-panel__inner"><div class="mega-ind-wrap">'
-        . $left_col . $panels
-        . '</div></div></div>';
+    return '<div class="mega-panel mega-panel--studios"><div class="mega-panel__inner mega-panel__inner--full">' . $tab_row . $bodies_html . '</div></div>';
 }
 
 function bluu_services_mobile_accordion() {
+    $data = bluu_get_studios_menu_tree();
+    if ( empty( $data['tabs'] ) ) {
+        return '';
+    }
     $html = '<ul class="mobile-mega-list">';
-    foreach ( bluu_services_data() as $svc ) {
-        $html .= '<li class="mobile-ind-group">';
-        $html .= '<div class="mobile-ind-group__header">';
-        $html .= '<a href="' . esc_url( home_url( $svc['url'] ) ) . '" class="mobile-ind-group__name">' . $svc['name'] . '</a>';
-        if ( ! empty( $svc['industries'] ) ) {
+    foreach ( $data['tabs'] as $studio ) {
+        $has_body = ! empty( $studio['industries'] ) || ! empty( $studio['case_studies'] );
+        $html    .= '<li class="mobile-ind-group">';
+        $html    .= '<div class="mobile-ind-group__header">';
+        $html    .= '<a href="' . esc_url( $studio['url'] ) . '" class="mobile-ind-group__name">' . esc_html( $studio['title'] ) . '</a>';
+        if ( $has_body ) {
             $html .= '<button class="mobile-ind-toggle" aria-expanded="false">' . bluu_mega_chevron() . '</button>';
         }
         $html .= '</div>';
-        if ( ! empty( $svc['industries'] ) ) {
+        if ( $has_body ) {
             $html .= '<div class="mobile-ind-group__body">';
-            $html .= '<div class="mobile-ind-section"><span class="mobile-ind-section__label">Industries</span><div class="mobile-pill-grid">';
-            foreach ( $svc['industries'] as $ind ) {
-                $html .= '<a href="' . esc_url( home_url( $ind[1] ) ) . '" class="mobile-pill">' . $ind[0] . '</a>';
+            if ( ! empty( $studio['industries'] ) ) {
+                $html .= '<div class="mobile-ind-section"><span class="mobile-ind-section__label">Industries</span><div class="mobile-pill-grid">';
+                foreach ( $studio['industries'] as $industry ) {
+                    $html .= '<a href="' . esc_url( $industry['url'] ) . '" class="mobile-pill">' . esc_html( $industry['title'] ) . '</a>';
+                }
+                $html .= '</div></div>';
             }
-            $html .= '</div></div>';
-            if ( ! empty( $svc['links'] ) ) {
-                $html .= '<div class="mobile-ind-section mobile-ind-section--uc"><span class="mobile-ind-section__label">Resources</span><div class="mobile-pill-grid">';
-                foreach ( $svc['links'] as $lnk ) {
-                    $html .= '<a href="' . esc_url( home_url( $lnk[1] ) ) . '" class="mobile-pill mobile-pill--uc">' . esc_html( $lnk[0] ) . '</a>';
+            if ( ! empty( $studio['case_studies'] ) ) {
+                $html .= '<div class="mobile-ind-section mobile-ind-section--uc"><span class="mobile-ind-section__label">Case Studies</span><div class="mobile-pill-grid">';
+                foreach ( $studio['case_studies'] as $cs ) {
+                    $html .= '<a href="' . esc_url( $cs['url'] ) . '" class="mobile-pill mobile-pill--uc">' . esc_html( $cs['title'] ) . '</a>';
                 }
                 $html .= '</div></div>';
             }
@@ -793,37 +945,44 @@ function bluu_services_mobile_accordion() {
     return $html;
 }
 
-// ── Softwares mega panel ───────────────────────────────────────────────────────
+// ── Products mega panel ─────────────────────────────────────────────────────────
+// Kept as a small hardcoded array (not menu-driven like Bluu Studios) — only 4
+// items, one of which (BluuAudit) is an external URL with no local Page to
+// hang ACF fields off, so there's nothing to gain from the dynamic approach here.
 
 function bluu_softwares_data() {
     return array(
         array(
-            'name'  => 'BluuCRM',
-            'url'   => '/crm',
-            'badge' => 'CRM &amp; Portal',
-            'desc'  => 'Client relationships, project management, and your client portal — unified.',
-            'icon'  => '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>',
+            'name'   => 'BluuCRM',
+            'url'    => '/crm',
+            'badge'  => 'CRM &amp; Portal',
+            'desc'   => 'Client relationships, project management, and your client portal — unified.',
+            'icon'   => 'people',
+            'accent' => 'blue',
         ),
         array(
-            'name'  => 'BluuAudit',
-            'url'   => 'https://audit.bluuhq.com',
-            'badge' => 'Intelligence',
-            'desc'  => 'Brand and competitor audit intelligence — surface gaps and opportunities in seconds.',
-            'icon'  => '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>',
+            'name'   => 'BluuAudit',
+            'url'    => 'https://audit.bluuhq.com',
+            'badge'  => 'Intelligence',
+            'desc'   => 'Brand and competitor audit intelligence — surface gaps and opportunities in seconds.',
+            'icon'   => 'target',
+            'accent' => 'amber',
         ),
         array(
-            'name'  => 'BluuShop',
-            'url'   => 'https://shop.bluuhq.com',
-            'badge' => 'Free Storefront',
-            'desc'  => 'A free online shop, run from your phone — customers checkout straight to WhatsApp.',
-            'icon'  => '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/>',
+            'name'   => 'BluuShop',
+            'url'    => 'https://shop.bluuhq.com',
+            'badge'  => 'Free Storefront',
+            'desc'   => 'A free online shop, run from your phone — customers checkout straight to WhatsApp.',
+            'icon'   => 'shopping-bag',
+            'accent' => 'green',
         ),
         array(
-            'name'  => 'BluuSync',
-            'url'   => '/sync',
-            'badge' => 'Infrastructure',
-            'desc'  => 'Server-to-server large file transfer — fast, secure, and built for production teams.',
-            'icon'  => '<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>',
+            'name'   => 'BluuSync',
+            'url'    => '/sync',
+            'badge'  => 'Infrastructure',
+            'desc'   => 'Server-to-server large file transfer — fast, secure, and built for production teams.',
+            'icon'   => 'server',
+            'accent' => 'teal',
         ),
     );
 }
@@ -832,18 +991,18 @@ function bluu_softwares_mega_panel() {
     $products = bluu_softwares_data();
     $cards    = '<div class="mega-product-grid">';
     foreach ( $products as $p ) {
-        $href   = ( strpos( $p['url'], 'http' ) === 0 ) ? $p['url'] : home_url( $p['url'] );
-        $cards .= '<a href="' . esc_url( $href ) . '" class="mega-product-card">';
-        $cards .= '<span class="mega-product-card__icon">' . bluu_mega_icon( $p['icon'], 22 ) . '</span>';
-        $cards .= '<span class="mega-product-card__body">';
-        $cards .= '<span class="mega-product-card__badge">' . $p['badge'] . '</span>';
-        $cards .= '<span class="mega-product-card__name">' . esc_html( $p['name'] ) . '</span>';
-        $cards .= '<span class="mega-product-card__desc">' . esc_html( $p['desc'] ) . '</span>';
-        $cards .= '</span>';
+        $href = ( strpos( $p['url'], 'http' ) === 0 ) ? $p['url'] : home_url( $p['url'] );
+        list( $accent, $tint ) = bluu_mega_accent_colors( $p['accent'] );
+        $cards .= '<a href="' . esc_url( $href ) . '" class="mega-product-card" style="--card-accent:' . esc_attr( $accent ) . '; --card-tint:' . esc_attr( $tint ) . ';">';
+        $cards .= '<span class="mpc-icon">' . bluu_mega_icon_by_key( $p['icon'], 26 ) . '</span>';
+        $cards .= '<span class="mpc-badge">' . $p['badge'] . '</span>';
+        $cards .= '<span class="mpc-name">' . esc_html( $p['name'] ) . '</span>';
+        $cards .= '<span class="mpc-desc">' . esc_html( $p['desc'] ) . '</span>';
+        $cards .= '<span class="mpc-cta">Try now ' . bluu_flyout_chevron() . '</span>';
         $cards .= '</a>';
     }
     $cards .= '</div>';
-    return '<div class="mega-panel mega-panel--product-grid"><div class="mega-panel__inner">' . $cards . '</div></div>';
+    return '<div class="mega-panel mega-panel--product-grid"><div class="mega-panel__inner mega-panel__inner--full">' . $cards . '</div></div>';
 }
 
 function bluu_softwares_mobile_list() {

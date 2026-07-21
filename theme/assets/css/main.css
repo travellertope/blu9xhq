@@ -5945,79 +5945,261 @@ a.contact-info__value:hover {
 .mega-svc-cta:hover { text-decoration: underline; }
 
 /* =============================================================================
-   Softwares product-grid mega panel
+   Products mega panel — Zoho-style card grid
    ============================================================================= */
 
-.mega-panel--product-grid .mega-panel__inner { padding: 0; }
+.mega-panel__inner--full { padding: 0; }
 
 .mega-product-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 3px solid var(--md-accent);
 }
 
 .mega-product-card {
+    --card-accent: var(--md-accent);
+    --card-tint: var(--md-accent-container);
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    padding: var(--space-6) var(--space-6);
+    padding: var(--space-7) var(--space-6) var(--space-6);
     text-decoration: none;
     color: var(--md-on-surface);
     border-right: 1px solid var(--md-outline-variant);
     transition: background var(--transition-fast);
 }
 .mega-product-card:last-child { border-right: none; }
-.mega-product-card:hover { background: var(--md-accent-container); }
+.mega-product-card:hover { background: var(--md-surface-variant); }
 
-.mega-product-card__icon {
-    width: 44px;
-    height: 44px;
-    background: var(--md-surface-variant);
+.mpc-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    background: var(--card-tint);
+    color: var(--card-accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    color: var(--md-accent);
     flex-shrink: 0;
-    transition: background var(--transition-fast), color var(--transition-fast);
+    transition: transform var(--transition-fast);
 }
-.mega-product-card:hover .mega-product-card__icon {
-    background: var(--md-accent);
-    color: #fff;
-}
-.mega-product-card__icon svg { display: block; }
+.mega-product-card:hover .mpc-icon { transform: translateY(-2px); }
+.mpc-icon svg { display: block; }
 
-.mega-product-card__body {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.mega-product-card__badge {
-    font-size: 10px;
-    font-weight: 700;
+.mpc-badge {
+    font-size: 10.5px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--md-accent);
+    letter-spacing: 0.09em;
+    color: var(--card-accent);
 }
 
-.mega-product-card__name {
+.mpc-name {
+    display: block;
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--md-on-surface);
+    line-height: 1.25;
+    margin-top: 2px;
+}
+
+.mpc-desc {
     display: block;
     font-size: var(--font-size-sm);
-    font-weight: 700;
-    color: var(--md-on-surface);
-    line-height: 1.3;
-}
-
-.mega-product-card__desc {
-    display: block;
-    font-size: var(--font-size-xs);
     color: var(--md-on-surface-variant);
-    line-height: 1.5;
+    line-height: 1.6;
+    margin-top: 2px;
 }
 
-.mega-product-card:hover .mega-product-card__name,
-.mega-product-card:hover .mega-product-card__badge { color: var(--md-accent); }
-.mega-product-card:hover .mega-product-card__desc  { color: var(--md-on-surface-variant); }
+.mpc-cta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: auto;
+    padding-top: var(--space-3);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--card-accent);
+}
+.mpc-cta svg { transition: transform var(--transition-fast); }
+.mega-product-card:hover .mpc-cta svg { transform: translateX(3px); }
+
+/* =============================================================================
+   Bluu Studios mega panel — tabs (Content Ops/Development/Management Studio)
+   + a per-studio search/industry-list/case-study-list left column, with a
+   Zoho-style card grid on the right. Content is entirely menu/ACF-driven —
+   see bluu_get_studios_menu_tree() in functions.php.
+   ============================================================================= */
+
+.studio-tabrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-7);
+    border-bottom: 1px solid var(--md-outline-variant);
+}
+.studio-tabs { display: flex; }
+.studio-tab {
+    padding: var(--space-4) 4px;
+    margin-right: var(--space-6);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--md-on-surface-variant);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    position: relative;
+    top: 1px;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+}
+.studio-tab:hover { color: var(--md-on-surface); }
+.studio-tab.is-active { color: var(--md-accent); border-bottom-color: var(--md-accent); }
+
+.studio-explore-all {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--md-accent);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.studio-body { display: none; }
+.studio-body.is-active { display: block; }
+
+.studio-wrap { display: flex; min-height: 380px; }
+
+.studio-left-col {
+    width: 260px;
+    flex-shrink: 0;
+    padding: var(--space-5) var(--space-3);
+    display: flex;
+    flex-direction: column;
+}
+
+.studio-search {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 9px var(--space-3);
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-sm);
+    color: var(--md-on-surface-variant);
+}
+.studio-search input {
+    border: none;
+    outline: none;
+    background: none;
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface);
+    width: 100%;
+}
+.studio-search input::placeholder { color: var(--md-on-surface-variant); }
+
+.studio-list-label {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin: 0 0 6px;
+    padding: 0 var(--space-3);
+}
+.studio-list-label--secondary { margin-top: var(--space-4); }
+
+.studio-left { display: flex; flex-direction: column; gap: 2px; }
+.studio-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--space-3) var(--space-3);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    text-align: left;
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+.studio-btn:hover { background: var(--md-surface-variant); color: var(--md-on-surface); }
+.studio-btn.is-active { background: var(--md-accent-container); color: var(--md-accent-dark); font-weight: 800; }
+.studio-btn .arrow { font-size: 12px; opacity: 0; transition: opacity var(--transition-fast); }
+.studio-btn:hover .arrow, .studio-btn.is-active .arrow { opacity: 0.6; }
+.studio-btn.is-hidden { display: none; }
+.studio-btn--small { padding: 8px var(--space-3); font-size: 13px; font-weight: 500; }
+
+.studio-panels { flex: 1; padding: var(--space-6) var(--space-7); border-left: 1px solid var(--md-outline-variant); }
+.studio-panel { display: none; }
+.studio-panel.is-active { display: block; }
+
+.studio-panels__head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 4px; }
+.studio-panel__title { font-family: var(--font-family-heading); font-size: var(--font-size-xl); font-weight: 800; }
+.studio-panel__desc { font-size: var(--font-size-sm); color: var(--md-on-surface-variant); line-height: 1.6; max-width: 620px; margin: 8px 0 var(--space-4); }
+
+.studio-section-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--md-on-surface-variant);
+    margin: 0 0 var(--space-3);
+}
+
+.studio-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    gap: var(--space-3);
+}
+.studio-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-md);
+    background: var(--md-surface-variant);
+    text-decoration: none;
+    color: var(--md-on-surface);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.studio-card:hover { border-color: var(--card-accent, var(--md-accent)); background: var(--md-surface); }
+.studio-card__icon {
+    width: 34px;
+    height: 34px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--card-tint, var(--md-accent-container));
+    color: var(--card-accent, var(--md-accent));
+    flex-shrink: 0;
+}
+.studio-card__icon svg { display: block; }
+.studio-card__name { font-family: var(--font-family-heading); font-weight: 800; font-size: 13.5px; line-height: 1.3; }
+.studio-card__desc { font-size: 12px; color: var(--md-on-surface-variant); line-height: 1.5; }
+.studio-card__cta { margin-top: auto; padding-top: 4px; font-size: 11.5px; font-weight: 800; color: var(--card-accent, var(--md-accent)); display: flex; align-items: center; gap: 4px; }
+
+.studio-quicklinks { display: flex; gap: var(--space-2); margin-top: var(--space-6); }
+.studio-link {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--md-on-surface-variant);
+    text-decoration: none;
+    padding: 6px var(--space-3);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: 99px;
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.studio-link:hover { color: var(--md-accent-dark); border-color: var(--md-accent); background: var(--md-accent-container); }
 
 /* =============================================================================
    Shared hero background — subtle crosshatch + dual glow (approved Pattern A).
