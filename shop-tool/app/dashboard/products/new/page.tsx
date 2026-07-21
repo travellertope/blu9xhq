@@ -8,8 +8,8 @@ import { Label } from "@/components/ui/label";
 
 /**
  * "Quick add" — the whole point is getting a product live in under 30
- * seconds: photo, name, price, save. Everything else (description,
- * variants, stock, category) is one tap deeper on the edit page.
+ * seconds: photo, name, price, optional description, save. Variants,
+ * stock, and category are one tap deeper on the edit page.
  */
 export default function NewProductPage() {
   const router = useRouter();
@@ -17,6 +17,7 @@ export default function NewProductPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -49,6 +50,7 @@ export default function NewProductPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
+          description: description || null,
           price: Number(price),
           images: imageUrl ? [imageUrl] : [],
         }),
@@ -93,7 +95,6 @@ export default function NewProductPage() {
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={handleFileChange}
           className="hidden"
         />
@@ -114,6 +115,18 @@ export default function NewProductPage() {
             onChange={(e) => setPrice(e.target.value)}
             required
             placeholder="15000"
+          />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Description</Label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            placeholder="Optional"
+            className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         </div>
 

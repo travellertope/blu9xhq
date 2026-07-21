@@ -5,17 +5,22 @@ import { useCart } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { formatMoney } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
+import BuyNowButton from "@/components/buy-now-button";
 import type { Product } from "@/types";
 
 export default function ProductDetail({
   product,
   shopSlug,
   shopId,
+  shopName,
+  whatsappNumber,
   currency,
 }: {
   product: Product;
   shopSlug: string;
   shopId: string;
+  shopName: string;
+  whatsappNumber: string;
   currency: string;
 }) {
   const { add } = useCart(shopSlug);
@@ -72,9 +77,20 @@ export default function ProductDetail({
         <p className="text-sm text-ink-soft line-through mb-3">{formatMoney(product.compare_at_price, currency)}</p>
       )}
 
-      <Button size="lg" className="w-full" disabled={missingSelection} onClick={handleAdd}>
-        {added ? "Added ✓" : "Add to cart"}
-      </Button>
+      <div className="space-y-2">
+        <Button size="lg" className="w-full" disabled={missingSelection} onClick={handleAdd}>
+          {added ? "Added ✓" : "Add to cart"}
+        </Button>
+        <BuyNowButton
+          shopId={shopId}
+          shopName={shopName}
+          whatsappNumber={whatsappNumber}
+          currency={currency}
+          product={{ id: product.id, name: product.name, price: product.price, image: product.images[0] ?? null }}
+          variant={product.variants.length > 0 ? selection : null}
+          disabled={missingSelection}
+        />
+      </div>
     </div>
   );
 }

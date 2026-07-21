@@ -16,6 +16,8 @@ export default function StorefrontContent({
   categories,
   shopSlug,
   shopId,
+  shopName,
+  whatsappNumber,
   currency,
   themeId,
 }: {
@@ -23,6 +25,8 @@ export default function StorefrontContent({
   categories: Category[];
   shopSlug: string;
   shopId: string;
+  shopName: string;
+  whatsappNumber: string;
   currency: string;
   themeId: ShopThemeId;
 }) {
@@ -73,6 +77,8 @@ export default function StorefrontContent({
               product={product}
               shopSlug={shopSlug}
               shopId={shopId}
+              shopName={shopName}
+              whatsappNumber={whatsappNumber}
               currency={currency}
               themeId={themeId}
             />

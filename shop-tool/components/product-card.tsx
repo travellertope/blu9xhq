@@ -6,6 +6,7 @@ import { useCart } from "@/lib/cart";
 import { trackEvent } from "@/lib/analytics";
 import { formatMoney } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
+import BuyNowButton from "@/components/buy-now-button";
 import type { ShopThemeId } from "@/lib/theme";
 import type { Product } from "@/types";
 
@@ -31,12 +32,16 @@ export default function ProductCard({
   product,
   shopSlug,
   shopId,
+  shopName,
+  whatsappNumber,
   currency,
   themeId,
 }: {
   product: Product;
   shopSlug: string;
   shopId: string;
+  shopName: string;
+  whatsappNumber: string;
   currency: string;
   themeId: ShopThemeId;
 }) {
@@ -87,9 +92,19 @@ export default function ProductCard({
             <Link href={`/${shopSlug}/product/${product.id}`}>View options</Link>
           </Button>
         ) : (
-          <Button size="sm" className="w-full mt-2" onClick={handleQuickAdd}>
-            Add to cart
-          </Button>
+          <div className="flex gap-1.5 mt-2">
+            <Button size="sm" className="flex-1" onClick={handleQuickAdd}>
+              Add to cart
+            </Button>
+            <BuyNowButton
+              compact
+              shopId={shopId}
+              shopName={shopName}
+              whatsappNumber={whatsappNumber}
+              currency={currency}
+              product={{ id: product.id, name: product.name, price: product.price, image: image ?? null }}
+            />
+          </div>
         )}
       </div>
     </div>
