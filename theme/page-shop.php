@@ -105,20 +105,8 @@ get_header();
             <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
         </div>
     </div>
-</section>
-
-<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
-<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuShop storefront preview', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="pm-head animate-on-scroll">
-            <div class="pm-head__left">
-                <span class="pm-tag" style="background:#E6F4EC; color:#157a41;"><span class="pm-dot" style="background:#1F9D55;"></span>BluuShop</span>
-                <h2><?php esc_html_e( 'The storefront, exactly as your customer sees it.', 'bluu-interactive' ); ?></h2>
-                <p><?php esc_html_e( "Your branding, your products, and a checkout that hands the order straight to WhatsApp — no cart abandonment on a payment page you don't control.", 'bluu-interactive' ); ?></p>
-            </div>
-            <span class="pm-url">shop.bluuhq.com/lumo-retail</span>
-        </div>
-        <div class="pm-frame animate-on-scroll">
+        <div class="pm-frame pm-frame--hero animate-on-scroll">
             <div class="pm-chrome">
                 <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
                 <div class="pm-chrome__bar">shop.bluuhq.com/lumo-retail</div>

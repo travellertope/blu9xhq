@@ -166,20 +166,8 @@ get_header();
             <p class="crm-hero__note"><?php esc_html_e( 'Free forever for your first 5 clients. No credit card required.', 'bluu-interactive' ); ?></p>
         </div>
     </div>
-</section>
-
-<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
-<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuCRM dashboard preview', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="pm-head animate-on-scroll">
-            <div class="pm-head__left">
-                <span class="pm-tag" style="background:var(--md-accent-container); color:var(--md-accent-dark);"><span class="pm-dot" style="background:var(--md-accent);"></span>BluuCRM</span>
-                <h2><?php esc_html_e( "The dashboard your agency actually opens every morning.", 'bluu-interactive' ); ?></h2>
-                <p><?php esc_html_e( 'Outstanding balances, renewals, overdue invoices, and at-risk clients — one view instead of five tabs.', 'bluu-interactive' ); ?></p>
-            </div>
-            <span class="pm-url">crm.bluuhq.com/admin</span>
-        </div>
-        <div class="pm-frame animate-on-scroll">
+        <div class="pm-frame pm-frame--hero animate-on-scroll">
             <div class="pm-chrome">
                 <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
                 <div class="pm-chrome__bar">crm.bluuhq.com/admin</div>

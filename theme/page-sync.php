@@ -145,20 +145,8 @@ get_header();
             <p class="sync-hero__note"><?php esc_html_e( 'Free forever for occasional transfers. No credit card required.', 'bluu-interactive' ); ?></p>
         </div>
     </div>
-</section>
-
-<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
-<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuSync transfer preview', 'bluu-interactive' ); ?>">
     <div class="container">
-        <div class="pm-head animate-on-scroll">
-            <div class="pm-head__left">
-                <span class="pm-tag" style="background:#E3F3F4; color:#0a5c63;"><span class="pm-dot" style="background:#0E7C86;"></span>BluuSync</span>
-                <h2><?php esc_html_e( 'Watch a multi-gigabyte transfer move without your laptop in the loop.', 'bluu-interactive' ); ?></h2>
-                <p><?php esc_html_e( 'Pick a source and destination, start the transfer, and check back for progress — the file never touches your machine.', 'bluu-interactive' ); ?></p>
-            </div>
-            <span class="pm-url">sync.bluuhq.com/transfer</span>
-        </div>
-        <div class="pm-frame animate-on-scroll">
+        <div class="pm-frame pm-frame--hero animate-on-scroll">
             <div class="pm-chrome">
                 <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
                 <div class="pm-chrome__bar">sync.bluuhq.com/transfer/new</div>

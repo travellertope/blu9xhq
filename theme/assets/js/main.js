@@ -800,17 +800,13 @@
         if ( ! header ) { return; }
 
         function sync() {
-            var inner = header.querySelector( '.site-header__inner' );
-            var target = inner || header;
-            var css = getComputedStyle( target );
-            var declared = parseInt( css.height, 10 );
-            if ( declared > 0 && css.height !== 'auto' ) {
-                document.documentElement.style.setProperty( '--header-height', declared + 'px' );
-            } else {
-                var h = Math.round( header.getBoundingClientRect().height );
-                if ( h > 0 ) {
-                    document.documentElement.style.setProperty( '--header-height', h + 'px' );
-                }
+            // Measure the header itself, not .site-header__inner — the inner
+            // row's own height excludes .site-header's top/bottom padding and
+            // border, which under-measured the real height enough to leave a
+            // visible gap above transparent-header heroes.
+            var h = Math.round( header.getBoundingClientRect().height );
+            if ( h > 0 ) {
+                document.documentElement.style.setProperty( '--header-height', h + 'px' );
             }
         }
 

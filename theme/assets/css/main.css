@@ -759,7 +759,7 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     position: fixed;
     left: 0;
     right: 0;
-    top: var(--header-height);
+    top: calc(var(--header-height) + 10px);
     z-index: 890;
     background: #FFFFFF;
     border-top: 3px solid var(--md-accent);
@@ -2064,7 +2064,8 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
         transition: none;
     }
     .hero-pulse,
-    .hero__float-card {
+    .hero__float-card,
+    .scan-hero__ill-node {
         animation: none;
     }
 }
@@ -5961,7 +5962,8 @@ a.contact-info__value:hover {
 .mega-product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    border-top: 3px solid var(--md-accent);
+    gap: var(--space-5);
+    padding: var(--space-7) var(--space-6);
 }
 
 .mega-product-card {
@@ -5969,15 +5971,19 @@ a.contact-info__value:hover {
     --card-tint: var(--md-accent-container);
     display: flex;
     flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-7) var(--space-6) var(--space-6);
+    gap: var(--space-3);
+    padding: var(--space-6);
     text-decoration: none;
     color: var(--md-on-surface);
-    border-right: 1px solid var(--md-outline-variant);
-    transition: background var(--transition-fast);
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
-.mega-product-card:last-child { border-right: none; }
-.mega-product-card:hover { background: var(--md-surface-variant); }
+.mega-product-card:hover {
+    background: var(--md-surface-variant);
+    border-color: var(--card-accent);
+    box-shadow: 0 10px 24px -14px rgba(10,25,47,0.22);
+}
 
 .mpc-icon {
     width: 56px;
@@ -6262,87 +6268,17 @@ a.contact-info__value:hover {
    bluu_mega_accent_colors() in functions.php (blue/amber/green/teal) so the
    mega menu and these mockups stay visually consistent.
    ============================================================================= */
-.pm-section {
-    padding-block: var(--space-9);
-}
-.pm-section--tint {
-    background: var(--md-surface-variant);
-    border-top: 1px solid var(--md-outline-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
-}
-.pm-head {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: var(--space-6);
-    flex-wrap: wrap;
-    margin-bottom: var(--space-7);
-}
-.pm-head__left {
-    max-width: 620px;
-}
-.pm-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: var(--font-size-xs);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 4px 10px 4px 8px;
-    border-radius: var(--radius-full);
-    margin-bottom: var(--space-3);
-}
-.pm-tag .pm-dot { width: 6px; height: 6px; border-radius: 50%; }
-.pm-head h2 {
-    font-family: var(--font-family-heading);
-    font-size: clamp(1.5rem, 2.6vw, 1.875rem);
-    font-weight: 800;
-    margin: 0 0 var(--space-2);
-    line-height: 1.25;
-}
-.pm-head p {
-    font-size: var(--font-size-sm);
-    line-height: 1.65;
-    color: var(--md-on-surface-variant);
-    margin: 0;
-}
-.pm-head code {
-    font-size: 0.85em;
-    background: var(--md-surface-variant);
-    border: 1px solid var(--md-outline-variant);
-    border-radius: 4px;
-    padding: 1px 5px;
-}
-.pm-url {
-    font-size: var(--font-size-xs);
-    color: var(--md-on-surface-variant);
-    font-family: ui-monospace, SFMono-Regular, monospace;
-    white-space: nowrap;
-    padding-top: var(--space-1);
-}
-.pm-note {
-    display: flex;
-    gap: 9px;
-    align-items: flex-start;
-    background: #FBF1DE;
-    border: 1px solid #E8D9A8;
-    color: #6B5A1F;
-    font-size: var(--font-size-xs);
-    line-height: 1.55;
-    padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-md, 8px);
-    margin-bottom: var(--space-5);
-}
-.pm-note svg { flex: none; margin-top: 2px; }
-
-/* Browser chrome frame */
+/* Browser chrome frame — sits directly inside each hero as its visual extension */
 .pm-frame {
     background: #fff;
     border: 1px solid var(--md-outline-variant);
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 1px 2px rgba(10,25,47,0.04), 0 16px 40px -20px rgba(10,25,47,0.22);
+}
+.pm-frame--hero {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-2);
 }
 .pm-chrome {
     display: flex;
@@ -6561,7 +6497,6 @@ a.contact-info__value:hover {
     .audit-mockup-grid { grid-template-columns: 1fr; }
     .sync-mockup-endpoints { grid-template-columns: 1fr; }
     .sync-mockup-arrow { transform: rotate(90deg); }
-    .pm-head { flex-direction: column; }
 }
 
 /* =============================================================================
@@ -6780,6 +6715,32 @@ a.contact-info__value:hover {
     padding-top: 16px;
     border-top: 1px solid #16243B;
     margin-top: 8px;
+}
+
+/* Homepage-only brand-reach illustration, in place of the sample-report demo */
+.scan-hero__illustration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+}
+.scan-hero__illustration svg {
+    width: 100%;
+    max-width: 420px;
+    height: auto;
+}
+.scan-hero__ill-node {
+    animation: scanIllFloat 4.5s ease-in-out infinite;
+}
+@keyframes scanIllFloat {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+.scan-hero__illustration-caption {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    text-align: center;
+    max-width: 320px;
 }
 
 /* CTA group (used in hero & final CTA) */
