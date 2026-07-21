@@ -144,7 +144,8 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
-<!-- ═══════════════════════ AFTER YOUR SCAN ═══════════════════════ -->
+<?php if ( is_page_template( 'page-audit.php' ) ) : ?>
+<!-- ═══════════════════ AFTER YOUR SCAN (audit-only) ═══════════════ -->
 <section class="scan-next" id="next" aria-label="How we help after your scan">
     <div class="container">
         <div class="scan-next__header">
@@ -189,6 +190,7 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <!-- ═══════════════════════════ TRUST ═════════════════════════════ -->
