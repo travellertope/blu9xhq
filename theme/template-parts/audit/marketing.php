@@ -321,7 +321,8 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
 <?php endif; ?>
 
 
-<!-- ═══════════════════════════ FAQ ═══════════════════════════════ -->
+<?php if ( ! is_front_page() ) : ?>
+<!-- ═══════════════════════ FAQ (audit-only) ═══════════════════════ -->
 <section class="scan-faq" id="faq" aria-label="Frequently asked questions">
     <div class="container">
         <div class="scan-checks__header">
@@ -352,6 +353,7 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <!-- ══════════════════════════ FINAL CTA ══════════════════════════ -->
