@@ -15,8 +15,7 @@ export default async function BillingPage() {
   const tenant = await getTenantById(tenantId);
   if (!tenant) redirect("/admin-login");
 
-  const plan   = (tenant.plan as TenantPlan) ?? "free";
-  const limits = PLAN_LIMITS[plan];
+  const plan = (tenant.plan as TenantPlan) ?? "free";
 
   const supabase = createSupabaseAdminClient();
   const [{ count: clientCount }, { count: teamCount }] = await Promise.all([
