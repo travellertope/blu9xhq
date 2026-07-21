@@ -10,6 +10,23 @@ import BuyNowButton from "@/components/buy-now-button";
 import type { ShopThemeId } from "@/lib/theme";
 import type { Product } from "@/types";
 
+function CartIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="9" cy="21" r="1" />
+      <circle cx="20" cy="21" r="1" />
+      <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
+    </svg>
+  );
+}
+
 const CARD_CLASSES: Record<ShopThemeId, string> = {
   minimal: "bg-white border border-line rounded-site overflow-hidden",
   boutique: "bg-white rounded-2xl overflow-hidden shadow-sm",
@@ -89,13 +106,29 @@ export default function ProductCard({
         </div>
         {hasVariants ? (
           <Button asChild size="sm" variant="outline" className="w-full mt-2">
-            <Link href={`/${shopSlug}/product/${product.id}`}>View options</Link>
+            <Link href={`/${shopSlug}/product/${product.id}`}>
+              {themeId === "market" ? "Options" : "View options"}
+            </Link>
           </Button>
         ) : (
           <div className="flex gap-1.5 mt-2">
-            <Button size="sm" className="flex-1" onClick={handleQuickAdd}>
-              Add to cart
-            </Button>
+            {themeId === "market" ? (
+              // "Add to cart" text + a compact WhatsApp button can't both fit at
+              // Market's 3-5 column grid widths — icon-only keeps it from
+              // overflowing the card.
+              <button
+                type="button"
+                onClick={handleQuickAdd}
+                aria-label="Add to cart"
+                className="flex-1 h-9 rounded-md bg-[var(--shop-accent)] text-white flex items-center justify-center"
+              >
+                <CartIcon className="h-4 w-4" />
+              </button>
+            ) : (
+              <Button size="sm" className="flex-1" onClick={handleQuickAdd}>
+                Add to cart
+              </Button>
+            )}
             <BuyNowButton
               compact
               shopId={shopId}
