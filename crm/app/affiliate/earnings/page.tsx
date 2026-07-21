@@ -9,6 +9,7 @@ import type { AffiliateCommission, AffiliateProduct } from "@/types";
 const PRODUCT_LABELS: Record<AffiliateProduct, string> = {
   scan_tool:      "BluuAudit",
   portal:         "Client Portal",
+  shop_tool:      "BluuShop",
   hosting_mgmt:   "Hosting & Management",
   content_ops:    "Content Operations",
   web_dev:        "Web / Mobile Dev",

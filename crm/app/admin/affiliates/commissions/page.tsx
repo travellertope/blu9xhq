@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 const PRODUCT_LABELS: Record<string, string> = {
   scan_tool:      "BluuAudit",
   portal:         "Client Portal",
+  shop_tool:      "BluuShop",
   hosting_mgmt:   "Hosting & Mgmt",
   content_ops:    "Content Ops",
   web_dev:        "Web / Mobile Dev",
