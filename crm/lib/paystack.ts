@@ -45,6 +45,41 @@ export async function createPaystackCustomer(params: {
   });
 }
 
+/** Initializing a transaction with a `plan` code is how Paystack creates a
+ *  recurring subscription — it happens as a side effect of the first
+ *  successful charge, not as a separate "create subscription" call. Used
+ *  for tenant SaaS-plan billing (as opposed to the one-off/charge-authorization
+ *  helpers below, which are for agency-to-client invoicing). */
+export async function initializePaystackSubscription(params: {
+  email: string;
+  amountKobo: number;
+  planCode: string;
+  callbackUrl: string;
+  metadata?: Record<string, unknown>;
+}): Promise<PaystackTransaction> {
+  return paystackFetch<PaystackTransaction>("/transaction/initialize", {
+    method: "POST",
+    body: JSON.stringify({
+      email: params.email,
+      amount: params.amountKobo,
+      plan: params.planCode,
+      callback_url: params.callbackUrl,
+      metadata: params.metadata ?? {},
+    }),
+  });
+}
+
+/** Cancelling a Paystack subscription requires both its code and the
+ *  email_token handed back when the subscription was created — Paystack
+ *  treats that pair as proof of ownership instead of just trusting the
+ *  authenticated API caller. */
+export async function disablePaystackSubscription(subscriptionCode: string, emailToken: string): Promise<void> {
+  await paystackFetch("/subscription/disable", {
+    method: "POST",
+    body: JSON.stringify({ code: subscriptionCode, token: emailToken }),
+  });
+}
+
 /** Initialize a Paystack transaction (one-time payment). */
 export async function initializePaystackTransaction(params: {
   email: string;

@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyPaystackWebhook } from "@/lib/paystack";
 import { listInvoices, updateInvoice } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+import type { PaidPlan } from "@/lib/paystack-products";
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
@@ -25,6 +27,10 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ received: true });
 }
 
+function isPaidPlan(value: unknown): value is PaidPlan {
+  return value === "starter" || value === "pro" || value === "agency";
+}
+
 async function processPaystackEvent(event: {
   event: string;
   data: Record<string, unknown>;
@@ -34,6 +40,28 @@ async function processPaystackEvent(event: {
       const data = event.data;
       const reference = String(data.reference ?? "");
       const metadata = (data.metadata ?? {}) as Record<string, unknown>;
+
+      // Tenant SaaS-plan subscription charge (from /api/billing/paystack/checkout).
+      // Renewal charges don't carry our custom metadata (only the original
+      // /transaction/initialize call does) — this naturally no-ops on
+      // renewals, which is correct, since the plan is already set.
+      const tenantId = metadata.tenant_id;
+      const targetPlan = metadata.target_plan;
+      if (typeof tenantId === "string" && isPaidPlan(targetPlan)) {
+        const customer = data.customer as { customer_code?: string } | undefined;
+        const supabase = createSupabaseAdminClient();
+        await supabase
+          .from("tenants")
+          .update({
+            plan: targetPlan,
+            billing_provider: "paystack",
+            paystack_customer_code: customer?.customer_code ?? null,
+          })
+          .eq("id", tenantId);
+        return;
+      }
+
+      // Agency-to-client invoice charge (WP-backed invoicing system).
       const invoiceId = parseInt(String(metadata.invoiceId ?? "0"), 10);
       const paidAt = String(data.paid_at ?? new Date().toISOString());
 
@@ -52,6 +80,37 @@ async function processPaystackEvent(event: {
       });
 
       await sendPaystackReceiptEmail(invoiceId, reference).catch(console.error);
+    }
+
+    if (event.event === "subscription.create") {
+      const data = event.data;
+      const customer = data.customer as { customer_code?: string } | undefined;
+      const subscriptionCode = data.subscription_code;
+      const emailToken = data.email_token;
+      if (customer?.customer_code && typeof subscriptionCode === "string" && typeof emailToken === "string") {
+        const supabase = createSupabaseAdminClient();
+        // subscription.create's payload doesn't carry our tenant_id metadata,
+        // so it's matched by the customer_code charge.success already
+        // stored — if this arrives first (ordering isn't guaranteed), it's
+        // a no-op and the cancel button just won't work until a later
+        // renewal event fills it in.
+        await supabase
+          .from("tenants")
+          .update({ paystack_subscription_code: subscriptionCode, paystack_email_token: emailToken })
+          .eq("paystack_customer_code", customer.customer_code);
+      }
+    }
+
+    if (event.event === "subscription.disable") {
+      const data = event.data;
+      const subscriptionCode = data.subscription_code;
+      if (typeof subscriptionCode === "string") {
+        const supabase = createSupabaseAdminClient();
+        await supabase
+          .from("tenants")
+          .update({ plan: "free" })
+          .eq("paystack_subscription_code", subscriptionCode);
+      }
     }
 
     if (event.event === "charge.failed") {

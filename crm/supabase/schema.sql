@@ -659,6 +659,17 @@ alter table tenants add column if not exists address text;
 alter table tenants add column if not exists from_email_name text;
 
 -- =============================================================================
+-- TENANT SUBSCRIPTION BILLING — Paystack (Nigeria/Africa), alongside Stripe
+-- (international). billing_provider tracks which gateway last set the plan;
+-- the Paystack columns mirror shop-tool's shops table pattern.
+-- =============================================================================
+alter table tenants add column if not exists billing_provider text
+  check (billing_provider in ('stripe', 'paystack'));
+alter table tenants add column if not exists paystack_customer_code text unique;
+alter table tenants add column if not exists paystack_subscription_code text unique;
+alter table tenants add column if not exists paystack_email_token text;
+
+-- =============================================================================
 -- FILES — optional subscription link (WP has an equivalent optional field)
 -- =============================================================================
 alter table files add column if not exists subscription_id uuid references subscriptions(id);
