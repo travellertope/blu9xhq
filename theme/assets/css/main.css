@@ -420,22 +420,30 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 }
 
 /* ── Site Header / Navigation ───────────────────────────────────────────────── */
+/*
+ * Transparent by default so it blends into a hero's .bluu-hero-bg pattern
+ * (see the overlay rule below); solid white only once scrolled past it.
+ * On pages without a patterned hero this just reveals the white body
+ * background, so it reads the same as an opaque header.
+ */
 .site-header {
     position: sticky;
     top: 0;
     z-index: 900;
-    background: #FFFFFF;
+    background: transparent;
     color: var(--md-on-surface);
     padding-top: 6px;
     padding-bottom: 6px;
     display: flex;
     align-items: center;
-    border-bottom: 1px solid var(--md-outline-variant);
-    box-shadow: var(--shadow-1);
-    transition: box-shadow var(--transition-medium);
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
+    transition: background var(--transition-medium), box-shadow var(--transition-medium), border-color var(--transition-medium);
 }
 
 .site-header--scrolled {
+    background: #FFFFFF;
+    border-bottom: 1px solid var(--md-outline-variant);
     box-shadow: var(--shadow-2);
 }
 
@@ -6229,6 +6237,24 @@ a.contact-info__value:hover {
     z-index: 1;
 }
 
+/*
+ * Pull each hero up by exactly the header's height and add the same amount
+ * back as padding-top, so the transparent .site-header floats over the top
+ * of the pattern instead of sitting on a solid bar above it — everything
+ * below the hero lands in the same place it always did. Scoped to these 4
+ * heroes only; every other page's layout is untouched.
+ */
+.crm-hero.bluu-hero-bg,
+.shop-hero.bluu-hero-bg,
+.sync-hero.bluu-hero-bg {
+    margin-top: calc(-1 * var(--header-height));
+    padding-top: calc(var(--header-height) + var(--space-9));
+}
+.scan-hero.bluu-hero-bg {
+    margin-top: calc(-1 * var(--header-height));
+    padding-top: calc(var(--header-height) + 64px);
+}
+
 /* =============================================================================
    Product mockups — one per marketing page (/crm, /audit, /shop, /sync),
    sitting right after each hero. Shared "browser frame" chrome, product-
@@ -7011,8 +7037,6 @@ a.contact-info__value:hover {
 .crm-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .crm-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -7285,8 +7309,6 @@ a.contact-info__value:hover {
 .shop-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .shop-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -7524,8 +7546,6 @@ a.contact-info__value:hover {
 .sync-hero {
     padding-block: var(--space-9) var(--space-8);
     text-align: center;
-    background: var(--md-surface-variant);
-    border-bottom: 1px solid var(--md-outline-variant);
 }
 .sync-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
