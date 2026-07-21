@@ -26,6 +26,7 @@ export interface Shop {
   paystack_customer_code: string | null;
   paystack_subscription_code: string | null;
   paystack_email_token: string | null;
+  directory_opt_in: boolean;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -94,6 +95,16 @@ export interface OrderIntent {
   ref_code: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ShopReview {
+  id: string;
+  shop_id: string;
+  reviewer_name: string;
+  rating: number;
+  comment: string | null;
+  hidden: boolean;
+  created_at: string;
 }
 
 export type AnalyticsEventType = "view" | "add_to_cart" | "checkout_click";

@@ -31,6 +31,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
   const [accentColor, setAccentColor] = useState(shop.accent_color ?? "");
   const [fontId, setFontId] = useState(shop.font_id || "inter");
   const [customDomain, setCustomDomain] = useState(shop.custom_domain ?? "");
+  const [directoryOptIn, setDirectoryOptIn] = useState(shop.directory_opt_in);
   const [logoUrl, setLogoUrl] = useState(shop.logo_url);
   const [coverUrl, setCoverUrl] = useState(shop.cover_url);
   const [uploadingKind, setUploadingKind] = useState<"logo" | "cover" | null>(null);
@@ -83,6 +84,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           accent_color: accentColor || null,
           font_id: fontId,
           custom_domain: limits.customDomain ? customDomain.trim().toLowerCase() || null : undefined,
+          directory_opt_in: directoryOptIn,
         }),
       });
       if (!res.ok) {
@@ -341,6 +343,24 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
             Point your domain&apos;s CNAME at shop.bluuhq.com, then enter it here. It can take a few
             minutes to start working after saving.
           </p>
+        </div>
+
+        <div className="pt-2 border-t border-line">
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={directoryOptIn}
+              onChange={(e) => setDirectoryOptIn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-line accent-blue shrink-0"
+            />
+            <span>
+              <span className="text-sm font-medium text-ink block">List my shop in the BluuShop directory</span>
+              <span className="text-xs text-ink-soft">
+                Shown at shop.bluuhq.com/discover once you have at least one product live. Free cross-promotion —
+                you can turn this off any time.
+              </span>
+            </span>
+          </label>
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={saving}>

@@ -55,6 +55,7 @@ alter table shops add column if not exists billing_provider text
 alter table shops add column if not exists paystack_customer_code text unique;
 alter table shops add column if not exists paystack_subscription_code text unique;
 alter table shops add column if not exists paystack_email_token text;
+alter table shops add column if not exists directory_opt_in boolean not null default false;
 
 -- =============================================================================
 -- CATEGORIES
@@ -154,6 +155,25 @@ create table if not exists analytics_events (
 create index if not exists analytics_events_shop_idx on analytics_events(shop_id, created_at desc);
 
 -- =============================================================================
+-- SHOP REVIEWS
+-- Lightweight and shop-level, not per-product — reviewers don't sign in
+-- (matches the no-shopper-login design everywhere else), so moderation is
+-- post-hoc: the owner can hide/delete anything from their dashboard rather
+-- than approving reviews before they go live.
+-- =============================================================================
+create table if not exists shop_reviews (
+  id            uuid primary key default gen_random_uuid(),
+  shop_id       uuid not null references shops(id) on delete cascade,
+  reviewer_name text not null,
+  rating        int not null check (rating between 1 and 5),
+  comment       text,
+  hidden        boolean not null default false,
+  created_at    timestamptz not null default now()
+);
+
+create index if not exists shop_reviews_shop_idx on shop_reviews(shop_id);
+
+-- =============================================================================
 -- updated_at triggers
 -- =============================================================================
 create or replace function set_updated_at()
@@ -185,6 +205,7 @@ alter table products         enable row level security;
 alter table delivery_zones   enable row level security;
 alter table order_intents    enable row level security;
 alter table analytics_events enable row level security;
+alter table shop_reviews     enable row level security;
 
 -- ── shops ────────────────────────────────────────────────────────────────────
 -- Public can read active shops (storefront needs this with no auth at all).
@@ -266,3 +287,23 @@ drop policy if exists "owner can read own analytics" on analytics_events;
 create policy "owner can read own analytics"
   on analytics_events for select
   using (exists (select 1 from shops where shops.id = analytics_events.shop_id and shops.owner_user_id = auth.uid()));
+
+-- ── shop_reviews ─────────────────────────────────────────────────────────────
+drop policy if exists "anyone can create reviews" on shop_reviews;
+create policy "anyone can create reviews"
+  on shop_reviews for insert
+  with check (exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.active = true));
+
+drop policy if exists "public can read visible reviews of active shops" on shop_reviews;
+create policy "public can read visible reviews of active shops"
+  on shop_reviews for select
+  using (
+    hidden = false
+    and exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.active = true)
+  );
+
+drop policy if exists "owner can manage own reviews" on shop_reviews;
+create policy "owner can manage own reviews"
+  on shop_reviews for all
+  using (exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.owner_user_id = auth.uid()))
+  with check (exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.owner_user_id = auth.uid()));
