@@ -12,21 +12,21 @@ export interface PlanLimits {
 export const PLAN_LIMITS: Record<ShopPlan, PlanLimits> = {
   free: {
     maxProducts: 20,
-    themes: ["minimal"],
+    themes: ["minimal", "list"],
     customBranding: false,
     customDomain: false,
     removeBranding: false,
   },
   starter: {
     maxProducts: 100,
-    themes: ["minimal", "boutique", "market"],
+    themes: ["minimal", "list", "boutique", "market", "gallery", "studio"],
     customBranding: true,
     customDomain: true,
     removeBranding: true,
   },
   pro: {
     maxProducts: Infinity,
-    themes: ["minimal", "boutique", "market"],
+    themes: ["minimal", "list", "boutique", "market", "gallery", "studio"],
     customBranding: true,
     customDomain: true,
     removeBranding: true,

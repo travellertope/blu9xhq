@@ -358,6 +358,7 @@ export type AffiliateStatus = "pending" | "active" | "suspended";
 export type AffiliateProduct =
   | "scan_tool"
   | "portal"
+  | "shop_tool"
   | "hosting_mgmt"
   | "content_ops"
   | "web_dev"

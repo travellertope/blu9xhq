@@ -128,7 +128,7 @@ async function processEvent(event: Stripe.Event): Promise<void> {
 }
 
 const COMMISSION_RATES: Record<string, number> = {
-  scan_tool: 0.30, portal: 0.30, hosting_mgmt: 0.30, content_ops: 0.15, web_dev: 0.10, ai_integration: 0.10,
+  scan_tool: 0.30, portal: 0.30, shop_tool: 0.30, hosting_mgmt: 0.30, content_ops: 0.15, web_dev: 0.10, ai_integration: 0.10,
 };
 
 async function recordAffiliateCommission(params: {

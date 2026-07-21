@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { THEMES, FONT_PAIRINGS, type ShopThemeId } from "@/lib/theme";
 import { getPlanLimits } from "@/lib/planLimits";
+import ThemeThumbnail from "@/components/dashboard/theme-thumbnail";
 import type { Shop } from "@/types";
 
 export default function SettingsForm({ shop }: { shop: Shop }) {
@@ -29,6 +30,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
   const [themeId, setThemeId] = useState<ShopThemeId>((shop.theme_id as ShopThemeId) || "minimal");
   const [accentColor, setAccentColor] = useState(shop.accent_color ?? "");
   const [fontId, setFontId] = useState(shop.font_id || "inter");
+  const [customDomain, setCustomDomain] = useState(shop.custom_domain ?? "");
   const [logoUrl, setLogoUrl] = useState(shop.logo_url);
   const [coverUrl, setCoverUrl] = useState(shop.cover_url);
   const [uploadingKind, setUploadingKind] = useState<"logo" | "cover" | null>(null);
@@ -80,6 +82,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           theme_id: themeId,
           accent_color: accentColor || null,
           font_id: fontId,
+          custom_domain: limits.customDomain ? customDomain.trim().toLowerCase() || null : undefined,
         }),
       });
       if (!res.ok) {
@@ -237,7 +240,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
 
           <div className="space-y-1.5">
             <p className="text-xs font-medium text-ink-soft">Layout theme</p>
-            <div className="space-y-1.5">
+            <div className="grid grid-cols-2 gap-2">
               {THEMES.map((t) => {
                 const locked = !limits.themes.includes(t.id);
                 return (
@@ -246,7 +249,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
                     key={t.id}
                     disabled={locked}
                     onClick={() => setThemeId(t.id)}
-                    className={`w-full text-left rounded-md border px-3 py-2 ${
+                    className={`text-left rounded-md border p-2 space-y-1.5 ${
                       locked
                         ? "border-line opacity-50 cursor-not-allowed"
                         : themeId === t.id
@@ -254,15 +257,18 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
                           : "border-line"
                     }`}
                   >
-                    <p className="text-sm font-semibold text-ink flex items-center gap-1.5">
-                      {t.label}
-                      {locked && (
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-blue bg-blue-soft rounded-full px-1.5 py-0.5">
-                          Starter+
-                        </span>
-                      )}
-                    </p>
-                    <p className="text-xs text-ink-soft">{t.description}</p>
+                    <ThemeThumbnail themeId={t.id} />
+                    <div>
+                      <p className="text-xs font-semibold text-ink flex items-center gap-1.5">
+                        {t.label}
+                        {locked && (
+                          <span className="text-[9px] font-bold uppercase tracking-wide text-blue bg-blue-soft rounded-full px-1.5 py-0.5">
+                            Starter+
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-[11px] text-ink-soft leading-snug">{t.description}</p>
+                    </div>
                   </button>
                 );
               })}
@@ -318,6 +324,23 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="space-y-1.5 pt-2 border-t border-line">
+          <Label>
+            Custom domain {!limits.customDomain && <span className="text-blue">— Starter+</span>}
+          </Label>
+          <Input
+            value={customDomain}
+            onChange={(e) => setCustomDomain(e.target.value)}
+            disabled={!limits.customDomain}
+            placeholder="shop.yourbusiness.com"
+            className="disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <p className="text-xs text-ink-soft">
+            Point your domain&apos;s CNAME at shop.bluuhq.com, then enter it here. It can take a few
+            minutes to start working after saving.
+          </p>
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={saving}>

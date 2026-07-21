@@ -63,6 +63,8 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
           categories={categories}
           shopSlug={shop.slug}
           shopId={shop.id}
+          shopName={shop.name}
+          whatsappNumber={shop.whatsapp_number}
           currency={shop.currency}
           themeId={themeId}
         />

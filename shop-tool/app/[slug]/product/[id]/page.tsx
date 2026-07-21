@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import type { Metadata } from "next";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import ProductDetail from "@/components/storefront/product-detail";
+import ProductImageCarousel from "@/components/storefront/product-image-carousel";
 import { shopThemeStyle } from "@/lib/theme";
 import type { DeliveryZone, Product, Shop } from "@/types";
 
@@ -50,7 +50,6 @@ export default async function ProductPage({ params }: { params: { slug: string; 
   if (!data) notFound();
 
   const { shop, product, deliveryZones } = data;
-  const image = product.images[0];
 
   return (
     <div
@@ -68,18 +67,19 @@ export default async function ProductPage({ params }: { params: { slug: string; 
       </header>
 
       <main className="max-w-site mx-auto px-4 py-6 grid sm:grid-cols-2 gap-8">
-        <div className="aspect-square bg-bg-soft rounded-site overflow-hidden relative">
-          {image ? (
-            <Image src={image} alt={product.name} fill className="object-cover" priority />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-ink-soft text-sm">No photo</div>
-          )}
-        </div>
+        <ProductImageCarousel images={product.images} alt={product.name} />
 
         <div>
           <h1 className="shop-font-heading text-2xl font-extrabold text-ink mb-2">{product.name}</h1>
           {product.description && <p className="text-ink-soft mb-4 leading-relaxed">{product.description}</p>}
-          <ProductDetail product={product} shopSlug={shop.slug} shopId={shop.id} currency={shop.currency} />
+          <ProductDetail
+            product={product}
+            shopSlug={shop.slug}
+            shopId={shop.id}
+            shopName={shop.name}
+            whatsappNumber={shop.whatsapp_number}
+            currency={shop.currency}
+          />
         </div>
       </main>
 

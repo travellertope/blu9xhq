@@ -5,7 +5,7 @@ import type { AffiliateProduct, ConversionType } from "@/types";
 
 const schema = z.object({
   affiliateCode:   z.string().regex(/^[A-Z0-9]{4,20}$/i),
-  product:         z.enum(["scan_tool", "portal", "hosting_mgmt", "content_ops", "web_dev", "ai_integration"]),
+  product:         z.enum(["scan_tool", "portal", "shop_tool", "hosting_mgmt", "content_ops", "web_dev", "ai_integration"]),
   conversionType:  z.enum(["scan", "lead", "trial", "paid_subscription", "one_time_purchase", "project_signed"]),
   grossAmount:     z.number().nonnegative().optional(),
   currency:        z.string().length(3).optional(),
@@ -17,6 +17,7 @@ const schema = z.object({
 const COMMISSION_RATES: Record<AffiliateProduct, number> = {
   scan_tool:      0.30,
   portal:         0.30,
+  shop_tool:      0.30,
   hosting_mgmt:   0.30,
   content_ops:    0.15,
   web_dev:        0.10,
