@@ -32,6 +32,11 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                     Search, AI tools, social, email — Bluu builds your site, runs your content, and keeps your brand visible across every channel that matters.
                 </p>
 
+                <div class="scan-hero__form-intro">
+                    <p class="scan-hero__form-kicker">See where you stand.</p>
+                    <p class="scan-hero__form-hint">Enter your domain below to see how visible your brand is across search, AI tools, and against your competitors.</p>
+                </div>
+
                 <form class="scan-hero__form" action="<?php echo esc_url( $scan_url ); ?>" method="GET">
                     <?php if ( $audit_ref ) : ?>
                         <input type="hidden" name="ref" value="<?php echo esc_attr( $audit_ref ); ?>">

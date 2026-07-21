@@ -6544,9 +6544,28 @@ a.contact-info__value:hover {
     margin: 18px 0 0;
 }
 
+/* Compact lead-in that bridges the pitch above to the form below */
+.scan-hero__form-intro {
+    margin-top: var(--space-6);
+    max-width: 420px;
+}
+.scan-hero__form-kicker {
+    font-family: var(--font-family-heading);
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--md-primary);
+    margin: 0 0 2px;
+}
+.scan-hero__form-hint {
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* Form row */
 .scan-hero__form {
-    margin-top: 24px;
+    margin-top: 14px;
 }
 .scan-hero__toggle {
     font-size: 13px;
