@@ -233,6 +233,36 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
+<!-- ═══════════════════════ ALSO FROM BLUU ════════════════════════ -->
+<?php
+$scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
+    return 'BluuAudit' !== $p['name'];
+} );
+?>
+<section class="scan-crosssell" aria-label="Also from Bluu">
+    <div class="container">
+        <div class="scan-checks__header">
+            <span class="scan-checks__eyebrow">Also from Bluu</span>
+            <h2 class="scan-checks__headline">One scan today. Maybe a different problem tomorrow.</h2>
+            <p class="scan-checks__sub">Bluu builds more than the scan — here's the rest of the lineup.</p>
+        </div>
+
+        <div class="scan-crosssell__grid">
+            <?php foreach ( $scan_other_products as $product ) :
+                $product_href = ( strpos( $product['url'], 'http' ) === 0 ) ? $product['url'] : home_url( $product['url'] );
+            ?>
+                <a href="<?php echo esc_url( $product_href ); ?>" class="scan-crosssell__card">
+                    <div class="scan-crosssell__icon"><?php echo bluu_mega_icon( $product['icon'], 20 ); // phpcs:ignore ?></div>
+                    <h3><?php echo esc_html( $product['name'] ); ?></h3>
+                    <p><?php echo esc_html( $product['desc'] ); ?></p>
+                    <span class="scan-next__learn">Learn more →</span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+
 <!-- ══════════════════════════ FINAL CTA ══════════════════════════ -->
 <section class="home-cta" id="cta" aria-label="Call to action">
     <div class="container container--narrow">
