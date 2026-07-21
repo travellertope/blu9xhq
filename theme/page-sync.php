@@ -129,7 +129,7 @@ get_header();
 ?>
 
 <!-- ── Sync Hero ────────────────────────────────────────────────────────────── -->
-<section class="sync-hero" aria-label="<?php esc_attr_e( 'BluuSync overview', 'bluu-interactive' ); ?>">
+<section class="sync-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuSync overview', 'bluu-interactive' ); ?>">
     <div class="container container--narrow">
         <div class="sync-hero__inner animate-on-scroll">
             <h1 class="sync-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>

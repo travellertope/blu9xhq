@@ -89,7 +89,7 @@ get_header();
 ?>
 
 <!-- ── Shop Hero ────────────────────────────────────────────────────────────── -->
-<section class="shop-hero" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
+<section class="shop-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
     <div class="container container--narrow">
         <div class="shop-hero__inner animate-on-scroll">
             <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>

@@ -18,7 +18,7 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 ?>
 
 <!-- ═════════════════════════════ HERO ═════════════════════════════ -->
-<section class="scan-hero" id="top" aria-label="AI visibility scan">
+<section class="scan-hero bluu-hero-bg" id="top" aria-label="AI visibility scan">
     <div class="container">
         <div class="scan-hero__grid">
 

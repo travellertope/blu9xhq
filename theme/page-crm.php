@@ -150,7 +150,7 @@ get_header();
 ?>
 
 <!-- ── CRM Hero ─────────────────────────────────────────────────────────────── -->
-<section class="crm-hero" aria-label="<?php esc_attr_e( 'BluuCRM overview', 'bluu-interactive' ); ?>">
+<section class="crm-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuCRM overview', 'bluu-interactive' ); ?>">
     <div class="container container--narrow">
         <div class="crm-hero__inner animate-on-scroll">
             <h1 class="crm-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>

@@ -6020,6 +6020,34 @@ a.contact-info__value:hover {
 .mega-product-card:hover .mega-product-card__desc  { color: var(--md-on-surface-variant); }
 
 /* =============================================================================
+   Shared hero background — subtle crosshatch + dual glow (approved Pattern A).
+   Applied alongside each product's own hero class (.scan-hero, .crm-hero,
+   .shop-hero, .sync-hero) rather than replacing it. Uses only colors already
+   in the palette (accent blue, the AI-score amber) — no new tokens.
+   ============================================================================= */
+.bluu-hero-bg {
+    position: relative;
+    background:
+        radial-gradient(720px 420px at 88% -8%, rgba(47, 95, 224, 0.10), transparent 60%),
+        radial-gradient(600px 360px at 6% 106%, rgba(217, 162, 42, 0.08), transparent 60%),
+        linear-gradient(180deg, #fbfcfe 0%, #f7f9fd 100%);
+}
+.bluu-hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image:
+        repeating-linear-gradient(45deg, rgba(47, 95, 224, 0.05) 0 1px, transparent 1px 34px),
+        repeating-linear-gradient(-45deg, rgba(47, 95, 224, 0.05) 0 1px, transparent 1px 34px);
+    pointer-events: none;
+}
+.bluu-hero-bg > .container {
+    position: relative;
+    z-index: 1;
+}
+
+/* =============================================================================
    Scan Homepage — Hero, Checks, Next Steps, FAQ, Trust
    ============================================================================= */
 
