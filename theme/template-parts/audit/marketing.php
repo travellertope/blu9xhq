@@ -202,7 +202,8 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
-<!-- ═════════════════════ WHAT THE SCAN CHECKS ════════════════════ -->
+<?php if ( ! is_front_page() ) : ?>
+<!-- ══════════════ WHAT THE SCAN CHECKS (audit-only) ═══════════════ -->
 <section class="scan-checks" aria-label="What the scan checks">
     <div class="container">
         <div class="scan-checks__header">
@@ -240,6 +241,7 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <?php if ( is_front_page() ) : ?>
