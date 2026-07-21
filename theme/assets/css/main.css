@@ -1852,7 +1852,7 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
 }
 .site-footer__grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: var(--space-7) var(--space-6);
 }
 .site-footer__col-title {
@@ -6782,18 +6782,6 @@ a.contact-info__value:hover {
 .scan-checks__header {
     text-align: center;
 }
-.scan-checks__eyebrow {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    color: var(--md-accent);
-    background: var(--md-accent-container);
-    padding: 6px 12px;
-    border-radius: var(--radius-full);
-    margin-bottom: 18px;
-}
 .scan-checks__headline {
     font-size: 38px;
     font-weight: 800;
@@ -6813,6 +6801,9 @@ a.contact-info__value:hover {
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
     margin-top: 56px;
+}
+.scan-checks__grid--4up {
+    grid-template-columns: repeat(3, 1fr) 1.4fr;
 }
 .scan-checks__card {
     background: #fff;
@@ -6847,30 +6838,14 @@ a.contact-info__value:hover {
     line-height: 1.6;
 }
 
-/* No-website callout */
-.scan-checks__callout {
-    margin-top: 56px;
+/* No-website callout — 4th (wider) card in the scan-checks grid */
+.scan-checks__card--callout {
     background: #FBEAE6;
-    border: 1px solid #F2C9BE;
-    border-left: 4px solid #E2543D;
-    border-radius: var(--radius-lg);
-    padding: 26px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
+    border-color: #F2C9BE;
+    border-top-color: #E2543D;
 }
-.scan-checks__callout h3 {
-    font-size: 17px;
-    margin-bottom: 6px;
-    font-family: var(--font-family-heading);
-}
-.scan-checks__callout p {
-    color: var(--md-on-surface-variant);
-    font-size: 14.5px;
-    max-width: 560px;
-    line-height: 1.55;
+.scan-checks__card--callout p {
+    margin-bottom: 18px;
 }
 
 /* ── After your scan — next steps ──────────────────────────────────────────── */
@@ -6919,15 +6894,52 @@ a.contact-info__value:hover {
 }
 .scan-next__learn:hover { text-decoration: underline; }
 
-/* ── Trust strip ───────────────────────────────────────────────────────────── */
-.scan-trust {
-    padding: 48px 0;
-    text-align: center;
+/* ── Also from Bluu — cross-sell to other softwares ──────────────────────────── */
+.scan-crosssell {
+    padding: 80px 0;
 }
-.scan-trust p {
+.scan-crosssell__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 56px;
+}
+.scan-crosssell__card {
+    display: block;
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: 28px 26px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+.scan-crosssell__card:hover {
+    border-color: var(--md-accent);
+    box-shadow: var(--shadow-2);
+    transform: translateY(-2px);
+}
+.scan-crosssell__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--md-corner);
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+.scan-crosssell__card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-family: var(--font-family-heading);
+}
+.scan-crosssell__card p {
     color: var(--md-on-surface-variant);
     font-size: 14.5px;
-    font-weight: 600;
+    line-height: 1.6;
+    margin-bottom: 14px;
 }
 
 /* ── FAQ ───────────────────────────────────────────────────────────────────── */
@@ -6997,12 +7009,11 @@ a.contact-info__value:hover {
     .scan-next__grid {
         grid-template-columns: 1fr;
     }
+    .scan-crosssell__grid {
+        grid-template-columns: 1fr;
+    }
     .scan-checks__headline {
         font-size: 30px;
-    }
-    .scan-checks__callout {
-        flex-direction: column;
-        align-items: flex-start;
     }
     .scan-hero__form-row {
         flex-direction: column;
@@ -7599,6 +7610,65 @@ a.contact-info__value:hover {
     color: var(--md-on-surface-variant);
 }
 
+.sync-steps {
+    padding-block: var(--space-9);
+    background: var(--md-surface-variant);
+}
+.sync-steps__header {
+    text-align: center;
+    max-width: 600px;
+    margin-inline: auto;
+}
+.sync-steps__headline {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.sync-steps__subhead {
+    margin-top: var(--space-3);
+    color: var(--md-on-surface-variant);
+}
+.sync-steps__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+}
+.sync-step {
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+}
+.sync-step__icon {
+    width: 42px;
+    height: 42px;
+    border-radius: var(--md-corner);
+    background: var(--md-accent-container);
+    color: var(--md-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+}
+.sync-step__label {
+    font-family: var(--font-mono, monospace);
+    font-size: var(--font-size-xs);
+    color: var(--md-accent);
+    margin-bottom: var(--space-2);
+}
+.sync-step__title {
+    font-family: var(--font-family-heading);
+    font-weight: 700;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-2);
+}
+.sync-step__body {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+}
+
 .sync-features {
     padding-block: var(--space-9);
 }
@@ -7814,6 +7884,7 @@ a.contact-info__value:hover {
 }
 
 @media (max-width: 1024px) {
+    .sync-steps__grid,
     .sync-features__grid,
     .sync-pricing__grid {
         grid-template-columns: repeat(2, 1fr);
@@ -7821,6 +7892,7 @@ a.contact-info__value:hover {
 }
 
 @media (max-width: 640px) {
+    .sync-steps__grid,
     .sync-features__grid,
     .sync-pricing__grid {
         grid-template-columns: 1fr;

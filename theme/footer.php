@@ -45,7 +45,19 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                     </ul>
                 </div>
 
-                <!-- Column 2: Industries -->
+                <!-- Column 2: Products -->
+                <div class="site-footer__col">
+                    <h3 class="site-footer__col-title"><?php esc_html_e( 'Products', 'bluu-interactive' ); ?></h3>
+                    <ul class="site-footer__menu">
+                        <?php foreach ( bluu_softwares_data() as $product ) :
+                            $product_href = ( strpos( $product['url'], 'http' ) === 0 ) ? $product['url'] : home_url( $product['url'] );
+                        ?>
+                            <li><a href="<?php echo esc_url( $product_href ); ?>"><?php echo esc_html( $product['name'] ); ?></a></li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+
+                <!-- Column 3: Industries -->
                 <div class="site-footer__col">
                     <h3 class="site-footer__col-title"><?php esc_html_e( 'Industries', 'bluu-interactive' ); ?></h3>
                     <ul class="site-footer__menu">
@@ -56,7 +68,7 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                     </ul>
                 </div>
 
-                <!-- Column 3: Resources -->
+                <!-- Column 4: Resources -->
                 <div class="site-footer__col">
                     <h3 class="site-footer__col-title"><?php esc_html_e( 'Resources', 'bluu-interactive' ); ?></h3>
                     <ul class="site-footer__menu">
@@ -67,7 +79,7 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                     </ul>
                 </div>
 
-                <!-- Column 4: Company -->
+                <!-- Column 5: Company -->
                 <div class="site-footer__col">
                     <h3 class="site-footer__col-title"><?php esc_html_e( 'Company', 'bluu-interactive' ); ?></h3>
                     <ul class="site-footer__menu">
