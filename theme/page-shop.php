@@ -90,19 +90,66 @@ get_header();
 
 <!-- ── Shop Hero ────────────────────────────────────────────────────────────── -->
 <section class="shop-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
-    <div class="container container--narrow">
-        <div class="shop-hero__inner animate-on-scroll">
-            <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
-            <p class="shop-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
-            <div class="shop-hero__actions">
-                <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>" class="btn-primary">
-                    <?php esc_html_e( 'Create your free shop', 'bluu-interactive' ); ?>
-                </a>
-                <a href="<?php echo esc_url( $shop_app_url . '/login' ); ?>" class="btn-outline">
-                    <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
-                </a>
+    <div class="container">
+        <div class="product-hero__grid">
+            <div class="shop-hero__inner animate-on-scroll">
+                <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+                <p class="shop-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+                <div class="shop-hero__actions">
+                    <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>" class="btn-primary">
+                        <?php esc_html_e( 'Create your free shop', 'bluu-interactive' ); ?>
+                    </a>
+                    <a href="<?php echo esc_url( $shop_app_url . '/login' ); ?>" class="btn-outline">
+                        <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
+                    </a>
+                </div>
+                <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
             </div>
-            <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
+
+            <div class="product-hero__illustration" aria-hidden="true">
+                <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M220 200 Q150 140 110 100" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 130 348 92" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q150 260 96 308" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 265 352 306" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+
+                    <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#1F9D55" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                    <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#1F9D55" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+
+                    <g transform="translate(220,200)">
+                        <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
+                        <circle cx="0" cy="0" r="15" fill="#1F9D55"/>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                        <circle cx="110" cy="100" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(110,100) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
+                        <circle cx="348" cy="92" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(348,92) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18z"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
+                        <circle cx="96" cy="308" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(96,308) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                        <circle cx="352" cy="306" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
         </div>
     </div>
     <div class="container">

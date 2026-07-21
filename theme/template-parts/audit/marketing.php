@@ -98,7 +98,6 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                             <path d="M337 296l15 12 15-12" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </g>
                     </svg>
-                    <p class="scan-hero__illustration-caption">Search · AI tools · social · email — one brand, everywhere.</p>
                 </div>
             <?php else : ?>
                 <!-- Right: sample report -->
