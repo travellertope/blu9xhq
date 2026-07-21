@@ -6436,17 +6436,6 @@ a.contact-info__value:hover {
     margin-bottom: 14px;
 }
 
-/* ── Trust strip ───────────────────────────────────────────────────────────── */
-.scan-trust {
-    padding: 48px 0;
-    text-align: center;
-}
-.scan-trust p {
-    color: var(--md-on-surface-variant);
-    font-size: 14.5px;
-    font-weight: 600;
-}
-
 /* ── FAQ ───────────────────────────────────────────────────────────────────── */
 .scan-faq {
     padding: 96px 0;

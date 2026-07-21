@@ -193,14 +193,6 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 <?php endif; ?>
 
 
-<!-- ═══════════════════════════ TRUST ═════════════════════════════ -->
-<div class="scan-trust" aria-label="Social proof">
-    <div class="container">
-        <p>Trusted by SaaS teams, agencies, and DTC brands to keep their content — and their visibility — running.</p>
-    </div>
-</div>
-
-
 <!-- ═══════════════════════════ FAQ ═══════════════════════════════ -->
 <section class="scan-faq" id="faq" aria-label="Frequently asked questions">
     <div class="container">
