@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { buildScanNarrative } from "@/lib/scan/narrative";
 
 interface ScanScores {
@@ -117,6 +119,8 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function ScanPage() {
+  const { data: session, status: sessionStatus } = useSession();
+  const router = useRouter();
   const [noSite, setNoSite] = useState(false);
   const [domain, setDomain] = useState("");
   const [bizName, setBizName] = useState("");
@@ -151,6 +155,32 @@ export default function ScanPage() {
   useEffect(() => {
     return () => stopPolling();
   }, [stopPolling]);
+
+  const unlockScan = useCallback(
+    async (scanId: string, emailValue: string, opts?: { auto?: boolean }) => {
+      if (!opts?.auto) setEmailSending(true);
+      try {
+        const res = await fetch("/api/email-gate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ scanId, email: emailValue }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          setEmailSent(true);
+          if (data.aiDetails) setAiDetails(data.aiDetails);
+          if (data.compDetails) setCompDetails(data.compDetails);
+          if (data.siteDetails) setSiteDetails(data.siteDetails);
+          if (data.strategicAnalysis) setStrategicAnalysis(data.strategicAnalysis);
+        }
+      } catch {
+        // Silently handle
+      }
+      if (!opts?.auto) setEmailSending(false);
+    },
+    []
+  );
 
   const performScan = useCallback(
     async (params: { domain: string; bizName: string; niche: string; noSite: boolean }) => {
@@ -215,6 +245,11 @@ export default function ScanPage() {
                 if (poll.aiDetails) setAiDetails(poll.aiDetails);
                 if (poll.compDetails) setCompDetails(poll.compDetails);
                 if (poll.siteDetails) setSiteDetails(poll.siteDetails);
+              } else if (session?.user?.email) {
+                // Already signed in — no need to ask for an email we already
+                // have; unlock the full report the same way the manual
+                // gate would, just without making them type it again.
+                unlockScan(data.id, session.user.email, { auto: true });
               }
               setTimeout(() => {
                 resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -235,7 +270,7 @@ export default function ScanPage() {
         setStatusText("");
       }
     },
-    [stopPolling]
+    [stopPolling, session, unlockScan]
   );
 
   const handleScan = useCallback(
@@ -265,6 +300,20 @@ export default function ScanPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // bluuhq.com's WordPress site is the real anonymous top-of-funnel; this
+  // page's own root doesn't need to double as another landing page for
+  // people who already have an account. A signed-in visitor lands here on
+  // /dashboard instead — unless they arrived with explicit scan intent
+  // (a shared scan link, or the dashboard's own "Run a new scan" button,
+  // which links here with ?scan=1), in which case we let them scan.
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    const url = new URL(window.location.href);
+    const hasScanIntent =
+      url.searchParams.has("domain") || url.searchParams.has("brand") || url.searchParams.has("scan");
+    if (!hasScanIntent) router.replace("/dashboard");
+  }, [sessionStatus, router]);
+
   const brandLabel = domain || bizName || "Your brand";
 
   // Build narrative from the detailed data
@@ -278,32 +327,12 @@ export default function ScanPage() {
     : null;
 
   const handleEmailGate = useCallback(
-    async (e: React.FormEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
       if (!scanIdRef.current) return;
-
-      setEmailSending(true);
-      try {
-        const res = await fetch("/api/email-gate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ scanId: scanIdRef.current, email }),
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          setEmailSent(true);
-          if (data.aiDetails) setAiDetails(data.aiDetails);
-          if (data.compDetails) setCompDetails(data.compDetails);
-          if (data.siteDetails) setSiteDetails(data.siteDetails);
-          if (data.strategicAnalysis) setStrategicAnalysis(data.strategicAnalysis);
-        }
-      } catch {
-        // Silently handle
-      }
-      setEmailSending(false);
+      unlockScan(scanIdRef.current, email);
     },
-    [email]
+    [email, unlockScan]
   );
 
   // Group AI details by category
@@ -331,10 +360,10 @@ export default function ScanPage() {
           </a>
           <div className="flex items-center gap-6">
             <a
-              href="/login"
+              href={sessionStatus === "authenticated" ? "/dashboard" : "/login"}
               className="text-sm font-semibold text-ink-soft hover:text-ink transition-colors"
             >
-              Log in
+              {sessionStatus === "authenticated" ? "Dashboard" : "Log in"}
             </a>
             <a
               href="https://bluuhq.com/contact"
@@ -733,8 +762,14 @@ export default function ScanPage() {
               {emailSent ? (
                 <div className="text-center py-3">
                   <p className="text-sm font-semibold text-green-700">
-                    Full report sent! Check your inbox.
+                    {sessionStatus === "authenticated"
+                      ? "Full report unlocked and saved to your dashboard."
+                      : "Full report sent! Check your inbox."}
                   </p>
+                </div>
+              ) : sessionStatus === "authenticated" ? (
+                <div className="text-center py-3">
+                  <p className="text-sm text-ink-soft">Unlocking your full report…</p>
                 </div>
               ) : !showEmailGate ? (
                 <div>
