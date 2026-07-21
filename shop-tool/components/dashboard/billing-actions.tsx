@@ -1,16 +1,26 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import type { ShopPlan } from "@/types";
 
-export function UpgradeButton({ plan }: { plan: "starter" | "pro" }) {
+export function UpgradeButton({
+  plan,
+  provider,
+  label,
+}: {
+  plan: "starter" | "pro";
+  provider: "stripe" | "paystack";
+  label: string;
+}) {
   const [loading, setLoading] = useState(false);
+  const endpoint = provider === "paystack" ? "/api/billing/paystack/checkout" : "/api/billing/checkout";
 
   async function handleUpgrade() {
     setLoading(true);
     try {
-      const res = await fetch("/api/billing/checkout", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, billing: "monthly" }),
@@ -26,7 +36,34 @@ export function UpgradeButton({ plan }: { plan: "starter" | "pro" }) {
 
   return (
     <Button size="sm" className="w-full" onClick={handleUpgrade} disabled={loading}>
-      {loading ? "Redirecting…" : "Upgrade"}
+      {loading ? "Redirecting…" : label}
+    </Button>
+  );
+}
+
+export function PaystackCancelButton() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleCancel() {
+    if (!window.confirm("Cancel your Paystack subscription? You'll move to the Free plan.")) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/billing/paystack/cancel", { method: "POST" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? "Couldn't cancel subscription");
+      alert("Subscription cancelled. This can take a minute to reflect here.");
+      router.refresh();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Button size="sm" variant="outline" className="w-full" onClick={handleCancel} disabled={loading}>
+      {loading ? "Cancelling…" : "Cancel subscription"}
     </Button>
   );
 }

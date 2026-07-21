@@ -50,6 +50,11 @@ alter table shops add column if not exists instagram_url text;
 alter table shops add column if not exists tiktok_url text;
 alter table shops add column if not exists facebook_url text;
 alter table shops add column if not exists x_url text;
+alter table shops add column if not exists billing_provider text
+  check (billing_provider in ('stripe', 'paystack'));
+alter table shops add column if not exists paystack_customer_code text unique;
+alter table shops add column if not exists paystack_subscription_code text unique;
+alter table shops add column if not exists paystack_email_token text;
 
 -- =============================================================================
 -- CATEGORIES

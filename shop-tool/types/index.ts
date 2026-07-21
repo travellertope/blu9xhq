@@ -22,6 +22,10 @@ export interface Shop {
   custom_domain: string | null;
   branding_hidden: boolean;
   stripe_customer_id: string | null;
+  billing_provider: "stripe" | "paystack" | null;
+  paystack_customer_code: string | null;
+  paystack_subscription_code: string | null;
+  paystack_email_token: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
