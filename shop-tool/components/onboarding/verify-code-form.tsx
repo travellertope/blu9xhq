@@ -11,6 +11,10 @@ import { Input } from "@/components/ui/input";
  * since verifyOtp just needs the code typed back in, not a secret stashed
  * in the browser that requested it (unlike the magic link itself, which
  * only completes sign-in in the same browser via PKCE).
+ *
+ * type is "email" per Supabase's own docs for verifying a signInWithOtp
+ * code — "magiclink" (tried here previously) isn't the documented value
+ * for this flow and didn't fix the "invalid or expired" reports.
  */
 export default function VerifyCodeForm({
   email,
@@ -32,14 +36,10 @@ export default function VerifyCodeForm({
     setVerifying(true);
 
     const supabase = createSupabaseBrowserClient();
-    // "magiclink", not "email" — signInWithOtp is called with emailRedirectTo
-    // set (both call sites), which makes Supabase issue a magiclink-type
-    // token. Verifying it as the wrong type always comes back
-    // invalid/expired, even for the correct code.
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: code,
-      type: "magiclink",
+      type: "email",
     });
 
     if (verifyError) {
