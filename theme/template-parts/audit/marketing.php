@@ -104,12 +104,11 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 <section class="scan-checks" aria-label="What the scan checks">
     <div class="container">
         <div class="scan-checks__header">
-            <span class="scan-checks__eyebrow">What the scan checks</span>
-            <h2 class="scan-checks__headline">Three things, in about two minutes.</h2>
+            <h2 class="scan-checks__headline">What the scan checks</h2>
             <p class="scan-checks__sub">Three plain-English answers. Just whether AI and search can actually find you, and what to do if they can't.</p>
         </div>
 
-        <div class="scan-checks__grid">
+        <div class="scan-checks__grid scan-checks__grid--4up">
             <div class="scan-checks__card">
                 <div class="scan-checks__icon">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M10 1v3M10 16v3M1 10h3M16 10h3M3.5 3.5l2 2M14.5 14.5l2 2M16.5 3.5l-2 2M5.5 14.5l-2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -131,14 +130,40 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                 <h3>Competitor intel</h3>
                 <p>What's already being published in your space — and what's sitting open for you to take.</p>
             </div>
-        </div>
-
-        <div class="scan-checks__callout">
-            <div>
+            <div class="scan-checks__card scan-checks__card--callout">
                 <h3>Don't have a website yet?</h3>
                 <p>The scan still works. Tick "no website yet" above and tell us your business and niche — we'll show you the landscape you're stepping into, and whether a site needs to come first.</p>
+                <a href="#top" class="btn-outline btn-outline--small">Run the scan anyway →</a>
             </div>
-            <a href="#top" class="btn-outline btn-outline--small">Run the scan anyway →</a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ═══════════════════════ ALSO FROM BLUU ════════════════════════ -->
+<?php
+$scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
+    return 'BluuAudit' !== $p['name'];
+} );
+?>
+<section class="scan-crosssell" aria-label="Also from Bluu">
+    <div class="container">
+        <div class="scan-checks__header">
+            <h2 class="scan-checks__headline">Also from Bluu</h2>
+            <p class="scan-checks__sub">Bluu builds more than the scan — here's the rest of the lineup.</p>
+        </div>
+
+        <div class="scan-crosssell__grid">
+            <?php foreach ( $scan_other_products as $product ) :
+                $product_href = ( strpos( $product['url'], 'http' ) === 0 ) ? $product['url'] : home_url( $product['url'] );
+            ?>
+                <a href="<?php echo esc_url( $product_href ); ?>" class="scan-crosssell__card">
+                    <div class="scan-crosssell__icon"><?php echo bluu_mega_icon( $product['icon'], 20 ); // phpcs:ignore ?></div>
+                    <h3><?php echo esc_html( $product['name'] ); ?></h3>
+                    <p><?php echo esc_html( $product['desc'] ); ?></p>
+                    <span class="scan-next__learn">Learn more →</span>
+                </a>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
@@ -149,8 +174,7 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 <section class="scan-next" id="next" aria-label="How we help after your scan">
     <div class="container">
         <div class="scan-next__header">
-            <span class="scan-checks__eyebrow">After your scan</span>
-            <h2 class="scan-checks__headline">One result, four ways we can help.</h2>
+            <h2 class="scan-checks__headline">After your scan</h2>
             <p class="scan-checks__sub">Your scan points to exactly one of these. We don't sell you all four — just the one you actually need.</p>
         </div>
 
@@ -197,8 +221,7 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 <section class="scan-faq" id="faq" aria-label="Frequently asked questions">
     <div class="container">
         <div class="scan-checks__header">
-            <span class="scan-checks__eyebrow">FAQ</span>
-            <h2 class="scan-checks__headline">Questions worth answering up front.</h2>
+            <h2 class="scan-checks__headline">FAQ</h2>
         </div>
 
         <div class="scan-faq__list">
@@ -221,36 +244,6 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                     <p><?php echo esc_html( $faq['a'] ); ?></p>
                 </div>
             </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
-
-<!-- ═══════════════════════ ALSO FROM BLUU ════════════════════════ -->
-<?php
-$scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
-    return 'BluuAudit' !== $p['name'];
-} );
-?>
-<section class="scan-crosssell" aria-label="Also from Bluu">
-    <div class="container">
-        <div class="scan-checks__header">
-            <span class="scan-checks__eyebrow">Also from Bluu</span>
-            <h2 class="scan-checks__headline">One scan today. Maybe a different problem tomorrow.</h2>
-            <p class="scan-checks__sub">Bluu builds more than the scan — here's the rest of the lineup.</p>
-        </div>
-
-        <div class="scan-crosssell__grid">
-            <?php foreach ( $scan_other_products as $product ) :
-                $product_href = ( strpos( $product['url'], 'http' ) === 0 ) ? $product['url'] : home_url( $product['url'] );
-            ?>
-                <a href="<?php echo esc_url( $product_href ); ?>" class="scan-crosssell__card">
-                    <div class="scan-crosssell__icon"><?php echo bluu_mega_icon( $product['icon'], 20 ); // phpcs:ignore ?></div>
-                    <h3><?php echo esc_html( $product['name'] ); ?></h3>
-                    <p><?php echo esc_html( $product['desc'] ); ?></p>
-                    <span class="scan-next__learn">Learn more →</span>
-                </a>
             <?php endforeach; ?>
         </div>
     </div>
