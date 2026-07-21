@@ -1,4 +1,4 @@
-import type { Shop, Category, Product, DeliveryZone, OrderIntent, AnalyticsEvent } from "./index";
+import type { Shop, Category, Product, DeliveryZone, OrderIntent, AnalyticsEvent, ShopReview } from "./index";
 
 // supabase-js's generic plumbing structurally checks Row/Insert/Update against
 // Record<string, unknown> — a plain `interface` fails that check even when
@@ -40,6 +40,7 @@ export interface Database {
         | "paystack_customer_code"
         | "paystack_subscription_code"
         | "paystack_email_token"
+        | "directory_opt_in"
         | "active"
         | "created_at"
         | "updated_at"
@@ -78,6 +79,11 @@ export interface Database {
         AnalyticsEvent,
         "shop_id" | "event_type" | "session_id",
         "id" | "product_id" | "created_at"
+      >;
+      shop_reviews: TableDef<
+        ShopReview,
+        "shop_id" | "reviewer_name" | "rating",
+        "id" | "comment" | "hidden" | "created_at"
       >;
     };
     Views: Record<string, never>;

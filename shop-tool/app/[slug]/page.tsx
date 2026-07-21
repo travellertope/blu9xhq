@@ -6,8 +6,9 @@ import AnalyticsTracker from "@/components/analytics-tracker";
 import CartDrawer from "@/components/cart-drawer";
 import StorefrontContent from "@/components/storefront/storefront-content";
 import ShopHeader from "@/components/storefront/shop-header";
+import ReviewsSection from "@/components/storefront/reviews-section";
 import { shopThemeStyle, type ShopThemeId } from "@/lib/theme";
-import type { Category, DeliveryZone, Product, Shop } from "@/types";
+import type { Category, DeliveryZone, Product, Shop, ShopReview } from "@/types";
 
 async function getShopData(slug: string) {
   const supabase = createSupabaseServerClient();
@@ -16,7 +17,7 @@ async function getShopData(slug: string) {
 
   if (!shop) return null;
 
-  const [{ data: categories }, { data: products }, { data: deliveryZones }] = await Promise.all([
+  const [{ data: categories }, { data: products }, { data: deliveryZones }, { data: reviews }] = await Promise.all([
     supabase.from("categories").select("*").eq("shop_id", shop.id).order("sort_order"),
     supabase
       .from("products")
@@ -25,6 +26,12 @@ async function getShopData(slug: string) {
       .eq("active", true)
       .order("sort_order"),
     supabase.from("delivery_zones").select("*").eq("shop_id", shop.id).order("sort_order"),
+    supabase
+      .from("shop_reviews")
+      .select("*")
+      .eq("shop_id", shop.id)
+      .eq("hidden", false)
+      .order("created_at", { ascending: false }),
   ]);
 
   return {
@@ -32,6 +39,7 @@ async function getShopData(slug: string) {
     categories: (categories ?? []) as Category[],
     products: (products ?? []) as Product[],
     deliveryZones: (deliveryZones ?? []) as DeliveryZone[],
+    reviews: (reviews ?? []) as ShopReview[],
   };
 }
 
@@ -48,7 +56,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
   const data = await getShopData(params.slug);
   if (!data) notFound();
 
-  const { shop, categories, products, deliveryZones } = data;
+  const { shop, categories, products, deliveryZones, reviews } = data;
   const themeId = (shop.theme_id as ShopThemeId) || "minimal";
 
   return (
@@ -68,6 +76,7 @@ export default async function StorefrontPage({ params }: { params: { slug: strin
           currency={shop.currency}
           themeId={themeId}
         />
+        <ReviewsSection shopId={shop.id} initialReviews={reviews} />
       </main>
 
       <CartDrawer

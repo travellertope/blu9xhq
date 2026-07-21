@@ -74,6 +74,7 @@ const updateSchema = z.object({
     .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/, "Enter a valid domain")
     .nullable()
     .optional(),
+  directory_opt_in: z.boolean().optional(),
 });
 
 export async function PATCH(request: Request) {
