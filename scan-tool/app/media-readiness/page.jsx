@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // ─── Brand Tokens ───
 const T = {
@@ -36,6 +36,15 @@ const Field = ({ label, value, onChange, placeholder, type = "text" }) => (
 
 // ═══════════════════════════════════════════
 // QUESTIONS — each contributes to PR, Wiki, or both
+//
+// Six categories from the original quiz — coverage, depth, independence,
+// awards, references, history — are objectively checkable via search, so
+// they're verified by AI (lib/mediaReadiness) instead of self-reported here.
+// The rest (story, assets, presskit, releases, network, social, budget) stay
+// self-report since they're internal/subjective and nothing external can
+// confirm them. Removing a question here does not change PR_MAX/WIKI_MAX —
+// each verified category still contributes its original max point value,
+// just sourced from search evidence instead of an answer.
 // ═══════════════════════════════════════════
 const questions = [
   {
@@ -63,36 +72,6 @@ const questions = [
       { text: "Yes, a complete set ready to share", pr: 10, wiki: 2 },
       { text: "We have some but they need work", pr: 5, wiki: 1 },
       { text: "Not really", pr: 1, wiki: 0 },
-    ],
-  },
-  {
-    id: "coverage", label: "Have you been covered in independent media publications?",
-    note: "This is the single most important factor — for PR momentum and for Wikipedia notability. Wikipedia requires \"significant coverage in reliable, independent, secondary sources.\"",
-    options: [
-      { text: "Yes — 5 or more in-depth articles in established publications", pr: 12, wiki: 25 },
-      { text: "A few times — 2 to 4 articles in known publications", pr: 8, wiki: 15 },
-      { text: "Once or twice, or only in niche/local outlets", pr: 4, wiki: 6 },
-      { text: "Never, or only in our own channels", pr: 0, wiki: 0 },
-    ],
-  },
-  {
-    id: "depth", label: "How substantial is that media coverage?",
-    note: "A name dropped in a round-up is not the same as a dedicated profile or feature. Wikipedia values in-depth treatment; PR value correlates with depth too.",
-    options: [
-      { text: "In-depth profiles, features, or investigative pieces", pr: 8, wiki: 15 },
-      { text: "A mix of features and shorter mentions", pr: 5, wiki: 9 },
-      { text: "Mostly brief mentions, listings, or event round-ups", pr: 2, wiki: 3 },
-      { text: "Not sure / haven't checked", pr: 1, wiki: 1 },
-    ],
-  },
-  {
-    id: "independence", label: "Were those publications independent of you?",
-    note: "Paid advertorials, sponsored content, and press release pickups don't count toward Wikipedia notability — and they carry less weight in PR credibility too.",
-    options: [
-      { text: "Yes — all or nearly all were independent editorial coverage", pr: 8, wiki: 15 },
-      { text: "Some were independent, some were paid or sponsored", pr: 5, wiki: 8 },
-      { text: "Most were paid, sponsored, or press release pickups", pr: 2, wiki: 2 },
-      { text: "Not sure what counts as independent", pr: 1, wiki: 1 },
     ],
   },
   {
@@ -130,36 +109,6 @@ const questions = [
       { text: "Strong and consistent — we post regularly with good engagement", pr: 10, wiki: 4 },
       { text: "Active but inconsistent", pr: 5, wiki: 2 },
       { text: "Minimal or inactive", pr: 1, wiki: 0 },
-    ],
-  },
-  {
-    id: "awards", label: "Have you received notable awards, honours, or formal recognition?",
-    note: "Awards from established institutions strengthen your notability case and give media a reason to cover you.",
-    options: [
-      { text: "Yes — multiple recognised awards or honours", pr: 6, wiki: 12 },
-      { text: "One or two meaningful recognitions", pr: 4, wiki: 7 },
-      { text: "Nominated but haven't won", pr: 2, wiki: 4 },
-      { text: "None yet", pr: 0, wiki: 0 },
-    ],
-  },
-  {
-    id: "references", label: "Can you find references to yourself in third-party databases, directories, or archives?",
-    note: "Industry databases, library catalogues, academic citations, IMDb, Discogs, or government registries — these are independent evidence of notability.",
-    options: [
-      { text: "Yes — present in multiple third-party databases", pr: 4, wiki: 10 },
-      { text: "A few entries in one or two places", pr: 2, wiki: 5 },
-      { text: "Only on our own website and social profiles", pr: 1, wiki: 1 },
-      { text: "Haven't looked", pr: 0, wiki: 0 },
-    ],
-  },
-  {
-    id: "history", label: "How long have you or your organisation been active?",
-    note: "Longevity builds credibility. A sustained track record strengthens both your PR positioning and Wikipedia's assessment of lasting notability.",
-    options: [
-      { text: "10+ years", pr: 4, wiki: 10 },
-      { text: "5–10 years", pr: 3, wiki: 7 },
-      { text: "2–5 years", pr: 2, wiki: 4 },
-      { text: "Under 2 years", pr: 1, wiki: 1 },
     ],
   },
   {
@@ -240,16 +189,97 @@ const ScoreCircle = ({ score, label, color, size = 120 }) => (
 // MAIN APP
 // ═══════════════════════════════════════════
 export default function App() {
-  const [step, setStep] = useState(-1); // -1=intro, 0..13=questions, 14=email, 15=results
+  const totalQ = questions.length;
+  // -2=intro, -1=identity capture, 0..totalQ-1=questions,
+  // totalQ=analyzing (AI verification), totalQ+1=email, totalQ+2=results
+  const STEP_ANALYZING = totalQ;
+  const STEP_EMAIL = totalQ + 1;
+  const STEP_RESULTS = totalQ + 2;
+
+  const [step, setStep] = useState(-2);
   const [answers, setAnswers] = useState({});
   const [sel, setSel] = useState(null);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [org, setOrg] = useState("");
+  const [website, setWebsite] = useState("");
   const [anim, setAnim] = useState(true);
-  const totalQ = questions.length;
+  const [identityError, setIdentityError] = useState("");
+  const [identitySubmitting, setIdentitySubmitting] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [verificationStatus, setVerificationStatus] = useState("idle"); // idle | processing | complete | failed
+  const [verificationStep, setVerificationStep] = useState("");
+  const [findings, setFindings] = useState(null);
+  const pollRef = useRef(null);
 
   const go = (n) => { setAnim(false); setTimeout(() => { setStep(n); setSel(null); setAnim(true); }, 220); };
+
+  async function submitIdentity() {
+    setIdentityError("");
+    if (!name.trim()) { setIdentityError("Please enter your name."); return; }
+    setIdentitySubmitting(true);
+    try {
+      const res = await fetch("/api/media-readiness/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), brand: (org.trim() || name.trim()), website: website.trim() || undefined }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.id) throw new Error(data.message || "Couldn't start research");
+      setVerificationId(data.id);
+      setVerificationStatus("processing");
+      go(0);
+    } catch (err) {
+      setIdentityError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIdentitySubmitting(false);
+    }
+  }
+
+  // Poll the AI verification job while it runs in the background — kicked
+  // off from the identity screen, so by the time the person finishes the
+  // self-report questions it's usually already done.
+  useEffect(() => {
+    if (!verificationId || verificationStatus === "complete" || verificationStatus === "failed") return;
+
+    async function poll() {
+      try {
+        const res = await fetch(`/api/media-readiness/verify/${verificationId}`);
+        const data = await res.json().catch(() => ({}));
+        setVerificationStep(data.currentStep || "");
+        if (data.status === "complete" || data.status === "failed") {
+          setVerificationStatus(data.status);
+          if (data.findings) {
+            setFindings(data.findings);
+            setAnswers(prev => ({
+              ...prev,
+              coverage_pr: data.findings.coverage.pr, coverage_wiki: data.findings.coverage.wiki,
+              depth_pr: data.findings.depth.pr, depth_wiki: data.findings.depth.wiki,
+              independence_pr: data.findings.independence.pr, independence_wiki: data.findings.independence.wiki,
+              awards_pr: data.findings.awards.pr, awards_wiki: data.findings.awards.wiki,
+              references_pr: data.findings.references.pr, references_wiki: data.findings.references.wiki,
+              history_pr: data.findings.history.pr, history_wiki: data.findings.history.wiki,
+            }));
+          }
+        }
+      } catch {
+        // transient network hiccup — the interval just tries again
+      }
+    }
+
+    poll();
+    pollRef.current = setInterval(poll, 1500);
+    return () => clearInterval(pollRef.current);
+  }, [verificationId, verificationStatus]);
+
+  // Once the person reaches the analyzing step, move on automatically the
+  // moment verification finishes (whether it succeeded or fell back).
+  useEffect(() => {
+    if (step === STEP_ANALYZING && (verificationStatus === "complete" || verificationStatus === "failed")) {
+      const t = setTimeout(() => go(STEP_EMAIL), 600);
+      return () => clearTimeout(t);
+    }
+  }, [step, verificationStatus]);
 
   const pick = (qId, prVal, wikiVal, idx) => {
     setSel(idx);
@@ -297,7 +327,7 @@ export default function App() {
   const fade = { opacity: anim ? 1 : 0, transform: anim ? "translateY(0)" : "translateY(10px)", transition: "all 0.22s ease" };
 
   // ─── INTRO ───
-  if (step === -1) return (
+  if (step === -2) return (
     <div style={wrap}>
       <div style={{ maxWidth: 560, width: "100%", textAlign: "center" }}>
         <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 24 }}>
@@ -314,14 +344,39 @@ export default function App() {
           How Ready Is Your Brand<br />for the Press — and Wikipedia?
         </h1>
         <p style={{ fontFamily: F.sans, fontSize: 15, color: T.mid, lineHeight: 1.65, maxWidth: 460, margin: "0 auto 12px" }}>
-          One assessment. Two scores. Answer 14 questions and get a personalised report showing your PR readiness and whether you qualify for a Wikipedia article.
+          One assessment. Two scores. Answer a few questions — while we independently verify your media coverage — and get a personalised report showing your PR readiness and whether you qualify for a Wikipedia article.
         </p>
         <p style={{ fontFamily: F.sans, fontSize: 14, color: T.mid, lineHeight: 1.6, maxWidth: 440, margin: "0 auto 40px" }}>
           Most brands overestimate their media readiness. Most Wikipedia articles get rejected. This tool tells you exactly where you stand — and what to fix.
         </p>
-        <Btn onClick={() => go(0)} style={{ maxWidth: 340, margin: "0 auto" }}>Start the Assessment →</Btn>
+        <Btn onClick={() => go(-1)} style={{ maxWidth: 340, margin: "0 auto" }}>Start the Assessment →</Btn>
         <p style={{ fontFamily: F.sans, fontSize: 12, color: T.light, marginTop: 32 }}>Takes about 3 minutes. Full report sent to your email.</p>
         <p style={{ fontFamily: F.sans, fontSize: 11, color: T.light, marginTop: 20 }}>Built by <span style={{ color: T.terra, fontWeight: 600 }}>The Moveee</span> — media infrastructure for African brands.</p>
+      </div>
+    </div>
+  );
+
+  // ─── IDENTITY CAPTURE ───
+  // Collected first (not at the email gate) so we can kick off AI-verified
+  // search for media coverage/awards/references/history in the background
+  // while the person answers the self-report questions below.
+  if (step === -1) return (
+    <div style={wrap}>
+      <div style={{ maxWidth: 480, width: "100%", ...fade }}>
+        <Eyebrow>Before we start</Eyebrow>
+        <h2 style={{ fontFamily: F.serif, fontSize: "clamp(24px, 4vw, 32px)", fontWeight: 400, color: T.dark, lineHeight: 1.25, margin: "0 0 12px" }}>Who are we assessing?</h2>
+        <p style={{ fontFamily: F.sans, fontSize: 15, color: T.mid, lineHeight: 1.6, margin: "0 0 32px" }}>
+          We'll use this to independently search for real media coverage, awards, and references — instead of just taking your word for it.
+        </p>
+        <Field label="Your name" value={name} onChange={setName} placeholder="e.g. Adaeze Okafor" />
+        <Field label="Organisation / brand (if applicable)" value={org} onChange={setOrg} placeholder="e.g. Omenka Gallery" />
+        <Field label="Website or social handle (optional)" value={website} onChange={setWebsite} placeholder="e.g. omenkagallery.com or @omenkagallery" />
+        {identityError && (
+          <p style={{ fontFamily: F.sans, fontSize: 13, color: T.red, margin: "0 0 16px" }}>{identityError}</p>
+        )}
+        <Btn onClick={submitIdentity} disabled={identitySubmitting || !name.trim()}>
+          {identitySubmitting ? "Starting…" : "Continue →"}
+        </Btn>
       </div>
     </div>
   );
@@ -357,8 +412,25 @@ export default function App() {
     );
   }
 
+  // ─── ANALYZING (AI verification) ───
+  if (step === STEP_ANALYZING) return (
+    <div style={wrap}>
+      <div style={{ maxWidth: 440, width: "100%", textAlign: "center", ...fade }}>
+        <div style={{ width: 56, height: 56, border: `3px solid ${T.border}`, borderTopColor: T.terra, borderRadius: "50%", margin: "0 auto 28px", animation: "mrq-spin 0.9s linear infinite" }} />
+        <style>{"@keyframes mrq-spin { to { transform: rotate(360deg); } }"}</style>
+        <Eyebrow>Verifying</Eyebrow>
+        <h2 style={{ fontFamily: F.serif, fontSize: "clamp(20px, 4vw, 26px)", fontWeight: 400, color: T.dark, lineHeight: 1.3, margin: "0 0 12px" }}>
+          Searching for your media footprint…
+        </h2>
+        <p style={{ fontFamily: F.sans, fontSize: 14, color: T.mid, lineHeight: 1.6 }}>
+          {verificationStep || "Checking independent coverage, awards, and references…"}
+        </p>
+      </div>
+    </div>
+  );
+
   // ─── EMAIL GATE ───
-  if (step === totalQ) return (
+  if (step === STEP_EMAIL) return (
     <div style={wrap}>
       <div style={{ maxWidth: 480, width: "100%", ...fade }}>
         <Eyebrow>Your report is ready</Eyebrow>
@@ -366,10 +438,8 @@ export default function App() {
         <p style={{ fontFamily: F.sans, fontSize: 15, color: T.mid, lineHeight: 1.6, margin: "0 0 36px" }}>
           Get your full PR Readiness Score, Wikipedia qualification verdict, category breakdown, and personalised action plan.
         </p>
-        <Field label="Your name" value={name} onChange={setName} placeholder="e.g. Adaeze Okafor" />
-        <Field label="Organisation (optional)" value={org} onChange={setOrg} placeholder="e.g. Omenka Gallery" />
         <Field label="Email address" value={email} onChange={setEmail} placeholder="you@company.com" type="email" />
-        <Btn onClick={() => go(totalQ + 1)} disabled={!email.includes("@") || !name.trim()}>See My Results →</Btn>
+        <Btn onClick={() => go(STEP_RESULTS)} disabled={!email.includes("@")}>See My Results →</Btn>
         <p style={{ fontFamily: F.sans, fontSize: 11, color: T.light, marginTop: 16, textAlign: "center" }}>We'll email a copy of your report. No spam, ever.</p>
       </div>
     </div>
@@ -399,6 +469,30 @@ export default function App() {
             <span style={{ fontFamily: F.sans, fontSize: 12, fontWeight: 600, color: wiki.color, background: wiki.bg, padding: "6px 14px" }}>{wiki.icon} Wiki: {wiki.label}</span>
           </div>
         </div>
+
+        {/* AI Verification */}
+        {findings && (
+          <div style={{ background: T.white, border: `1px solid ${T.border}`, borderLeft: `4px solid ${T.terra}`, padding: "24px 28px", marginBottom: 40 }}>
+            <h4 style={{ fontFamily: F.sans, fontSize: 12, fontWeight: 600, color: T.terra, letterSpacing: "0.1em", textTransform: "uppercase", margin: "0 0 10px" }}>
+              Verified via AI Search{verificationStatus === "failed" ? " (partial)" : ""}
+            </h4>
+            <p style={{ fontFamily: F.sans, fontSize: 14, color: T.dark, lineHeight: 1.6, margin: "0 0 14px" }}>{findings.coverage.summary}</p>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 8 }}>
+              <li style={{ fontFamily: F.sans, fontSize: 13, color: T.mid }}>
+                <b style={{ color: T.dark }}>Media coverage found: </b>
+                {findings.coverage.sources.length ? findings.coverage.sources.join(", ") : "None found"}
+              </li>
+              <li style={{ fontFamily: F.sans, fontSize: 13, color: T.mid }}>
+                <b style={{ color: T.dark }}>Awards found: </b>
+                {findings.awards.sources.length ? findings.awards.sources.join(", ") : "None found"}
+              </li>
+              <li style={{ fontFamily: F.sans, fontSize: 13, color: T.mid }}>
+                <b style={{ color: T.dark }}>Third-party references found: </b>
+                {findings.references.sources.length ? findings.references.sources.join(", ") : "None found"}
+              </li>
+            </ul>
+          </div>
+        )}
 
         {/* PR Summary */}
         <div style={{ background: T.white, border: `1px solid ${T.border}`, borderLeft: `4px solid ${pr.color}`, padding: "24px 28px", marginBottom: 12 }}>
@@ -483,7 +577,11 @@ export default function App() {
 
         {/* Retake */}
         <div style={{ textAlign: "center" }}>
-          <button onClick={() => { setStep(-1); setAnswers({}); setEmail(""); setName(""); setOrg(""); }}
+          <button onClick={() => {
+            setStep(-2); setAnswers({}); setEmail(""); setName(""); setOrg(""); setWebsite("");
+            setIdentityError(""); setVerificationId(null); setVerificationStatus("idle");
+            setVerificationStep(""); setFindings(null);
+          }}
             style={{ fontFamily: F.sans, fontSize: 12, color: T.light, background: "none", border: "none", cursor: "pointer", letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Retake the Assessment →
           </button>
