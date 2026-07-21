@@ -182,7 +182,7 @@ get_header();
                 <h1 class="sync-hero__headline">
                     <?php echo esc_html( $headline_1 ); ?>
                     <?php if ( $headline_2 ) : ?>
-                        <br><span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
+                        <span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
                     <?php endif; ?>
                 </h1>
                 <?php if ( $hero_subhead ) : ?>
