@@ -9,12 +9,10 @@ export function UpgradeButton({
   plan,
   provider,
   label,
-  recommended,
 }: {
   plan: "starter" | "pro";
   provider: "stripe" | "paystack";
   label: string;
-  recommended?: boolean;
 }) {
   const [loading, setLoading] = useState(false);
   const endpoint = provider === "paystack" ? "/api/billing/paystack/checkout" : "/api/billing/checkout";
@@ -37,20 +35,9 @@ export function UpgradeButton({
   }
 
   return (
-    <div className="space-y-1">
-      {recommended && (
-        <p className="text-[11px] font-semibold text-blue uppercase tracking-wide">Recommended for you</p>
-      )}
-      <Button
-        size="sm"
-        variant={recommended ? "default" : "outline"}
-        className="w-full"
-        onClick={handleUpgrade}
-        disabled={loading}
-      >
-        {loading ? "Redirecting…" : label}
-      </Button>
-    </div>
+    <Button size="sm" className="w-full" onClick={handleUpgrade} disabled={loading}>
+      {loading ? "Redirecting…" : label}
+    </Button>
   );
 }
 

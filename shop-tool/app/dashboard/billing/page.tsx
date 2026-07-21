@@ -33,11 +33,11 @@ export default async function BillingPage() {
 
   // Vercel adds this header at the edge on every request — no geolocation
   // API or extra dependency needed. Our Paystack plans are NGN-only, so
-  // Nigeria is the one country where Paystack is actually the better
-  // default; everywhere else, Stripe/USD is. Both stay available either
-  // way — this only decides which is first and solid vs. outline.
+  // only visitors physically in Nigeria right now see it; everyone else
+  // (including Nigerians currently abroad — the IP reflects where they are,
+  // not their nationality) sees Stripe/USD. Only one is ever shown.
   const country = headers().get("x-vercel-ip-country");
-  const paystackRecommended = country === "NG";
+  const showPaystack = country === "NG";
 
   return (
     <div className="space-y-5">
@@ -76,10 +76,19 @@ export default async function BillingPage() {
             <div key={plan} className="bg-white border border-line rounded-lg p-4 space-y-3">
               <div className="flex items-baseline justify-between">
                 <h2 className="font-bold text-ink">{usd.name}</h2>
-                <p className="text-sm text-ink-soft text-right">
-                  <span className="text-lg font-extrabold text-ink">${usd.monthlyUsd}</span>/mo
-                  <br />
-                  <span className="text-xs">or ₦{ngn.monthlyNgn.toLocaleString()}/mo</span>
+                <p className="text-sm text-ink-soft">
+                  {showPaystack ? (
+                    <>
+                      <span className="text-lg font-extrabold text-ink">
+                        ₦{ngn.monthlyNgn.toLocaleString()}
+                      </span>
+                      /mo
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-lg font-extrabold text-ink">${usd.monthlyUsd}</span>/mo
+                    </>
+                  )}
                 </p>
               </div>
               <ul className="text-sm text-ink-soft space-y-1">
@@ -95,40 +104,14 @@ export default async function BillingPage() {
                 ) : (
                   <ManageBillingButton />
                 )
+              ) : showPaystack ? (
+                <UpgradeButton
+                  plan={plan}
+                  provider="paystack"
+                  label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
+                />
               ) : (
-                // Stacked, not side by side — "Pay with card" and "Pay with
-                // Paystack" need to read as two different payment methods,
-                // not just two numbers, and a 2-column row gets tight on
-                // narrow phones once both labels are legible. Order and
-                // solid-vs-outline follow the geolocation-based default;
-                // both are always clickable either way.
-                <div className="space-y-2">
-                  {paystackRecommended ? (
-                    <>
-                      <UpgradeButton
-                        plan={plan}
-                        provider="paystack"
-                        label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
-                        recommended
-                      />
-                      <UpgradeButton plan={plan} provider="stripe" label={`Pay with card — $${usd.monthlyUsd}/mo`} />
-                    </>
-                  ) : (
-                    <>
-                      <UpgradeButton
-                        plan={plan}
-                        provider="stripe"
-                        label={`Pay with card — $${usd.monthlyUsd}/mo`}
-                        recommended
-                      />
-                      <UpgradeButton
-                        plan={plan}
-                        provider="paystack"
-                        label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
-                      />
-                    </>
-                  )}
-                </div>
+                <UpgradeButton plan={plan} provider="stripe" label={`Pay with card — $${usd.monthlyUsd}/mo`} />
               )}
             </div>
           );
