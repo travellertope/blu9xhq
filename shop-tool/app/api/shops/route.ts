@@ -59,7 +59,7 @@ const updateSchema = z.object({
   tiktok_url: z.string().trim().url().nullable().optional(),
   facebook_url: z.string().trim().url().nullable().optional(),
   x_url: z.string().trim().url().nullable().optional(),
-  theme_id: z.enum(["minimal", "boutique", "market"]).optional(),
+  theme_id: z.enum(["minimal", "list", "boutique", "market", "gallery", "studio"]).optional(),
   accent_color: z
     .string()
     .trim()

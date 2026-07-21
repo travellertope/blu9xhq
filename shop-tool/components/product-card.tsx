@@ -7,8 +7,10 @@ import { trackEvent } from "@/lib/analytics";
 import { formatMoney } from "@/lib/whatsapp";
 import { Button } from "@/components/ui/button";
 import BuyNowButton from "@/components/buy-now-button";
-import type { ShopThemeId } from "@/lib/theme";
+import { COMPACT_ACTION_THEMES, type ShopThemeId } from "@/lib/theme";
 import type { Product } from "@/types";
+
+type GridThemeId = Exclude<ShopThemeId, "list">;
 
 function CartIcon({ className }: { className?: string }) {
   return (
@@ -27,22 +29,28 @@ function CartIcon({ className }: { className?: string }) {
   );
 }
 
-const CARD_CLASSES: Record<ShopThemeId, string> = {
+const CARD_CLASSES: Record<GridThemeId, string> = {
   minimal: "bg-white border border-line rounded-site overflow-hidden",
   boutique: "bg-white rounded-2xl overflow-hidden shadow-sm",
   market: "bg-white border border-line rounded-md overflow-hidden",
+  gallery: "", // no card box at all — just an image and a caption, gallery-wall style
+  studio: "bg-white border-2 border-ink rounded-none overflow-hidden",
 };
 
-const IMAGE_ASPECT: Record<ShopThemeId, string> = {
+const IMAGE_ASPECT: Record<GridThemeId, string> = {
   minimal: "aspect-square",
   boutique: "aspect-[4/5]",
   market: "aspect-square",
+  gallery: "aspect-[3/4] rounded-md overflow-hidden",
+  studio: "aspect-square",
 };
 
-const BODY_PADDING: Record<ShopThemeId, string> = {
+const BODY_PADDING: Record<GridThemeId, string> = {
   minimal: "p-3",
   boutique: "p-4",
   market: "p-2",
+  gallery: "pt-3", // no side/bottom padding — there's no box to pad
+  studio: "p-3",
 };
 
 export default function ProductCard({
@@ -60,7 +68,7 @@ export default function ProductCard({
   shopName: string;
   whatsappNumber: string;
   currency: string;
-  themeId: ShopThemeId;
+  themeId: GridThemeId;
 }) {
   const { add } = useCart(shopSlug);
   const hasVariants = product.variants.length > 0;
@@ -92,7 +100,11 @@ export default function ProductCard({
       </Link>
       <div className={BODY_PADDING[themeId]}>
         <Link href={`/${shopSlug}/product/${product.id}`}>
-          <h3 className={`text-sm font-semibold text-ink truncate ${themeId === "market" ? "text-xs" : ""}`}>
+          <h3
+            className={`text-sm font-semibold text-ink truncate ${
+              themeId === "market" ? "text-xs" : themeId === "studio" ? "text-xs uppercase tracking-wide" : ""
+            }`}
+          >
             {product.name}
           </h3>
         </Link>
@@ -107,15 +119,21 @@ export default function ProductCard({
         {hasVariants ? (
           <Button asChild size="sm" variant="outline" className="w-full mt-2">
             <Link href={`/${shopSlug}/product/${product.id}`}>
+              {/* Market's columns are narrow enough that "View options" needs
+                  shortening too — verified against real card widths down to
+                  320px; every other theme's full-width variant button has
+                  room for the long form. */}
               {themeId === "market" ? "Options" : "View options"}
             </Link>
           </Button>
         ) : (
           <div className="flex gap-1.5 mt-2">
-            {themeId === "market" ? (
-              // "Add to cart" text + a compact WhatsApp button can't both fit at
-              // Market's 3-5 column grid widths — icon-only keeps it from
-              // overflowing the card.
+            {COMPACT_ACTION_THEMES.includes(themeId) ? (
+              // "Add to cart" text + a compact WhatsApp button don't reliably
+              // fit side by side at these themes' grid widths — measured
+              // against real card widths down to a 320px viewport, not
+              // guessed. Boutique is the one grid wide enough to keep the
+              // full label.
               <button
                 type="button"
                 onClick={handleQuickAdd}

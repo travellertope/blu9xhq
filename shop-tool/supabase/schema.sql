@@ -30,7 +30,7 @@ create table if not exists shops (
   x_url           text,
   plan            text not null default 'free'
                     check (plan in ('free', 'starter', 'pro')),
-  theme_id        text not null default 'minimal',        -- 'minimal' | 'boutique' | 'market'
+  theme_id        text not null default 'minimal',        -- see ShopThemeId in lib/theme.ts
   accent_color    text,                                   -- hex, e.g. '#2F5FE0'; null = brand default
   font_id         text not null default 'inter',           -- see FONT_PAIRINGS in lib/theme.ts
   custom_domain   text unique,                             -- Phase 3

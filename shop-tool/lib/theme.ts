@@ -1,12 +1,22 @@
 import type { CSSProperties } from "react";
 
-export type ShopThemeId = "minimal" | "boutique" | "market";
+export type ShopThemeId = "minimal" | "boutique" | "market" | "gallery" | "studio" | "list";
 
 export const THEMES: { id: ShopThemeId; label: string; description: string }[] = [
   { id: "minimal", label: "Minimal", description: "Clean grid, lets your photos do the talking." },
+  { id: "list", label: "List", description: "A scannable menu of thumbnail, name, and price — great for a short catalog or food menu." },
   { id: "boutique", label: "Boutique", description: "Spacious and editorial — great for a curated catalog." },
   { id: "market", label: "Market", description: "Dense grid built for browsing lots of items fast." },
+  { id: "gallery", label: "Gallery", description: "Full-bleed photos and generous whitespace — a lookbook, not a catalog." },
+  { id: "studio", label: "Studio", description: "Monochrome and graphic, with your accent color as the only pop." },
 ];
+
+/** Themes whose grid is narrow enough (at some real breakpoint) that a
+ *  full "Add to cart" label next to Buy Now doesn't reliably fit — measured
+ *  against real card widths down to a 320px viewport, not guessed. Boutique
+ *  is the one grid theme wide enough to keep the full label; List isn't a
+ *  grid at all but uses the same compact actions for row-height consistency. */
+export const COMPACT_ACTION_THEMES: ShopThemeId[] = ["minimal", "market", "gallery", "studio", "list"];
 
 export const FONT_PAIRINGS: Record<string, { label: string; heading: string; body: string }> = {
   inter: { label: "Modern (default)", heading: "var(--font-manrope)", body: "var(--font-inter)" },
