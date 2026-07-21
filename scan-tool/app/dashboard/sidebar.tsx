@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/dashboard", label: "Overview", icon: IconHome },
+  { href: "/dashboard/scan", label: "New scan", icon: IconPlusCircle },
   { href: "/dashboard/scans", label: "Scan history", icon: IconList },
   { href: "/dashboard/trends", label: "Trends", icon: IconTrendingUp },
   { href: "/dashboard/competitors", label: "Competitors", icon: IconUsers },
@@ -18,8 +19,10 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <nav className="flex flex-col gap-0.5 px-3">
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-        const isActive =
-          href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+        // Exact match or a real sub-path — plain startsWith would make
+        // "/dashboard/scan" (New scan) falsely match "/dashboard/scans"
+        // (Scan history), since one is a string prefix of the other.
+        const isActive = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={href}
@@ -57,6 +60,15 @@ export function IconHome({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 11.5 12 4l9 7.5M5 10v9.5a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10" />
+    </svg>
+  );
+}
+
+export function IconPlusCircle({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8M8 12h8" />
     </svg>
   );
 }
