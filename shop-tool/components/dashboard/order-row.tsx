@@ -24,6 +24,13 @@ export default function OrderRow({
   const [status, setStatus] = useState(order.status);
   const [updating, setUpdating] = useState(false);
 
+  // Defensive against a missing/undefined delivery_fee (e.g. the column
+  // migration hasn't been run against this database yet) — subtotal + a
+  // non-finite value is NaN, which formatMoney would otherwise render as
+  // literally "NaN" in the total shown to the owner.
+  const deliveryFee = Number.isFinite(order.delivery_fee) ? order.delivery_fee : 0;
+  const subtotal = Number.isFinite(order.subtotal) ? order.subtotal : 0;
+
   async function handleStatusChange(next: OrderIntentStatus) {
     setStatus(next);
     onStatusChange?.(order.id, next);
@@ -72,12 +79,10 @@ export default function OrderRow({
 
       {order.delivery_zone_name && (
         <p className="text-xs text-ink-soft">
-          Delivery: {order.delivery_zone_name} — {formatMoney(order.delivery_fee, currency)}
+          Delivery: {order.delivery_zone_name} — {formatMoney(deliveryFee, currency)}
         </p>
       )}
-      <p className="text-sm font-semibold text-ink">
-        Total: {formatMoney(order.subtotal + order.delivery_fee, currency)}
-      </p>
+      <p className="text-sm font-semibold text-ink">Total: {formatMoney(subtotal + deliveryFee, currency)}</p>
     </div>
   );
 }
