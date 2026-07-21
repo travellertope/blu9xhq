@@ -184,10 +184,10 @@ get_header();
                     <?php if ( $headline_2 ) : ?>
                         <span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
                     <?php endif; ?>
+                    <?php if ( $hero_subhead ) : ?>
+                        <?php echo esc_html( $hero_subhead ); ?>
+                    <?php endif; ?>
                 </h1>
-                <?php if ( $hero_subhead ) : ?>
-                    <p class="sync-hero__subhead"><?php echo esc_html( $hero_subhead ); ?></p>
-                <?php endif; ?>
                 <p class="sync-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
                 <div class="sync-hero__actions">
                     <a href="<?php echo esc_url( $sync_app_url . '/register' ); ?>" class="btn-primary">
