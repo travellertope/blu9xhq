@@ -100,6 +100,66 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
+<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
+<section class="pm-section" aria-label="Full BluuAudit report preview">
+    <div class="container">
+        <div class="pm-head animate-on-scroll">
+            <div class="pm-head__left">
+                <span class="pm-tag" style="background:#FBF1DE; color:#8f6414;"><span class="pm-dot" style="background:#C68A1E;"></span>BluuAudit</span>
+                <h2>The full report, not just the score.</h2>
+                <p>Every scan breaks down into the three pillars above, plus exactly where you stand next to competitors already publishing in your space.</p>
+            </div>
+            <span class="pm-url">audit.bluuhq.com/report/8841</span>
+        </div>
+        <div class="pm-frame animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">audit.bluuhq.com/report/8841</div>
+            </div>
+            <div class="audit-mockup">
+                <div class="audit-mockup__top">
+                    <span class="audit-mockup__domain">northbridgeco.com</span>
+                    <span class="audit-mockup__badge">Sample report</span>
+                </div>
+                <div class="audit-mockup-score-row">
+                    <span class="audit-mockup-score-big">78</span>
+                    <span class="audit-mockup-score-tag">/ 100 overall</span>
+                </div>
+                <div class="audit-mockup-pillars">
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">AI discoverability</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:64%; background:#C68A1E;"></span></span>
+                        <span class="audit-mockup-pillar__val">64</span>
+                    </div>
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">Site &amp; tech health</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:91%; background:#1F9D55;"></span></span>
+                        <span class="audit-mockup-pillar__val">91</span>
+                    </div>
+                    <div class="audit-mockup-pillar">
+                        <span class="audit-mockup-pillar__name">Competitor intel</span>
+                        <span class="audit-mockup-pillar__track"><span class="audit-mockup-pillar__fill" style="width:79%; background:#1F9D55;"></span></span>
+                        <span class="audit-mockup-pillar__val">79</span>
+                    </div>
+                </div>
+                <div class="audit-mockup-grid">
+                    <div class="audit-mockup-verdict">
+                        <b>Biggest opportunity</b>
+                        AI discoverability — most AI tools can't find this brand yet. Structured data and clearer product pages would close most of the gap.
+                    </div>
+                    <div class="audit-mockup-competitors">
+                        <div class="audit-mockup-competitors__title">Competitor intel</div>
+                        <div class="audit-mockup-competitor-row"><span>You</span><span>64</span></div>
+                        <div class="audit-mockup-competitor-row"><span>Competitor A</span><span>82</span></div>
+                        <div class="audit-mockup-competitor-row"><span>Competitor B</span><span>58</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
 <!-- ═════════════════════ WHAT THE SCAN CHECKS ════════════════════ -->
 <section class="scan-checks" aria-label="What the scan checks">
     <div class="container">

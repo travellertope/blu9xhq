@@ -168,6 +168,91 @@ get_header();
     </div>
 </section>
 
+<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
+<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuCRM dashboard preview', 'bluu-interactive' ); ?>">
+    <div class="container">
+        <div class="pm-head animate-on-scroll">
+            <div class="pm-head__left">
+                <span class="pm-tag" style="background:var(--md-accent-container); color:var(--md-accent-dark);"><span class="pm-dot" style="background:var(--md-accent);"></span>BluuCRM</span>
+                <h2><?php esc_html_e( "The dashboard your agency actually opens every morning.", 'bluu-interactive' ); ?></h2>
+                <p><?php esc_html_e( 'Outstanding balances, renewals, overdue invoices, and at-risk clients — one view instead of five tabs.', 'bluu-interactive' ); ?></p>
+            </div>
+            <span class="pm-url">crm.bluuhq.com/admin</span>
+        </div>
+        <div class="pm-frame animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">crm.bluuhq.com/admin</div>
+            </div>
+            <div class="crm-mockup">
+                <div class="crm-mockup__sidebar">
+                    <div class="crm-mockup__logo">Bluu<b>CRM</b></div>
+                    <div class="crm-mockup__nav">
+                        <span class="is-active">Dashboard</span>
+                        <span>Clients</span>
+                        <span>Subscriptions</span>
+                        <span>Invoices</span>
+                        <span>Files</span>
+                        <span>Tickets</span>
+                        <span>Follow-ups</span>
+                        <span>Affiliates</span>
+                        <span>Settings</span>
+                    </div>
+                </div>
+                <div class="crm-mockup__main">
+                    <div class="crm-mockup__title">Dashboard</div>
+                    <div class="crm-mockup__sub">Welcome back, Adaeze</div>
+                    <div class="crm-mockup-stats">
+                        <div class="crm-mockup-stat">
+                            <div class="crm-mockup-stat__label">Outstanding</div>
+                            <div class="crm-mockup-stat__value">$4,280</div>
+                            <div class="crm-mockup-stat__sub">6 invoices</div>
+                        </div>
+                        <div class="crm-mockup-stat">
+                            <div class="crm-mockup-stat__label">Overdue</div>
+                            <div class="crm-mockup-stat__value">$860</div>
+                            <div class="crm-mockup-stat__sub">2 invoices</div>
+                        </div>
+                        <div class="crm-mockup-stat">
+                            <div class="crm-mockup-stat__label">Active clients</div>
+                            <div class="crm-mockup-stat__value">37</div>
+                            <div class="crm-mockup-stat__sub">+3 this month</div>
+                        </div>
+                        <div class="crm-mockup-stat">
+                            <div class="crm-mockup-stat__label">Est. MRR</div>
+                            <div class="crm-mockup-stat__value">$9,140</div>
+                            <div class="crm-mockup-stat__sub">across all plans</div>
+                        </div>
+                    </div>
+                    <div class="crm-mockup-cards">
+                        <div class="crm-mockup-card">
+                            <div class="crm-mockup-card__title">Upcoming renewals</div>
+                            <div class="crm-mockup-card__row"><span>Kaine Digital — Pro plan</span><span class="crm-mockup-card__row-sub">in 3 days</span></div>
+                            <div class="crm-mockup-card__row"><span>Verve Studio — Starter</span><span class="crm-mockup-card__row-sub">in 5 days</span></div>
+                            <div class="crm-mockup-card__row"><span>Lumo Retail — Agency</span><span class="crm-mockup-card__row-sub">in 6 days</span></div>
+                        </div>
+                        <div class="crm-mockup-card">
+                            <div class="crm-mockup-card__title">Overdue invoices</div>
+                            <div class="crm-mockup-card__row"><span>Northbridge Co.</span><span class="crm-mockup-pill crm-mockup-pill--red">4 days</span></div>
+                            <div class="crm-mockup-card__row"><span>Fenwick &amp; Ade</span><span class="crm-mockup-pill crm-mockup-pill--red">9 days</span></div>
+                        </div>
+                        <div class="crm-mockup-card">
+                            <div class="crm-mockup-card__title">At-risk clients</div>
+                            <div class="crm-mockup-card__row"><span>Orin Consulting</span><span class="crm-mockup-pill crm-mockup-pill--amber">Low usage</span></div>
+                            <div class="crm-mockup-card__row"><span>Baxter Media</span><span class="crm-mockup-pill crm-mockup-pill--amber">No login 21d</span></div>
+                        </div>
+                        <div class="crm-mockup-card">
+                            <div class="crm-mockup-card__title">Recent activity</div>
+                            <div class="crm-mockup-card__row"><span>Invoice #204 paid</span><span class="crm-mockup-card__row-sub">2h ago</span></div>
+                            <div class="crm-mockup-card__row"><span>New client: Halden Labs</span><span class="crm-mockup-card__row-sub">Yesterday</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ── Features ─────────────────────────────────────────────────────────────── -->
 <section class="crm-features" aria-label="<?php esc_attr_e( 'What\'s inside BluuCRM', 'bluu-interactive' ); ?>">
     <div class="container">

@@ -107,6 +107,63 @@ get_header();
     </div>
 </section>
 
+<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
+<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuShop storefront preview', 'bluu-interactive' ); ?>">
+    <div class="container">
+        <div class="pm-head animate-on-scroll">
+            <div class="pm-head__left">
+                <span class="pm-tag" style="background:#E6F4EC; color:#157a41;"><span class="pm-dot" style="background:#1F9D55;"></span>BluuShop</span>
+                <h2><?php esc_html_e( 'The storefront, exactly as your customer sees it.', 'bluu-interactive' ); ?></h2>
+                <p><?php esc_html_e( "Your branding, your products, and a checkout that hands the order straight to WhatsApp — no cart abandonment on a payment page you don't control.", 'bluu-interactive' ); ?></p>
+            </div>
+            <span class="pm-url">shop.bluuhq.com/lumo-retail</span>
+        </div>
+        <div class="pm-frame animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">shop.bluuhq.com/lumo-retail</div>
+            </div>
+            <div class="shop-mockup">
+                <div class="shop-mockup__cover">
+                    <div class="shop-mockup__avatar">LR</div>
+                </div>
+                <div class="shop-mockup__head">
+                    <div>
+                        <div class="shop-mockup__name">Lumo Retail</div>
+                        <div class="shop-mockup__tagline">Home fragrance &amp; candles, made in Lagos</div>
+                    </div>
+                    <span class="shop-mockup__cart">🛒 Cart · 3</span>
+                </div>
+                <div class="shop-mockup__grid">
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#E6F4EC;">🕯️</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Amber Musk Candle</div><div class="shop-mockup-product__price">₦12,500</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#EAF0FF;">🧴</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Room Mist — Bergamot</div><div class="shop-mockup-product__price">₦7,000</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#FBF1DE;">🪔</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Diffuser Set</div><div class="shop-mockup-product__price">₦18,000</div></div>
+                    </div>
+                    <div class="shop-mockup-product">
+                        <div class="shop-mockup-product__img" style="background:#E3F3F4;">🎁</div>
+                        <div class="shop-mockup-product__body"><div class="shop-mockup-product__name">Gift Bundle</div><div class="shop-mockup-product__price">₦25,000</div></div>
+                    </div>
+                </div>
+                <div class="shop-mockup__checkout">
+                    <div>
+                        <div class="shop-mockup__checkout-text">Checkout on WhatsApp</div>
+                        <div class="shop-mockup__checkout-sub">No login. Order opens as a message to Lumo Retail.</div>
+                    </div>
+                    <span class="shop-mockup__checkout-btn">Send order →</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ── How it works ─────────────────────────────────────────────────────────── -->
 <section class="shop-steps" aria-label="<?php esc_attr_e( 'How BluuShop works', 'bluu-interactive' ); ?>">
     <div class="container">

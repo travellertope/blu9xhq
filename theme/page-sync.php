@@ -147,6 +147,67 @@ get_header();
     </div>
 </section>
 
+<!-- ── Product mockup ───────────────────────────────────────────────────────── -->
+<section class="pm-section" aria-label="<?php esc_attr_e( 'BluuSync transfer preview', 'bluu-interactive' ); ?>">
+    <div class="container">
+        <div class="pm-head animate-on-scroll">
+            <div class="pm-head__left">
+                <span class="pm-tag" style="background:#E3F3F4; color:#0a5c63;"><span class="pm-dot" style="background:#0E7C86;"></span>BluuSync</span>
+                <h2><?php esc_html_e( 'Watch a multi-gigabyte transfer move without your laptop in the loop.', 'bluu-interactive' ); ?></h2>
+                <p><?php esc_html_e( 'Pick a source and destination, start the transfer, and check back for progress — the file never touches your machine.', 'bluu-interactive' ); ?></p>
+            </div>
+            <span class="pm-url">sync.bluuhq.com/transfer</span>
+        </div>
+        <div class="pm-frame animate-on-scroll">
+            <div class="pm-chrome">
+                <div class="pm-chrome__dots"><span></span><span></span><span></span></div>
+                <div class="pm-chrome__bar">sync.bluuhq.com/transfer/new</div>
+            </div>
+            <div class="sync-mockup">
+                <div class="sync-mockup-endpoints">
+                    <div class="sync-mockup-endpoint">
+                        <div class="sync-mockup-endpoint__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/></svg></div>
+                        <div><div class="sync-mockup-endpoint__label">Source</div><div class="sync-mockup-endpoint__value">SFTP — media-archive.co</div></div>
+                    </div>
+                    <div class="sync-mockup-arrow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+                    <div class="sync-mockup-endpoint">
+                        <div class="sync-mockup-endpoint__icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg></div>
+                        <div><div class="sync-mockup-endpoint__label">Destination</div><div class="sync-mockup-endpoint__value">Google Drive — Backups</div></div>
+                    </div>
+                </div>
+                <div class="sync-mockup-progress-card">
+                    <div class="sync-mockup-progress-top">
+                        <span class="sync-mockup-progress-name">quarterly-backup-2026-q2.tar.gz</span>
+                        <span class="sync-mockup-progress-pct">63%</span>
+                    </div>
+                    <div class="sync-mockup-progress-track"><div class="sync-mockup-progress-fill"></div></div>
+                    <div class="sync-mockup-progress-meta">
+                        <span>3.8 GB of 6.1 GB</span>
+                        <span>~4 min remaining</span>
+                    </div>
+                </div>
+                <div class="sync-mockup-history">
+                    <div class="sync-mockup-history-row">
+                        <span class="sync-mockup-history-name">product-photos-master.zip</span>
+                        <span class="sync-mockup-history-size">2.1 GB</span>
+                        <span class="sync-mockup-badge sync-mockup-badge--done">Done</span>
+                    </div>
+                    <div class="sync-mockup-history-row">
+                        <span class="sync-mockup-history-name">client-videos-raw.mov</span>
+                        <span class="sync-mockup-history-size">9.4 GB</span>
+                        <span class="sync-mockup-badge sync-mockup-badge--done">Done</span>
+                    </div>
+                    <div class="sync-mockup-history-row">
+                        <span class="sync-mockup-history-name">site-db-export.sql.gz</span>
+                        <span class="sync-mockup-history-size">640 MB</span>
+                        <span class="sync-mockup-badge sync-mockup-badge--done">Done</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- ── Features ─────────────────────────────────────────────────────────────── -->
 <section class="sync-features" aria-label="<?php esc_attr_e( 'What\'s inside BluuSync', 'bluu-interactive' ); ?>">
     <div class="container">
