@@ -31,12 +31,16 @@ export default async function BillingPage() {
   const shop = await getMyShop();
   if (!shop) return null;
 
-  // Vercel adds this header at the edge on every request — no geolocation
-  // API or extra dependency needed. Our Paystack plans are NGN-only, so
-  // only visitors physically in Nigeria right now see it; everyone else
-  // (including Nigerians currently abroad — the IP reflects where they are,
-  // not their nationality) sees Stripe/USD. Only one is ever shown.
-  const country = headers().get("x-vercel-ip-country");
+  // Vercel adds x-vercel-ip-country at the edge on every request — no
+  // geolocation API or extra dependency needed. But if this domain is
+  // proxied through Cloudflare (orange-cloud DNS) rather than DNS-only,
+  // Vercel sees Cloudflare's edge IP hit it, not the visitor's — so that
+  // header would reflect wherever Cloudflare's request came from, not the
+  // actual visitor. cf-ipcountry is Cloudflare's own geolocation of the
+  // original client connection, done before any proxying, so it stays
+  // correct in that case — prefer it when present.
+  const requestHeaders = headers();
+  const country = requestHeaders.get("cf-ipcountry") || requestHeaders.get("x-vercel-ip-country");
   const showPaystack = country === "NG";
 
   return (
