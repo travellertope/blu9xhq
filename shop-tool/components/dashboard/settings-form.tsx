@@ -29,6 +29,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
   const [themeId, setThemeId] = useState<ShopThemeId>((shop.theme_id as ShopThemeId) || "minimal");
   const [accentColor, setAccentColor] = useState(shop.accent_color ?? "");
   const [fontId, setFontId] = useState(shop.font_id || "inter");
+  const [customDomain, setCustomDomain] = useState(shop.custom_domain ?? "");
   const [logoUrl, setLogoUrl] = useState(shop.logo_url);
   const [coverUrl, setCoverUrl] = useState(shop.cover_url);
   const [uploadingKind, setUploadingKind] = useState<"logo" | "cover" | null>(null);
@@ -80,6 +81,7 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
           theme_id: themeId,
           accent_color: accentColor || null,
           font_id: fontId,
+          custom_domain: limits.customDomain ? customDomain.trim().toLowerCase() || null : undefined,
         }),
       });
       if (!res.ok) {
@@ -318,6 +320,23 @@ export default function SettingsForm({ shop }: { shop: Shop }) {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="space-y-1.5 pt-2 border-t border-line">
+          <Label>
+            Custom domain {!limits.customDomain && <span className="text-blue">— Starter+</span>}
+          </Label>
+          <Input
+            value={customDomain}
+            onChange={(e) => setCustomDomain(e.target.value)}
+            disabled={!limits.customDomain}
+            placeholder="shop.yourbusiness.com"
+            className="disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+          <p className="text-xs text-ink-soft">
+            Point your domain&apos;s CNAME at shop.bluuhq.com, then enter it here. It can take a few
+            minutes to start working after saving.
+          </p>
         </div>
 
         <Button type="submit" className="w-full" size="lg" disabled={saving}>

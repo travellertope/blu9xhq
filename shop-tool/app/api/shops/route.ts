@@ -67,6 +67,13 @@ const updateSchema = z.object({
     .nullable()
     .optional(),
   font_id: z.enum(["inter", "playfair", "space-grotesk", "manrope"]).optional(),
+  custom_domain: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/, "Enter a valid domain")
+    .nullable()
+    .optional(),
 });
 
 export async function PATCH(request: Request) {
@@ -95,6 +102,9 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Custom font pairings need a Starter or Pro plan." }, { status: 402 });
     }
   }
+  if (!limits.customDomain && updates.custom_domain) {
+    return NextResponse.json({ error: "Custom domains need a Starter or Pro plan." }, { status: 402 });
+  }
 
   const supabase = createSupabaseServerClient();
   // RLS ("owner can manage own shop") scopes this to the caller's shop already;
@@ -102,7 +112,9 @@ export async function PATCH(request: Request) {
   const { error } = await supabase.from("shops").update(updates).eq("owner_user_id", shop.owner_user_id);
 
   if (error) {
-    return NextResponse.json({ error: "Couldn't save changes" }, { status: 400 });
+    const message =
+      error.code === "23505" ? "That domain is already connected to another shop." : "Couldn't save changes";
+    return NextResponse.json({ error: message }, { status: 400 });
   }
   return NextResponse.json({ ok: true });
 }
