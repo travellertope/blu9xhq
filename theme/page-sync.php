@@ -19,6 +19,30 @@ $hero_body     = ( function_exists( 'get_field' ) ? get_field( 'sync_hero_body' 
 $cta_headline = ( function_exists( 'get_field' ) ? get_field( 'sync_cta_headline' ) : '' ) ?: 'Ready to stop babysitting file transfers?';
 $cta_body     = ( function_exists( 'get_field' ) ? get_field( 'sync_cta_body' )     : '' ) ?: '';
 
+// ── How It Works ─────────────────────────────────────────────────────────────
+$steps = array(
+    array(
+        'icon'  => '<path d="M12 3v12"/><polyline points="7 8 12 3 17 8"/><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>',
+        'title' => 'Pick a source',
+        'body'  => 'Enter FTP/SFTP credentials and a file path, or connect Google Drive or OneDrive — for the file you want to copy FROM.',
+    ),
+    array(
+        'icon'  => '<path d="M12 21V9"/><polyline points="7 16 12 21 17 16"/><path d="M21 9V5a2 2 0 00-2-2H5a2 2 0 00-2 2v4"/>',
+        'title' => 'Pick a destination',
+        'body'  => 'Enter FTP/SFTP credentials and a path, or connect Google Drive, OneDrive, or a YouTube channel — for where the file goes TO.',
+    ),
+    array(
+        'icon'  => '<polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>',
+        'title' => 'We stream directly',
+        'body'  => 'Our server opens a read-stream from source and a write-stream to destination. Data flows through our servers — never touches your machine.',
+    ),
+    array(
+        'icon'  => '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>',
+        'title' => 'Done. File transferred.',
+        'body'  => 'Get a confirmation with total bytes transferred. It keeps running even if you close the tab, and Pro emails you the moment it\'s done.',
+    ),
+);
+
 // ── Features ─────────────────────────────────────────────────────────────────
 $features = array(
     array(
@@ -108,20 +132,36 @@ $plans = array(
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
     array(
-        'q' => 'Do the files ever touch my computer?',
-        'a' => 'No. Your browser only starts the job — BluuSync\'s servers stream the data directly from the source to the destination.',
+        'q' => 'How does server-to-server transfer work?',
+        'a' => 'We open a read-stream from your source FTP server and a write-stream to your destination server. Data flows directly between them through our relay — it never touches your local machine or browser. Think of it as piping data through a tunnel.',
     ),
     array(
-        'q' => 'What happens to my FTP/SFTP credentials?',
-        'a' => 'By default they\'re used for the active session only and are never written to disk or logged.',
+        'q' => 'What\'s the maximum file size?',
+        'a' => 'On the Free plan, up to 800MB. Pro supports 10GB, and Enterprise has no limit. The underlying streaming architecture can handle files of any size — it streams data directly from source to destination instead of buffering it in memory, so memory usage stays constant regardless of file size.',
     ),
     array(
-        'q' => 'What\'s the largest file I can transfer?',
-        'a' => '800MB on the Free plan, 10GB on Pro, and unlimited file size on Enterprise.',
+        'q' => 'Are my FTP credentials safe?',
+        'a' => 'Yes. Credentials are sent over HTTPS and never written to logs. By default they\'re used only for the active transfer and then discarded. If you choose to save a server, or retry a past transfer from your History, those credentials are stored encrypted at rest and only ever decrypted for your own authenticated requests.',
     ),
     array(
-        'q' => 'Can I trigger transfers from my own scripts?',
-        'a' => 'Yes — Enterprise includes API access so you can kick off transfers programmatically from your own pipelines.',
+        'q' => 'Can I transfer between different hosting providers?',
+        'a' => 'Absolutely. That\'s the primary use case. Moving files from GoDaddy to SiteGround, from Bluehost to DigitalOcean, between any two servers with FTP access — it all works the same way.',
+    ),
+    array(
+        'q' => 'What protocols are supported?',
+        'a' => 'FTP and SFTP (SSH File Transfer Protocol) are both available on every plan — SFTP isn\'t gated by tier, and we recommend it whenever your servers support it. Pro also unlocks Google Drive and OneDrive as a source or destination alongside FTP/SFTP servers, plus uploading straight to YouTube as a destination.',
+    ),
+    array(
+        'q' => 'What happens if the transfer is interrupted?',
+        'a' => 'The transfer runs on our servers independently of your browser, so closing the tab or losing your own connection doesn\'t stop it. If the connection to either server drops mid-transfer, we automatically retry with backoff — resuming from the last byte that landed for FTP/SFTP (Google Drive, OneDrive, and YouTube re-upload from scratch on retry, since none of them support that kind of resume). If every retry fails, you can re-run it with one click from your Transfer History without re-entering credentials.',
+    ),
+    array(
+        'q' => 'How does the YouTube upload work?',
+        'a' => 'Connect your YouTube channel in Saved Servers, then pick it as a transfer destination — it\'s upload-only, since there\'s no supported way to pull a video\'s raw file back off YouTube via their API. Your file uploads as a private video titled from its file name; you finish it up (thumbnail, description, visibility) in YouTube Studio. To keep things within YouTube\'s API limits, uploads are capped at 2 per day per account.',
+    ),
+    array(
+        'q' => 'Do I need to keep the browser tab open?',
+        'a' => 'No. Once you initiate the transfer, the stream runs on our server independently. You can close the tab and check the destination server later. Pro plans get an email as soon as it finishes, whether it succeeds or fails.',
     ),
 );
 
@@ -143,6 +183,26 @@ get_header();
                 </a>
             </div>
             <p class="sync-hero__note"><?php esc_html_e( 'Free forever for occasional transfers. No credit card required.', 'bluu-interactive' ); ?></p>
+        </div>
+    </div>
+</section>
+
+<!-- ── How It Works ─────────────────────────────────────────────────────────── -->
+<section class="sync-steps" aria-label="<?php esc_attr_e( 'How BluuSync works', 'bluu-interactive' ); ?>">
+    <div class="container">
+        <div class="sync-steps__header animate-on-scroll">
+            <h2 class="sync-steps__headline"><?php esc_html_e( 'How it works.', 'bluu-interactive' ); ?></h2>
+            <p class="sync-steps__subhead"><?php esc_html_e( 'Four steps. No software to install. No files on your local machine.', 'bluu-interactive' ); ?></p>
+        </div>
+        <div class="sync-steps__grid">
+            <?php foreach ( $steps as $i => $step ) : ?>
+                <div class="sync-step animate-on-scroll">
+                    <div class="sync-step__icon"><?php echo bluu_mega_icon( $step['icon'], 20 ); // phpcs:ignore ?></div>
+                    <div class="sync-step__label"><?php echo esc_html( sprintf( /* translators: %d: step number */ __( 'STEP %d', 'bluu-interactive' ), $i + 1 ) ); ?></div>
+                    <h3 class="sync-step__title"><?php echo esc_html( $step['title'] ); ?></h3>
+                    <p class="sync-step__body"><?php echo esc_html( $step['body'] ); ?></p>
+                </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </section>
