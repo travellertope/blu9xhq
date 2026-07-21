@@ -37,14 +37,14 @@ export default async function DashboardOverview() {
       ) : (
         <div className="bg-white rounded-xl border border-gray-200 p-6 text-center text-gray-500 text-sm">
           No scans yet.{" "}
-          <Link href="/?scan=1" className="text-blue-600 font-medium">
+          <Link href="/dashboard/scan" className="text-blue-600 font-medium">
             Run your first scan →
           </Link>
         </div>
       )}
 
       <Link
-        href="/?scan=1"
+        href="/dashboard/scan"
         className="inline-block rounded-lg bg-blue-600 text-white px-5 py-2.5 text-sm font-semibold"
       >
         Run a new scan
