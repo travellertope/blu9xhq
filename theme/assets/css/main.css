@@ -6592,9 +6592,11 @@ a.contact-info__value:hover {
     margin-bottom: 18px;
 }
 .scan-hero__headline {
-    font-size: 46px;
+    font-size: clamp(2.25rem, 4.4vw, 3.75rem);
     font-weight: 800;
-    line-height: 1.12;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
 }
 .scan-hero__headline--accent {
     color: var(--md-accent);

@@ -25,11 +25,11 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
             <!-- Left: copy + form -->
             <div class="scan-hero__content">
                 <h1 class="scan-hero__headline">
-                    Most brands are invisible to AI search. <span class="scan-hero__headline--accent">See your AI visibility score — free.</span>
+                    Show up <span class="scan-hero__headline--accent">everywhere</span> your customers are already looking.
                 </h1>
 
                 <p class="scan-hero__sub">
-                    Run a quick scan to check your AI discoverability, site health, and content gaps — then get a clear next step, whether that's content, your site, or both.
+                    Search, AI tools, social, email — Bluu builds your site, runs your content, and keeps your brand visible across every channel that matters.
                 </p>
 
                 <form class="scan-hero__form" action="<?php echo esc_url( $scan_url ); ?>" method="GET">
