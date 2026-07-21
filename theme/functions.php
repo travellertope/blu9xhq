@@ -962,7 +962,7 @@ function bluu_softwares_data() {
         ),
         array(
             'name'   => 'BluuAudit',
-            'url'    => 'https://audit.bluuhq.com',
+            'url'    => '/audit',
             'badge'  => 'Intelligence',
             'desc'   => 'Brand and competitor audit intelligence — surface gaps and opportunities in seconds.',
             'icon'   => 'target',
@@ -970,7 +970,7 @@ function bluu_softwares_data() {
         ),
         array(
             'name'   => 'BluuShop',
-            'url'    => 'https://shop.bluuhq.com',
+            'url'    => '/shop',
             'badge'  => 'Free Storefront',
             'desc'   => 'A free online shop, run from your phone — customers checkout straight to WhatsApp.',
             'icon'   => 'shopping-bag',
