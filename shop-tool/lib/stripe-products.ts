@@ -8,8 +8,8 @@ export interface PlanDetails {
 
 export const PLAN_DETAILS: Record<ShopPlan, PlanDetails> = {
   free: { name: "Free", monthlyUsd: 0, annualUsd: 0 },
-  starter: { name: "Starter", monthlyUsd: 15, annualUsd: 150 },
-  pro: { name: "Pro", monthlyUsd: 39, annualUsd: 390 },
+  starter: { name: "Starter", monthlyUsd: 5, annualUsd: 50 },
+  pro: { name: "Pro", monthlyUsd: 15, annualUsd: 150 },
 };
 
 const PLAN_ENV_KEY: Partial<Record<ShopPlan, string>> = {

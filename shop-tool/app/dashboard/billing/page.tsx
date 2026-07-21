@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { getMyShop } from "@/lib/auth";
 import { PLAN_DETAILS } from "@/lib/stripe-products";
 import { PAYSTACK_PLAN_DETAILS } from "@/lib/paystack-products";
@@ -29,6 +30,14 @@ const TIERS: { plan: "starter" | "pro"; features: string[] }[] = [
 export default async function BillingPage() {
   const shop = await getMyShop();
   if (!shop) return null;
+
+  // Vercel adds this header at the edge on every request — no geolocation
+  // API or extra dependency needed. Our Paystack plans are NGN-only, so
+  // Nigeria is the one country where Paystack is actually the better
+  // default; everywhere else, Stripe/USD is. Both stay available either
+  // way — this only decides which is first and solid vs. outline.
+  const country = headers().get("x-vercel-ip-country");
+  const paystackRecommended = country === "NG";
 
   return (
     <div className="space-y-5">
@@ -90,14 +99,35 @@ export default async function BillingPage() {
                 // Stacked, not side by side — "Pay with card" and "Pay with
                 // Paystack" need to read as two different payment methods,
                 // not just two numbers, and a 2-column row gets tight on
-                // narrow phones once both labels are legible.
+                // narrow phones once both labels are legible. Order and
+                // solid-vs-outline follow the geolocation-based default;
+                // both are always clickable either way.
                 <div className="space-y-2">
-                  <UpgradeButton plan={plan} provider="stripe" label={`Pay with card — $${usd.monthlyUsd}/mo`} />
-                  <UpgradeButton
-                    plan={plan}
-                    provider="paystack"
-                    label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
-                  />
+                  {paystackRecommended ? (
+                    <>
+                      <UpgradeButton
+                        plan={plan}
+                        provider="paystack"
+                        label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
+                        recommended
+                      />
+                      <UpgradeButton plan={plan} provider="stripe" label={`Pay with card — $${usd.monthlyUsd}/mo`} />
+                    </>
+                  ) : (
+                    <>
+                      <UpgradeButton
+                        plan={plan}
+                        provider="stripe"
+                        label={`Pay with card — $${usd.monthlyUsd}/mo`}
+                        recommended
+                      />
+                      <UpgradeButton
+                        plan={plan}
+                        provider="paystack"
+                        label={`Pay with Paystack — ₦${ngn.monthlyNgn.toLocaleString()}/mo`}
+                      />
+                    </>
+                  )}
                 </div>
               )}
             </div>
