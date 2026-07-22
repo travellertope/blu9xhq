@@ -232,6 +232,15 @@ function bluu_text( $str ) {
     ) );
 }
 
+// ── Geo currency (mirrors crm/app/admin/billing/page.tsx's country check) ──────
+// Cloudflare's cf-ipcountry reflects the visitor's real connection even behind
+// a reverse proxy; x-vercel-ip-country is the fallback for anything fronted by
+// Vercel instead. Nigeria gets Naira/Paystack pricing; everyone else sees USD.
+function bluu_is_nigeria_visitor() {
+    $country = $_SERVER['HTTP_CF_IPCOUNTRY'] ?? $_SERVER['HTTP_X_VERCEL_IP_COUNTRY'] ?? '';
+    return 'NG' === $country;
+}
+
 // Contact form AJAX handler is registered in inc/contact-submissions.php
 
 // ── Custom Excerpt Length ──────────────────────────────────────────────────────

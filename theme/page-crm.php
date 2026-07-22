@@ -63,12 +63,16 @@ $features = array(
 );
 
 // ── Pricing ──────────────────────────────────────────────────────────────────
+// Kept in sync by hand with the actual source of truth: crm/lib/stripe-products.ts
+// (USD) and crm/lib/paystack-products.ts (NGN, monthly-only — annual billing is
+// a Stripe/USD-only option there too, so NGN plans below have no annual price).
 $plans = array(
     array(
         'name'        => 'Free',
         'description' => 'Try BluuCRM with up to 5 clients',
         'monthly'     => 0,
         'annual'      => 0,
+        'monthly_ngn' => 0,
         'featured'    => false,
         'cta_text'    => 'Create free account',
         'highlights'  => array(
@@ -82,8 +86,9 @@ $plans = array(
     array(
         'name'        => 'Starter',
         'description' => 'For freelancers and small agencies',
-        'monthly'     => 29,
-        'annual'      => 290,
+        'monthly'     => 14,
+        'annual'      => 140,
+        'monthly_ngn' => 8900,
         'featured'    => false,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -97,8 +102,9 @@ $plans = array(
     array(
         'name'        => 'Pro',
         'description' => 'AI insights + more team members',
-        'monthly'     => 79,
-        'annual'      => 790,
+        'monthly'     => 39,
+        'annual'      => 390,
+        'monthly_ngn' => 24900,
         'featured'    => false,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -112,8 +118,9 @@ $plans = array(
     array(
         'name'        => 'Agency',
         'description' => 'Unlimited clients, team, and storage',
-        'monthly'     => 199,
-        'annual'      => 1990,
+        'monthly'     => 99,
+        'annual'      => 990,
+        'monthly_ngn' => 62900,
         'featured'    => true,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -125,6 +132,8 @@ $plans = array(
         ),
     ),
 );
+
+$crm_show_ngn = bluu_is_nigeria_visitor();
 
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
@@ -319,14 +328,23 @@ get_header();
                 <div class="<?php echo esc_attr( $card_class ); ?>">
                     <h3 class="crm-plan__name"><?php echo esc_html( $plan['name'] ); ?></h3>
                     <p class="crm-plan__desc"><?php echo esc_html( $plan['description'] ); ?></p>
-                    <div class="crm-plan__price">
-                        <span class="crm-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
-                        <?php if ( $plan['monthly'] > 0 ) : ?>
-                            <span class="crm-plan__price-period">/mo</span>
+                    <?php if ( $crm_show_ngn ) : ?>
+                        <div class="crm-plan__price">
+                            <span class="crm-plan__price-amount">&#8358;<?php echo esc_html( number_format( $plan['monthly_ngn'] ) ); ?></span>
+                            <?php if ( $plan['monthly_ngn'] > 0 ) : ?>
+                                <span class="crm-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="crm-plan__price">
+                            <span class="crm-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
+                            <?php if ( $plan['monthly'] > 0 ) : ?>
+                                <span class="crm-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ( $plan['annual'] > 0 ) : ?>
+                            <p class="crm-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
                         <?php endif; ?>
-                    </div>
-                    <?php if ( $plan['annual'] > 0 ) : ?>
-                        <p class="crm-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
                     <?php endif; ?>
                     <ul class="crm-plan__features">
                         <?php foreach ( $plan['highlights'] as $item ) : ?>
