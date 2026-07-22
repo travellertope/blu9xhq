@@ -5,10 +5,10 @@
  * Marketing page for BluuShop, assigned to /shop. Every CTA points at the
  * app (shop.bluuhq.com) — this page is the pitch, not the product.
  *
- * Scoped to what's actually shipped (Phase 1): free mobile-first
- * storefront + WhatsApp checkout. No pricing table — Starter/Pro tiers
- * and billing aren't built yet (see SHOP-TOOL-PLAN.md Phase 3), so this
- * page doesn't advertise plans nobody can actually sign up for.
+ * Pricing kept in sync by hand with the actual source of truth:
+ * shop-tool/lib/stripe-products.ts (USD), shop-tool/lib/paystack-products.ts
+ * (NGN, monthly-only), and shop-tool/lib/planLimits.ts (feature gating per
+ * plan).
  *
  * @package bluu-interactive
  */
@@ -65,11 +65,62 @@ $features = array(
     ),
 );
 
+// ── Pricing ──────────────────────────────────────────────────────────────────
+$plans = array(
+    array(
+        'name'        => 'Free',
+        'description' => 'Get started selling today',
+        'monthly'     => 0,
+        'annual'      => 0,
+        'monthly_ngn' => 0,
+        'featured'    => false,
+        'cta_text'    => 'Create your free shop',
+        'highlights'  => array(
+            'Up to 20 products',
+            'Minimal & List themes',
+            'WhatsApp checkout',
+            'Order tracking dashboard',
+        ),
+    ),
+    array(
+        'name'        => 'Starter',
+        'description' => 'For shops that want their own look',
+        'monthly'     => 5,
+        'annual'      => 50,
+        'monthly_ngn' => 2900,
+        'featured'    => false,
+        'cta_text'    => 'Get started',
+        'highlights'  => array(
+            'Up to 100 products',
+            'All 6 storefront themes',
+            'Custom accent color & fonts',
+            'Custom domain',
+            'Remove "Powered by BluuShop"',
+        ),
+    ),
+    array(
+        'name'        => 'Pro',
+        'description' => 'Unlimited products, same great look',
+        'monthly'     => 15,
+        'annual'      => 150,
+        'monthly_ngn' => 8900,
+        'featured'    => true,
+        'cta_text'    => 'Get started',
+        'highlights'  => array(
+            'Unlimited products',
+            'Everything in Starter',
+            'Priority support',
+        ),
+    ),
+);
+
+$shop_show_ngn = bluu_is_nigeria_visitor();
+
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
     array(
         'q' => 'Is BluuShop really free?',
-        'a' => 'Yes — free for up to 20 products, no credit card required to sign up.',
+        'a' => 'The Free plan stays free forever for up to 20 products — no credit card required to sign up. Starter and Pro exist for shops that outgrow that: more products, all 6 storefront themes, a custom domain, and your own branding instead of "Powered by BluuShop."',
     ),
     array(
         'q' => 'Do I need a website already?',
@@ -229,6 +280,55 @@ get_header();
                     <div class="shop-feature-card__icon"><?php echo bluu_mega_icon( $f['icon'], 20 ); // phpcs:ignore ?></div>
                     <h3 class="shop-feature-card__title"><?php echo esc_html( $f['title'] ); ?></h3>
                     <p class="shop-feature-card__body"><?php echo esc_html( $f['body'] ); ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- ── Pricing ──────────────────────────────────────────────────────────────── -->
+<section class="shop-pricing" aria-label="<?php esc_attr_e( 'BluuShop pricing', 'bluu-interactive' ); ?>" id="pricing">
+    <div class="container">
+        <div class="shop-pricing__header animate-on-scroll">
+            <h2 class="shop-pricing__headline"><?php esc_html_e( 'Start free. Upgrade when you outgrow it.', 'bluu-interactive' ); ?></h2>
+        </div>
+        <div class="shop-pricing__grid">
+            <?php foreach ( $plans as $plan ) :
+                $card_class = 'shop-plan' . ( $plan['featured'] ? ' shop-plan--featured' : '' );
+            ?>
+                <div class="<?php echo esc_attr( $card_class ); ?>">
+                    <h3 class="shop-plan__name"><?php echo esc_html( $plan['name'] ); ?></h3>
+                    <p class="shop-plan__desc"><?php echo esc_html( $plan['description'] ); ?></p>
+                    <?php if ( $shop_show_ngn ) : ?>
+                        <div class="shop-plan__price">
+                            <span class="shop-plan__price-amount">&#8358;<?php echo esc_html( number_format( $plan['monthly_ngn'] ) ); ?></span>
+                            <?php if ( $plan['monthly_ngn'] > 0 ) : ?>
+                                <span class="shop-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="shop-plan__price">
+                            <span class="shop-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
+                            <?php if ( $plan['monthly'] > 0 ) : ?>
+                                <span class="shop-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ( $plan['annual'] > 0 ) : ?>
+                            <p class="shop-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <ul class="shop-plan__features">
+                        <?php foreach ( $plan['highlights'] as $item ) : ?>
+                            <li class="shop-plan__feature">
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                <?php echo esc_html( $item ); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>"
+                       class="<?php echo $plan['featured'] ? 'btn-primary' : 'btn-outline'; ?> shop-plan__cta">
+                        <?php echo esc_html( $plan['cta_text'] ); ?>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>

@@ -7468,6 +7468,99 @@ a.contact-info__value:hover {
     line-height: 1.6;
 }
 
+.shop-pricing {
+    padding-block: var(--space-9);
+}
+.shop-pricing__header {
+    text-align: center;
+    max-width: 600px;
+    margin-inline: auto;
+}
+.shop-pricing__headline {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-pricing__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+    align-items: stretch;
+}
+.shop-plan {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+}
+.shop-plan--featured {
+    border-color: var(--md-accent);
+    box-shadow: var(--shadow-2);
+}
+.shop-plan__name {
+    font-family: var(--font-family-heading);
+    font-weight: 800;
+    font-size: var(--font-size-xl);
+}
+.shop-plan__desc {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-1);
+    min-height: 2.6em;
+}
+.shop-plan__price {
+    margin-top: var(--space-4);
+}
+.shop-plan__price-amount {
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-plan__price-period {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+}
+.shop-plan__annual {
+    font-size: var(--font-size-xs);
+    color: var(--md-accent);
+    margin-top: var(--space-1);
+}
+.shop-plan__features {
+    margin-top: var(--space-5);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.shop-plan__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+}
+.shop-plan__feature svg {
+    color: var(--md-accent);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+.shop-plan__cta {
+    margin-top: var(--space-6);
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+@media (max-width: 900px) {
+    .shop-pricing__grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin-inline: auto;
+    }
+}
+
 .shop-faq {
     padding-block: var(--space-9);
 }
