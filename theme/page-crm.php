@@ -63,12 +63,16 @@ $features = array(
 );
 
 // ── Pricing ──────────────────────────────────────────────────────────────────
+// Kept in sync by hand with the actual source of truth: crm/lib/stripe-products.ts
+// (USD) and crm/lib/paystack-products.ts (NGN, monthly-only — annual billing is
+// a Stripe/USD-only option there too, so NGN plans below have no annual price).
 $plans = array(
     array(
         'name'        => 'Free',
         'description' => 'Try BluuCRM with up to 5 clients',
         'monthly'     => 0,
         'annual'      => 0,
+        'monthly_ngn' => 0,
         'featured'    => false,
         'cta_text'    => 'Create free account',
         'highlights'  => array(
@@ -82,8 +86,9 @@ $plans = array(
     array(
         'name'        => 'Starter',
         'description' => 'For freelancers and small agencies',
-        'monthly'     => 29,
-        'annual'      => 290,
+        'monthly'     => 14,
+        'annual'      => 140,
+        'monthly_ngn' => 8900,
         'featured'    => false,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -97,8 +102,9 @@ $plans = array(
     array(
         'name'        => 'Pro',
         'description' => 'AI insights + more team members',
-        'monthly'     => 79,
-        'annual'      => 790,
+        'monthly'     => 39,
+        'annual'      => 390,
+        'monthly_ngn' => 24900,
         'featured'    => false,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -112,8 +118,9 @@ $plans = array(
     array(
         'name'        => 'Agency',
         'description' => 'Unlimited clients, team, and storage',
-        'monthly'     => 199,
-        'annual'      => 1990,
+        'monthly'     => 99,
+        'annual'      => 990,
+        'monthly_ngn' => 62900,
         'featured'    => true,
         'cta_text'    => 'Get started',
         'highlights'  => array(
@@ -125,6 +132,8 @@ $plans = array(
         ),
     ),
 );
+
+$crm_show_ngn = bluu_is_nigeria_visitor();
 
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
@@ -151,19 +160,66 @@ get_header();
 
 <!-- ── CRM Hero ─────────────────────────────────────────────────────────────── -->
 <section class="crm-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuCRM overview', 'bluu-interactive' ); ?>">
-    <div class="container container--narrow">
-        <div class="crm-hero__inner animate-on-scroll">
-            <h1 class="crm-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
-            <p class="crm-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
-            <div class="crm-hero__actions">
-                <a href="<?php echo esc_url( $crm_app_url . '/signup' ); ?>" class="btn-primary">
-                    <?php esc_html_e( 'Create free account', 'bluu-interactive' ); ?>
-                </a>
-                <a href="<?php echo esc_url( $crm_app_url . '/admin-login' ); ?>" class="btn-outline">
-                    <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
-                </a>
+    <div class="container">
+        <div class="product-hero__grid">
+            <div class="crm-hero__inner animate-on-scroll">
+                <h1 class="crm-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+                <p class="crm-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+                <div class="crm-hero__actions">
+                    <a href="<?php echo esc_url( $crm_app_url . '/signup' ); ?>" class="btn-primary">
+                        <?php esc_html_e( 'Create free account', 'bluu-interactive' ); ?>
+                    </a>
+                    <a href="<?php echo esc_url( $crm_app_url . '/admin-login' ); ?>" class="btn-outline">
+                        <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
+                    </a>
+                </div>
+                <p class="crm-hero__note"><?php esc_html_e( 'Free forever for your first 5 clients. No credit card required.', 'bluu-interactive' ); ?></p>
             </div>
-            <p class="crm-hero__note"><?php esc_html_e( 'Free forever for your first 5 clients. No credit card required.', 'bluu-interactive' ); ?></p>
+
+            <div class="product-hero__illustration" aria-hidden="true">
+                <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M220 200 Q150 140 110 100" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 130 348 92" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q150 260 96 308" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 265 352 306" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+
+                    <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                    <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+
+                    <g transform="translate(220,200)">
+                        <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
+                        <circle cx="0" cy="0" r="15" fill="#2F5FE0"/>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                        <circle cx="110" cy="100" r="30" fill="#EAF0FF"/>
+                        <g transform="translate(110,100) scale(0.72) translate(-12,-12)" fill="none" stroke="#2F5FE0" stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
+                        <circle cx="348" cy="92" r="30" fill="#EAF0FF"/>
+                        <g transform="translate(348,92) scale(0.72) translate(-12,-12)" fill="none" stroke="#2F5FE0" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
+                        <circle cx="96" cy="308" r="30" fill="#EAF0FF"/>
+                        <g transform="translate(96,308) scale(0.72) translate(-12,-12)" fill="none" stroke="#2F5FE0" stroke-width="2">
+                            <path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z"/><path d="M9 7h6M9 11h6"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                        <circle cx="352" cy="306" r="30" fill="#EAF0FF"/>
+                        <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#2F5FE0" stroke-width="2">
+                            <rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
         </div>
     </div>
     <div class="container">
@@ -272,14 +328,23 @@ get_header();
                 <div class="<?php echo esc_attr( $card_class ); ?>">
                     <h3 class="crm-plan__name"><?php echo esc_html( $plan['name'] ); ?></h3>
                     <p class="crm-plan__desc"><?php echo esc_html( $plan['description'] ); ?></p>
-                    <div class="crm-plan__price">
-                        <span class="crm-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
-                        <?php if ( $plan['monthly'] > 0 ) : ?>
-                            <span class="crm-plan__price-period">/mo</span>
+                    <?php if ( $crm_show_ngn ) : ?>
+                        <div class="crm-plan__price">
+                            <span class="crm-plan__price-amount">&#8358;<?php echo esc_html( number_format( $plan['monthly_ngn'] ) ); ?></span>
+                            <?php if ( $plan['monthly_ngn'] > 0 ) : ?>
+                                <span class="crm-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="crm-plan__price">
+                            <span class="crm-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
+                            <?php if ( $plan['monthly'] > 0 ) : ?>
+                                <span class="crm-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ( $plan['annual'] > 0 ) : ?>
+                            <p class="crm-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
                         <?php endif; ?>
-                    </div>
-                    <?php if ( $plan['annual'] > 0 ) : ?>
-                        <p class="crm-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
                     <?php endif; ?>
                     <ul class="crm-plan__features">
                         <?php foreach ( $plan['highlights'] as $item ) : ?>

@@ -176,27 +176,60 @@ get_header();
 
 <!-- ── Sync Hero ────────────────────────────────────────────────────────────── -->
 <section class="sync-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuSync overview', 'bluu-interactive' ); ?>">
-    <div class="container container--narrow">
-        <div class="sync-hero__inner animate-on-scroll">
-            <h1 class="sync-hero__headline">
-                <?php echo esc_html( $headline_1 ); ?>
-                <?php if ( $headline_2 ) : ?>
-                    <br><span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
-                <?php endif; ?>
-            </h1>
-            <?php if ( $hero_subhead ) : ?>
-                <p class="sync-hero__subhead"><?php echo esc_html( $hero_subhead ); ?></p>
-            <?php endif; ?>
-            <p class="sync-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
-            <div class="sync-hero__actions">
-                <a href="<?php echo esc_url( $sync_app_url . '/register' ); ?>" class="btn-primary">
-                    <?php esc_html_e( 'Create free account', 'bluu-interactive' ); ?>
-                </a>
-                <a href="<?php echo esc_url( $sync_app_url . '/login' ); ?>" class="btn-outline">
-                    <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
-                </a>
+    <div class="container">
+        <div class="product-hero__grid">
+            <div class="sync-hero__inner animate-on-scroll">
+                <h1 class="sync-hero__headline">
+                    <?php echo esc_html( $headline_1 ); ?>
+                    <?php if ( $headline_2 ) : ?>
+                        <span class="sync-hero__headline--accent"><?php echo esc_html( $headline_2 ); ?></span>
+                    <?php endif; ?>
+                    <?php if ( $hero_subhead ) : ?>
+                        <?php echo esc_html( $hero_subhead ); ?>
+                    <?php endif; ?>
+                </h1>
+                <p class="sync-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+                <div class="sync-hero__actions">
+                    <a href="<?php echo esc_url( $sync_app_url . '/register' ); ?>" class="btn-primary">
+                        <?php esc_html_e( 'Create free account', 'bluu-interactive' ); ?>
+                    </a>
+                    <a href="<?php echo esc_url( $sync_app_url . '/login' ); ?>" class="btn-outline">
+                        <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
+                    </a>
+                </div>
+                <p class="sync-hero__note"><?php esc_html_e( 'Free forever for occasional transfers. No credit card required.', 'bluu-interactive' ); ?></p>
             </div>
-            <p class="sync-hero__note"><?php esc_html_e( 'Free forever for occasional transfers. No credit card required.', 'bluu-interactive' ); ?></p>
+
+            <!-- Directional source -> hub -> destination pipeline, not radial: BluuSync moves data one way, not outward in every direction. -->
+            <div class="product-hero__illustration" aria-hidden="true">
+                <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="132" y1="120" x2="192" y2="174" stroke="#0E7C86" stroke-width="2" opacity="0.5"/>
+                    <line x1="250" y1="224" x2="329" y2="287" stroke="#0E7C86" stroke-width="2" opacity="0.5"/>
+                    <polygon points="192,174 179,169 187,182" fill="#0E7C86" opacity="0.7"/>
+                    <polygon points="329,287 314,284 320,298" fill="#0E7C86" opacity="0.7"/>
+
+                    <g transform="translate(220,200)">
+                        <rect x="-38" y="-38" width="76" height="76" rx="18" fill="#0a192f"/>
+                        <g transform="scale(1.35) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                        <circle cx="110" cy="100" r="30" fill="#E3F3F4"/>
+                        <g transform="translate(110,100) scale(0.72) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1s;">
+                        <circle cx="352" cy="306" r="30" fill="#E3F3F4"/>
+                        <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#0E7C86" stroke-width="2">
+                            <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
         </div>
     </div>
     <div class="container">

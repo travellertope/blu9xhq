@@ -2065,7 +2065,8 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     }
     .hero-pulse,
     .hero__float-card,
-    .scan-hero__ill-node {
+    .scan-hero__ill-node,
+    .scan-hero__ill-radar {
         animation: none;
     }
 }
@@ -6739,13 +6740,12 @@ a.contact-info__value:hover {
 /* Homepage-only brand-reach illustration, in place of the sample-report demo */
 .scan-hero__illustration {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: var(--space-5);
+    justify-content: center;
 }
 .scan-hero__illustration svg {
     width: 100%;
-    max-width: 420px;
+    max-width: 540px;
     height: auto;
 }
 .scan-hero__ill-node {
@@ -6755,11 +6755,15 @@ a.contact-info__value:hover {
     0%, 100% { transform: translateY(0); }
     50%       { transform: translateY(-6px); }
 }
-.scan-hero__illustration-caption {
-    font-size: var(--font-size-sm);
-    color: var(--md-on-surface-variant);
-    text-align: center;
-    max-width: 320px;
+
+/* /audit's radar sweep, replacing the homepage's static pulse rings */
+.scan-hero__ill-radar {
+    animation: scanRadarSweep 4s linear infinite;
+    transform-box: fill-box;
+}
+@keyframes scanRadarSweep {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
 }
 
 /* CTA group (used in hero & final CTA) */
@@ -7026,10 +7030,41 @@ a.contact-info__value:hover {
     }
 }
 
+/* ── Product hero grid — text + illustration, shared by /crm, /shop, /sync ─── */
+.product-hero__grid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-7);
+    align-items: center;
+}
+.product-hero__illustration {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-hero__illustration svg {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+}
+@media (max-width: 900px) {
+    .product-hero__grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    .product-hero__illustration {
+        order: -1;
+        max-width: 320px;
+        margin-inline: auto;
+    }
+    .product-hero__illustration svg {
+        max-width: 280px;
+    }
+}
+
 /* ── BluuCRM marketing page (/crm) ─────────────────────────────────────────── */
 .crm-hero {
     padding-block: var(--space-9) var(--space-8);
-    text-align: center;
 }
 .crm-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -7039,8 +7074,8 @@ a.contact-info__value:hover {
     color: var(--md-primary);
 }
 .crm-hero__body {
-    margin: var(--space-5) auto 0;
-    max-width: 560px;
+    margin-top: var(--space-5);
+    max-width: 480px;
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-lg);
     line-height: 1.65;
@@ -7048,10 +7083,13 @@ a.contact-info__value:hover {
 .crm-hero__actions {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: var(--space-4);
     margin-top: var(--space-6);
     flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+    .crm-hero__body { margin-inline: auto; }
+    .crm-hero__actions { justify-content: center; }
 }
 .crm-hero__note {
     margin-top: var(--space-4);
@@ -7301,7 +7339,6 @@ a.contact-info__value:hover {
 /* ── BluuShop marketing page (/shop) ──────────────────────────────────────── */
 .shop-hero {
     padding-block: var(--space-9) var(--space-8);
-    text-align: center;
 }
 .shop-hero__headline {
     font-size: clamp(2rem, 5vw, 3rem);
@@ -7311,8 +7348,8 @@ a.contact-info__value:hover {
     color: var(--md-primary);
 }
 .shop-hero__body {
-    margin: var(--space-5) auto 0;
-    max-width: 560px;
+    margin-top: var(--space-5);
+    max-width: 480px;
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-lg);
     line-height: 1.65;
@@ -7320,10 +7357,13 @@ a.contact-info__value:hover {
 .shop-hero__actions {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: var(--space-4);
     margin-top: var(--space-6);
     flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+    .shop-hero__body { margin-inline: auto; }
+    .shop-hero__actions { justify-content: center; }
 }
 .shop-hero__note {
     margin-top: var(--space-4);
@@ -7426,6 +7466,99 @@ a.contact-info__value:hover {
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-sm);
     line-height: 1.6;
+}
+
+.shop-pricing {
+    padding-block: var(--space-9);
+}
+.shop-pricing__header {
+    text-align: center;
+    max-width: 600px;
+    margin-inline: auto;
+}
+.shop-pricing__headline {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-pricing__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    margin-top: var(--space-8);
+    align-items: stretch;
+}
+.shop-plan {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid var(--md-outline-variant);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+}
+.shop-plan--featured {
+    border-color: var(--md-accent);
+    box-shadow: var(--shadow-2);
+}
+.shop-plan__name {
+    font-family: var(--font-family-heading);
+    font-weight: 800;
+    font-size: var(--font-size-xl);
+}
+.shop-plan__desc {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+    margin-top: var(--space-1);
+    min-height: 2.6em;
+}
+.shop-plan__price {
+    margin-top: var(--space-4);
+}
+.shop-plan__price-amount {
+    font-size: var(--font-size-3xl);
+    font-weight: 800;
+    font-family: var(--font-family-heading);
+}
+.shop-plan__price-period {
+    color: var(--md-on-surface-variant);
+    font-size: var(--font-size-sm);
+}
+.shop-plan__annual {
+    font-size: var(--font-size-xs);
+    color: var(--md-accent);
+    margin-top: var(--space-1);
+}
+.shop-plan__features {
+    margin-top: var(--space-5);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+.shop-plan__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--md-on-surface-variant);
+}
+.shop-plan__feature svg {
+    color: var(--md-accent);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+.shop-plan__cta {
+    margin-top: var(--space-6);
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+}
+@media (max-width: 900px) {
+    .shop-pricing__grid {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+        margin-inline: auto;
+    }
 }
 
 .shop-faq {
@@ -7538,29 +7671,20 @@ a.contact-info__value:hover {
 /* ── BluuSync marketing page (/sync) ───────────────────────────────────────── */
 .sync-hero {
     padding-block: var(--space-9) var(--space-8);
-    text-align: center;
 }
 .sync-hero__headline {
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 800;
-    line-height: 1.1;
-    letter-spacing: -0.01em;
+    line-height: 1.15;
     font-family: var(--font-family-heading);
     color: var(--md-primary);
 }
 .sync-hero__headline--accent {
     color: var(--md-accent);
 }
-.sync-hero__subhead {
-    margin: var(--space-4) auto 0;
-    max-width: 560px;
-    color: var(--md-on-surface-variant);
-    font-size: var(--font-size-xl);
-    font-weight: 600;
-}
 .sync-hero__body {
-    margin: var(--space-3) auto 0;
-    max-width: 560px;
+    margin-top: var(--space-3);
+    max-width: 480px;
     color: var(--md-on-surface-variant);
     font-size: var(--font-size-lg);
     line-height: 1.65;
@@ -7568,10 +7692,13 @@ a.contact-info__value:hover {
 .sync-hero__actions {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: var(--space-4);
     margin-top: var(--space-6);
     flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+    .sync-hero__body { margin-inline: auto; }
+    .sync-hero__actions { justify-content: center; }
 }
 .sync-hero__note {
     margin-top: var(--space-4);

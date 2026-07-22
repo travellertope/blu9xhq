@@ -5,10 +5,10 @@
  * Marketing page for BluuShop, assigned to /shop. Every CTA points at the
  * app (shop.bluuhq.com) — this page is the pitch, not the product.
  *
- * Scoped to what's actually shipped (Phase 1): free mobile-first
- * storefront + WhatsApp checkout. No pricing table — Starter/Pro tiers
- * and billing aren't built yet (see SHOP-TOOL-PLAN.md Phase 3), so this
- * page doesn't advertise plans nobody can actually sign up for.
+ * Pricing kept in sync by hand with the actual source of truth:
+ * shop-tool/lib/stripe-products.ts (USD), shop-tool/lib/paystack-products.ts
+ * (NGN, monthly-only), and shop-tool/lib/planLimits.ts (feature gating per
+ * plan).
  *
  * @package bluu-interactive
  */
@@ -65,11 +65,62 @@ $features = array(
     ),
 );
 
+// ── Pricing ──────────────────────────────────────────────────────────────────
+$plans = array(
+    array(
+        'name'        => 'Free',
+        'description' => 'Get started selling today',
+        'monthly'     => 0,
+        'annual'      => 0,
+        'monthly_ngn' => 0,
+        'featured'    => false,
+        'cta_text'    => 'Create your free shop',
+        'highlights'  => array(
+            'Up to 20 products',
+            'Minimal & List themes',
+            'WhatsApp checkout',
+            'Order tracking dashboard',
+        ),
+    ),
+    array(
+        'name'        => 'Starter',
+        'description' => 'For shops that want their own look',
+        'monthly'     => 5,
+        'annual'      => 50,
+        'monthly_ngn' => 2900,
+        'featured'    => false,
+        'cta_text'    => 'Get started',
+        'highlights'  => array(
+            'Up to 100 products',
+            'All 6 storefront themes',
+            'Custom accent color & fonts',
+            'Custom domain',
+            'Remove "Powered by BluuShop"',
+        ),
+    ),
+    array(
+        'name'        => 'Pro',
+        'description' => 'Unlimited products, same great look',
+        'monthly'     => 15,
+        'annual'      => 150,
+        'monthly_ngn' => 8900,
+        'featured'    => true,
+        'cta_text'    => 'Get started',
+        'highlights'  => array(
+            'Unlimited products',
+            'Everything in Starter',
+            'Priority support',
+        ),
+    ),
+);
+
+$shop_show_ngn = bluu_is_nigeria_visitor();
+
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
     array(
         'q' => 'Is BluuShop really free?',
-        'a' => 'Yes — free for up to 20 products, no credit card required to sign up.',
+        'a' => 'The Free plan stays free forever for up to 20 products — no credit card required to sign up. Starter and Pro exist for shops that outgrow that: more products, all 6 storefront themes, a custom domain, and your own branding instead of "Powered by BluuShop."',
     ),
     array(
         'q' => 'Do I need a website already?',
@@ -90,19 +141,68 @@ get_header();
 
 <!-- ── Shop Hero ────────────────────────────────────────────────────────────── -->
 <section class="shop-hero bluu-hero-bg" aria-label="<?php esc_attr_e( 'BluuShop overview', 'bluu-interactive' ); ?>">
-    <div class="container container--narrow">
-        <div class="shop-hero__inner animate-on-scroll">
-            <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
-            <p class="shop-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
-            <div class="shop-hero__actions">
-                <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>" class="btn-primary">
-                    <?php esc_html_e( 'Create your free shop', 'bluu-interactive' ); ?>
-                </a>
-                <a href="<?php echo esc_url( $shop_app_url . '/login' ); ?>" class="btn-outline">
-                    <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
-                </a>
+    <div class="container">
+        <div class="product-hero__grid">
+            <div class="shop-hero__inner animate-on-scroll">
+                <h1 class="shop-hero__headline"><?php echo esc_html( $hero_headline ); ?></h1>
+                <p class="shop-hero__body"><?php echo bluu_text( $hero_body ); ?></p>
+                <div class="shop-hero__actions">
+                    <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>" class="btn-primary">
+                        <?php esc_html_e( 'Create your free shop', 'bluu-interactive' ); ?>
+                    </a>
+                    <a href="<?php echo esc_url( $shop_app_url . '/login' ); ?>" class="btn-outline">
+                        <?php esc_html_e( 'Log in', 'bluu-interactive' ); ?>
+                    </a>
+                </div>
+                <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
             </div>
-            <p class="shop-hero__note"><?php esc_html_e( 'Free for your first 20 products. No credit card required.', 'bluu-interactive' ); ?></p>
+
+            <div class="product-hero__illustration" aria-hidden="true">
+                <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M220 200 Q150 140 110 100" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 130 348 92" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q150 260 96 308" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 265 352 306" stroke="#1F9D55" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+
+                    <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#1F9D55" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+                    <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#1F9D55" stroke-width="1.5" style="transform-origin:220px 200px;"/>
+
+                    <g transform="translate(220,200)">
+                        <rect x="-40" y="-40" width="80" height="80" rx="18" fill="#0a192f"/>
+                        <g transform="scale(1.5) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="1.8">
+                            <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/><path d="M3 6h18M16 10a4 4 0 01-8 0"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                        <circle cx="110" cy="100" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(110,100) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M20.4 14.5L16 10 4 20"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
+                        <circle cx="348" cy="92" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(348,92) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18 14 14 0 010-18z"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
+                        <circle cx="96" cy="308" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(96,308) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>
+                        </g>
+                    </g>
+
+                    <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                        <circle cx="352" cy="306" r="30" fill="#E6F4EC"/>
+                        <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#1F9D55" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </g>
+                    </g>
+                </svg>
+            </div>
         </div>
     </div>
     <div class="container">
@@ -180,6 +280,55 @@ get_header();
                     <div class="shop-feature-card__icon"><?php echo bluu_mega_icon( $f['icon'], 20 ); // phpcs:ignore ?></div>
                     <h3 class="shop-feature-card__title"><?php echo esc_html( $f['title'] ); ?></h3>
                     <p class="shop-feature-card__body"><?php echo esc_html( $f['body'] ); ?></p>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- ── Pricing ──────────────────────────────────────────────────────────────── -->
+<section class="shop-pricing" aria-label="<?php esc_attr_e( 'BluuShop pricing', 'bluu-interactive' ); ?>" id="pricing">
+    <div class="container">
+        <div class="shop-pricing__header animate-on-scroll">
+            <h2 class="shop-pricing__headline"><?php esc_html_e( 'Start free. Upgrade when you outgrow it.', 'bluu-interactive' ); ?></h2>
+        </div>
+        <div class="shop-pricing__grid">
+            <?php foreach ( $plans as $plan ) :
+                $card_class = 'shop-plan' . ( $plan['featured'] ? ' shop-plan--featured' : '' );
+            ?>
+                <div class="<?php echo esc_attr( $card_class ); ?>">
+                    <h3 class="shop-plan__name"><?php echo esc_html( $plan['name'] ); ?></h3>
+                    <p class="shop-plan__desc"><?php echo esc_html( $plan['description'] ); ?></p>
+                    <?php if ( $shop_show_ngn ) : ?>
+                        <div class="shop-plan__price">
+                            <span class="shop-plan__price-amount">&#8358;<?php echo esc_html( number_format( $plan['monthly_ngn'] ) ); ?></span>
+                            <?php if ( $plan['monthly_ngn'] > 0 ) : ?>
+                                <span class="shop-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php else : ?>
+                        <div class="shop-plan__price">
+                            <span class="shop-plan__price-amount">$<?php echo esc_html( $plan['monthly'] ); ?></span>
+                            <?php if ( $plan['monthly'] > 0 ) : ?>
+                                <span class="shop-plan__price-period">/mo</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ( $plan['annual'] > 0 ) : ?>
+                            <p class="shop-plan__annual">or $<?php echo esc_html( $plan['annual'] ); ?>/yr — save ~17%</p>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    <ul class="shop-plan__features">
+                        <?php foreach ( $plan['highlights'] as $item ) : ?>
+                            <li class="shop-plan__feature">
+                                <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                <?php echo esc_html( $item ); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="<?php echo esc_url( $shop_app_url . '/create' ); ?>"
+                       class="<?php echo $plan['featured'] ? 'btn-primary' : 'btn-outline'; ?> shop-plan__cta">
+                        <?php echo esc_html( $plan['cta_text'] ); ?>
+                    </a>
                 </div>
             <?php endforeach; ?>
         </div>

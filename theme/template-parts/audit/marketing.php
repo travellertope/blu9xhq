@@ -59,15 +59,16 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                 </p>
             </div>
 
-            <?php if ( is_front_page() ) : ?>
-                <!-- Right: brand-reach illustration -->
-                <div class="scan-hero__illustration" aria-hidden="true">
-                    <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path class="scan-hero__ill-link" d="M220 200 Q150 140 110 100" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                        <path class="scan-hero__ill-link" d="M220 200 Q300 130 348 92" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                        <path class="scan-hero__ill-link" d="M220 200 Q150 260 96 308" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
-                        <path class="scan-hero__ill-link" d="M220 200 Q300 265 352 306" stroke="#2F5FE0" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+            <!-- Right: brand-reach illustration (amber, matching /crm, /shop, /sync) -->
+            <div class="scan-hero__illustration" aria-hidden="true">
+                <svg viewBox="0 0 440 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <?php $ill_color = is_front_page() ? '#2F5FE0' : '#C68A1E'; ?>
+                    <path d="M220 200 Q150 140 110 100" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 130 348 92" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q150 260 96 308" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
+                    <path d="M220 200 Q300 265 352 306" stroke="<?php echo esc_attr( $ill_color ); ?>" stroke-width="1.6" stroke-dasharray="4 6" opacity="0.45"/>
 
+                    <?php if ( is_front_page() ) : ?>
                         <circle class="hero-pulse" cx="220" cy="200" r="72" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
                         <circle class="hero-pulse hero-pulse--delay" cx="220" cy="200" r="96" stroke="#2F5FE0" stroke-width="1.5" style="transform-origin:220px 200px;"/>
 
@@ -97,51 +98,54 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
                             <rect x="337" y="294" width="30" height="22" rx="3" fill="none" stroke="#0E7C86" stroke-width="2"/>
                             <path d="M337 296l15 12 15-12" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         </g>
-                    </svg>
-                    <p class="scan-hero__illustration-caption">Search · AI tools · social · email — one brand, everywhere.</p>
-                </div>
-            <?php else : ?>
-                <!-- Right: sample report -->
-                <div class="scan-hero__demo" aria-hidden="true">
-                    <div class="scan-hero__demo-top">
-                        <div class="scan-hero__demo-status">
-                            <span class="scan-hero__demo-dot"></span>
-                            <span class="scan-hero__demo-label">SAMPLE REPORT</span>
-                        </div>
-                        <span class="scan-hero__demo-url">audit.bluuhq.com</span>
-                    </div>
+                    <?php else : ?>
+                        <!-- Radar sweep, not a static pulse: audit is a scan, not a broadcast. -->
+                        <defs>
+                            <linearGradient id="scanRadarFade" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#C68A1E" stop-opacity="0.4"/>
+                                <stop offset="100%" stop-color="#C68A1E" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="220" cy="200" r="96" stroke="#C68A1E" stroke-width="1.5" opacity="0.3"/>
+                        <path class="scan-hero__ill-radar" d="M220,200 L307,159.4 A96,96 0 0,1 307,240.6 Z" fill="url(#scanRadarFade)" style="transform-origin:220px 200px;"/>
 
-                    <div class="scan-hero__demo-body">
-                        <div class="scan-hero__score-row">
-                            <span class="scan-hero__score-big" style="color: var(--md-warning, #D9A22A)">78</span>
-                            <span class="scan-hero__score-tag">/ 100 overall</span>
-                        </div>
-                        <div class="scan-hero__pillars">
-                            <div class="scan-hero__pillar">
-                                <span class="scan-hero__pillar-name">AI discoverability</span>
-                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:64%; background:#D9A22A;"></span></span>
-                                <span class="scan-hero__pillar-val">64</span>
-                            </div>
-                            <div class="scan-hero__pillar">
-                                <span class="scan-hero__pillar-name">Site &amp; tech health</span>
-                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:91%; background:#2F9E63;"></span></span>
-                                <span class="scan-hero__pillar-val">91</span>
-                            </div>
-                            <div class="scan-hero__pillar">
-                                <span class="scan-hero__pillar-name">Competitor intel</span>
-                                <span class="scan-hero__pillar-track"><span class="scan-hero__pillar-fill" style="width:79%; background:#2F9E63;"></span></span>
-                                <span class="scan-hero__pillar-val">79</span>
-                            </div>
-                        </div>
-                        <div class="scan-hero__verdict">
-                            <b>Biggest opportunity:</b> AI discoverability — most AI tools can't find this brand yet.
-                            <a href="<?php echo esc_url( home_url( '/content-ops' ) ); ?>">See Content Ops →</a>
-                        </div>
-                    </div>
+                        <g transform="translate(220,200)">
+                            <path d="M0 -46L40 -23V23L0 46L-40 23V-23L0 -46Z" fill="#0a192f"/>
+                            <circle cx="0" cy="0" r="15" fill="#C68A1E"/>
+                        </g>
 
-                    <div class="scan-hero__demo-meta">Checked 42 pages · 3 competitor sites · 18 AI search prompts</div>
-                </div>
-            <?php endif; ?>
+                        <!-- Overall score (target) -->
+                        <g class="scan-hero__ill-node" style="animation-delay:0s;">
+                            <circle cx="110" cy="100" r="30" fill="#FBF1DE"/>
+                            <g transform="translate(110,100) scale(0.72) translate(-12,-12)" fill="none" stroke="#C68A1E" stroke-width="2">
+                                <circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>
+                            </g>
+                        </g>
+
+                        <!-- AI discoverability (sparkle) -->
+                        <g class="scan-hero__ill-node" style="animation-delay:0.6s;">
+                            <circle cx="348" cy="92" r="30" fill="#FBF1DE"/>
+                            <path d="M348 78l4.5 10.5L363 93l-10.5 4.5L348 108l-4.5-10.5L333 93l10.5-4.5z" fill="#C68A1E"/>
+                        </g>
+
+                        <!-- Site & tech health (shield) -->
+                        <g class="scan-hero__ill-node" style="animation-delay:1.2s;">
+                            <circle cx="96" cy="308" r="30" fill="#FBF1DE"/>
+                            <g transform="translate(96,308) scale(0.72) translate(-12,-12)" fill="none" stroke="#C68A1E" stroke-width="2">
+                                <path d="M12 2 3 6v6c0 5 3.8 9.4 9 10 5.2-.6 9-5 9-10V6l-9-4z"/>
+                            </g>
+                        </g>
+
+                        <!-- Competitor intel (chart) -->
+                        <g class="scan-hero__ill-node" style="animation-delay:1.8s;">
+                            <circle cx="352" cy="306" r="30" fill="#FBF1DE"/>
+                            <g transform="translate(352,306) scale(0.72) translate(-12,-12)" fill="none" stroke="#C68A1E" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                            </g>
+                        </g>
+                    <?php endif; ?>
+                </svg>
+            </div>
 
         </div>
     </div>
@@ -198,7 +202,8 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
 </section>
 
 
-<!-- ═════════════════════ WHAT THE SCAN CHECKS ════════════════════ -->
+<?php if ( ! is_front_page() ) : ?>
+<!-- ══════════════ WHAT THE SCAN CHECKS (audit-only) ═══════════════ -->
 <section class="scan-checks" aria-label="What the scan checks">
     <div class="container">
         <div class="scan-checks__header">
@@ -236,9 +241,11 @@ $audit_ref = isset( $_GET['ref'] ) ? sanitize_text_field( wp_unslash( $_GET['ref
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
-<!-- ═══════════════════════ ALSO FROM BLUU ════════════════════════ -->
+<?php if ( is_front_page() ) : ?>
+<!-- ═══════════════════ ALSO FROM BLUU (homepage-only) ════════════════ -->
 <?php
 $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
     return 'BluuAudit' !== $p['name'];
@@ -265,6 +272,7 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <?php if ( is_page_template( 'page-audit.php' ) ) : ?>
@@ -315,7 +323,8 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
 <?php endif; ?>
 
 
-<!-- ═══════════════════════════ FAQ ═══════════════════════════════ -->
+<?php if ( ! is_front_page() ) : ?>
+<!-- ═══════════════════════ FAQ (audit-only) ═══════════════════════ -->
 <section class="scan-faq" id="faq" aria-label="Frequently asked questions">
     <div class="container">
         <div class="scan-checks__header">
@@ -346,6 +355,7 @@ $scan_other_products = array_filter( bluu_softwares_data(), function ( $p ) {
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 
 <!-- ══════════════════════════ FINAL CTA ══════════════════════════ -->
