@@ -84,11 +84,17 @@ $features = array(
 );
 
 // ── Pricing ──────────────────────────────────────────────────────────────────
+// Kept in sync by hand with the actual source of truth: lib/stripe-products.ts
+// (USD) and lib/paystack-products.ts (NGN) in the transfer repo. Enterprise has
+// no NGN price because it's sales-assisted (mailto), not a Paystack plan — and
+// Pro's Paystack checkout has no trial (only Stripe's does), so its NGN note
+// doesn't repeat the "14 days free" claim.
 $plans = array(
     array(
         'name'        => 'Free',
         'description' => 'Perfect for one-off migrations',
         'price'       => '$0',
+        'price_ngn'   => '₦0',
         'period'      => 'forever',
         'featured'    => false,
         'cta_text'    => 'Get Started',
@@ -100,14 +106,17 @@ $plans = array(
         ),
     ),
     array(
-        'name'        => 'Pro',
-        'description' => 'For developers & sysadmins',
-        'price'       => '$19',
-        'period'      => '/month',
-        'featured'    => true,
-        'cta_text'    => 'Start 14-Day Free Trial',
-        'note'        => '14 days free, then $19/mo — cancel anytime',
-        'highlights'  => array(
+        'name'          => 'Pro',
+        'description'   => 'For developers & sysadmins',
+        'price'         => '$14',
+        'price_ngn'     => '₦4,900',
+        'period'        => '/month',
+        'featured'      => true,
+        'cta_text'      => 'Start 14-Day Free Trial',
+        'cta_text_ngn'  => 'Get Started with Paystack',
+        'note'          => '14 days free, then $14/mo — cancel anytime',
+        'note_ngn'      => 'Billed monthly — cancel anytime',
+        'highlights'    => array(
             'Unlimited transfers',
             'Up to 10GB per file',
             'Google Drive & OneDrive as source or destination',
@@ -134,6 +143,8 @@ $plans = array(
         ),
     ),
 );
+
+$sync_show_ngn = bluu_is_nigeria_visitor();
 
 // ── FAQ ────────────────────────────────────────────────────────────────────
 $faqs = array(
@@ -334,16 +345,20 @@ get_header();
                 $cta_href = $is_enterprise
                     ? 'mailto:sales@bluuhq.com?subject=BluuSync%20Enterprise'
                     : $sync_app_url . '/register';
+                $plan_show_ngn = $sync_show_ngn && ! empty( $plan['price_ngn'] );
+                $display_price = $plan_show_ngn ? $plan['price_ngn'] : $plan['price'];
+                $display_note  = $plan_show_ngn ? ( $plan['note_ngn'] ?? '' ) : ( $plan['note'] ?? '' );
+                $display_cta   = $plan_show_ngn ? ( $plan['cta_text_ngn'] ?? $plan['cta_text'] ) : $plan['cta_text'];
             ?>
                 <div class="<?php echo esc_attr( $card_class ); ?>">
                     <h3 class="sync-plan__name"><?php echo esc_html( $plan['name'] ); ?></h3>
                     <p class="sync-plan__desc"><?php echo esc_html( $plan['description'] ); ?></p>
                     <div class="sync-plan__price">
-                        <span class="sync-plan__price-amount"><?php echo esc_html( $plan['price'] ); ?></span>
+                        <span class="sync-plan__price-amount"><?php echo esc_html( $display_price ); ?></span>
                         <span class="sync-plan__price-period"><?php echo esc_html( $plan['period'] ); ?></span>
                     </div>
-                    <?php if ( ! empty( $plan['note'] ) ) : ?>
-                        <p class="sync-plan__note"><?php echo esc_html( $plan['note'] ); ?></p>
+                    <?php if ( ! empty( $display_note ) ) : ?>
+                        <p class="sync-plan__note"><?php echo esc_html( $display_note ); ?></p>
                     <?php endif; ?>
                     <ul class="sync-plan__features">
                         <?php foreach ( $plan['highlights'] as $item ) : ?>
@@ -355,7 +370,7 @@ get_header();
                     </ul>
                     <a href="<?php echo esc_url( $cta_href ); ?>"
                        class="<?php echo $plan['featured'] ? 'btn-primary' : 'btn-outline'; ?> sync-plan__cta">
-                        <?php echo esc_html( $plan['cta_text'] ); ?>
+                        <?php echo esc_html( $display_cta ); ?>
                     </a>
                 </div>
             <?php endforeach; ?>

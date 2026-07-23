@@ -456,6 +456,52 @@ function bluu_customizer_register( $wp_customize ) {
             },
         ) );
     }
+
+    // =========================================================================
+    // PANEL: Product Page Branding
+    // Menus for these are managed in Appearance → Menus (locations named
+    // "BluuCRM — Header Menu" etc.); footer widgets in Appearance → Widgets.
+    // This panel only covers the one thing a menu/widget can't provide: a
+    // per-product logo, since add_theme_support( 'custom-logo' ) is site-wide.
+    // =========================================================================
+    $wp_customize->add_panel( 'bluu_product_branding', array(
+        'title'       => esc_html__( 'Product Page Branding', 'bluu-interactive' ),
+        'description' => esc_html__( 'Custom logo for each dedicated product page (/crm, /shop, /sync, /audit) and its child pages. Header/footer menus for these live in Appearance → Menus; footer widgets in Appearance → Widgets.', 'bluu-interactive' ),
+        'priority'    => 35,
+    ) );
+
+    foreach ( bluu_product_registry() as $bluu_product_slug => $bluu_product ) {
+        $section_id = 'bluu_product_' . $bluu_product_slug;
+
+        $wp_customize->add_section( $section_id, array(
+            'title' => $bluu_product['label'],
+            'panel' => 'bluu_product_branding',
+        ) );
+
+        $wp_customize->add_setting( $bluu_product['logo_mod'], array(
+            'default'           => '',
+            'sanitize_callback' => 'absint',
+            'transport'         => 'refresh',
+        ) );
+        $wp_customize->add_control( new WP_Customize_Media_Control( $wp_customize, $bluu_product['logo_mod'], array(
+            /* translators: %s: product name, e.g. "BluuCRM" */
+            'label'       => sprintf( esc_html__( '%s Logo', 'bluu-interactive' ), $bluu_product['label'] ),
+            'description' => esc_html__( "Shown instead of the site logo in this product's header/footer. Leave empty to use the site logo.", 'bluu-interactive' ),
+            'section'     => $section_id,
+            'mime_type'   => 'image',
+        ) ) );
+
+        $wp_customize->add_setting( $bluu_product['wordmark_mod'], array(
+            'default'           => $bluu_product['label'],
+            'sanitize_callback' => 'sanitize_text_field',
+            'transport'         => 'postMessage',
+        ) );
+        $wp_customize->add_control( $bluu_product['wordmark_mod'], array(
+            'label'   => esc_html__( 'Fallback text (shown if no logo image uploaded)', 'bluu-interactive' ),
+            'section' => $section_id,
+            'type'    => 'text',
+        ) );
+    }
 }
 add_action( 'customize_register', 'bluu_customizer_register' );
 
