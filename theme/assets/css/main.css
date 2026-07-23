@@ -7086,7 +7086,6 @@ a.contact-info__value:hover {
         text-align: center;
     }
     .product-hero__illustration {
-        order: -1;
         max-width: 320px;
         margin-inline: auto;
     }

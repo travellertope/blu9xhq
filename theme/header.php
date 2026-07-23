@@ -24,6 +24,8 @@ $bluu_product_logo_id  = $bluu_product ? get_theme_mod( $bluu_product['logo_mod'
 $bluu_header_menu_location = ( $bluu_product && has_nav_menu( $bluu_product['menu_header'] ) )
     ? $bluu_product['menu_header']
     : 'primary';
+$bluu_header_cta_text = $bluu_product ? $bluu_product['cta_text'] : 'Run free scan';
+$bluu_header_cta_url  = $bluu_product ? $bluu_product['cta_url'] : '#top';
 ?>
 
 <header class="site-header" id="site-header" role="banner">
@@ -74,7 +76,7 @@ $bluu_header_menu_location = ( $bluu_product && has_nav_menu( $bluu_product['men
         <!-- CTA Buttons -->
         <div class="site-header__cta">
             <a href="<?php echo esc_url( home_url( '/contact' ) ); ?>" class="btn-outline btn-outline--small">Let's talk</a>
-            <a href="#top" class="btn-primary btn-primary--small">Run free scan</a>
+            <a href="<?php echo esc_url( $bluu_header_cta_url ); ?>" class="btn-primary btn-primary--small"><?php echo esc_html( $bluu_header_cta_text ); ?></a>
         </div>
 
         <!-- Mobile Hamburger -->

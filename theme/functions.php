@@ -1064,6 +1064,8 @@ function bluu_product_registry() {
             'sidebar'     => 'crm-footer-widgets',
             'logo_mod'    => 'crm_logo',
             'wordmark_mod'=> 'crm_wordmark',
+            'cta_text'    => 'Create free account',
+            'cta_url'     => 'https://crm.bluuhq.com/signup',
         ),
         'shop'  => array(
             'label'       => 'BluuShop',
@@ -1072,6 +1074,8 @@ function bluu_product_registry() {
             'sidebar'     => 'shop-footer-widgets',
             'logo_mod'    => 'shop_logo',
             'wordmark_mod'=> 'shop_wordmark',
+            'cta_text'    => 'Create your free shop',
+            'cta_url'     => 'https://shop.bluuhq.com/create',
         ),
         'sync'  => array(
             'label'       => 'BluuSync',
@@ -1080,6 +1084,8 @@ function bluu_product_registry() {
             'sidebar'     => 'sync-footer-widgets',
             'logo_mod'    => 'sync_logo',
             'wordmark_mod'=> 'sync_wordmark',
+            'cta_text'    => 'Create free account',
+            'cta_url'     => 'https://sync.bluuhq.com/register',
         ),
         'audit' => array(
             'label'       => 'BluuAudit',
@@ -1088,14 +1094,26 @@ function bluu_product_registry() {
             'sidebar'     => 'audit-footer-widgets',
             'logo_mod'    => 'audit_logo',
             'wordmark_mod'=> 'audit_wordmark',
+            'cta_text'    => 'Run free scan',
+            // Relative on purpose: id="top" sits on the scan-hero section
+            // shared by both the homepage and /audit, so this stays an
+            // in-page jump on either one instead of a full navigation.
+            'cta_url'     => '#top',
         ),
     );
 }
 
 /**
  * Which product (if any) the current request belongs to — the page itself,
- * the homepage (currently BluuAudit's), or a child page nested under one of
- * the dedicated product pages via the normal WP Parent Page hierarchy.
+ * or a child page nested under one of the dedicated product pages via the
+ * normal WP Parent Page hierarchy.
+ *
+ * Deliberately excludes the homepage even though front-page.php currently
+ * reuses BluuAudit's marketing content — the homepage is the whole site's
+ * front door, so it keeps the default BluuHQ identity (logo/nav/footer)
+ * rather than picking up BluuAudit's branding just because it shares that
+ * content. Only the dedicated /audit page (and pages nested under it) get
+ * BluuAudit's own branding once configured.
  *
  * Returns a product slug (matching bluu_product_registry()) or false.
  */
@@ -1110,14 +1128,7 @@ function bluu_get_product_context() {
         $product_templates[ "page-{$slug}.php" ] = $slug;
     }
 
-    // front-page.php is currently BluuAudit's homepage, regardless of
-    // whether a template is explicitly assigned to that page.
-    if ( is_front_page() ) {
-        $context = 'audit';
-        return $context;
-    }
-
-    if ( ! is_singular( 'page' ) ) {
+    if ( is_front_page() || ! is_singular( 'page' ) ) {
         $context = false;
         return $context;
     }
