@@ -1064,6 +1064,8 @@ function bluu_product_registry() {
             'sidebar'     => 'crm-footer-widgets',
             'logo_mod'    => 'crm_logo',
             'wordmark_mod'=> 'crm_wordmark',
+            'cta_text'    => 'Create free account',
+            'cta_url'     => 'https://crm.bluuhq.com/signup',
         ),
         'shop'  => array(
             'label'       => 'BluuShop',
@@ -1072,6 +1074,8 @@ function bluu_product_registry() {
             'sidebar'     => 'shop-footer-widgets',
             'logo_mod'    => 'shop_logo',
             'wordmark_mod'=> 'shop_wordmark',
+            'cta_text'    => 'Create your free shop',
+            'cta_url'     => 'https://shop.bluuhq.com/create',
         ),
         'sync'  => array(
             'label'       => 'BluuSync',
@@ -1080,6 +1084,8 @@ function bluu_product_registry() {
             'sidebar'     => 'sync-footer-widgets',
             'logo_mod'    => 'sync_logo',
             'wordmark_mod'=> 'sync_wordmark',
+            'cta_text'    => 'Create free account',
+            'cta_url'     => 'https://sync.bluuhq.com/register',
         ),
         'audit' => array(
             'label'       => 'BluuAudit',
@@ -1088,6 +1094,11 @@ function bluu_product_registry() {
             'sidebar'     => 'audit-footer-widgets',
             'logo_mod'    => 'audit_logo',
             'wordmark_mod'=> 'audit_wordmark',
+            'cta_text'    => 'Run free scan',
+            // Relative on purpose: id="top" sits on the scan-hero section
+            // shared by both the homepage and /audit, so this stays an
+            // in-page jump on either one instead of a full navigation.
+            'cta_url'     => '#top',
         ),
     );
 }
