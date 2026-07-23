@@ -1883,6 +1883,39 @@ h6 { font-size: var(--font-size-base); font-weight: 800; line-height: 1.5; }
     font-weight: 600;
 }
 
+/* Per-product footer (menu + widgets), replaces the grid on product pages */
+.site-footer__product-footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-6);
+}
+.site-footer__product-menu .site-footer__menu {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+}
+.site-footer__product-widgets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-6);
+    color: #9FB0C9;
+}
+.site-footer__product-widgets .widget-title {
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    color: #6F84A3;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-3);
+}
+.site-footer__product-widgets a {
+    color: #C7D2E3;
+}
+.site-footer__product-widgets a:hover {
+    color: #fff;
+}
+
 /* Bottom bar */
 .site-footer__bottom {
     padding-block: var(--space-4);

@@ -4,6 +4,15 @@
 $linkedin_url   = get_theme_mod( 'bluu_linkedin_url', 'https://linkedin.com/company/bluuinteractive' );
 $twitter_url    = get_theme_mod( 'bluu_twitter_url',  'https://twitter.com/bluuinteractive' );
 $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
+
+// A page belonging to one of the dedicated product pages (or a child page
+// nested under one) gets that product's own footer logo, plus its own footer
+// menu/widgets in place of the default link grid once either is configured
+// for it — see bluu_get_product_context() in functions.php.
+$bluu_product_context = bluu_get_product_context();
+$bluu_product         = $bluu_product_context ? bluu_product_registry()[ $bluu_product_context ] : null;
+$bluu_product_logo_id = $bluu_product ? get_theme_mod( $bluu_product['logo_mod'] ) : 0;
+$bluu_product_has_footer_content = $bluu_product && ( has_nav_menu( $bluu_product['menu_footer'] ) || is_active_sidebar( $bluu_product['sidebar'] ) );
 ?>
 
 <footer class="site-footer" role="contentinfo">
@@ -29,6 +38,32 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
         </div>
     </div>
 
+    <?php if ( $bluu_product_has_footer_content ) : ?>
+        <!-- ── Product footer (menu + widgets) ─────────────────────────────── -->
+        <div class="site-footer__main">
+            <div class="container">
+                <div class="site-footer__product-footer">
+                    <?php if ( has_nav_menu( $bluu_product['menu_footer'] ) ) : ?>
+                        <nav class="site-footer__product-menu" aria-label="<?php echo esc_attr( $bluu_product['label'] ); ?> footer navigation">
+                            <?php
+                            wp_nav_menu( array(
+                                'theme_location' => $bluu_product['menu_footer'],
+                                'menu_class'     => 'site-footer__menu',
+                                'container'      => false,
+                                'depth'          => 1,
+                            ) );
+                            ?>
+                        </nav>
+                    <?php endif; ?>
+                    <?php if ( is_active_sidebar( $bluu_product['sidebar'] ) ) : ?>
+                        <div class="site-footer__product-widgets">
+                            <?php dynamic_sidebar( $bluu_product['sidebar'] ); ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    <?php else : ?>
     <!-- ── Main link grid ──────────────────────────────────────────────────── -->
     <div class="site-footer__main">
         <div class="container">
@@ -93,6 +128,7 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
     <!-- ── Bottom bar ──────────────────────────────────────────────────────── -->
     <div class="site-footer__bottom">
@@ -101,11 +137,21 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
 
                 <!-- Logo -->
                 <div class="site-footer__logo">
-                    <a href="<?php echo esc_url( home_url( '/' ) ); ?>" aria-label="<?php bloginfo( 'name' ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-                        <?php
-                        $dark_logo_id = get_theme_mod( 'bluu_logo_dark' );
-                        if ( $dark_logo_id ) :
-                            $dark_logo_url = wp_get_attachment_image_url( $dark_logo_id, 'full' );
+                    <a href="<?php echo esc_url( $bluu_product ? home_url( '/' . $bluu_product_context ) : home_url( '/' ) ); ?>" aria-label="<?php echo esc_attr( $bluu_product ? $bluu_product['label'] : get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+                        <?php if ( $bluu_product_logo_id ) : ?>
+                            <img src="<?php echo esc_url( wp_get_attachment_image_url( $bluu_product_logo_id, 'full' ) ); ?>" alt="<?php echo esc_attr( $bluu_product['label'] ); ?>" class="custom-logo site-footer__logo-img site-footer__logo-img--invert">
+                        <?php elseif ( $bluu_product ) : ?>
+                            <svg width="22" height="22" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                                <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#7FA0FF" stroke-width="1.8"/>
+                                <circle cx="13" cy="13" r="4.5" fill="#7FA0FF"/>
+                            </svg>
+                            <span class="site-footer__logo-text">
+                                <?php echo esc_html( get_theme_mod( $bluu_product['wordmark_mod'], $bluu_product['label'] ) ); ?>
+                            </span>
+                        <?php else :
+                            $dark_logo_id = get_theme_mod( 'bluu_logo_dark' );
+                            if ( $dark_logo_id ) :
+                                $dark_logo_url = wp_get_attachment_image_url( $dark_logo_id, 'full' );
                         ?>
                             <img src="<?php echo esc_url( $dark_logo_url ); ?>" alt="<?php bloginfo( 'name' ); ?>" class="custom-logo site-footer__logo-img">
                         <?php elseif ( has_custom_logo() ) :
@@ -121,7 +167,7 @@ $copyright_text = get_theme_mod( 'bluu_copyright_text', '' );
                             <span class="site-footer__logo-text">
                                 <span class="site-footer__logo-name">Bluu</span><span class="site-footer__logo-name site-footer__logo-name--accent">HQ</span>
                             </span>
-                        <?php endif; ?>
+                        <?php endif; endif; ?>
                     </a>
                 </div>
 

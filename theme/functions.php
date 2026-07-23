@@ -48,10 +48,17 @@ if ( ! function_exists( 'bluu_theme_setup' ) ) :
         add_theme_support( 'editor-styles' );
 
         // Register navigation menus
-        register_nav_menus( array(
+        $bluu_nav_locations = array(
             'primary' => esc_html__( 'Primary Navigation', 'bluu-interactive' ),
             'footer'  => esc_html__( 'Footer Navigation', 'bluu-interactive' ),
-        ) );
+        );
+        foreach ( bluu_product_registry() as $bluu_product ) {
+            /* translators: %s: product name, e.g. "BluuCRM" */
+            $bluu_nav_locations[ $bluu_product['menu_header'] ] = sprintf( esc_html__( '%s — Header Menu', 'bluu-interactive' ), $bluu_product['label'] );
+            /* translators: %s: product name, e.g. "BluuCRM" */
+            $bluu_nav_locations[ $bluu_product['menu_footer'] ] = sprintf( esc_html__( '%s — Footer Menu', 'bluu-interactive' ), $bluu_product['label'] );
+        }
+        register_nav_menus( $bluu_nav_locations );
 
         // Load text domain
         load_theme_textdomain( 'bluu-interactive', get_template_directory() . '/languages' );
@@ -267,6 +274,20 @@ function bluu_register_widgets() {
         'before_title'  => '<h3 class="widget-title">',
         'after_title'   => '</h3>',
     ) );
+
+    foreach ( bluu_product_registry() as $bluu_product ) {
+        register_sidebar( array(
+            /* translators: %s: product name, e.g. "BluuCRM" */
+            'name'          => sprintf( esc_html__( '%s — Footer Widgets', 'bluu-interactive' ), $bluu_product['label'] ),
+            'id'            => $bluu_product['sidebar'],
+            /* translators: %s: product name, e.g. "BluuCRM" */
+            'description'   => sprintf( esc_html__( 'Shown in the footer of the %s page and its child pages, instead of the default footer columns.', 'bluu-interactive' ), $bluu_product['label'] ),
+            'before_widget' => '<div id="%1$s" class="widget %2$s">',
+            'after_widget'  => '</div>',
+            'before_title'  => '<h3 class="widget-title">',
+            'after_title'   => '</h3>',
+        ) );
+    }
 }
 add_action( 'widgets_init', 'bluu_register_widgets' );
 
@@ -1022,6 +1043,104 @@ function bluu_softwares_mobile_list() {
     }
     $html .= '</ul>';
     return $html;
+}
+
+// ── Per-product headers/footers ─────────────────────────────────────────────────
+// Lets each product page (and its child pages) have its own logo, nav menu, and
+// footer widgets — configured via Appearance → Menus/Widgets and the Customizer's
+// "Product Page Branding" panel — instead of sharing the site-wide ones.
+
+/**
+ * Registry of dedicated product pages. Keyed by the same slug used in each
+ * page's Template Name (page-{slug}.php), so bluu_get_product_context() can
+ * map a page template straight to its menu locations / sidebar / logo setting.
+ */
+function bluu_product_registry() {
+    return array(
+        'crm'   => array(
+            'label'       => 'BluuCRM',
+            'menu_header' => 'crm-header',
+            'menu_footer' => 'crm-footer',
+            'sidebar'     => 'crm-footer-widgets',
+            'logo_mod'    => 'crm_logo',
+            'wordmark_mod'=> 'crm_wordmark',
+        ),
+        'shop'  => array(
+            'label'       => 'BluuShop',
+            'menu_header' => 'shop-header',
+            'menu_footer' => 'shop-footer',
+            'sidebar'     => 'shop-footer-widgets',
+            'logo_mod'    => 'shop_logo',
+            'wordmark_mod'=> 'shop_wordmark',
+        ),
+        'sync'  => array(
+            'label'       => 'BluuSync',
+            'menu_header' => 'sync-header',
+            'menu_footer' => 'sync-footer',
+            'sidebar'     => 'sync-footer-widgets',
+            'logo_mod'    => 'sync_logo',
+            'wordmark_mod'=> 'sync_wordmark',
+        ),
+        'audit' => array(
+            'label'       => 'BluuAudit',
+            'menu_header' => 'audit-header',
+            'menu_footer' => 'audit-footer',
+            'sidebar'     => 'audit-footer-widgets',
+            'logo_mod'    => 'audit_logo',
+            'wordmark_mod'=> 'audit_wordmark',
+        ),
+    );
+}
+
+/**
+ * Which product (if any) the current request belongs to — the page itself,
+ * the homepage (currently BluuAudit's), or a child page nested under one of
+ * the dedicated product pages via the normal WP Parent Page hierarchy.
+ *
+ * Returns a product slug (matching bluu_product_registry()) or false.
+ */
+function bluu_get_product_context() {
+    static $context;
+    if ( isset( $context ) ) {
+        return $context;
+    }
+
+    $product_templates = array();
+    foreach ( array_keys( bluu_product_registry() ) as $slug ) {
+        $product_templates[ "page-{$slug}.php" ] = $slug;
+    }
+
+    // front-page.php is currently BluuAudit's homepage, regardless of
+    // whether a template is explicitly assigned to that page.
+    if ( is_front_page() ) {
+        $context = 'audit';
+        return $context;
+    }
+
+    if ( ! is_singular( 'page' ) ) {
+        $context = false;
+        return $context;
+    }
+
+    $post_id  = get_queried_object_id();
+    $template = get_page_template_slug( $post_id );
+
+    if ( isset( $product_templates[ $template ] ) ) {
+        $context = $product_templates[ $template ];
+        return $context;
+    }
+
+    // Child pages: walk up Parent Page ancestors for the nearest match.
+    foreach ( get_post_ancestors( $post_id ) as $ancestor_id ) {
+        $ancestor_template = get_page_template_slug( $ancestor_id );
+        if ( isset( $product_templates[ $ancestor_template ] ) ) {
+            $context = $product_templates[ $ancestor_template ];
+            return $context;
+        }
+    }
+
+    $context = false;
+    return $context;
 }
 
 // ── Admin Enqueue ──────────────────────────────────────────────────────────────

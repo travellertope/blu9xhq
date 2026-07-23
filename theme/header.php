@@ -14,12 +14,34 @@
     <?php esc_html_e( 'Skip to main content', 'bluu-interactive' ); ?>
 </a>
 
+<?php
+// A page belonging to one of the dedicated product pages (or a child page
+// nested under one) gets that product's own logo and nav menu instead of the
+// site-wide ones — see bluu_get_product_context() in functions.php.
+$bluu_product_context = bluu_get_product_context();
+$bluu_product          = $bluu_product_context ? bluu_product_registry()[ $bluu_product_context ] : null;
+$bluu_product_logo_id  = $bluu_product ? get_theme_mod( $bluu_product['logo_mod'] ) : 0;
+$bluu_header_menu_location = ( $bluu_product && has_nav_menu( $bluu_product['menu_header'] ) )
+    ? $bluu_product['menu_header']
+    : 'primary';
+?>
+
 <header class="site-header" id="site-header" role="banner">
     <div class="site-header__inner container">
 
         <!-- Logo -->
-        <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="site-header__logo" aria-label="<?php echo esc_attr( get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
-            <?php if ( has_custom_logo() ) : ?>
+        <a href="<?php echo esc_url( $bluu_product ? home_url( '/' . $bluu_product_context ) : home_url( '/' ) ); ?>" class="site-header__logo" aria-label="<?php echo esc_attr( $bluu_product ? $bluu_product['label'] : get_bloginfo( 'name' ) ); ?> – <?php esc_attr_e( 'Home', 'bluu-interactive' ); ?>">
+            <?php if ( $bluu_product_logo_id ) : ?>
+                <img src="<?php echo esc_url( wp_get_attachment_image_url( $bluu_product_logo_id, 'full' ) ); ?>" alt="<?php echo esc_attr( $bluu_product['label'] ); ?>" class="custom-logo">
+            <?php elseif ( $bluu_product ) : ?>
+                <svg class="site-header__logo-mark" width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+                    <path d="M13 1L24 7.5V18.5L13 25L2 18.5V7.5L13 1Z" stroke="#2F5FE0" stroke-width="1.8"/>
+                    <circle cx="13" cy="13" r="4.5" fill="#2F5FE0"/>
+                </svg>
+                <span class="site-header__logo-text">
+                    <?php echo esc_html( get_theme_mod( $bluu_product['wordmark_mod'], $bluu_product['label'] ) ); ?>
+                </span>
+            <?php elseif ( has_custom_logo() ) : ?>
                 <?php
                 $custom_logo_id  = get_theme_mod( 'custom_logo' );
                 $custom_logo_url = wp_get_attachment_image_url( $custom_logo_id, 'full' );
@@ -40,7 +62,7 @@
         <nav class="site-header__nav" id="primary-nav" role="navigation" aria-label="<?php esc_attr_e( 'Primary Navigation', 'bluu-interactive' ); ?>">
             <?php
             wp_nav_menu( array(
-                'theme_location' => 'primary',
+                'theme_location' => $bluu_header_menu_location,
                 'menu_class'     => 'site-header__menu',
                 'container'      => false,
                 'fallback_cb'    => 'bluu_fallback_nav',
@@ -84,7 +106,7 @@
     <div class="mobile-nav__inner">
         <?php
         wp_nav_menu( array(
-            'theme_location' => 'primary',
+            'theme_location' => $bluu_header_menu_location,
             'menu_class'     => 'mobile-nav__menu',
             'container'      => false,
             'fallback_cb'    => 'bluu_fallback_mobile_nav',
