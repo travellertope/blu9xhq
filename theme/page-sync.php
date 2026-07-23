@@ -102,11 +102,11 @@ $plans = array(
     array(
         'name'        => 'Pro',
         'description' => 'For developers & sysadmins',
-        'price'       => '$19',
+        'price'       => '$14',
         'period'      => '/month',
         'featured'    => true,
         'cta_text'    => 'Start 14-Day Free Trial',
-        'note'        => '14 days free, then $19/mo — cancel anytime',
+        'note'        => '14 days free, then $14/mo — cancel anytime',
         'highlights'  => array(
             'Unlimited transfers',
             'Up to 10GB per file',
