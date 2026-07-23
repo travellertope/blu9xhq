@@ -1105,8 +1105,15 @@ function bluu_product_registry() {
 
 /**
  * Which product (if any) the current request belongs to — the page itself,
- * the homepage (currently BluuAudit's), or a child page nested under one of
- * the dedicated product pages via the normal WP Parent Page hierarchy.
+ * or a child page nested under one of the dedicated product pages via the
+ * normal WP Parent Page hierarchy.
+ *
+ * Deliberately excludes the homepage even though front-page.php currently
+ * reuses BluuAudit's marketing content — the homepage is the whole site's
+ * front door, so it keeps the default BluuHQ identity (logo/nav/footer)
+ * rather than picking up BluuAudit's branding just because it shares that
+ * content. Only the dedicated /audit page (and pages nested under it) get
+ * BluuAudit's own branding once configured.
  *
  * Returns a product slug (matching bluu_product_registry()) or false.
  */
@@ -1121,14 +1128,7 @@ function bluu_get_product_context() {
         $product_templates[ "page-{$slug}.php" ] = $slug;
     }
 
-    // front-page.php is currently BluuAudit's homepage, regardless of
-    // whether a template is explicitly assigned to that page.
-    if ( is_front_page() ) {
-        $context = 'audit';
-        return $context;
-    }
-
-    if ( ! is_singular( 'page' ) ) {
+    if ( is_front_page() || ! is_singular( 'page' ) ) {
         $context = false;
         return $context;
     }
