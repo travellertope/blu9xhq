@@ -1,16 +1,32 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { planAllows } from "@/lib/planLimits";
-import { getTenantById } from "@/lib/tenant";
+import { getTenantById, type TenantRow } from "@/lib/tenant";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import PortalNav from "./PortalNav";
 
-export const metadata = {
-  title: "BluuHQ Client Portal",
-  description: "Your BluuHQ client portal",
-};
-
 const DEFAULT_ACCENT = "#2F5FE0";
+
+// cache() dedupes this within a single request, so generateMetadata() and
+// the layout component below share one actual DB call instead of two.
+const getBrandingTenant = cache(async (): Promise<TenantRow | null> => {
+  const session = await getSession();
+  if (!session) return null;
+  const { tenantId, tenantPlan } = session.user;
+  if (!tenantId || !planAllows(tenantPlan, "whiteLabel")) return null;
+  return getTenantById(tenantId);
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const tenant = await getBrandingTenant();
+  const name = tenant?.name || "BluuHQ";
+  return {
+    title: `${name} Client Portal`,
+    description: `Your ${name} client portal`,
+  };
+}
 
 export default async function PortalLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -25,20 +41,11 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   // admin/layout.tsx and /portal-login's own gate, so a client sees the same
   // branding their agency has actually paid for, consistently across both
   // the login screen and the portal itself.
-  const { tenantId, tenantPlan } = session.user;
-  let tenantLogo: string | null = null;
-  let tenantName: string | null = null;
-  let accentColour = DEFAULT_ACCENT;
-  let whiteLabeled = false;
-  if (tenantId && planAllows(tenantPlan, "whiteLabel")) {
-    const tenant = await getTenantById(tenantId);
-    if (tenant) {
-      tenantLogo = tenant.logo_url;
-      tenantName = tenant.name;
-      accentColour = tenant.accent_colour ?? DEFAULT_ACCENT;
-      whiteLabeled = true;
-    }
-  }
+  const tenant = await getBrandingTenant();
+  const tenantLogo = tenant?.logo_url ?? null;
+  const tenantName = tenant?.name ?? null;
+  const accentColour = tenant?.accent_colour ?? DEFAULT_ACCENT;
+  const whiteLabeled = !!tenant;
 
   return (
     <div
