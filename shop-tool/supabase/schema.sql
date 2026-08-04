@@ -60,6 +60,57 @@ alter table shops add column if not exists referral_code text unique;
 alter table shops add column if not exists referred_by_shop_id uuid references shops(id) on delete set null;
 alter table shops add column if not exists referral_bonus_expires_at timestamptz;
 
+-- Denormalized copy of the owner's auth.users.email, set at shop creation
+-- (see lib/onboarding.ts, app/api/shops/route.ts) so /admin/shops can
+-- search/filter by owner email with a plain ilike instead of paging
+-- through the Auth Admin API.
+alter table shops add column if not exists owner_email text;
+create index if not exists shops_owner_email_idx on shops(owner_email);
+
+-- Keeps owner_email in sync with auth.users.email for however it might
+-- change — the in-app "Change email" flow (components/dashboard/
+-- change-email-form.tsx), a password-reset-style admin edit in the
+-- Supabase dashboard, a future support tool, anything. A DB trigger is the
+-- one place this can be guaranteed correct regardless of which code path
+-- did the changing, rather than relying on every future write path to
+-- remember to also update `shops`.
+create or replace function sync_shops_owner_email()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.email is distinct from old.email then
+    update shops set owner_email = new.email where owner_user_id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_email_updated on auth.users;
+create trigger on_auth_user_email_updated
+  after update of email on auth.users
+  for each row execute function sync_shops_owner_email();
+
+-- Counts consecutive failed renewal charges for a paid shop, reset to 0 on
+-- any successful charge or plan change. Drives the payment-reminder email
+-- sequence in lib/payment-reminders.ts — see that file for why a simple
+-- per-shop counter is used instead of reading each billing provider's own
+-- retry-schedule metadata.
+alter table shops add column if not exists payment_failure_count integer not null default 0;
+
+-- One-time backfill for shops created before owner_email existed. Safe to
+-- re-run — only touches rows still missing it. Needs to run as plain SQL
+-- (this file, via the SQL Editor or `supabase db push`) rather than
+-- through the app, since auth.users isn't reachable from the PostgREST
+-- API shop-tool's own clients use.
+update shops
+set owner_email = auth_users.email
+from auth.users as auth_users
+where shops.owner_user_id = auth_users.id
+  and shops.owner_email is null;
+
 -- =============================================================================
 -- CATEGORIES
 -- =============================================================================

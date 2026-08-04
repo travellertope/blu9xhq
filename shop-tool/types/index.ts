@@ -3,6 +3,7 @@ export type ShopPlan = "free" | "starter" | "pro";
 export interface Shop {
   id: string;
   owner_user_id: string;
+  owner_email: string | null;
   slug: string;
   name: string;
   whatsapp_number: string;
@@ -30,6 +31,7 @@ export interface Shop {
   referral_code: string | null;
   referred_by_shop_id: string | null;
   referral_bonus_expires_at: string | null;
+  payment_failure_count: number;
   active: boolean;
   created_at: string;
   updated_at: string;

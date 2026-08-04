@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaystackWebhookSignature } from "@/lib/paystack";
 import { checkAndAwardReferralReward } from "@/lib/referral";
+import { handlePaymentFailure } from "@/lib/payment-reminders";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { ShopPlan } from "@/types";
 
@@ -38,12 +39,13 @@ async function processEvent(event: { event: string; data: Record<string, unknown
       const metadata = (data.metadata ?? {}) as Record<string, unknown>;
       const shopId = metadata.shop_id;
       const plan = metadata.target_plan;
+      const customer = data.customer as { customer_code?: string } | undefined;
+      const supabase = createSupabaseAdminClient();
+
       // Renewal charges don't carry our custom metadata (only the original
       // /transaction/initialize call does) — this naturally no-ops on
       // renewals, which is correct, since the plan is already set.
       if (typeof shopId === "string" && isShopPlan(plan)) {
-        const customer = data.customer as { customer_code?: string } | undefined;
-        const supabase = createSupabaseAdminClient();
         await supabase
           .from("shops")
           .update({
@@ -51,8 +53,16 @@ async function processEvent(event: { event: string; data: Record<string, unknown
             branding_hidden: plan !== "free",
             billing_provider: "paystack",
             paystack_customer_code: customer?.customer_code ?? null,
+            payment_failure_count: 0,
           })
           .eq("id", shopId);
+      } else if (customer?.customer_code) {
+        // A successful renewal charge — no custom metadata to key off, but
+        // any failure streak from previous retries is now over.
+        await supabase
+          .from("shops")
+          .update({ payment_failure_count: 0 })
+          .eq("paystack_customer_code", customer.customer_code);
       }
     }
 
@@ -82,7 +92,7 @@ async function processEvent(event: { event: string; data: Record<string, unknown
         const supabase = createSupabaseAdminClient();
         const { data: updated } = await supabase
           .from("shops")
-          .update({ plan: "free", branding_hidden: false })
+          .update({ plan: "free", branding_hidden: false, payment_failure_count: 0 })
           .eq("paystack_subscription_code", subscriptionCode)
           .select("id")
           .maybeSingle();
@@ -93,6 +103,25 @@ async function processEvent(event: { event: string; data: Record<string, unknown
         if (updated) {
           await checkAndAwardReferralReward(updated.id).catch((err) =>
             console.error("[paystack-webhook] referral reward check failed:", err)
+          );
+        }
+      }
+    }
+
+    if (event.event === "invoice.payment_failed") {
+      const data = event.data;
+      const subscription = data.subscription as { subscription_code?: string } | undefined;
+      const subscriptionCode = subscription?.subscription_code;
+      if (typeof subscriptionCode === "string") {
+        const supabase = createSupabaseAdminClient();
+        const { data: shop } = await supabase
+          .from("shops")
+          .select("id")
+          .eq("paystack_subscription_code", subscriptionCode)
+          .maybeSingle();
+        if (shop) {
+          await handlePaymentFailure(shop.id).catch((err) =>
+            console.error("[paystack-webhook] payment failure handling failed:", err)
           );
         }
       }

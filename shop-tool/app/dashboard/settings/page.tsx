@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { getMyShop } from "@/lib/auth";
+import { getMyShop, getSession } from "@/lib/auth";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import SettingsForm from "@/components/dashboard/settings-form";
+import ChangeEmailForm from "@/components/dashboard/change-email-form";
 import DeliveryZonesManager from "@/components/dashboard/delivery-zones-manager";
 import ReviewsManager from "@/components/dashboard/reviews-manager";
 import type { DeliveryZone, ShopReview } from "@/types";
@@ -10,6 +11,7 @@ export default async function SettingsPage() {
   const shop = await getMyShop();
   if (!shop) return null;
 
+  const session = await getSession();
   const supabase = createSupabaseServerClient();
   const [{ data: zones }, { data: reviews }] = await Promise.all([
     supabase.from("delivery_zones").select("*").eq("shop_id", shop.id).order("sort_order"),
@@ -24,6 +26,9 @@ export default async function SettingsPage() {
       >
         Refer a shop, earn free Starter →
       </Link>
+      <div className="mb-5">
+        <ChangeEmailForm currentEmail={session?.email || shop.owner_email || ""} />
+      </div>
       <SettingsForm shop={shop} />
       <div className="mt-5">
         <DeliveryZonesManager currency={shop.currency} initialZones={(zones ?? []) as DeliveryZone[]} />

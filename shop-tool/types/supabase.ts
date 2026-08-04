@@ -18,7 +18,7 @@ export interface Database {
     Tables: {
       shops: TableDef<
         Shop,
-        "owner_user_id" | "slug" | "name" | "whatsapp_number",
+        "owner_user_id" | "owner_email" | "slug" | "name" | "whatsapp_number",
         | "id"
         | "currency"
         | "logo_url"
@@ -44,6 +44,7 @@ export interface Database {
         | "referral_code"
         | "referred_by_shop_id"
         | "referral_bonus_expires_at"
+        | "payment_failure_count"
         | "active"
         | "created_at"
         | "updated_at"
