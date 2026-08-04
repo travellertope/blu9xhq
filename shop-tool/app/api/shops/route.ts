@@ -38,6 +38,7 @@ export async function POST(request: Request) {
     .from("shops")
     .insert({
       owner_user_id: session.userId,
+      owner_email: session.email || null,
       slug,
       name: parsed.data.name,
       whatsapp_number: parsed.data.whatsapp_number,

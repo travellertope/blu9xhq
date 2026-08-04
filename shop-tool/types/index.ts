@@ -3,6 +3,7 @@ export type ShopPlan = "free" | "starter" | "pro";
 export interface Shop {
   id: string;
   owner_user_id: string;
+  owner_email: string | null;
   slug: string;
   name: string;
   whatsapp_number: string;

@@ -48,6 +48,7 @@ export async function completePendingShopSetup(
       .from("shops")
       .insert({
         owner_user_id: user.id,
+        owner_email: user.email ?? null,
         slug,
         name: pendingName,
         whatsapp_number: pendingWhatsapp,

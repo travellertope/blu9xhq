@@ -60,6 +60,26 @@ alter table shops add column if not exists referral_code text unique;
 alter table shops add column if not exists referred_by_shop_id uuid references shops(id) on delete set null;
 alter table shops add column if not exists referral_bonus_expires_at timestamptz;
 
+-- Denormalized copy of the owner's auth.users.email, set at shop creation
+-- (see lib/onboarding.ts, app/api/shops/route.ts) so /admin/shops can
+-- search/filter by owner email with a plain ilike instead of paging
+-- through the Auth Admin API. There's no email-change flow in this app
+-- today, so nothing re-syncs this if an owner's auth email is ever
+-- changed directly in Supabase — worth revisiting if that changes.
+alter table shops add column if not exists owner_email text;
+create index if not exists shops_owner_email_idx on shops(owner_email);
+
+-- One-time backfill for shops created before owner_email existed. Safe to
+-- re-run — only touches rows still missing it. Needs to run as plain SQL
+-- (this file, via the SQL Editor or `supabase db push`) rather than
+-- through the app, since auth.users isn't reachable from the PostgREST
+-- API shop-tool's own clients use.
+update shops
+set owner_email = auth_users.email
+from auth.users as auth_users
+where shops.owner_user_id = auth_users.id
+  and shops.owner_email is null;
+
 -- =============================================================================
 -- CATEGORIES
 -- =============================================================================

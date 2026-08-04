@@ -18,7 +18,7 @@ export interface Database {
     Tables: {
       shops: TableDef<
         Shop,
-        "owner_user_id" | "slug" | "name" | "whatsapp_number",
+        "owner_user_id" | "owner_email" | "slug" | "name" | "whatsapp_number",
         | "id"
         | "currency"
         | "logo_url"
