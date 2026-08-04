@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getMyShop, getSession } from "@/lib/auth";
-import { getPlanLimits } from "@/lib/planLimits";
+import { getPlanLimits, getEffectivePlan } from "@/lib/planLimits";
+import { assignReferralCode, recordReferral, resolveReferrerShopId } from "@/lib/referral";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { toSlug } from "@/lib/utils";
 
@@ -9,6 +10,7 @@ const createSchema = z.object({
   name: z.string().trim().min(1).max(120),
   slug: z.string().trim().min(1).max(40),
   whatsapp_number: z.string().trim().min(6).max(20),
+  referral_code: z.string().trim().max(20).optional(),
 });
 
 export async function POST(request: Request) {
@@ -32,16 +34,27 @@ export async function POST(request: Request) {
   }
 
   const slug = toSlug(parsed.data.slug) || toSlug(parsed.data.name);
-  const { error } = await supabase.from("shops").insert({
-    owner_user_id: session.userId,
-    slug,
-    name: parsed.data.name,
-    whatsapp_number: parsed.data.whatsapp_number,
-  });
+  const { data: inserted, error } = await supabase
+    .from("shops")
+    .insert({
+      owner_user_id: session.userId,
+      slug,
+      name: parsed.data.name,
+      whatsapp_number: parsed.data.whatsapp_number,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    const message = error.code === "23505" ? "That shop link is taken — try another." : "Couldn't create your shop";
+  if (error || !inserted) {
+    const message = error?.code === "23505" ? "That shop link is taken — try another." : "Couldn't create your shop";
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  await assignReferralCode(inserted.id);
+  const referrerShopId = await resolveReferrerShopId(parsed.data.referral_code);
+  if (referrerShopId) {
+    await supabase.from("shops").update({ referred_by_shop_id: referrerShopId }).eq("id", inserted.id);
+    await recordReferral(referrerShopId, inserted.id);
   }
 
   return NextResponse.json({ ok: true });
@@ -86,7 +99,7 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid shop details" }, { status: 400 });
   }
 
-  const limits = getPlanLimits(shop.plan);
+  const limits = getPlanLimits(getEffectivePlan(shop));
   const updates = parsed.data;
 
   if (updates.theme_id && !limits.themes.includes(updates.theme_id)) {

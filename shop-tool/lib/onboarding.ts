@@ -1,5 +1,6 @@
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { toSlug } from "@/lib/utils";
+import { assignReferralCode, recordReferral, resolveReferrerShopId } from "@/lib/referral";
 import type { Database } from "@/types/supabase";
 
 /**
@@ -39,19 +40,33 @@ export async function completePendingShopSetup(
     typeof meta.pending_shop_slug === "string" && meta.pending_shop_slug
       ? meta.pending_shop_slug
       : toSlug(pendingName);
+  const pendingReferralCode =
+    typeof meta.pending_referral_code === "string" ? meta.pending_referral_code : "";
 
   for (const slug of [baseSlug, `${baseSlug}-${user.id.slice(0, 4)}`]) {
-    const { error: insertError } = await supabase.from("shops").insert({
-      owner_user_id: user.id,
-      slug,
-      name: pendingName,
-      whatsapp_number: pendingWhatsapp,
-    });
+    const { data: inserted, error: insertError } = await supabase
+      .from("shops")
+      .insert({
+        owner_user_id: user.id,
+        slug,
+        name: pendingName,
+        whatsapp_number: pendingWhatsapp,
+      })
+      .select("id")
+      .single();
 
-    if (!insertError) return { redirectTo: "/dashboard" };
+    if (!insertError && inserted) {
+      await assignReferralCode(inserted.id);
+      const referrerShopId = await resolveReferrerShopId(pendingReferralCode);
+      if (referrerShopId) {
+        await supabase.from("shops").update({ referred_by_shop_id: referrerShopId }).eq("id", inserted.id);
+        await recordReferral(referrerShopId, inserted.id);
+      }
+      return { redirectTo: "/dashboard" };
+    }
     // Unique-violation on slug — retry once with a short suffix; any other
     // error means something's actually wrong, so stop rather than loop.
-    if (insertError.code !== "23505") break;
+    if (insertError?.code !== "23505") break;
   }
 
   return { redirectTo: "/create" };

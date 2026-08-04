@@ -1,4 +1,4 @@
-import type { Shop, Category, Product, DeliveryZone, OrderIntent, AnalyticsEvent, ShopReview } from "./index";
+import type { Shop, Category, Product, DeliveryZone, OrderIntent, AnalyticsEvent, ShopReview, Referral } from "./index";
 
 // supabase-js's generic plumbing structurally checks Row/Insert/Update against
 // Record<string, unknown> — a plain `interface` fails that check even when
@@ -41,6 +41,9 @@ export interface Database {
         | "paystack_subscription_code"
         | "paystack_email_token"
         | "directory_opt_in"
+        | "referral_code"
+        | "referred_by_shop_id"
+        | "referral_bonus_expires_at"
         | "active"
         | "created_at"
         | "updated_at"
@@ -84,6 +87,11 @@ export interface Database {
         ShopReview,
         "shop_id" | "reviewer_name" | "rating",
         "id" | "comment" | "hidden" | "created_at"
+      >;
+      referrals: TableDef<
+        Referral,
+        "referrer_shop_id" | "referred_shop_id",
+        "id" | "status" | "activated_at" | "created_at"
       >;
     };
     Views: Record<string, never>;

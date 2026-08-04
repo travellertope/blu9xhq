@@ -15,7 +15,7 @@ import VerifyCodeForm from "@/components/onboarding/verify-code-form";
  * on signInWithOtp, so completing sign-in (link or code) can create the
  * shop immediately — no separate "finish setting up" step.
  */
-export default function CreateWithEmailForm() {
+export default function CreateWithEmailForm({ referralCode }: { referralCode?: string }) {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [slugEdited, setSlugEdited] = useState(false);
@@ -39,6 +39,7 @@ export default function CreateWithEmailForm() {
           pending_shop_name: name,
           pending_shop_slug: slug,
           pending_whatsapp_number: whatsapp,
+          ...(referralCode ? { pending_referral_code: referralCode } : {}),
         },
       },
     });

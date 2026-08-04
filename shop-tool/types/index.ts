@@ -27,6 +27,9 @@ export interface Shop {
   paystack_subscription_code: string | null;
   paystack_email_token: string | null;
   directory_opt_in: boolean;
+  referral_code: string | null;
+  referred_by_shop_id: string | null;
+  referral_bonus_expires_at: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -104,6 +107,17 @@ export interface ShopReview {
   rating: number;
   comment: string | null;
   hidden: boolean;
+  created_at: string;
+}
+
+export type ReferralStatus = "pending" | "active" | "rewarded";
+
+export interface Referral {
+  id: string;
+  referrer_shop_id: string;
+  referred_shop_id: string;
+  status: ReferralStatus;
+  activated_at: string | null;
   created_at: string;
 }
 
