@@ -27,9 +27,11 @@ const NAV_ITEMS = [
 interface Props {
   firstName: string;
   affiliateCode: string;
+  tenantLogo?: string;
+  tenantName?: string;
 }
 
-function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate?: () => void }) {
+function NavInner({ firstName, affiliateCode, tenantLogo, tenantName, onNavigate }: Props & { onNavigate?: () => void }) {
   const pathname = usePathname();
   const router   = useRouter();
 
@@ -41,7 +43,12 @@ function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate
   return (
     <div className="flex h-full flex-col bg-white border-r">
       <div className="flex h-14 items-center px-5 border-b shrink-0">
-        <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
+        {tenantLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={tenantLogo} alt={tenantName ?? "Logo"} className="h-8 max-w-[140px] object-contain" />
+        ) : (
+          <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
+        )}
       </div>
 
       <ScrollArea className="flex-1 py-4">
@@ -66,11 +73,11 @@ function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-blue-50 text-blue-700"
+                    ? "bg-blue-50 text-[var(--tenant-accent)]"
                     : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 )}
               >
-                <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-blue-700" : "text-slate-400")} />
+                <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-[var(--tenant-accent)]" : "text-slate-400")} />
                 {label}
               </Link>
             );
@@ -97,19 +104,24 @@ function NavInner({ firstName, affiliateCode, onNavigate }: Props & { onNavigate
   );
 }
 
-export default function AffiliateNav({ firstName, affiliateCode }: Props) {
+export default function AffiliateNav({ firstName, affiliateCode, tenantLogo, tenantName }: Props) {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-56 shrink-0 h-full">
-        <NavInner firstName={firstName} affiliateCode={affiliateCode} />
+        <NavInner firstName={firstName} affiliateCode={affiliateCode} tenantLogo={tenantLogo} tenantName={tenantName} />
       </aside>
 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-white border-b z-50 flex items-center justify-between px-4">
-        <Image src="/logo.png" alt="BluuHQ" width={90} height={26} priority className="object-contain" />
+        {tenantLogo ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={tenantLogo} alt={tenantName ?? "Logo"} className="h-6 max-w-[110px] object-contain" />
+        ) : (
+          <Image src="/logo.png" alt="BluuHQ" width={90} height={26} priority className="object-contain" />
+        )}
         <button
           onClick={() => setMobileOpen(true)}
           className="p-2 rounded-md text-slate-600 hover:bg-slate-100"
@@ -125,7 +137,13 @@ export default function AffiliateNav({ firstName, affiliateCode }: Props) {
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
-          <NavInner firstName={firstName} affiliateCode={affiliateCode} onNavigate={() => setMobileOpen(false)} />
+          <NavInner
+            firstName={firstName}
+            affiliateCode={affiliateCode}
+            tenantLogo={tenantLogo}
+            tenantName={tenantName}
+            onNavigate={() => setMobileOpen(false)}
+          />
         </SheetContent>
       </Sheet>
     </>
