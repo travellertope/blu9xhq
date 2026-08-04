@@ -66,6 +66,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  // Admin-email check happens in lib/admin.ts (requireAdmin) — this is just
+  // the "must be signed in at all" gate, same pattern as /dashboard above.
+  if ((pathname === "/admin" || pathname.startsWith("/admin/")) && !session) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   return res;
 }
 
