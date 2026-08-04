@@ -1,21 +1,32 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
+import { getEffectivePlan, getPlanLimits } from "@/lib/planLimits";
+import type { ShopPlan } from "@/types";
 
-/** Looks up a shop's slug by its custom domain (Starter/Pro only). Runs
- *  against Supabase's REST API directly since middleware can't use the
- *  cookie-bound server client for an unauthenticated, cross-shop query. */
+/** Looks up a shop's slug by its custom domain, but only if it's still
+ *  entitled to one — custom domains are a Starter/Pro perk (or a free shop
+ *  with an active referral bonus), and a downgraded shop shouldn't keep a
+ *  paid-only URL resolving indefinitely. Runs against Supabase's REST API
+ *  directly since middleware can't use the cookie-bound server client for
+ *  an unauthenticated, cross-shop query. */
 async function resolveShopSlugForDomain(host: string): Promise<string | null> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return null;
   try {
     const res = await fetch(
-      `${url}/rest/v1/shops?custom_domain=eq.${encodeURIComponent(host)}&active=eq.true&select=slug&limit=1`,
+      `${url}/rest/v1/shops?custom_domain=eq.${encodeURIComponent(host)}&active=eq.true&select=slug,plan,referral_bonus_expires_at&limit=1`,
       { headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` } }
     );
     if (!res.ok) return null;
-    const rows = (await res.json()) as { slug: string }[];
-    return rows[0]?.slug ?? null;
+    const rows = (await res.json()) as
+      | { slug: string; plan: ShopPlan; referral_bonus_expires_at: string | null }[]
+      | undefined;
+    const shop = rows?.[0];
+    if (!shop) return null;
+    const effectivePlan = getEffectivePlan(shop);
+    if (!getPlanLimits(effectivePlan).customDomain) return null;
+    return shop.slug;
   } catch {
     return null;
   }

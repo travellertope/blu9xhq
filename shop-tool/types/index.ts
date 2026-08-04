@@ -31,6 +31,7 @@ export interface Shop {
   referral_code: string | null;
   referred_by_shop_id: string | null;
   referral_bonus_expires_at: string | null;
+  payment_failure_count: number;
   active: boolean;
   created_at: string;
   updated_at: string;

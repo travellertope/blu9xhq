@@ -1,9 +1,10 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { constructStripeWebhookEvent } from "@/lib/stripe";
+import { constructStripeWebhookEvent, getStripe } from "@/lib/stripe";
 import { getPlanFromPriceId } from "@/lib/stripe-products";
 import { checkAndAwardReferralReward } from "@/lib/referral";
+import { handlePaymentFailure, resetPaymentFailureCount } from "@/lib/payment-reminders";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { ShopPlan } from "@/types";
 import type Stripe from "stripe";
@@ -37,6 +38,7 @@ async function setShopPlan(shopId: string, plan: ShopPlan, stripeCustomerId?: st
     .update({
       plan,
       branding_hidden: plan !== "free",
+      payment_failure_count: 0,
       ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
     })
     .eq("id", shopId);
@@ -49,6 +51,23 @@ async function setShopPlan(shopId: string, plan: ShopPlan, stripeCustomerId?: st
       console.error("[shop-billing-webhook] referral reward check failed:", err)
     );
   }
+}
+
+/**
+ * Invoice objects don't carry shop_id metadata directly — only the
+ * subscription does. `invoice.subscription` doesn't reliably resolve on
+ * this SDK/API version (the same quirk already fixed in crm's and
+ * scan-tool's webhooks); `invoice.parent.subscription_details.subscription`
+ * is the pattern that actually works — copied verbatim rather than
+ * re-derived, per SHOP-TOOL-PLAN's note on that bug.
+ */
+async function shopIdForInvoice(invoice: Stripe.Invoice): Promise<string | null> {
+  const subRef = invoice.parent?.subscription_details?.subscription;
+  const subscriptionId = typeof subRef === "string" ? subRef : null;
+  if (!subscriptionId) return null;
+
+  const subscription = await getStripe().subscriptions.retrieve(subscriptionId);
+  return subscription.metadata?.shop_id ?? null;
 }
 
 async function processEvent(event: Stripe.Event): Promise<void> {
@@ -82,6 +101,16 @@ async function processEvent(event: Stripe.Event): Promise<void> {
       const sub = event.data.object as Stripe.Subscription;
       const shopId = sub.metadata?.shop_id;
       if (shopId) await setShopPlan(shopId, "free");
+    }
+
+    if (event.type === "invoice.paid") {
+      const shopId = await shopIdForInvoice(event.data.object as Stripe.Invoice);
+      if (shopId) await resetPaymentFailureCount(shopId);
+    }
+
+    if (event.type === "invoice.payment_failed") {
+      const shopId = await shopIdForInvoice(event.data.object as Stripe.Invoice);
+      if (shopId) await handlePaymentFailure(shopId);
     }
   } catch (err) {
     console.error("[shop-billing-webhook] processEvent error:", err);

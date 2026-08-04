@@ -69,6 +69,13 @@ alter table shops add column if not exists referral_bonus_expires_at timestamptz
 alter table shops add column if not exists owner_email text;
 create index if not exists shops_owner_email_idx on shops(owner_email);
 
+-- Counts consecutive failed renewal charges for a paid shop, reset to 0 on
+-- any successful charge or plan change. Drives the payment-reminder email
+-- sequence in lib/payment-reminders.ts — see that file for why a simple
+-- per-shop counter is used instead of reading each billing provider's own
+-- retry-schedule metadata.
+alter table shops add column if not exists payment_failure_count integer not null default 0;
+
 -- One-time backfill for shops created before owner_email existed. Safe to
 -- re-run — only touches rows still missing it. Needs to run as plain SQL
 -- (this file, via the SQL Editor or `supabase db push`) rather than
