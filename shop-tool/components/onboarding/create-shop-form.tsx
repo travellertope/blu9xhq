@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 
 /** For a signed-in user who hasn't finished creating a shop yet. */
-export default function CreateShopForm() {
+export default function CreateShopForm({ referralCode }: { referralCode?: string }) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
@@ -30,7 +30,7 @@ export default function CreateShopForm() {
     const res = await fetch("/api/shops", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug, whatsapp_number: whatsapp }),
+      body: JSON.stringify({ name, slug, whatsapp_number: whatsapp, referral_code: referralCode }),
     });
 
     setLoading(false);

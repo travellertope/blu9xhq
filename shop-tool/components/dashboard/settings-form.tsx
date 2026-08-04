@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { THEMES, FONT_PAIRINGS, type ShopThemeId } from "@/lib/theme";
-import { getPlanLimits } from "@/lib/planLimits";
+import { getPlanLimits, getEffectivePlan } from "@/lib/planLimits";
 import ThemeThumbnail from "@/components/dashboard/theme-thumbnail";
 import type { Shop } from "@/types";
 
 export default function SettingsForm({ shop }: { shop: Shop }) {
   const router = useRouter();
-  const limits = getPlanLimits(shop.plan);
+  const limits = getPlanLimits(getEffectivePlan(shop));
   const logoInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 

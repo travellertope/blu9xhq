@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPaystackWebhookSignature } from "@/lib/paystack";
+import { checkAndAwardReferralReward } from "@/lib/referral";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { ShopPlan } from "@/types";
 
@@ -79,10 +80,21 @@ async function processEvent(event: { event: string; data: Record<string, unknown
       const subscriptionCode = data.subscription_code;
       if (typeof subscriptionCode === "string") {
         const supabase = createSupabaseAdminClient();
-        await supabase
+        const { data: updated } = await supabase
           .from("shops")
           .update({ plan: "free", branding_hidden: false })
-          .eq("paystack_subscription_code", subscriptionCode);
+          .eq("paystack_subscription_code", subscriptionCode)
+          .select("id")
+          .maybeSingle();
+
+        // Dropping back to free is the one moment a referrer's already-active
+        // referrals (accrued while they were paying, so skipped at the time)
+        // can become eligible for a reward — see checkAndAwardReferralReward.
+        if (updated) {
+          await checkAndAwardReferralReward(updated.id).catch((err) =>
+            console.error("[paystack-webhook] referral reward check failed:", err)
+          );
+        }
       }
     }
   } catch (err) {

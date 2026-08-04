@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { getMyShop } from "@/lib/auth";
 import { PLAN_DETAILS } from "@/lib/stripe-products";
 import { PAYSTACK_PLAN_DETAILS } from "@/lib/paystack-products";
@@ -43,12 +44,31 @@ export default async function BillingPage() {
   const country = requestHeaders.get("cf-ipcountry") || requestHeaders.get("x-vercel-ip-country");
   const showPaystack = country === "NG";
 
+  const bonusExpires = shop.referral_bonus_expires_at ? new Date(shop.referral_bonus_expires_at) : null;
+  const bonusActive = shop.plan === "free" && bonusExpires && bonusExpires > new Date();
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h1 className="text-lg font-bold text-ink">Billing</h1>
         <CurrentPlanBadge plan={shop.plan} />
       </div>
+
+      {bonusActive ? (
+        <div className="bg-blue-soft border border-blue/20 rounded-lg p-4 text-sm text-ink">
+          Free Starter access from referrals, active until <b>{bonusExpires!.toLocaleDateString()}</b>.{" "}
+          <Link href="/dashboard/referrals" className="font-semibold underline">
+            Refer more
+          </Link>
+        </div>
+      ) : shop.plan === "free" ? (
+        <Link
+          href="/dashboard/referrals"
+          className="block bg-blue-soft border border-blue/20 rounded-lg p-4 text-sm font-semibold text-blue"
+        >
+          Refer 2 shops, get Starter free for a month →
+        </Link>
+      ) : null}
 
       {shop.plan !== "free" && (
         <div className="bg-white border border-line rounded-lg p-4">

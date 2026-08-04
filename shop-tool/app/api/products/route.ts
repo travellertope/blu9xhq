@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getMyShop } from "@/lib/auth";
-import { getPlanLimits } from "@/lib/planLimits";
+import { getPlanLimits, getEffectivePlan } from "@/lib/planLimits";
+import { activateReferralAndMaybeReward } from "@/lib/referral";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const variantSchema = z.object({
@@ -36,10 +37,11 @@ export async function POST(request: Request) {
     .select("id", { count: "exact", head: true })
     .eq("shop_id", shop.id);
 
-  const { maxProducts } = getPlanLimits(shop.plan);
+  const effectivePlan = getEffectivePlan(shop);
+  const { maxProducts } = getPlanLimits(effectivePlan);
   if ((count ?? 0) >= maxProducts) {
     return NextResponse.json(
-      { error: `You've hit your ${shop.plan} plan's ${maxProducts}-product limit. Upgrade to add more.` },
+      { error: `You've hit your ${effectivePlan} plan's ${maxProducts}-product limit. Upgrade to add more.` },
       { status: 402 }
     );
   }
@@ -53,5 +55,11 @@ export async function POST(request: Request) {
   if (error) {
     return NextResponse.json({ error: "Couldn't save product" }, { status: 400 });
   }
+
+  // First product ever for this shop — the referral activation bar.
+  if ((count ?? 0) === 0 && shop.referred_by_shop_id) {
+    await activateReferralAndMaybeReward(shop.id).catch(() => {});
+  }
+
   return NextResponse.json({ product: data });
 }

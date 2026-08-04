@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getMyShop } from "@/lib/auth";
-import { getPlanLimits } from "@/lib/planLimits";
+import { getPlanLimits, getEffectivePlan } from "@/lib/planLimits";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import ProductRow from "@/components/dashboard/product-row";
 import CategoriesManager from "@/components/dashboard/categories-manager";
@@ -17,7 +17,7 @@ export default async function ProductsPage() {
     supabase.from("categories").select("*").eq("shop_id", shop.id).order("sort_order"),
   ]);
 
-  const { maxProducts } = getPlanLimits(shop.plan);
+  const { maxProducts } = getPlanLimits(getEffectivePlan(shop));
   const productCount = products?.length ?? 0;
   const atLimit = productCount >= maxProducts;
 

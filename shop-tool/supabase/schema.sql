@@ -56,6 +56,9 @@ alter table shops add column if not exists paystack_customer_code text unique;
 alter table shops add column if not exists paystack_subscription_code text unique;
 alter table shops add column if not exists paystack_email_token text;
 alter table shops add column if not exists directory_opt_in boolean not null default false;
+alter table shops add column if not exists referral_code text unique;
+alter table shops add column if not exists referred_by_shop_id uuid references shops(id) on delete set null;
+alter table shops add column if not exists referral_bonus_expires_at timestamptz;
 
 -- =============================================================================
 -- CATEGORIES
@@ -174,6 +177,30 @@ create table if not exists shop_reviews (
 create index if not exists shop_reviews_shop_idx on shop_reviews(shop_id);
 
 -- =============================================================================
+-- REFERRALS
+-- One row per referred shop. Every shop gets its own referral_code
+-- (assigned in lib/referral.ts on creation); a referral goes 'pending' ->
+-- 'active' when the referred shop creates its first product — proof of a
+-- real, populated shop rather than a throwaway signup. Every 2 'active'
+-- referrals bump their referrer's plan by crediting shops.referral_bonus_expires_at
+-- with a free month of Starter-level access (only while the referrer is
+-- still on the free plan — see activateReferralAndMaybeReward in
+-- lib/referral.ts), at which point those referrals flip to 'rewarded' so
+-- they aren't counted twice.
+-- =============================================================================
+create table if not exists referrals (
+  id                uuid primary key default gen_random_uuid(),
+  referrer_shop_id  uuid not null references shops(id) on delete cascade,
+  referred_shop_id  uuid not null unique references shops(id) on delete cascade,
+  status            text not null default 'pending'
+                      check (status in ('pending', 'active', 'rewarded')),
+  activated_at      timestamptz,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists referrals_referrer_idx on referrals(referrer_shop_id, status);
+
+-- =============================================================================
 -- updated_at triggers
 -- =============================================================================
 create or replace function set_updated_at()
@@ -206,6 +233,7 @@ alter table delivery_zones   enable row level security;
 alter table order_intents    enable row level security;
 alter table analytics_events enable row level security;
 alter table shop_reviews     enable row level security;
+alter table referrals        enable row level security;
 
 -- ── shops ────────────────────────────────────────────────────────────────────
 -- Public can read active shops (storefront needs this with no auth at all).
@@ -307,3 +335,14 @@ create policy "owner can manage own reviews"
   on shop_reviews for all
   using (exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.owner_user_id = auth.uid()))
   with check (exists (select 1 from shops where shops.id = shop_reviews.shop_id and shops.owner_user_id = auth.uid()));
+
+-- ── referrals ────────────────────────────────────────────────────────────────
+-- No insert/update policy: all writes happen server-side via the admin
+-- client (lib/referral.ts), the same trusted-context pattern the Stripe/
+-- Paystack webhooks use for cross-tenant writes — a referral row always
+-- touches two different shops' owners, which "owner can manage own X"
+-- policies can't express.
+drop policy if exists "owner can read own referrals" on referrals;
+create policy "owner can read own referrals"
+  on referrals for select
+  using (exists (select 1 from shops where shops.id = referrals.referrer_shop_id and shops.owner_user_id = auth.uid()));

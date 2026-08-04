@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextRequest, NextResponse } from "next/server";
 import { constructStripeWebhookEvent } from "@/lib/stripe";
 import { getPlanFromPriceId } from "@/lib/stripe-products";
+import { checkAndAwardReferralReward } from "@/lib/referral";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { ShopPlan } from "@/types";
 import type Stripe from "stripe";
@@ -39,6 +40,15 @@ async function setShopPlan(shopId: string, plan: ShopPlan, stripeCustomerId?: st
       ...(stripeCustomerId ? { stripe_customer_id: stripeCustomerId } : {}),
     })
     .eq("id", shopId);
+
+  // Dropping back to free is the one moment a referrer's already-active
+  // referrals (accrued while they were paying, so skipped at the time) can
+  // become eligible for a reward — see checkAndAwardReferralReward.
+  if (plan === "free") {
+    await checkAndAwardReferralReward(shopId).catch((err) =>
+      console.error("[shop-billing-webhook] referral reward check failed:", err)
+    );
+  }
 }
 
 async function processEvent(event: Stripe.Event): Promise<void> {
