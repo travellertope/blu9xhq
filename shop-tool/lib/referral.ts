@@ -53,35 +53,25 @@ export async function recordReferral(referrerShopId: string, referredShopId: str
 }
 
 /**
- * Called when a shop creates its first product — the bar for "active"
- * business, not just a signup. Marks this shop's referral (if any) as
- * active, then checks whether its referrer has crossed another
- * REFERRALS_PER_REWARD threshold and, if the referrer is still on the free
- * plan, credits a free month of Starter-level access. Referrers already
- * paying for Starter/Pro don't accrue a reward while they're on a paid
+ * Tallies a shop's 'active' (not yet 'rewarded') referrals and, if it's
+ * crossed another REFERRALS_PER_REWARD threshold, credits a free month of
+ * Starter-level access per threshold crossed. No-ops for shops on a paid
  * plan — the bonus exists to nudge free-tier owners toward Starter, not to
  * discount an existing subscription.
+ *
+ * Called from two places: right after a referral activates (the common
+ * case), and from the Stripe/Paystack webhook handlers whenever a shop's
+ * plan drops back to 'free' — a referrer who accrued active referrals
+ * while paying wouldn't otherwise get counted until their next referral
+ * activates, which could be a long wait or never.
  */
-export async function activateReferralAndMaybeReward(referredShopId: string): Promise<void> {
+export async function checkAndAwardReferralReward(shopId: string): Promise<void> {
   const supabase = createSupabaseAdminClient();
-
-  const { data: referral } = await supabase
-    .from("referrals")
-    .select("id, referrer_shop_id")
-    .eq("referred_shop_id", referredShopId)
-    .eq("status", "pending")
-    .maybeSingle();
-  if (!referral) return;
-
-  await supabase
-    .from("referrals")
-    .update({ status: "active", activated_at: new Date().toISOString() })
-    .eq("id", referral.id);
 
   const { data: referrer } = await supabase
     .from("shops")
     .select("id, plan, referral_bonus_expires_at")
-    .eq("id", referral.referrer_shop_id)
+    .eq("id", shopId)
     .maybeSingle();
   if (!referrer || referrer.plan !== "free") return;
 
@@ -103,4 +93,28 @@ export async function activateReferralAndMaybeReward(referredShopId: string): Pr
 
   await supabase.from("referrals").update({ status: "rewarded" }).in("id", toReward);
   await supabase.from("shops").update({ referral_bonus_expires_at: newExpiry.toISOString() }).eq("id", referrer.id);
+}
+
+/**
+ * Called when a shop creates its first product — the bar for "active"
+ * business, not just a signup. Marks this shop's referral (if any) as
+ * active, then runs the reward tally for its referrer.
+ */
+export async function activateReferralAndMaybeReward(referredShopId: string): Promise<void> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data: referral } = await supabase
+    .from("referrals")
+    .select("id, referrer_shop_id")
+    .eq("referred_shop_id", referredShopId)
+    .eq("status", "pending")
+    .maybeSingle();
+  if (!referral) return;
+
+  await supabase
+    .from("referrals")
+    .update({ status: "active", activated_at: new Date().toISOString() })
+    .eq("id", referral.id);
+
+  await checkAndAwardReferralReward(referral.referrer_shop_id);
 }
