@@ -63,11 +63,35 @@ alter table shops add column if not exists referral_bonus_expires_at timestamptz
 -- Denormalized copy of the owner's auth.users.email, set at shop creation
 -- (see lib/onboarding.ts, app/api/shops/route.ts) so /admin/shops can
 -- search/filter by owner email with a plain ilike instead of paging
--- through the Auth Admin API. There's no email-change flow in this app
--- today, so nothing re-syncs this if an owner's auth email is ever
--- changed directly in Supabase — worth revisiting if that changes.
+-- through the Auth Admin API.
 alter table shops add column if not exists owner_email text;
 create index if not exists shops_owner_email_idx on shops(owner_email);
+
+-- Keeps owner_email in sync with auth.users.email for however it might
+-- change — the in-app "Change email" flow (components/dashboard/
+-- change-email-form.tsx), a password-reset-style admin edit in the
+-- Supabase dashboard, a future support tool, anything. A DB trigger is the
+-- one place this can be guaranteed correct regardless of which code path
+-- did the changing, rather than relying on every future write path to
+-- remember to also update `shops`.
+create or replace function sync_shops_owner_email()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.email is distinct from old.email then
+    update shops set owner_email = new.email where owner_user_id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_email_updated on auth.users;
+create trigger on_auth_user_email_updated
+  after update of email on auth.users
+  for each row execute function sync_shops_owner_email();
 
 -- Counts consecutive failed renewal charges for a paid shop, reset to 0 on
 -- any successful charge or plan change. Drives the payment-reminder email
