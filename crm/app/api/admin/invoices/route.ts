@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
 function mapInvoiceRow(row: any) {
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
   const perPage  = 20;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("invoices")
       .select("*", { count: "exact" })
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     // Auto-generate invoice number
     const { count } = await supabase

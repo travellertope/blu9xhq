@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
 import { z } from "zod";
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     const now = new Date().toISOString();
     let entry: Record<string, unknown> | null = null;
     try {
-      const supabase = createSupabaseServerClient();
+      const supabase = createSupabaseAdminClient();
       const { data: commRow, error } = await supabase
         .from("communications")
         .insert({

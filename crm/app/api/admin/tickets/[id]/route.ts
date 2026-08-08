@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { deleteFromR2 } from "@/lib/r2";
 import { sendTicketStatusChanged } from "@/lib/resend";
 import { isValidStatus, isValidPriority } from "@/lib/ticket-utils";
@@ -16,7 +16,7 @@ export async function GET(
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: ticket, error } = await supabase
       .from("tickets")
       .select("*, clients(company_name,contact_name,portal_email)")
@@ -96,7 +96,7 @@ export async function PATCH(
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: ticket, error: fetchErr } = await supabase
       .from("tickets")
       .select("*, clients(contact_name,portal_email)")
@@ -183,7 +183,7 @@ export async function DELETE(
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: attachments } = await supabase
       .from("ticket_attachments")
       .select("r2_key")

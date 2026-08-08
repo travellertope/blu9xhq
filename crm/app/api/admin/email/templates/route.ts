@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 function mapRow(row: any) {
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
   const tenantId = result.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("email_templates")
       .select("*")
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: inserted, error } = await supabase
       .from("email_templates")
       .insert({

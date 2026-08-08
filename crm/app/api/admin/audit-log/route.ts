@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 // GET /api/admin/audit-log
 // Fetches communications rows where channel=system (internal audit events).
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
   const dateTo   = searchParams.get("dateTo");
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("communications")
       .select("*", { count: "exact" })

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const search  = (sp.get("search") ?? "").trim();
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("communications")
       .select("*, clients(company_name,contact_name)", { count: "exact" })

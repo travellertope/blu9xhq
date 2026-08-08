@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession, requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { BluuCommunication, CommMoodSentiment, CommMoodSource, CommEmailStatus } from "@/types";
 import { z } from "zod";
 
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("communications")
       .select("*", { count: "exact" })
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
   // Note: account_manager per-client scoping deferred — see GET handler comment above.
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: inserted, error } = await supabase
       .from("communications")
       .insert({

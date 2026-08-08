@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 function mapRow(row: any) {
@@ -32,7 +32,7 @@ export async function GET(
   const tenantId = result.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("email_templates")
       .select("*")
@@ -79,7 +79,7 @@ export async function PATCH(
     if (d.type !== undefined)     update.tmpl_type = d.type;
     if (d.mergeTags !== undefined) update.merge_tags = d.mergeTags;
 
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: updated, error } = await supabase
       .from("email_templates")
       .update(update)
@@ -108,7 +108,7 @@ export async function DELETE(
   const tenantId = result.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase
       .from("email_templates")
       .delete()
