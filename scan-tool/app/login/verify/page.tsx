@@ -33,30 +33,41 @@ function VerifyInner() {
       return;
     }
 
-    signIn("magic-link", { email, token, redirect: false }).then(async (res) => {
-      if (!res?.ok) {
-        setError(
-          res?.error === "CredentialsSignin"
+    signIn("magic-link", { email, token, redirect: false })
+      .then(async (res) => {
+        if (!res?.ok) {
+          const reason = res?.error === "CredentialsSignin"
             ? "That link is invalid or expired."
-            : `Sign-in failed (${res?.error || "unknown error"}).`
-        );
-        return;
-      }
+            : `Sign-in failed (${res?.error || "unknown error"}).`;
+          console.error("[verify] signIn failed:", res?.error, res?.status);
+          setError(reason);
+          return;
+        }
 
-      // signIn() resolving "ok" only means the credentials were accepted —
-      // it doesn't guarantee the session cookie was actually stored by the
-      // browser (e.g. cookie domain/secure mismatches). Confirm a session
-      // exists before navigating into the middleware-protected dashboard,
-      // otherwise the user gets silently bounced back to /login with no
-      // explanation.
-      const session = await fetch("/api/auth/session").then((r) => r.json());
-      if (!session?.user) {
-        setError("Signed in, but the session didn't persist. Check that cookies are enabled and try again.");
-        return;
-      }
+        // Confirm the session cookie was actually stored before navigating —
+        // signIn returning ok only means credentials were accepted, not that
+        // the cookie persisted (domain/secure mismatches can silently drop it).
+        let session: { user?: unknown } = {};
+        try {
+          session = await fetch("/api/auth/session", { credentials: "same-origin" }).then((r) => r.json());
+        } catch (e) {
+          console.error("[verify] session check threw:", e);
+          setError("Could not confirm sign-in. Please try again.");
+          return;
+        }
 
-      router.push("/dashboard");
-    });
+        if (!session?.user) {
+          console.error("[verify] session empty after signIn ok:", session);
+          setError("Signed in, but the session didn't persist — check that cookies are enabled in your browser and try again.");
+          return;
+        }
+
+        router.push("/dashboard");
+      })
+      .catch((e) => {
+        console.error("[verify] signIn threw:", e);
+        setError("Something went wrong during sign-in. Please try again.");
+      });
   }, [params, router]);
 
   return (
