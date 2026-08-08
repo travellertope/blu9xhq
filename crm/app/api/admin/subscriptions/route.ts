@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession, requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendNewService } from "@/lib/resend";
 import { z } from "zod";
 
@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   const statusFilter = searchParams.get("status") ?? null;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("subscriptions")
       .select("*, clients(company_name,contact_name), services(title)", { count: "exact" })
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const [{ data: client }, { data: service }] = await Promise.all([
       supabase.from("clients").select("company_name,contact_name,contact_email,portal_email").eq("id", d.clientId).eq("tenant_id", tenantId).maybeSingle(),

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { z } from "zod";
 
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (parsed.data.assignedClients !== undefined) update.assigned_clients = parsed.data.assignedClients;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: updated, error } = await supabase
       .from("team_members")
       .update(update)

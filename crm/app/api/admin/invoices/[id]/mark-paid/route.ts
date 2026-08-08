@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { exitEnrollmentsForClient } from "@/lib/sequenceExits";
@@ -34,7 +34,7 @@ export async function POST(
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: invoice, error: fetchErr } = await supabase
       .from("invoices")

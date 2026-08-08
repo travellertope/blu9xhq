@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { exitEnrollmentsForClient } from "@/lib/sequenceExits";
 import { z } from "zod";
 
@@ -42,7 +42,7 @@ export async function PATCH(
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: existing, error: fetchErr } = await supabase
       .from("subscriptions")

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/encryption";
 import { sendPortalInvite } from "@/lib/resend";
 import { z } from "zod";
@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
   const orderCol = ORDER_COL[orderby] ?? "created_at";
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("clients")
       .select("*", { count: "exact" })
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
   const tenantId = session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: inserted, error } = await supabase
       .from("clients")

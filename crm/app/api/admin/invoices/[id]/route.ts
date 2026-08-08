@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 function mapInvoiceRow(row: any) {
   return {
@@ -30,7 +30,7 @@ export async function GET(
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("invoices")
       .select("*")
@@ -74,7 +74,7 @@ export async function PATCH(
   if (preAuth instanceof NextResponse) return preAuth;
   const tenantId = preAuth.session.user.tenantId!;
 
-  const supabase = createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data: current, error: fetchErr } = await supabase
     .from("invoices")
     .select("client_id, status")
@@ -134,7 +134,7 @@ export async function DELETE(
   const tenantId = preAuth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: current, error: fetchErr } = await supabase
       .from("invoices")
       .select("status")

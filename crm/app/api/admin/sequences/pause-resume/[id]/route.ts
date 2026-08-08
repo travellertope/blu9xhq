@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 const schema = z.object({
@@ -26,7 +26,7 @@ export async function PATCH(
   const { action } = parsed.data;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: enrollment, error: fetchErr } = await supabase
       .from("sequence_enrollments")
       .select("status")

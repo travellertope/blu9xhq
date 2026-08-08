@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export async function GET(req: NextRequest) {
   const auth = await requireSession(req);
@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const { session } = auth;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error, count } = await supabase
       .from("services")
       .select("id,title,description,category,base_price,currency,billing_cycle,is_active", { count: "exact" })

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { z } from "zod";
 
 function mapSequence(row: any) {
@@ -58,7 +58,7 @@ export async function GET(
   const tenantId = result.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("sequences")
       .select("*, sequence_steps(*)")
@@ -99,7 +99,7 @@ export async function PATCH(
   const d = parsed.data;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const update: Record<string, unknown> = {};
     if (d.title             !== undefined) update.title = d.title;

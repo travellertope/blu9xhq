@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { r2SignedUrl } from "@/lib/r2";
 
 export async function GET(
@@ -12,7 +12,7 @@ export async function GET(
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: fileRow, error } = await supabase
       .from("files")
       .select("r2_key")

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { encrypt, decrypt } from "@/lib/encryption";
 
 function tryDecrypt(value: string): string {
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("tenants")
       .select("bank_name,bank_account_name,bank_account_number,bank_sort_code,address,from_email_name")
@@ -70,7 +70,7 @@ export async function PATCH(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase
       .from("tenants")
       .update(update)
