@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/auth";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 type ExitReason = "client_replied" | "invoice_paid" | "subscription_cancelled" | "manual";
 
@@ -19,7 +19,7 @@ export async function exitEnrollmentsForClient(
   if (!tenantId) return;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: active, error } = await supabase
       .from("sequence_enrollments")
       .select("id, sequences(exit_conditions)")

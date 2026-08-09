@@ -33,6 +33,11 @@ export async function POST(
     return NextResponse.json({ error: "paymentMethod and paidAt are required" }, { status: 400 });
   }
 
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    console.error("[mark-paid] SUPABASE_SERVICE_ROLE_KEY is not set");
+    return NextResponse.json({ error: "Server misconfiguration" }, { status: 500 });
+  }
+
   try {
     const supabase = createSupabaseAdminClient();
 
@@ -107,8 +112,14 @@ export async function POST(
     });
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error("[POST /api/admin/invoices/[id]/mark-paid]", err);
-    return NextResponse.json({ error: "Failed to mark invoice as paid" }, { status: 502 });
+  } catch (err: any) {
+    console.error("[POST /api/admin/invoices/[id]/mark-paid] error:", {
+      message: err?.message,
+      code: err?.code,
+      details: err?.details,
+      hint: err?.hint,
+      status: err?.status,
+    });
+    return NextResponse.json({ error: "Failed to mark invoice as paid", detail: err?.message }, { status: 502 });
   }
 }

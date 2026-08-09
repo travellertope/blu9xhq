@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/auth";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export interface AuditEventParams {
   action: string;
@@ -27,7 +27,7 @@ export async function logAuditEvent(params: AuditEventParams): Promise<void> {
     const session = await getSession();
     if (!session?.user?.tenantId) return;
 
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase.from("communications").insert({
       tenant_id:   session.user.tenantId,
       client_id:   clientId ?? null,
