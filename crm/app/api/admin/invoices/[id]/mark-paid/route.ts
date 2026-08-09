@@ -98,7 +98,7 @@ export async function POST(
     // Exit sequences with invoice_paid condition (fire and forget)
     void exitEnrollmentsForClient(invoice.client_id, "invoice_paid").catch(console.error);
 
-    await logAuditEvent({
+    void logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
