@@ -108,13 +108,8 @@ export async function POST(
 
     return NextResponse.json({ ok: true });
   } catch (err: any) {
-    console.error("[POST /api/admin/invoices/[id]/mark-paid] error:", {
-      message: err?.message,
-      code: err?.code,
-      details: err?.details,
-      hint: err?.hint,
-      status: err?.status,
-    });
+    // warn-level so it surfaces in Vercel log exports (error-level is filtered out)
+    console.warn("[mark-paid] DB error:", err?.code, err?.message, err?.details, err?.hint);
     return NextResponse.json({ error: "Failed to mark invoice as paid", detail: err?.message }, { status: 502 });
   }
 }
