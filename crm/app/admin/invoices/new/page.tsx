@@ -33,8 +33,7 @@ const CURRENCIES = ["USD", "GBP", "EUR", "GHS", "NGN"];
 
 export default function NewInvoicePage() {
   const router = useRouter();
-  const { user: session, status } = useBluuSession();
-  const user = session?.user as any;
+  const { user, status } = useBluuSession();
   const role = user?.bluuhqRole ?? "viewer";
 
   // Permission check
