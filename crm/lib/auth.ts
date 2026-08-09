@@ -97,26 +97,31 @@ export function getSessionFromRequest(req: NextRequest): BluuSession | null {
   // Supabase stores the session as JSON in a cookie whose name starts with
   // "sb-" and ends with "-auth-token". It may be chunked (sb-...-auth-token.0,
   // sb-...-auth-token.1, ...) for large tokens.
-  const cookies = req.cookies;
+  const allCookies = req.cookies.getAll();
+  console.warn("[getSessionFromRequest] cookies:", allCookies.map((c) => c.name).join(", "));
 
   // Find the base token cookie or chunked pieces
   let tokenJson: string | undefined;
-  const baseCookie = [...cookies.getAll()].find(
+  const baseCookie = allCookies.find(
     (c) => /^sb-.+-auth-token$/.test(c.name)
   );
 
   if (baseCookie) {
     tokenJson = baseCookie.value;
+    console.warn("[getSessionFromRequest] found base cookie:", baseCookie.name, "len:", tokenJson.length);
   } else {
     // Chunked cookie: concatenate sb-...-auth-token.0, .1, ...
     const chunks: { index: number; value: string }[] = [];
-    for (const c of cookies.getAll()) {
+    for (const c of allCookies) {
       const m = c.name.match(/^(sb-.+-auth-token)\.(\d+)$/);
       if (m) chunks.push({ index: Number(m[2]), value: c.value });
     }
     if (chunks.length > 0) {
       chunks.sort((a, b) => a.index - b.index);
       tokenJson = chunks.map((c) => c.value).join("");
+      console.warn("[getSessionFromRequest] found chunked cookie, chunks:", chunks.length, "total len:", tokenJson.length);
+    } else {
+      console.warn("[getSessionFromRequest] no auth cookie found");
     }
   }
 
@@ -124,12 +129,19 @@ export function getSessionFromRequest(req: NextRequest): BluuSession | null {
 
   let parsed: { access_token?: string; user?: { id?: string; email?: string; user_metadata?: Record<string, any> }; expires_at?: number };
   try {
-    parsed = JSON.parse(decodeURIComponent(tokenJson));
-  } catch {
+    // The @supabase/ssr package stores the value as encodeURIComponent(JSON.stringify(session)).
+    // Next.js req.cookies returns raw (still URL-encoded) values.
+    const decoded = tokenJson.startsWith("%") || tokenJson.includes("%7B")
+      ? decodeURIComponent(tokenJson)
+      : tokenJson;
+    parsed = JSON.parse(decoded);
+  } catch (e) {
+    console.warn("[getSessionFromRequest] JSON parse failed:", e, "value prefix:", tokenJson.slice(0, 50));
     return null;
   }
 
   const { access_token, user, expires_at } = parsed;
+  console.warn("[getSessionFromRequest] parsed: access_token=", !!access_token, "user=", !!user, "expires_at=", expires_at);
   if (!access_token || !user) return null;
 
   // Reject expired tokens (middleware should have refreshed, but be defensive)
