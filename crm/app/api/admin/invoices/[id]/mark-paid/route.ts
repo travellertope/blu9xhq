@@ -39,18 +39,22 @@ export async function POST(
   }
 
   try {
+    console.warn("[mark-paid] step1 tenantId=", tenantId, "invoiceId=", params.id);
     const supabase = createSupabaseAdminClient();
 
+    console.warn("[mark-paid] step2 fetching invoice");
     const { data: invoice, error: fetchErr } = await supabase
       .from("invoices")
-      .select("*, clients(contact_name, company_name, contact_email, portal_email)")
+      .select("id, invoice_number, total, currency, client_id, clients(contact_name, company_name, contact_email, portal_email)")
       .eq("id", params.id)
       .eq("tenant_id", tenantId)
       .maybeSingle();
 
+    console.warn("[mark-paid] step3 fetch done", !!invoice, fetchErr?.code, fetchErr?.message);
     if (fetchErr) throw fetchErr;
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
+    console.warn("[mark-paid] step4 updating invoice");
     const { error: updateErr } = await supabase
       .from("invoices")
       .update({
@@ -62,6 +66,7 @@ export async function POST(
       })
       .eq("id", params.id)
       .eq("tenant_id", tenantId);
+    console.warn("[mark-paid] step5 update done", updateErr?.code, updateErr?.message);
     if (updateErr) throw updateErr;
 
     // Send payment receipt email — fire and forget so a slow/failing email
