@@ -45,7 +45,7 @@ export async function POST(
     console.warn("[mark-paid] step2 fetching invoice");
     const { data: invoice, error: fetchErr } = await supabase
       .from("invoices")
-      .select("id, invoice_number, total, currency, client_id, clients(contact_name, company_name, contact_email, portal_email)")
+      .select("id, invoice_number, total, currency, client_id, clients(contact_name, company_name, contact_email)")
       .eq("id", params.id)
       .eq("tenant_id", tenantId)
       .maybeSingle();
@@ -71,7 +71,7 @@ export async function POST(
 
     // Send payment receipt email — fire and forget so a slow/failing email
     // never blocks the invoice from being marked paid.
-    const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
+    const clientEmail = invoice.clients?.contact_email;
     const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
     if (clientEmail) {
       const invNumber = invoice.invoice_number;
