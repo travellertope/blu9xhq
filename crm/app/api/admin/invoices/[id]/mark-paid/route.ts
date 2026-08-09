@@ -114,7 +114,6 @@ export async function POST(
         body: {
           status: "paid",
           paid_date: body.paidAt,
-          payment_method: body.paymentMethod,
           payment_gateway: GATEWAY_MAP[body.paymentMethod] ?? "manual",
           gateway_payment_id: body.reference || null,
         },
