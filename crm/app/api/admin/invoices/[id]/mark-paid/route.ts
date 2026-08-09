@@ -11,7 +11,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  console.warn("[mark-paid] A: pre-requirePermission");
   const auth = await requirePermission(req, "mark_invoices_paid");
+  console.warn("[mark-paid] B: post-requirePermission, isNextResponse=", auth instanceof NextResponse);
   if (auth instanceof NextResponse) return auth;
   const { session } = auth;
   const user = session.user as any;
@@ -23,11 +25,13 @@ export async function POST(
     reference?: string;
   };
 
+  console.warn("[mark-paid] C: pre-req.json");
   try {
     body = await req.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
+  console.warn("[mark-paid] D: post-req.json, method=", body.paymentMethod, "paidAt=", body.paidAt);
 
   if (!body.paymentMethod || !body.paidAt) {
     return NextResponse.json({ error: "paymentMethod and paidAt are required" }, { status: 400 });
