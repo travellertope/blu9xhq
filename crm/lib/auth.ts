@@ -12,6 +12,7 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { decodeJwtClaims } from "@/lib/jwt";
 import type { UserRole } from "@/types";
+import type { NextRequest } from "next/server";
 
 // ── Session shape (mirrors the old NextAuth session.user payload) ─────────────
 
@@ -84,6 +85,82 @@ export async function getSession(): Promise<BluuSession | null> {
       status:           claims.status,
     },
     expires: new Date(session.expires_at! * 1000).toISOString(),
+  };
+}
+
+/**
+ * Read session from the Supabase auth cookie WITHOUT making any network call.
+ * Safe to use in API Route Handlers where middleware has already refreshed the token.
+ * Falls back to null if the cookie is missing or the token is expired.
+ */
+export function getSessionFromRequest(req: NextRequest): BluuSession | null {
+  // Supabase stores the session as JSON in a cookie whose name starts with
+  // "sb-" and ends with "-auth-token". It may be chunked (sb-...-auth-token.0,
+  // sb-...-auth-token.1, ...) for large tokens.
+  const cookies = req.cookies;
+
+  // Find the base token cookie or chunked pieces
+  let tokenJson: string | undefined;
+  const baseCookie = [...cookies.getAll()].find(
+    (c) => /^sb-.+-auth-token$/.test(c.name)
+  );
+
+  if (baseCookie) {
+    tokenJson = baseCookie.value;
+  } else {
+    // Chunked cookie: concatenate sb-...-auth-token.0, .1, ...
+    const chunks: { index: number; value: string }[] = [];
+    for (const c of cookies.getAll()) {
+      const m = c.name.match(/^(sb-.+-auth-token)\.(\d+)$/);
+      if (m) chunks.push({ index: Number(m[2]), value: c.value });
+    }
+    if (chunks.length > 0) {
+      chunks.sort((a, b) => a.index - b.index);
+      tokenJson = chunks.map((c) => c.value).join("");
+    }
+  }
+
+  if (!tokenJson) return null;
+
+  let parsed: { access_token?: string; user?: { id?: string; email?: string; user_metadata?: Record<string, any> }; expires_at?: number };
+  try {
+    parsed = JSON.parse(decodeURIComponent(tokenJson));
+  } catch {
+    return null;
+  }
+
+  const { access_token, user, expires_at } = parsed;
+  if (!access_token || !user) return null;
+
+  // Reject expired tokens (middleware should have refreshed, but be defensive)
+  if (expires_at && expires_at * 1000 < Date.now()) return null;
+
+  const claims = decodeJwtClaims(access_token);
+  const userMeta = user.user_metadata ?? {};
+  const userType: string = claims.user_type ?? "";
+  const role: UserRole =
+    userType === "team"      ? "bluu_admin"
+    : userType === "client"  ? "bluu_client"
+    : userType === "affiliate" ? "bluu_affiliate"
+    : "bluu_client";
+
+  return {
+    user: {
+      id:              user.id ?? "",
+      email:           user.email ?? "",
+      name:            userMeta.full_name ?? userMeta.name ?? user.email ?? "",
+      role,
+      tenantId:        claims.tenant_id,
+      tenantPlan:      claims.tenant_plan,
+      bluuhqRole:      claims.crm_role,
+      assignedClients: claims.assigned_clients,
+      affiliateCode:   claims.affiliate_code,
+      affiliateStatus: claims.aff_status,
+      wpUserId:        claims.wp_user_id ? Number(claims.wp_user_id) : undefined,
+      clientId:        claims.client_id,
+      status:          claims.status,
+    },
+    expires: expires_at ? new Date(expires_at * 1000).toISOString() : "",
   };
 }
 
