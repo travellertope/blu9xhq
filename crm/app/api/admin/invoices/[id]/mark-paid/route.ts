@@ -49,16 +49,23 @@ function readSessionFromCookies() {
     return null;
   }
 
-  // Parse: value may be URL-encoded JSON or plain JSON
+  // Parse: @supabase/ssr v0.6+ base64url-encodes cookie values.
+  // Try: plain JSON → URL-decoded JSON → base64url-decoded JSON
   let parsed: any;
   try {
     parsed = JSON.parse(raw);
   } catch {
     try {
       parsed = JSON.parse(decodeURIComponent(raw));
-    } catch (e2) {
-      console.warn("[mark-paid-auth] JSON parse failed, first 80 chars:", raw.slice(0, 80));
-      return null;
+    } catch {
+      try {
+        const b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
+        const padded = b64 + "=".repeat((4 - (b64.length % 4)) % 4);
+        parsed = JSON.parse(Buffer.from(padded, "base64").toString("utf-8"));
+      } catch (e3) {
+        console.warn("[mark-paid-auth] all parse methods failed, first 80 chars:", raw.slice(0, 80));
+        return null;
+      }
     }
   }
 
