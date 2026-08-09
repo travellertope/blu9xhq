@@ -98,50 +98,42 @@ export function getSessionFromRequest(req: NextRequest): BluuSession | null {
   // "sb-" and ends with "-auth-token". It may be chunked (sb-...-auth-token.0,
   // sb-...-auth-token.1, ...) for large tokens.
   const allCookies = req.cookies.getAll();
-  console.warn("[getSessionFromRequest] cookies:", allCookies.map((c) => c.name).join(", "));
 
-  // Find the base token cookie or chunked pieces
+  // @supabase/ssr stores large sessions as chunked cookies:
+  // sb-<ref>-auth-token.0, sb-<ref>-auth-token.1, ...
+  // The base cookie sb-<ref>-auth-token is empty when chunks exist.
+  const chunks: { index: number; value: string }[] = [];
+  let baseCookieName: string | undefined;
+  for (const c of allCookies) {
+    const chunkMatch = c.name.match(/^(sb-.+-auth-token)\.(\d+)$/);
+    if (chunkMatch) {
+      chunks.push({ index: Number(chunkMatch[2]), value: c.value });
+      baseCookieName = chunkMatch[1];
+    }
+  }
+
   let tokenJson: string | undefined;
-  const baseCookie = allCookies.find(
-    (c) => /^sb-.+-auth-token$/.test(c.name)
-  );
-
-  if (baseCookie) {
-    tokenJson = baseCookie.value;
-    console.warn("[getSessionFromRequest] found base cookie:", baseCookie.name, "len:", tokenJson.length);
+  if (chunks.length > 0) {
+    chunks.sort((a, b) => a.index - b.index);
+    tokenJson = chunks.map((c) => c.value).join("");
   } else {
-    // Chunked cookie: concatenate sb-...-auth-token.0, .1, ...
-    const chunks: { index: number; value: string }[] = [];
-    for (const c of allCookies) {
-      const m = c.name.match(/^(sb-.+-auth-token)\.(\d+)$/);
-      if (m) chunks.push({ index: Number(m[2]), value: c.value });
-    }
-    if (chunks.length > 0) {
-      chunks.sort((a, b) => a.index - b.index);
-      tokenJson = chunks.map((c) => c.value).join("");
-      console.warn("[getSessionFromRequest] found chunked cookie, chunks:", chunks.length, "total len:", tokenJson.length);
-    } else {
-      console.warn("[getSessionFromRequest] no auth cookie found");
-    }
+    const baseCookie = allCookies.find((c) => /^sb-.+-auth-token$/.test(c.name));
+    if (baseCookie?.value) tokenJson = baseCookie.value;
   }
 
   if (!tokenJson) return null;
 
   let parsed: { access_token?: string; user?: { id?: string; email?: string; user_metadata?: Record<string, any> }; expires_at?: number };
   try {
-    // The @supabase/ssr package stores the value as encodeURIComponent(JSON.stringify(session)).
-    // Next.js req.cookies returns raw (still URL-encoded) values.
     const decoded = tokenJson.startsWith("%") || tokenJson.includes("%7B")
       ? decodeURIComponent(tokenJson)
       : tokenJson;
     parsed = JSON.parse(decoded);
-  } catch (e) {
-    console.warn("[getSessionFromRequest] JSON parse failed:", e, "value prefix:", tokenJson.slice(0, 50));
+  } catch {
     return null;
   }
 
   const { access_token, user, expires_at } = parsed;
-  console.warn("[getSessionFromRequest] parsed: access_token=", !!access_token, "user=", !!user, "expires_at=", expires_at);
   if (!access_token || !user) return null;
 
   // Reject expired tokens (middleware should have refreshed, but be defensive)
