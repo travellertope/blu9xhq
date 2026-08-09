@@ -13,6 +13,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { decodeJwtClaims } from "@/lib/jwt";
 import type { UserRole } from "@/types";
 import type { NextRequest } from "next/server";
+import { cookies } from "next/headers";
 
 // ── Session shape (mirrors the old NextAuth session.user payload) ─────────────
 
@@ -89,15 +90,27 @@ export async function getSession(): Promise<BluuSession | null> {
 }
 
 /**
- * Read session from the Supabase auth cookie WITHOUT making any network call.
- * Safe to use in API Route Handlers where middleware has already refreshed the token.
- * Falls back to null if the cookie is missing or the token is expired.
+ * Read session from next/headers cookies WITHOUT any Supabase SDK network call.
+ * Uses the same cookie source as createSupabaseServerClient() but skips the
+ * GoTrueClient initialization that can hang on cold Lambda starts.
+ * Use in API Route Handlers; falls back to null if no valid session found.
+ */
+export function getSessionFromCookies(): BluuSession | null {
+  return _parseSupabaseCookies(cookies().getAll());
+}
+
+/**
+ * Read session from a NextRequest's cookies WITHOUT any Supabase SDK network call.
+ * Prefer getSessionFromCookies() in route handlers — req.cookies may not reflect
+ * middleware-modified cookie values.
  */
 export function getSessionFromRequest(req: NextRequest): BluuSession | null {
-  // Supabase stores the session as JSON in a cookie whose name starts with
-  // "sb-" and ends with "-auth-token". It may be chunked (sb-...-auth-token.0,
-  // sb-...-auth-token.1, ...) for large tokens.
-  const allCookies = req.cookies.getAll();
+  return _parseSupabaseCookies(req.cookies.getAll());
+}
+
+function _parseSupabaseCookies(
+  allCookies: { name: string; value: string }[]
+): BluuSession | null {
 
   // @supabase/ssr stores large sessions as chunked cookies:
   // sb-<ref>-auth-token.0, sb-<ref>-auth-token.1, ...
