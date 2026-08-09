@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { decodeJwtClaims } from "@/lib/jwt";
 import { hasPermission, type Role } from "@/lib/permissions";
 
+export const maxDuration = 30;
+
 const GATEWAY_MAP: Record<string, string> = { stripe: "stripe", paystack: "paystack" };
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
