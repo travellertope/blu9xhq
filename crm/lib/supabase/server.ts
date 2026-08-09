@@ -27,6 +27,14 @@ export function createSupabaseServerClient() {
           }
         },
       },
+      auth: {
+        // Middleware already refreshes the session; disabling auto-refresh here
+        // prevents getSession() from making a blocking network call to Supabase
+        // Auth on every server-side read (which can hang and cause 502s).
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
     }
   );
 }
