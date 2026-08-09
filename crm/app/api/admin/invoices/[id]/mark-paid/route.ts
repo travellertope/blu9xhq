@@ -64,40 +64,35 @@ export async function POST(
       .eq("tenant_id", tenantId);
     if (updateErr) throw updateErr;
 
-    // Send payment receipt email
-    try {
-      const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
-      const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
-
-      if (clientEmail) {
-        const invNumber = invoice.invoice_number;
-        const total = invoice.total;
-        const currency = invoice.currency;
-
-        await sendEmailHtml({
-          to: clientEmail,
-          subject: `Payment received — Invoice ${invNumber}`,
-          html: `
-            <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-              <h2>Payment Received</h2>
-              <p>Hi ${clientName},</p>
-              <p>We have received your payment for invoice ${invNumber}. Thank you!</p>
-              <table style="width:100%;border-collapse:collapse;margin:16px 0">
-                <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invNumber}</td></tr>
-                <tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600">${currency} ${total?.toLocaleString()}</td></tr>
-                <tr><td style="padding:8px 0;color:#64748b">Payment Date</td><td style="padding:8px 0">${body.paidAt}</td></tr>
-                <tr><td style="padding:8px 0;color:#64748b">Payment Method</td><td style="padding:8px 0">${body.paymentMethod.replace("_", " ")}</td></tr>
-                ${body.reference ? `<tr><td style="padding:8px 0;color:#64748b">Reference</td><td style="padding:8px 0">${body.reference}</td></tr>` : ""}
-              </table>
-              <p style="color:#64748b;font-size:13px">This is your payment receipt. Please keep it for your records.</p>
-            </div>
-          `,
-          text: `Payment received for Invoice ${invNumber}.\n\nAmount: ${currency} ${total}\nDate: ${body.paidAt}\nMethod: ${body.paymentMethod}`,
-          tags: [{ name: "type", value: "payment_receipt" }],
-        });
-      }
-    } catch (emailErr) {
-      console.error("[mark-paid] Failed to send receipt email:", emailErr);
+    // Send payment receipt email — fire and forget so a slow/failing email
+    // never blocks the invoice from being marked paid.
+    const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
+    const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
+    if (clientEmail) {
+      const invNumber = invoice.invoice_number;
+      const total = invoice.total;
+      const currency = invoice.currency;
+      void sendEmailHtml({
+        to: clientEmail,
+        subject: `Payment received — Invoice ${invNumber}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+            <h2>Payment Received</h2>
+            <p>Hi ${clientName},</p>
+            <p>We have received your payment for invoice ${invNumber}. Thank you!</p>
+            <table style="width:100%;border-collapse:collapse;margin:16px 0">
+              <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invNumber}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600">${currency} ${total?.toLocaleString()}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b">Payment Date</td><td style="padding:8px 0">${body.paidAt}</td></tr>
+              <tr><td style="padding:8px 0;color:#64748b">Payment Method</td><td style="padding:8px 0">${body.paymentMethod.replace("_", " ")}</td></tr>
+              ${body.reference ? `<tr><td style="padding:8px 0;color:#64748b">Reference</td><td style="padding:8px 0">${body.reference}</td></tr>` : ""}
+            </table>
+            <p style="color:#64748b;font-size:13px">This is your payment receipt. Please keep it for your records.</p>
+          </div>
+        `,
+        text: `Payment received for Invoice ${invNumber}.\n\nAmount: ${currency} ${total}\nDate: ${body.paidAt}\nMethod: ${body.paymentMethod}`,
+        tags: [{ name: "type", value: "payment_receipt" }],
+      }).catch((emailErr) => console.error("[mark-paid] Failed to send receipt email:", emailErr));
     }
 
     // Exit sequences with invoice_paid condition (fire and forget)
