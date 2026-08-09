@@ -1,4 +1,4 @@
-import { getSessionFromCookies } from "@/lib/auth";
+import { getSession } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { hasPermission, canAccessClient, type Role } from "@/lib/permissions";
 import type { BluuSession } from "@/lib/auth";
@@ -22,7 +22,7 @@ export async function requirePermission(
   permission: string,
   clientId?: string
 ): Promise<PermissionResult> {
-  const session = getSessionFromCookies();
+  const session = await getSession();
 
   if (!session?.user) {
     return NextResponse.json(
@@ -67,7 +67,7 @@ export async function requirePermission(
  * Use for routes that only need an authenticated bluu_admin session.
  */
 export async function requireSession(_req: NextRequest): Promise<PermissionResult> {
-  const session = getSessionFromCookies();
+  const session = await getSession();
   if (!session?.user || session.user.role !== "bluu_admin") {
     return NextResponse.json({ error: "Unauthorized", code: "NO_SESSION" }, { status: 401 });
   }
@@ -79,7 +79,7 @@ export async function requireSession(_req: NextRequest): Promise<PermissionResul
  * Use for all portal API routes.
  */
 export async function requireClientSession(_req: NextRequest): Promise<PermissionResult> {
-  const session = getSessionFromCookies();
+  const session = await getSession();
   if (!session?.user || session.user.role !== "bluu_client") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
