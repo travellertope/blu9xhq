@@ -96,11 +96,15 @@ export async function POST(
     const invoice = rows?.[0];
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-    const clientEmail = invoice.clients?.contact_email;
-    const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
+    const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
+    const clientEmail = (client?.contact_email ?? "").trim();
+    const clientName  = client?.contact_name || client?.company_name || "there";
 
-    if (!clientEmail) {
-      return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
+    if (!clientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
+      return NextResponse.json(
+        { error: `Client has no valid email address (got: "${clientEmail || ""}")` },
+        { status: 400 }
+      );
     }
 
     const invNumber = invoice.invoice_number;
