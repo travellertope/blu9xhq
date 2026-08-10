@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { decodeJwtClaims } from "@/lib/jwt";
 import { hasPermission, type Role } from "@/lib/permissions";
 import { sendEmailHtml } from "@/lib/resend";
+import { decrypt } from "@/lib/encryption";
 
 export const maxDuration = 30;
 
@@ -97,7 +98,11 @@ export async function POST(
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
     const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
-    const clientEmail = (client?.contact_email ?? "").trim();
+    let rawEmail = client?.contact_email ?? "";
+    if (rawEmail.includes(":")) {
+      try { rawEmail = decrypt(rawEmail); } catch {}
+    }
+    const clientEmail = rawEmail.trim();
     const clientName  = client?.contact_name || client?.company_name || "there";
 
     if (!clientEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clientEmail)) {
