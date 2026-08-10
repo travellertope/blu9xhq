@@ -4,6 +4,8 @@ import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendEmailHtml } from "@/lib/resend";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
+export const maxDuration = 30;
+
 export async function POST(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -19,7 +21,7 @@ export async function POST(
 
     const { data: invoice, error: fetchErr } = await supabase
       .from("invoices")
-      .select("*, clients(contact_name, company_name, contact_email, portal_email)")
+      .select("*, clients(contact_name, company_name, contact_email)")
       .eq("id", params.id)
       .eq("tenant_id", tenantId)
       .maybeSingle();
@@ -27,7 +29,7 @@ export async function POST(
     if (fetchErr) throw fetchErr;
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-    const clientEmail = invoice.clients?.portal_email ?? invoice.clients?.contact_email;
+    const clientEmail = invoice.clients?.contact_email;
     const clientName  = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
 
     if (!clientEmail) {
@@ -72,13 +74,13 @@ export async function POST(
       .eq("tenant_id", tenantId);
     if (updateErr) throw updateErr;
 
-    await logAuditEvent({
+    void logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_SENT,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Sent invoice ${invNumber} to ${clientEmail}`,
       clientId: invoice.client_id,
-    });
+    }).catch(() => {});
 
     return NextResponse.json({ ok: true });
   } catch (err) {
