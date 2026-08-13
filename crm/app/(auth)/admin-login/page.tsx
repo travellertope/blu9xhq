@@ -140,7 +140,15 @@ function AdminLoginForm() {
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-slate-700">Password</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium text-slate-700">Password</label>
+                  <a
+                    href="/forgot-password"
+                    className="text-xs text-[#1875F2] hover:underline transition-colors"
+                  >
+                    Forgot password?
+                  </a>
+                </div>
                 <input
                   {...register("password")}
                   type="password"

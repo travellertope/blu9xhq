@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface Settings {
   bankName: string;
@@ -22,7 +23,7 @@ interface PaymentSettings {
   preferredGateway: string;
 }
 
-type Tab = "general" | "bank" | "payments";
+type Tab = "general" | "bank" | "payments" | "security";
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("general");
@@ -44,6 +45,9 @@ export default function AdminSettingsPage() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Tab | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/settings/bank-details")
@@ -133,7 +137,7 @@ export default function AdminSettingsPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
-        {(["general", "bank", "payments"] as const).map((t) => (
+        {(["general", "bank", "payments", "security"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -144,7 +148,7 @@ export default function AdminSettingsPage() {
                 : "border-transparent text-slate-500 hover:text-slate-700")
             }
           >
-            {t === "general" ? "General" : t === "bank" ? "Bank Details" : "Payments"}
+            {t === "general" ? "General" : t === "bank" ? "Bank Details" : t === "payments" ? "Payments" : "Security"}
           </button>
         ))}
         <Link
@@ -348,6 +352,98 @@ export default function AdminSettingsPage() {
             className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
           >
             {saving === "payments" ? "Saving…" : "Save Payment Settings"}
+          </button>
+        </div>
+      )}
+
+      {/* Security tab */}
+      {tab === "security" && (
+        <div className="space-y-5">
+          <p className="text-sm text-slate-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            Change the password for your admin account.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Enter current password"
+              autoComplete="current-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repeat new password"
+              autoComplete="new-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <button
+            onClick={async () => {
+              if (!currentPassword) {
+                toast.error("Please enter your current password");
+                return;
+              }
+              if (newPassword.length < 8) {
+                toast.error("New password must be at least 8 characters");
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                toast.error("Passwords do not match");
+                return;
+              }
+              setSaving("security");
+              try {
+                const supabase = createSupabaseBrowserClient();
+                // Re-authenticate with current password to verify identity
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user?.email) throw new Error("Could not verify current user");
+                const { error: signInErr } = await supabase.auth.signInWithPassword({
+                  email: user.email,
+                  password: currentPassword,
+                });
+                if (signInErr) {
+                  toast.error("Current password is incorrect");
+                  setSaving(null);
+                  return;
+                }
+                const { error: updateErr } = await supabase.auth.updateUser({ password: newPassword });
+                if (updateErr) throw updateErr;
+                toast.success("Password updated successfully");
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              } catch (err: any) {
+                toast.error(err?.message || "Failed to update password");
+              } finally {
+                setSaving(null);
+              }
+            }}
+            disabled={saving === "security"}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
+          >
+            {saving === "security" ? "Updating…" : "Update Password"}
           </button>
         </div>
       )}
