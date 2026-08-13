@@ -13,7 +13,16 @@ interface Settings {
   fromEmailName: string;
 }
 
-type Tab = "general" | "bank";
+interface PaymentSettings {
+  stripeSecretKey: string;
+  stripePublishableKey: string;
+  stripeWebhookSecret: string;
+  paystackSecretKey: string;
+  paystackPublicKey: string;
+  preferredGateway: string;
+}
+
+type Tab = "general" | "bank" | "payments";
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("general");
@@ -24,6 +33,14 @@ export default function AdminSettingsPage() {
     sortCode: "",
     address: "",
     fromEmailName: "",
+  });
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
+    stripeSecretKey: "",
+    stripePublishableKey: "",
+    stripeWebhookSecret: "",
+    paystackSecretKey: "",
+    paystackPublicKey: "",
+    preferredGateway: "auto",
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Tab | null>(null);
@@ -36,12 +53,41 @@ export default function AdminSettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/admin/settings/payment-gateways")
+      .then((r) => r.json())
+      .then((d) => setPaymentSettings((prev) => ({ ...prev, ...(d as Partial<PaymentSettings>) })))
+      .catch(() => toast.error("Failed to load payment settings"));
+  }, []);
+
   function update(key: keyof Settings, value: string) {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updatePayment(key: keyof PaymentSettings, value: string) {
+    setPaymentSettings((prev) => ({ ...prev, [key]: value }));
+  }
+
   async function handleSave(section: Tab) {
     setSaving(section);
+
+    if (section === "payments") {
+      try {
+        const res = await fetch("/api/admin/settings/payment-gateways", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentSettings),
+        });
+        if (!res.ok) throw new Error("Save failed");
+        toast.success("Payment settings saved");
+      } catch {
+        toast.error("Failed to save payment settings");
+      } finally {
+        setSaving(null);
+      }
+      return;
+    }
+
     const payload: Partial<Settings> =
       section === "bank"
         ? {
@@ -87,7 +133,7 @@ export default function AdminSettingsPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
-        {(["general", "bank"] as const).map((t) => (
+        {(["general", "bank", "payments"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -98,7 +144,7 @@ export default function AdminSettingsPage() {
                 : "border-transparent text-slate-500 hover:text-slate-700")
             }
           >
-            {t === "general" ? "General" : "Bank Details"}
+            {t === "general" ? "General" : t === "bank" ? "Bank Details" : "Payments"}
           </button>
         ))}
         <Link
@@ -194,6 +240,114 @@ export default function AdminSettingsPage() {
             className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
           >
             {saving === "bank" ? "Saving…" : "Save Bank Details"}
+          </button>
+        </div>
+      )}
+
+      {/* Payments tab */}
+      {tab === "payments" && (
+        <div className="space-y-5">
+          <p className="text-sm text-slate-500 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2">
+            Configure payment gateways to accept online payments for invoices.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Preferred Gateway</label>
+            <select
+              value={paymentSettings.preferredGateway}
+              onChange={(e) => updatePayment("preferredGateway", e.target.value)}
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="auto">Auto</option>
+              <option value="stripe">Stripe</option>
+              <option value="paystack">Paystack</option>
+            </select>
+            {paymentSettings.preferredGateway === "auto" && (
+              <p className="text-xs text-slate-400">
+                Automatically selects Paystack for NGN/GHS currencies, Stripe for others
+              </p>
+            )}
+          </div>
+
+          {/* Stripe */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-semibold text-slate-800">Stripe</h3>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Publishable Key</label>
+              <input
+                type="text"
+                value={paymentSettings.stripePublishableKey}
+                onChange={(e) => updatePayment("stripePublishableKey", e.target.value)}
+                placeholder="pk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Secret Key</label>
+              <input
+                type="password"
+                value={paymentSettings.stripeSecretKey}
+                onChange={(e) => updatePayment("stripeSecretKey", e.target.value)}
+                placeholder="sk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Webhook Secret</label>
+              <input
+                type="password"
+                value={paymentSettings.stripeWebhookSecret}
+                onChange={(e) => updatePayment("stripeWebhookSecret", e.target.value)}
+                placeholder="whsec_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Set your Stripe webhook URL to: https://crm.bluuhq.com/api/webhooks/tenant-stripe/&#123;your-tenant-id&#125;
+            </p>
+          </div>
+
+          {/* Paystack */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-semibold text-slate-800">Paystack</h3>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Public Key</label>
+              <input
+                type="text"
+                value={paymentSettings.paystackPublicKey}
+                onChange={(e) => updatePayment("paystackPublicKey", e.target.value)}
+                placeholder="pk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Secret Key</label>
+              <input
+                type="password"
+                value={paymentSettings.paystackSecretKey}
+                onChange={(e) => updatePayment("paystackSecretKey", e.target.value)}
+                placeholder="sk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <p className="text-xs text-slate-400">
+              Set your Paystack webhook URL to: https://crm.bluuhq.com/api/webhooks/tenant-paystack/&#123;your-tenant-id&#125;
+            </p>
+          </div>
+
+          <button
+            onClick={() => handleSave("payments")}
+            disabled={saving === "payments"}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
+          >
+            {saving === "payments" ? "Saving…" : "Save Payment Settings"}
           </button>
         </div>
       )}

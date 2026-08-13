@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const { data: rows, error } = await supabaseRest(
-      `invoices?select=*,clients(contact_name,company_name,contact_email),tenants(name,logo_url)&id=eq.${invoiceId}`
+      `invoices?select=*,clients(contact_name,company_name,contact_email),tenants(name,logo_url,payment_preferred_gateway,payment_stripe_publishable_key,payment_paystack_public_key,payment_stripe_secret_key_enc,payment_paystack_secret_key_enc)&id=eq.${invoiceId}`
     );
     if (error) throw new Error(JSON.stringify(error));
     const invoice = rows?.[0];
@@ -40,6 +40,19 @@ export async function GET(req: NextRequest) {
 
     const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
     const tenant = Array.isArray(invoice.tenants) ? invoice.tenants[0] : invoice.tenants;
+
+    const hasStripe = !!tenant?.payment_stripe_secret_key_enc;
+    const hasPaystack = !!tenant?.payment_paystack_secret_key_enc;
+    const pref = tenant?.payment_preferred_gateway;
+    const currency = invoice.currency?.toUpperCase();
+
+    let paymentGateway: string | null = null;
+    if (invoice.status === "sent" || invoice.status === "overdue") {
+      if (pref === "stripe" && hasStripe) paymentGateway = "stripe";
+      else if (pref === "paystack" && hasPaystack) paymentGateway = "paystack";
+      else if (["NGN", "GHS"].includes(currency)) paymentGateway = hasPaystack ? "paystack" : hasStripe ? "stripe" : null;
+      else paymentGateway = hasStripe ? "stripe" : hasPaystack ? "paystack" : null;
+    }
 
     return NextResponse.json({
       invoiceNumber: invoice.invoice_number,
@@ -58,6 +71,10 @@ export async function GET(req: NextRequest) {
       clientCompany: client?.company_name || "",
       tenantName: tenant?.name || "BluuHQ",
       tenantLogo: tenant?.logo_url || null,
+      invoiceId: invoice.id,
+      canPay: paymentGateway !== null,
+      paymentGateway: paymentGateway,
+      paystackPublicKey: paymentGateway === "paystack" ? (tenant?.payment_paystack_public_key || null) : null,
     });
   } catch (err: any) {
     console.error("[GET /api/invoice/view]", err?.message);

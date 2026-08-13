@@ -11,6 +11,7 @@ interface LineItem {
 
 interface InvoiceData {
   invoiceNumber: string;
+  invoiceId: string;
   status: string;
   total: number;
   subtotal: number;
@@ -26,6 +27,9 @@ interface InvoiceData {
   clientCompany: string;
   tenantName: string;
   tenantLogo: string | null;
+  canPay: boolean;
+  paymentGateway: "stripe" | "paystack" | null;
+  paystackPublicKey: string | null;
 }
 
 function formatDate(d: string | null) {
@@ -70,9 +74,11 @@ export default function PublicInvoiceViewPage() {
 function InvoiceContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const paymentStatus = searchParams.get("status");
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -115,8 +121,49 @@ function InvoiceContent() {
 
   const fmt = (n: number) => `${invoice.currency} ${n.toLocaleString()}`;
 
+  async function handlePay() {
+    if (!token) return;
+    setPaying(true);
+    try {
+      const res = await fetch("/api/invoice/pay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Payment initiation failed");
+      }
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (e: any) {
+      setError(e.message);
+      setPaying(false);
+    }
+  }
+
+  const canShowPayButton =
+    invoice.canPay &&
+    (invoice.status === "sent" || invoice.status === "overdue");
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-2xl mx-auto">
+        {paymentStatus === "success" && (
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600 shrink-0" />
+            <p className="text-sm text-green-700">Payment received! Your invoice has been updated.</p>
+          </div>
+        )}
+        {paymentStatus === "cancelled" && (
+          <div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-3 flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0" />
+            <p className="text-sm text-yellow-700">Payment was cancelled.</p>
+          </div>
+        )}
+      </div>
       <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         {/* Header */}
         <div className="px-8 pt-8 pb-6 border-b border-gray-100">
@@ -203,6 +250,19 @@ function InvoiceContent() {
             </div>
           </div>
         </div>
+
+        {/* Pay Now */}
+        {canShowPayButton && (
+          <div className="px-8 pb-6">
+            <button
+              onClick={handlePay}
+              disabled={paying}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg px-6 py-3.5 text-base font-semibold transition-colors"
+            >
+              {paying ? "Redirecting to payment…" : "Pay Now"}
+            </button>
+          </div>
+        )}
 
         {/* Notes */}
         {invoice.notes && (
