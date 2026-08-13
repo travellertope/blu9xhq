@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
+import { getSessionFromCookies } from "@/lib/auth";
+import { hasPermission, type Role } from "@/lib/permissions";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/encryption";
 import { sendPortalInvite } from "@/lib/resend";
@@ -101,9 +103,14 @@ const createClientSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const auth = await requirePermission(req, "create_edit_clients");
-  if (auth instanceof NextResponse) return auth;
-  const { session } = auth;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const role = (session.user.bluuhqRole ?? "viewer") as Role;
+  if (!hasPermission(role, "create_edit_clients")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   let body: unknown;
   try {
