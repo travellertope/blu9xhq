@@ -35,6 +35,8 @@ export const PERMISSIONS: Record<string, Role[]> = {
   manage_affiliates:     ["super_admin", "billing_manager"],
   send_portal_invites:   ["super_admin", "account_manager", "support_staff"],
   view_credentials:      ["super_admin", "account_manager", "support_staff"],
+  view_daily_logs:       ["super_admin", "account_manager"],
+  manage_daily_logs:     ["super_admin", "account_manager", "billing_manager", "support_staff", "viewer"],
 };
 
 // ─── Helper functions ──────────────────────────────────────────────────────────
