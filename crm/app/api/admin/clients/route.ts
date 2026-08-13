@@ -143,7 +143,6 @@ export async function POST(req: NextRequest) {
         status:                     d.status,
         tags:                       d.tags ?? [],
         notes:                      d.notes ?? null,
-        active_subscription_count: 0,
       })
       .select("*")
       .single();
