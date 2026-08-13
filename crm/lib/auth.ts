@@ -58,6 +58,16 @@ export async function getSession(): Promise<BluuSession | null> {
   const claims = decodeJwtClaims(session.access_token);
   const userMeta = session.user.user_metadata ?? {};
 
+  // Override tenant from cookie if present
+  const tenantCookie = cookies().get("bluu_active_tenant");
+  if (tenantCookie?.value) {
+    try {
+      const parsed = JSON.parse(tenantCookie.value);
+      if (parsed.tenantId) claims.tenant_id = parsed.tenantId;
+      if (parsed.crmRole) claims.crm_role = parsed.crmRole;
+    } catch {}
+  }
+
   const userType: string = claims.user_type ?? "";
 
   const role: UserRole = userType === "team"
@@ -160,6 +170,17 @@ function _parseSupabaseCookies(
   if (expires_at && expires_at * 1000 < Date.now()) return null;
 
   const claims = decodeJwtClaims(access_token);
+
+  // Override tenant from cookie if present
+  const tenantOverride = allCookies.find((c) => c.name === "bluu_active_tenant");
+  if (tenantOverride?.value) {
+    try {
+      const parsed = JSON.parse(tenantOverride.value);
+      if (parsed.tenantId) claims.tenant_id = parsed.tenantId;
+      if (parsed.crmRole) claims.crm_role = parsed.crmRole;
+    } catch {}
+  }
+
   const userMeta = user.user_metadata ?? {};
   const userType: string = claims.user_type ?? "";
   const role: UserRole =

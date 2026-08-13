@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RoleBadge } from "@/components/admin/RoleBadge";
+import { TenantSwitcher } from "@/components/admin/TenantSwitcher";
 import { hasPermission, type Role } from "@/lib/permissions";
 
 // Nav items with their required permission (undefined = visible to all team roles)
@@ -69,6 +70,9 @@ function SidebarInner({ userName, bluuhqRole, tenantLogo, accentColour, onNaviga
           <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
         )}
       </div>
+
+      {/* Tenant switcher */}
+      <TenantSwitcher />
 
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">
