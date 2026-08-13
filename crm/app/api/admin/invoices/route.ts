@@ -3,6 +3,8 @@ import { requirePermission } from "@/lib/apiPermissions";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 
+export const maxDuration = 30;
+
 function mapInvoiceRow(row: any) {
   return {
     id:             row.id,
@@ -134,13 +136,13 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    await logAuditEvent({
+    void logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_CREATED,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Created invoice ${invNumber} for client ${body.clientId}`,
       clientId: body.clientId,
-    });
+    }).catch(() => {});
 
     return NextResponse.json({ invoice: mapInvoiceRow(inserted) }, { status: 201 });
   } catch (err) {
