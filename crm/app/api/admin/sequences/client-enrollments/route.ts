@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSession } from "@/lib/apiPermissions";
+import { getSessionFromCookies } from "@/lib/auth";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
+
+export const maxDuration = 30;
 
 const VISIBLE_STATUSES = ["active", "paused", "completed", "exited"];
 
 // ─── GET /api/admin/sequences/client-enrollments ─────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const result = await requireSession(req);
-  if (result instanceof NextResponse) return result;
-  const tenantId = result.session.user.tenantId!;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const tenantId = session.user.tenantId!;
 
   const sp = new URL(req.url).searchParams;
   const clientId = sp.get("clientId");
