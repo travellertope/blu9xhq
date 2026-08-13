@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 
@@ -56,6 +56,18 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function PublicInvoiceViewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Loading invoice…</p>
+      </div>
+    }>
+      <InvoiceContent />
+    </Suspense>
+  );
+}
+
+function InvoiceContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
