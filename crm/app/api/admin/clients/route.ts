@@ -5,6 +5,8 @@ import { encrypt } from "@/lib/encryption";
 import { sendPortalInvite } from "@/lib/resend";
 import { z } from "zod";
 
+export const maxDuration = 30;
+
 // Shapes a Supabase `clients` row as a WP-post-like object so existing page
 // components (typed against WPClientPost) need no changes.
 function toWpShape(row: any) {
