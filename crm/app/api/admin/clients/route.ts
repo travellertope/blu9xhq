@@ -139,7 +139,9 @@ export async function POST(req: NextRequest) {
         contact_email:              encrypt(d.email),
         contact_phone:              d.phone ? encrypt(d.phone) : null,
         company_name:               d.company,
+        portal_email:               d.email,
         status:                     d.status,
+        active_subscription_count:  0,
         tags:                       d.tags ?? [],
         notes:                      d.notes ?? null,
       })
@@ -160,7 +162,10 @@ export async function POST(req: NextRequest) {
         loginUrl: inviteLink,
       }).catch(console.error);
 
-      // portal_invited_at is an ALTER TABLE column — skip until schema cache is reloaded
+      await supabase
+        .from("clients")
+        .update({ portal_invited_at: new Date().toISOString() })
+        .eq("id", inserted.id);
     }
 
     return NextResponse.json({ client: toWpShape(inserted) }, { status: 201 });
