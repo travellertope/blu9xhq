@@ -138,9 +138,16 @@ function _parseSupabaseCookies(
 
   let parsed: { access_token?: string; user?: { id?: string; email?: string; user_metadata?: Record<string, any> }; expires_at?: number };
   try {
-    const decoded = tokenJson.startsWith("%") || tokenJson.includes("%7B")
-      ? decodeURIComponent(tokenJson)
-      : tokenJson;
+    let decoded: string;
+    if (tokenJson.startsWith("base64-")) {
+      const b64 = tokenJson.slice(7);
+      const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
+      decoded = Buffer.from(padded, "base64").toString("utf-8");
+    } else if (tokenJson.startsWith("%") || tokenJson.includes("%7B")) {
+      decoded = decodeURIComponent(tokenJson);
+    } else {
+      decoded = tokenJson;
+    }
     parsed = JSON.parse(decoded);
   } catch {
     return null;
