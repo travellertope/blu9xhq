@@ -331,12 +331,15 @@ export default function AdminSettingsPage() {
               />
             </div>
 
-            <p className="text-xs text-slate-400">
-              Set your Stripe webhook URL to:{" "}
-              <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
-                https://crm.bluuhq.com/api/webhooks/tenant-stripe/{tenantId || "loading..."}
-              </code>
-            </p>
+            <div className="text-xs text-slate-400 space-y-1">
+              <p>
+                Webhook URL:{" "}
+                <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                  https://crm.bluuhq.com/api/webhooks/tenant-stripe/{tenantId || "loading..."}
+                </code>
+              </p>
+              <p>Enable this event: <code className="bg-slate-100 px-1 py-0.5 rounded text-xs">checkout.session.completed</code></p>
+            </div>
           </div>
 
           {/* Paystack */}
@@ -365,12 +368,15 @@ export default function AdminSettingsPage() {
               />
             </div>
 
-            <p className="text-xs text-slate-400">
-              Set your Paystack webhook URL to:{" "}
-              <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
-                https://crm.bluuhq.com/api/webhooks/tenant-paystack/{tenantId || "loading..."}
-              </code>
-            </p>
+            <div className="text-xs text-slate-400 space-y-1">
+              <p>
+                Webhook URL:{" "}
+                <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                  https://crm.bluuhq.com/api/webhooks/tenant-paystack/{tenantId || "loading..."}
+                </code>
+              </p>
+              <p>Enable this event: <code className="bg-slate-100 px-1 py-0.5 rounded text-xs">charge.success</code></p>
+            </div>
           </div>
 
           <button
