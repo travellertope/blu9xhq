@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
         if (signInErr || !signInData.user) {
           await supabase.from("tenants").delete().eq("id", tenant.id);
-          return NextResponse.json({ error: "An account with this email already exists. Please enter your current password." }, { status: 400 });
+          return NextResponse.json({ error: "An account with this email already exists. Please enter your current password, or <a href='/forgot-password'>reset it here</a>." }, { status: 400 });
         }
         userId = signInData.user.id;
         existingUser = true;
