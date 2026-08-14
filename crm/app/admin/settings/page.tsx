@@ -157,7 +157,7 @@ export default function AdminSettingsPage() {
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
         {(["general", "bank", "payments", "security"] as const)
-          .filter((t) => t !== "payments" || (tenantPlan && tenantPlan !== "free"))
+          .filter((t) => t !== "payments" || tenantPlan !== "free")
           .map((t) => (
           <button
             key={t}
