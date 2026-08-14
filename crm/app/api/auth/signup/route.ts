@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/tenant";
 import { cookies } from "next/headers";
@@ -68,13 +69,28 @@ export async function POST(req: NextRequest) {
       // Check if user already exists
       const msg = authErr.message?.toLowerCase() ?? "";
       if (msg.includes("already") || msg.includes("exists") || msg.includes("registered") || msg.includes("duplicate")) {
-        const { data: { users } } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-        const found = users?.find((u) => u.email?.toLowerCase() === email);
-        if (!found) {
+        // Verify the password matches their existing account
+        const cookieStore = cookies();
+        const anonClient = createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            cookies: {
+              getAll() { return cookieStore.getAll(); },
+              setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore.set(name, value, options)
+                );
+              },
+            },
+          }
+        );
+        const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
+        if (signInErr || !signInData.user) {
           await supabase.from("tenants").delete().eq("id", tenant.id);
-          throw new Error("User exists but could not be found");
+          return NextResponse.json({ error: "An account with this email already exists. Please enter your current password." }, { status: 400 });
         }
-        userId = found.id;
+        userId = signInData.user.id;
         existingUser = true;
       } else {
         await supabase.from("tenants").delete().eq("id", tenant.id);
