@@ -48,6 +48,8 @@ export default function AdminSettingsPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [tenantId, setTenantId] = useState("");
+  const [tenantPlan, setTenantPlan] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/settings/bank-details")
@@ -62,6 +64,23 @@ export default function AdminSettingsPage() {
       .then((r) => r.json())
       .then((d) => setPaymentSettings((prev) => ({ ...prev, ...(d as Partial<PaymentSettings>) })))
       .catch(() => toast.error("Failed to load payment settings"));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/tenants")
+      .then((r) => r.json())
+      .then((d) => {
+        const tenants = Array.isArray(d) ? d : d.tenants ?? [];
+        const current = tenants.find((t: any) => t.isCurrent);
+        if (current) {
+          setTenantId(current.id);
+        }
+      })
+      .catch(() => {});
+    fetch("/api/admin/tenant-plan")
+      .then((r) => r.json())
+      .then((d) => { if (d.plan) setTenantPlan(d.plan); })
+      .catch(() => {});
   }, []);
 
   function update(key: keyof Settings, value: string) {
@@ -137,7 +156,9 @@ export default function AdminSettingsPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
-        {(["general", "bank", "payments", "security"] as const).map((t) => (
+        {(["general", "bank", "payments", "security"] as const)
+          .filter((t) => t !== "payments" || (tenantPlan && tenantPlan !== "free"))
+          .map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -311,7 +332,10 @@ export default function AdminSettingsPage() {
             </div>
 
             <p className="text-xs text-slate-400">
-              Set your Stripe webhook URL to: https://crm.bluuhq.com/api/webhooks/tenant-stripe/&#123;your-tenant-id&#125;
+              Set your Stripe webhook URL to:{" "}
+              <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                https://crm.bluuhq.com/api/webhooks/tenant-stripe/{tenantId || "loading..."}
+              </code>
             </p>
           </div>
 
@@ -342,7 +366,10 @@ export default function AdminSettingsPage() {
             </div>
 
             <p className="text-xs text-slate-400">
-              Set your Paystack webhook URL to: https://crm.bluuhq.com/api/webhooks/tenant-paystack/&#123;your-tenant-id&#125;
+              Set your Paystack webhook URL to:{" "}
+              <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                https://crm.bluuhq.com/api/webhooks/tenant-paystack/{tenantId || "loading..."}
+              </code>
             </p>
           </div>
 

@@ -55,7 +55,14 @@ export default function SignupPage() {
         return;
       }
 
-      // 2. Sign in to get session cookies
+      if (signupData.existingUser) {
+        // Existing user adding a new tenant — cookie is already set by the API.
+        // Redirect directly; they already have a session.
+        window.location.href = "/admin";
+        return;
+      }
+
+      // 2. New user — sign in to get session cookies
       const signinRes = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
