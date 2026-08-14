@@ -62,10 +62,7 @@ export async function PATCH(req: NextRequest) {
   }
   const tenantId = session.user.tenantId!;
 
-  // Only paid plans can configure payment gateways
-  const supabaseCheck = createSupabaseAdminClient();
-  const { data: tenantRow } = await supabaseCheck.from("tenants").select("plan").eq("id", tenantId).single();
-  if (tenantRow?.plan === "free") {
+  if (session.user.tenantPlan === "free") {
     return NextResponse.json({ error: "Upgrade to a paid plan to configure online payments" }, { status: 403 });
   }
 
