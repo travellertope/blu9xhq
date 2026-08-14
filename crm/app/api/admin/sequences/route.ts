@@ -67,14 +67,14 @@ export async function GET(req: NextRequest) {
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("[GET /api/admin/sequences] DB error:", error.message, error.code);
+      return NextResponse.json({ sequences: [] });
+    }
     return NextResponse.json({ sequences: (data ?? []).map(mapSequence) });
   } catch (err: unknown) {
     console.error("[GET /api/admin/sequences]", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
-      { status: 502 }
-    );
+    return NextResponse.json({ sequences: [] });
   }
 }
 
