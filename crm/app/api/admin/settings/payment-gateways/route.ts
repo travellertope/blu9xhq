@@ -21,7 +21,7 @@ export async function GET() {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!hasPermission(session.user.role, "access_settings")) {
+  if (!hasPermission(session.user.bluuhqRole, "access_settings")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const tenantId = session.user.tenantId!;
@@ -57,7 +57,7 @@ export async function PATCH(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!hasPermission(session.user.role, "access_settings")) {
+  if (!hasPermission(session.user.bluuhqRole, "access_settings")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const tenantId = session.user.tenantId!;

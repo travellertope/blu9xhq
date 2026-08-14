@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!hasPermission(session.user.role, "build_sequences")) {
+  if (!hasPermission(session.user.bluuhqRole, "build_sequences")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const tenantId = session.user.tenantId!;
