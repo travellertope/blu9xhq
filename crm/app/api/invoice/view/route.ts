@@ -59,6 +59,7 @@ export async function GET(req: NextRequest) {
       status: invoice.status,
       total: invoice.total,
       subtotal: invoice.subtotal,
+      discount: invoice.discount ?? 0,
       taxRate: invoice.tax_rate,
       taxAmount: invoice.tax_amount,
       currency: invoice.currency,

@@ -64,8 +64,20 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-Bold",
     color: "#64748b",
   },
+  tableHeaderQty: {
+    width: 40,
+    textAlign: "center",
+    fontFamily: "Helvetica-Bold",
+    color: "#64748b",
+  },
+  tableHeaderUnitPrice: {
+    width: 70,
+    textAlign: "right",
+    fontFamily: "Helvetica-Bold",
+    color: "#64748b",
+  },
   tableHeaderAmount: {
-    width: 100,
+    width: 80,
     textAlign: "right",
     fontFamily: "Helvetica-Bold",
     color: "#64748b",
@@ -79,14 +91,38 @@ const styles = StyleSheet.create({
   tableRowDesc: {
     flex: 1,
   },
+  tableRowQty: {
+    width: 40,
+    textAlign: "center",
+  },
+  tableRowUnitPrice: {
+    width: 70,
+    textAlign: "right",
+  },
   tableRowAmount: {
+    width: 80,
+    textAlign: "right",
+  },
+  subtotalRow: {
+    flexDirection: "row",
+    padding: "4 8",
+    justifyContent: "flex-end",
+  },
+  subtotalLabel: {
     width: 100,
+    textAlign: "right",
+    color: "#64748b",
+  },
+  subtotalValue: {
+    width: 80,
     textAlign: "right",
   },
   totalRow: {
     flexDirection: "row",
     padding: "8 8",
-    marginTop: 8,
+    marginTop: 4,
+    borderTopWidth: 1,
+    borderTopColor: "#e2e8f0",
   },
   totalLabel: {
     flex: 1,
@@ -94,7 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   totalAmount: {
-    width: 100,
+    width: 80,
     textAlign: "right",
     fontFamily: "Helvetica-Bold",
     fontSize: 12,
@@ -126,6 +162,9 @@ const styles = StyleSheet.create({
 
 interface LineItem {
   description: string;
+  quantity?: number;
+  unitPrice?: number;
+  discount?: number;
   amount: number;
 }
 
@@ -136,6 +175,10 @@ interface InvoicePDFProps {
   clientName: string;
   clientCompany?: string;
   lineItems: LineItem[];
+  subtotal: number;
+  discount: number;
+  taxRate: number;
+  taxAmount: number;
   total: number;
   currency: string;
   notes?: string;
@@ -149,6 +192,10 @@ function InvoicePDF({
   clientName,
   clientCompany,
   lineItems,
+  subtotal,
+  discount,
+  taxRate,
+  taxAmount,
   total,
   currency,
   notes,
@@ -188,15 +235,42 @@ function InvoicePDF({
         {/* Table */}
         <View style={styles.tableHeader}>
           <Text style={styles.tableHeaderDesc}>Description</Text>
-          <Text style={styles.tableHeaderAmount}>Amount ({currency})</Text>
+          <Text style={styles.tableHeaderQty}>Qty</Text>
+          <Text style={styles.tableHeaderUnitPrice}>Unit Price</Text>
+          <Text style={styles.tableHeaderAmount}>Amount</Text>
         </View>
 
         {lineItems.map((item, i) => (
           <View key={i} style={styles.tableRow}>
-            <Text style={styles.tableRowDesc}>{item.description}</Text>
+            <Text style={styles.tableRowDesc}>
+              {item.description}
+              {(item.discount ?? 0) > 0 ? ` (disc: -${item.discount})` : ""}
+            </Text>
+            <Text style={styles.tableRowQty}>{item.quantity ?? 1}</Text>
+            <Text style={styles.tableRowUnitPrice}>{(item.unitPrice ?? item.amount)?.toLocaleString()}</Text>
             <Text style={styles.tableRowAmount}>{item.amount?.toLocaleString()}</Text>
           </View>
         ))}
+
+        {/* Subtotal / Discount / Tax */}
+        {(discount > 0 || taxAmount > 0) && (
+          <View style={styles.subtotalRow}>
+            <Text style={styles.subtotalLabel}>Subtotal</Text>
+            <Text style={styles.subtotalValue}>{currency} {subtotal?.toLocaleString()}</Text>
+          </View>
+        )}
+        {discount > 0 && (
+          <View style={styles.subtotalRow}>
+            <Text style={styles.subtotalLabel}>Discount</Text>
+            <Text style={[styles.subtotalValue, { color: "#ef4444" }]}>-{currency} {discount?.toLocaleString()}</Text>
+          </View>
+        )}
+        {taxAmount > 0 && (
+          <View style={styles.subtotalRow}>
+            <Text style={styles.subtotalLabel}>Tax{taxRate ? ` (${taxRate}%)` : ""}</Text>
+            <Text style={styles.subtotalValue}>+{currency} {taxAmount?.toLocaleString()}</Text>
+          </View>
+        )}
 
         {/* Total */}
         <View style={styles.totalRow}>
@@ -264,6 +338,10 @@ export async function POST(
       clientName: invoice.clients?.contact_name || invoice.clients?.company_name || "",
       clientCompany: invoice.clients?.company_name,
       lineItems,
+      subtotal: invoice.subtotal ?? invoice.total,
+      discount: invoice.discount ?? 0,
+      taxRate: invoice.tax_rate ?? 0,
+      taxAmount: invoice.tax_amount ?? 0,
       total: invoice.total,
       currency: invoice.currency,
       notes: invoice.notes,

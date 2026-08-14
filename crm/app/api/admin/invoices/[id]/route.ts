@@ -8,6 +8,10 @@ function mapInvoiceRow(row: any) {
     number:         row.invoice_number,
     clientId:       row.client_id,
     subscriptionId: row.subscription_id ?? undefined,
+    subtotal:       row.subtotal,
+    discount:       row.discount ?? 0,
+    taxRate:        row.tax_rate ?? 0,
+    taxAmount:      row.tax_amount ?? 0,
     total:          row.total,
     currency:       row.currency,
     status:         row.status,
@@ -55,10 +59,12 @@ export async function PATCH(
   let body: {
     markAsPaid?: boolean;
     status?: string;
-    lineItems?: { description: string; amount: number }[];
+    lineItems?: { description: string; quantity?: number; unitPrice?: number; discount?: number; amount: number }[];
     currency?: string;
     dueDate?: string;
     notes?: string;
+    taxRate?: number;
+    discount?: number;
   };
 
   try {
@@ -88,7 +94,7 @@ export async function PATCH(
   }
   if (!current) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-  const isFieldEdit = body.lineItems !== undefined || body.currency !== undefined || body.dueDate !== undefined || body.notes !== undefined;
+  const isFieldEdit = body.lineItems !== undefined || body.currency !== undefined || body.dueDate !== undefined || body.notes !== undefined || body.taxRate !== undefined || body.discount !== undefined;
   if (isFieldEdit && current.status !== "draft") {
     return NextResponse.json({ error: "Only draft invoices can be edited" }, { status: 422 });
   }
@@ -100,14 +106,25 @@ export async function PATCH(
   try {
     const patch: Record<string, unknown> = {};
     if (body.status !== undefined) patch.status = body.status;
-    if (body.lineItems !== undefined) {
-      patch.line_items = body.lineItems;
-      patch.total = body.lineItems.reduce((s, i) => s + i.amount, 0);
-      patch.subtotal = patch.total;
-    }
+    if (body.lineItems !== undefined) patch.line_items = body.lineItems;
+    if (body.taxRate !== undefined) patch.tax_rate = body.taxRate || null;
+    if (body.discount !== undefined) patch.discount = body.discount || null;
     if (body.currency !== undefined) patch.currency = body.currency;
     if (body.dueDate !== undefined) patch.due_date = body.dueDate;
     if (body.notes !== undefined) patch.notes = body.notes;
+
+    // Recompute totals if line items, tax, or discount changed
+    if (body.lineItems !== undefined || body.taxRate !== undefined || body.discount !== undefined) {
+      const items = body.lineItems ?? [];
+      const itemsSubtotal = items.reduce((s, i) => s + (i.amount ?? 0), 0);
+      const disc = body.discount ?? 0;
+      const subtotalAfterDiscount = Math.max(itemsSubtotal - disc, 0);
+      const rate = body.taxRate ?? 0;
+      const taxAmt = subtotalAfterDiscount * (rate / 100);
+      patch.subtotal = itemsSubtotal;
+      patch.tax_amount = taxAmt || null;
+      patch.total = subtotalAfterDiscount + taxAmt;
+    }
 
     const { data: updated, error } = await supabase
       .from("invoices")

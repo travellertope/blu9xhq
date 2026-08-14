@@ -6,6 +6,9 @@ import { CheckCircle, Clock, AlertCircle } from "lucide-react";
 
 interface LineItem {
   description: string;
+  quantity?: number;
+  unitPrice?: number;
+  discount?: number;
   amount: number;
 }
 
@@ -15,6 +18,7 @@ interface InvoiceData {
   status: string;
   total: number;
   subtotal: number;
+  discount: number | null;
   taxRate: number | null;
   taxAmount: number | null;
   currency: string;
@@ -217,13 +221,22 @@ function InvoiceContent() {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-2 text-gray-500 font-medium">Description</th>
-                <th className="text-right py-2 text-gray-500 font-medium">Amount</th>
+                <th className="text-center py-2 text-gray-500 font-medium w-14">Qty</th>
+                <th className="text-right py-2 text-gray-500 font-medium w-24">Unit Price</th>
+                <th className="text-right py-2 text-gray-500 font-medium w-24">Amount</th>
               </tr>
             </thead>
             <tbody>
               {invoice.lineItems.map((item, i) => (
                 <tr key={i} className="border-b border-gray-100">
-                  <td className="py-3 text-gray-900">{item.description}</td>
+                  <td className="py-3 text-gray-900">
+                    {item.description}
+                    {(item.discount ?? 0) > 0 && (
+                      <span className="block text-xs text-gray-400">Disc: -{fmt(item.discount!)}</span>
+                    )}
+                  </td>
+                  <td className="py-3 text-center text-gray-600">{item.quantity ?? 1}</td>
+                  <td className="py-3 text-right text-gray-600">{fmt(item.unitPrice ?? item.amount)}</td>
                   <td className="py-3 text-right text-gray-900">{fmt(item.amount)}</td>
                 </tr>
               ))}
@@ -232,17 +245,23 @@ function InvoiceContent() {
 
           {/* Totals */}
           <div className="mt-4 space-y-2">
+            {((invoice.discount != null && invoice.discount > 0) || (invoice.taxAmount != null && invoice.taxAmount > 0)) && (
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Subtotal</span>
+                <span>{fmt(invoice.subtotal)}</span>
+              </div>
+            )}
+            {invoice.discount != null && invoice.discount > 0 && (
+              <div className="flex justify-between text-sm text-red-500">
+                <span>Discount</span>
+                <span>-{fmt(invoice.discount)}</span>
+              </div>
+            )}
             {invoice.taxAmount != null && invoice.taxAmount > 0 && (
-              <>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Subtotal</span>
-                  <span>{fmt(invoice.subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Tax{invoice.taxRate ? ` (${invoice.taxRate}%)` : ""}</span>
-                  <span>{fmt(invoice.taxAmount)}</span>
-                </div>
-              </>
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Tax{invoice.taxRate ? ` (${invoice.taxRate}%)` : ""}</span>
+                <span>+{fmt(invoice.taxAmount)}</span>
+              </div>
             )}
             <div className="flex justify-between pt-2 border-t border-gray-200">
               <span className="text-base font-bold text-gray-900">Total</span>
