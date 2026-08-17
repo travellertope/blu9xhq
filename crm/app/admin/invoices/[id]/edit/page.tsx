@@ -19,10 +19,20 @@ import { PlusCircle, Trash2, ArrowLeft } from "lucide-react";
 
 interface LineItem {
   description: string;
-  amount: number | string;
+  quantity: number | string;
+  unitPrice: number | string;
+  discount: number | string;
+  amount?: number;
 }
 
 const CURRENCIES = ["USD", "GBP", "EUR", "GHS", "NGN"];
+
+function lineAmount(item: LineItem): number {
+  const qty = parseFloat(String(item.quantity)) || 0;
+  const price = parseFloat(String(item.unitPrice)) || 0;
+  const disc = parseFloat(String(item.discount)) || 0;
+  return Math.max(qty * price - disc, 0);
+}
 
 export default function EditInvoicePage() {
   const params = useParams();
@@ -34,7 +44,11 @@ export default function EditInvoicePage() {
   const [currency, setCurrency] = useState("USD");
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
-  const [lineItems, setLineItems] = useState<LineItem[]>([{ description: "", amount: "" }]);
+  const [lineItems, setLineItems] = useState<LineItem[]>([
+    { description: "", quantity: 1, unitPrice: "", discount: 0 },
+  ]);
+  const [taxRate, setTaxRate] = useState<number | string>(0);
+  const [overallDiscount, setOverallDiscount] = useState<number | string>(0);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -53,10 +67,17 @@ export default function EditInvoicePage() {
         setCurrency(inv.currency ?? "USD");
         setDueDate(inv.dueDate ?? "");
         setNotes(inv.notes ?? "");
+        setTaxRate(inv.taxRate ?? 0);
+        setOverallDiscount(inv.discount ?? 0);
         setLineItems(
           inv.lineItems?.length
-            ? inv.lineItems
-            : [{ description: "", amount: "" }]
+            ? inv.lineItems.map((li: any) => ({
+                description: li.description ?? "",
+                quantity: li.quantity ?? 1,
+                unitPrice: li.unitPrice ?? li.amount ?? 0,
+                discount: li.discount ?? 0,
+              }))
+            : [{ description: "", quantity: 1, unitPrice: "", discount: 0 }]
         );
       } catch {
         toast.error("Invoice not found");
@@ -68,11 +89,15 @@ export default function EditInvoicePage() {
     load();
   }, [id, router]);
 
-  const total = lineItems.reduce((sum, item) => {
-    return sum + (parseFloat(String(item.amount)) || 0);
-  }, 0);
+  const itemsSubtotal = lineItems.reduce((sum, item) => sum + lineAmount(item), 0);
+  const discountVal = parseFloat(String(overallDiscount)) || 0;
+  const subtotalAfterDiscount = Math.max(itemsSubtotal - discountVal, 0);
+  const taxRateVal = parseFloat(String(taxRate)) || 0;
+  const taxAmount = subtotalAfterDiscount * (taxRateVal / 100);
+  const total = subtotalAfterDiscount + taxAmount;
 
-  const addLineItem = () => setLineItems((prev) => [...prev, { description: "", amount: "" }]);
+  const addLineItem = () =>
+    setLineItems((prev) => [...prev, { description: "", quantity: 1, unitPrice: "", discount: 0 }]);
 
   const removeLineItem = (idx: number) =>
     setLineItems((prev) => prev.filter((_, i) => i !== idx));
@@ -85,7 +110,7 @@ export default function EditInvoicePage() {
   const handleSave = async () => {
     if (!dueDate) { toast.error("Please set a due date"); return; }
     if (lineItems.length === 0) { toast.error("Add at least one line item"); return; }
-    if (lineItems.some((li) => !li.description || !li.amount)) {
+    if (lineItems.some((li) => !li.description || !li.unitPrice)) {
       toast.error("Fill in all line items");
       return;
     }
@@ -98,11 +123,16 @@ export default function EditInvoicePage() {
         body: JSON.stringify({
           lineItems: lineItems.map((li) => ({
             description: li.description,
-            amount: parseFloat(String(li.amount)) || 0,
+            quantity: parseFloat(String(li.quantity)) || 1,
+            unitPrice: parseFloat(String(li.unitPrice)) || 0,
+            discount: parseFloat(String(li.discount)) || 0,
+            amount: lineAmount(li),
           })),
           currency,
           dueDate,
           notes: notes || undefined,
+          taxRate: taxRateVal || undefined,
+          discount: discountVal || undefined,
         }),
       });
 
@@ -125,7 +155,7 @@ export default function EditInvoicePage() {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-1" />
@@ -181,8 +211,17 @@ export default function EditInvoicePage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
+          <div className="flex gap-2 text-xs font-medium text-slate-500 px-1">
+            <span className="flex-1">Description</span>
+            <span className="w-16 text-center">Qty</span>
+            <span className="w-24 text-center">Unit Price</span>
+            <span className="w-20 text-center">Discount</span>
+            <span className="w-24 text-right">Amount</span>
+            <span className="w-9" />
+          </div>
+
           {lineItems.map((item, idx) => (
-            <div key={idx} className="flex gap-3 items-start">
+            <div key={idx} className="flex gap-2 items-start">
               <div className="flex-1">
                 <Input
                   placeholder="Description"
@@ -190,13 +229,34 @@ export default function EditInvoicePage() {
                   onChange={(e) => updateLineItem(idx, "description", e.target.value)}
                 />
               </div>
-              <div className="w-32">
+              <div className="w-16">
                 <Input
                   type="number"
-                  placeholder="Amount"
-                  value={item.amount}
-                  onChange={(e) => updateLineItem(idx, "amount", e.target.value)}
+                  min="1"
+                  placeholder="1"
+                  value={item.quantity}
+                  onChange={(e) => updateLineItem(idx, "quantity", e.target.value)}
                 />
+              </div>
+              <div className="w-24">
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={item.unitPrice}
+                  onChange={(e) => updateLineItem(idx, "unitPrice", e.target.value)}
+                />
+              </div>
+              <div className="w-20">
+                <Input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={item.discount}
+                  onChange={(e) => updateLineItem(idx, "discount", e.target.value)}
+                />
+              </div>
+              <div className="w-24 flex items-center justify-end h-9 text-sm font-medium text-slate-700">
+                {lineAmount(item).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </div>
               {lineItems.length > 1 && (
                 <Button
@@ -208,15 +268,59 @@ export default function EditInvoicePage() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               )}
+              {lineItems.length <= 1 && <div className="w-9" />}
             </div>
           ))}
 
-          <div className="flex justify-end border-t pt-3">
-            <div className="text-right">
-              <p className="text-xs text-slate-500">Total</p>
-              <p className="text-xl font-bold text-slate-900">
-                {currency} {total.toLocaleString()}
-              </p>
+          <div className="border-t pt-3 space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-slate-500">Items Subtotal</span>
+              <span className="font-medium">{currency} {itemsSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+            </div>
+
+            <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Overall Discount</span>
+                <Input
+                  type="number"
+                  min="0"
+                  className="w-24 h-7 text-xs"
+                  value={overallDiscount}
+                  onChange={(e) => setOverallDiscount(e.target.value)}
+                />
+              </div>
+              {discountVal > 0 && (
+                <span className="text-red-500 font-medium">
+                  -{currency} {discountVal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Tax Rate (%)</span>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  className="w-20 h-7 text-xs"
+                  value={taxRate}
+                  onChange={(e) => setTaxRate(e.target.value)}
+                />
+              </div>
+              {taxAmount > 0 && (
+                <span className="font-medium">
+                  +{currency} {taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </span>
+              )}
+            </div>
+
+            <div className="flex justify-between items-center pt-2 border-t">
+              <span className="text-base font-bold text-slate-900">Total</span>
+              <span className="text-xl font-bold text-slate-900">
+                {currency} {total.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              </span>
             </div>
           </div>
         </CardContent>

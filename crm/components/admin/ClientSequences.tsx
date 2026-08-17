@@ -56,18 +56,19 @@ export function ClientSequences({ clientId, clientEmail }: ClientSequencesProps)
     async function init() {
       setLoading(true);
       try {
-        const [enrollRes, seqRes] = await Promise.all([
-          fetch(`/api/admin/sequences/client-enrollments?clientId=${clientId}`),
-          fetch("/api/admin/sequences"),
-        ]);
-        const enrollData = await enrollRes.json();
-        const seqData    = await seqRes.json();
-
-        setEnrollments(enrollData.enrollments ?? []);
+        const seqRes = await fetch("/api/admin/sequences");
+        const seqData = await seqRes.json();
         const allSequences: WPSequence[] = seqData.sequences ?? seqData ?? [];
         setSequences(allSequences.filter((s) => s.acf?.is_active));
       } catch {
         toast.error("Failed to load sequences");
+      }
+      try {
+        const enrollRes = await fetch(`/api/admin/sequences/client-enrollments?clientId=${clientId}`);
+        const enrollData = await enrollRes.json();
+        setEnrollments(enrollData.enrollments ?? []);
+      } catch {
+        // Enrollments may not be available yet
       } finally {
         setLoading(false);
       }

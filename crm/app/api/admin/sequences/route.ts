@@ -67,14 +67,14 @@ export async function GET(req: NextRequest) {
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("[GET /api/admin/sequences] DB error:", error.message, error.code);
+      return NextResponse.json({ sequences: [] });
+    }
     return NextResponse.json({ sequences: (data ?? []).map(mapSequence) });
   } catch (err: unknown) {
     console.error("[GET /api/admin/sequences]", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
-      { status: 502 }
-    );
+    return NextResponse.json({ sequences: [] });
   }
 }
 
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!hasPermission(session.user.role, "build_sequences")) {
+  if (!hasPermission(session.user.bluuhqRole, "build_sequences")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
   const tenantId = session.user.tenantId!;

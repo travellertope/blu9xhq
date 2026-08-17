@@ -28,6 +28,10 @@ interface Invoice {
   id: number;
   number: string;
   clientId: number;
+  subtotal: number;
+  discount: number;
+  taxRate: number;
+  taxAmount: number;
   total: number;
   currency: string;
   status: string;
@@ -37,7 +41,7 @@ interface Invoice {
   paymentMethod?: string;
   notes?: string;
   pdfUrl?: string;
-  lineItems: { description: string; amount: number }[];
+  lineItems: { description: string; quantity?: number; unitPrice?: number; discount?: number; amount: number }[];
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -355,14 +359,46 @@ export default function InvoiceDetailPage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            {invoice.lineItems.map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between text-sm py-2 border-b last:border-0">
-                <span className="text-slate-700">{item.description}</span>
-                <span className="font-medium">{invoice.currency} {item.amount?.toLocaleString()}</span>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b text-slate-500">
+                <th className="text-left py-2 font-medium">Description</th>
+                <th className="text-center py-2 font-medium w-16">Qty</th>
+                <th className="text-right py-2 font-medium w-24">Unit Price</th>
+                <th className="text-right py-2 font-medium w-20">Disc.</th>
+                <th className="text-right py-2 font-medium w-24">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invoice.lineItems.map((item, idx) => (
+                <tr key={idx} className="border-b border-slate-100">
+                  <td className="py-2 text-slate-700">{item.description}</td>
+                  <td className="py-2 text-center text-slate-600">{item.quantity ?? 1}</td>
+                  <td className="py-2 text-right text-slate-600">{(item.unitPrice ?? item.amount)?.toLocaleString()}</td>
+                  <td className="py-2 text-right text-slate-600">{item.discount ? item.discount.toLocaleString() : "—"}</td>
+                  <td className="py-2 text-right font-medium">{invoice.currency} {item.amount?.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mt-3 space-y-1 text-sm">
+            <div className="flex justify-between">
+              <span className="text-slate-500">Subtotal</span>
+              <span>{invoice.currency} {(invoice.subtotal ?? invoice.total)?.toLocaleString()}</span>
+            </div>
+            {invoice.discount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-slate-500">Discount</span>
+                <span className="text-red-500">-{invoice.currency} {invoice.discount.toLocaleString()}</span>
               </div>
-            ))}
-            <div className="flex items-center justify-between text-sm pt-2 font-bold">
+            )}
+            {invoice.taxAmount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-slate-500">Tax{invoice.taxRate ? ` (${invoice.taxRate}%)` : ""}</span>
+                <span>+{invoice.currency} {invoice.taxAmount.toLocaleString()}</span>
+              </div>
+            )}
+            <div className="flex justify-between pt-2 border-t font-bold">
               <span>Total</span>
               <span className="text-lg">{invoice.currency} {invoice.total?.toLocaleString()}</span>
             </div>
