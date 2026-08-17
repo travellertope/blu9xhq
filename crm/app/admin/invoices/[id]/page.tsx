@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
-import { ArrowLeft, Send, CheckCircle, FileDown, Ban, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, FileDown, Link2, Ban, Pencil, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface Invoice {
@@ -127,6 +127,7 @@ export default function InvoiceDetailPage() {
   const [markPaidOpen, setMarkPaidOpen] = useState(false);
   const [markPaidLoading, setMarkPaidLoading] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [copyingLink, setCopyingLink] = useState(false);
   const [voiding, setVoiding] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -197,6 +198,21 @@ export default function InvoiceDetailPage() {
       toast.error("Failed to generate PDF");
     } finally {
       setPdfLoading(false);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    setCopyingLink(true);
+    try {
+      const res = await fetch(`/api/admin/invoices/${id}/pay-link`);
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok || !body.url) throw new Error(body.error ?? "Couldn't get link");
+      await navigator.clipboard.writeText(body.url);
+      toast.success("Invoice link copied");
+    } catch {
+      toast.error("Couldn't copy link");
+    } finally {
+      setCopyingLink(false);
     }
   };
 
@@ -296,6 +312,11 @@ export default function InvoiceDetailPage() {
         <Button size="sm" variant="outline" onClick={handleDownloadPdf} disabled={pdfLoading}>
           <FileDown className="h-4 w-4 mr-1.5" />
           {pdfLoading ? "Generating…" : "Download PDF"}
+        </Button>
+
+        <Button size="sm" variant="outline" onClick={handleCopyLink} disabled={copyingLink}>
+          <Link2 className="h-4 w-4 mr-1.5" />
+          {copyingLink ? "Copying…" : "Copy Invoice Link"}
         </Button>
 
         <PermissionGuard permission="create_invoices">
