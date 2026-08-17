@@ -6,6 +6,8 @@ import { listInvoices, updateInvoice, wpRestFetch } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getPlanFromPriceId } from "@/lib/stripe-products";
+import { logSystemAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
+import { exitEnrollmentsForClientAsSystem } from "@/lib/sequenceExits";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -136,14 +138,14 @@ async function processEvent(event: Stripe.Event): Promise<void> {
 
 /**
  * Marks a Supabase-backed invoice paid after a successful checkout from
- * the public /pay/[token] link, and sends the same receipt email the
- * manual "Mark as Paid" admin action sends (see
- * app/api/admin/invoices/[id]/mark-paid/route.ts). Deliberately does NOT
- * call logAuditEvent or exitEnrollmentsForClient — both derive their
- * tenant/actor from a live admin session (lib/auth.ts getSession()) and
- * silently no-op outside one, which a webhook never has. Replicating them
- * session-independently would mean duplicating audit-log/sequence-exit
- * internals here; left as a known gap rather than half-implemented.
+ * the public /pay/[token] link. Mirrors every effect of the manual "Mark
+ * as Paid" admin action (see app/api/admin/invoices/[id]/mark-paid/route.ts)
+ * — the invoice update, the receipt email, the audit-log entry, and
+ * exiting active email sequences with an invoice_paid exit condition —
+ * using logSystemAuditEvent/exitEnrollmentsForClientAsSystem, the
+ * session-independent counterparts of that route's logAuditEvent/
+ * exitEnrollmentsForClient calls, since a webhook has no live admin
+ * session for those to derive tenant/actor from.
  */
 async function markInvoicePaidViaPayLink(invoiceId: string, cs: Stripe.Checkout.Session): Promise<void> {
   const supabase = createSupabaseAdminClient();
@@ -159,10 +161,21 @@ async function markInvoicePaidViaPayLink(invoiceId: string, cs: Stripe.Checkout.
       gateway_payment_id: gatewayPaymentId,
     })
     .eq("id", invoiceId)
-    .select("invoice_number, total, currency, clients(contact_name, company_name, contact_email, portal_email)")
+    .select(
+      "tenant_id, client_id, invoice_number, total, currency, clients(contact_name, company_name, contact_email, portal_email)"
+    )
     .maybeSingle();
   if (error) throw error;
   if (!invoice) return;
+
+  await logSystemAuditEvent(invoice.tenant_id, {
+    action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,
+    actorName: "Stripe (pay link)",
+    detail: `Invoice ${invoice.invoice_number} marked paid via public pay link — ${gatewayPaymentId}`,
+    clientId: invoice.client_id,
+  });
+
+  void exitEnrollmentsForClientAsSystem(invoice.tenant_id, invoice.client_id, "invoice_paid").catch(console.error);
 
   const client = invoice.clients as {
     contact_name?: string;
