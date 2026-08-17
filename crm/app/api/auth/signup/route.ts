@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/tenant";
+import { cookies } from "next/headers";
+
+export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,7 +54,10 @@ export async function POST(req: NextRequest) {
       throw new Error(tenantErr?.message ?? "Failed to create tenant");
     }
 
-    // Create Supabase auth user
+    // Create Supabase auth user (or find existing)
+    let userId: string;
+    let existingUser = false;
+
     const { data: authData, error: authErr } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -58,12 +65,43 @@ export async function POST(req: NextRequest) {
       user_metadata: { full_name: name },
     });
 
-    if (authErr || !authData.user) {
+    if (authErr) {
+      // Check if user already exists
+      const msg = authErr.message?.toLowerCase() ?? "";
+      if (msg.includes("already") || msg.includes("exists") || msg.includes("registered") || msg.includes("duplicate")) {
+        // Verify the password matches their existing account
+        const cookieStore = cookies();
+        const anonClient = createServerClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            cookies: {
+              getAll() { return cookieStore.getAll(); },
+              setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) =>
+                  cookieStore.set(name, value, options)
+                );
+              },
+            },
+          }
+        );
+        const { data: signInData, error: signInErr } = await anonClient.auth.signInWithPassword({ email, password });
+        if (signInErr || !signInData.user) {
+          await supabase.from("tenants").delete().eq("id", tenant.id);
+          return NextResponse.json({ error: "An account with this email already exists. Please enter your current password, or <a href='/forgot-password'>reset it here</a>." }, { status: 400 });
+        }
+        userId = signInData.user.id;
+        existingUser = true;
+      } else {
+        await supabase.from("tenants").delete().eq("id", tenant.id);
+        throw new Error(authErr.message ?? "Failed to create user");
+      }
+    } else if (!authData.user) {
       await supabase.from("tenants").delete().eq("id", tenant.id);
-      throw new Error(authErr?.message ?? "Failed to create user");
+      throw new Error("Failed to create user");
+    } else {
+      userId = authData.user.id;
     }
-
-    const userId = authData.user.id;
 
     // Link user to tenant as super_admin
     const { error: tmErr } = await supabase.from("team_members").insert({
@@ -74,12 +112,20 @@ export async function POST(req: NextRequest) {
     });
 
     if (tmErr) {
-      await supabase.auth.admin.deleteUser(userId);
+      if (!existingUser) await supabase.auth.admin.deleteUser(userId);
       await supabase.from("tenants").delete().eq("id", tenant.id);
       throw new Error(tmErr.message);
     }
 
-    return NextResponse.json({ ok: true, slug, tenantId: tenant.id });
+    // Set active tenant cookie to the new tenant
+    cookies().set("bluu_active_tenant", JSON.stringify({ tenantId: tenant.id, crmRole: "super_admin" }), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+
+    return NextResponse.json({ ok: true, slug, tenantId: tenant.id, ...(existingUser ? { existingUser: true } : {}) });
   } catch (err: any) {
     console.error("[POST /api/auth/signup]", err);
     return NextResponse.json({ error: err.message ?? "Signup failed" }, { status: 500 });

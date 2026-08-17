@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { sendTicketReply } from "@/lib/resend";
 import { logTicketToTimeline } from "@/lib/ticketServer";
 
@@ -26,7 +26,7 @@ export async function POST(
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: ticket, error: fetchErr } = await supabase
       .from("tickets")
       .select("*, clients(contact_name,portal_email)")

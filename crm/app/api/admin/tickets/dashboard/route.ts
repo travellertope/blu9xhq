@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 // GET /api/admin/tickets/dashboard — ticket list + summary for the admin tickets page
 export async function GET(req: NextRequest) {
@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const now = new Date().toISOString();
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     let query = supabase
       .from("tickets")

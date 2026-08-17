@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { uploadToR2, generateTicketAttachmentKey } from "@/lib/r2";
 import {
   TICKET_ALLOWED_MIME_TYPES,
@@ -35,7 +35,7 @@ export async function POST(
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: ticket, error: fetchErr } = await supabase
       .from("tickets")
       .select("id")

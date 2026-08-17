@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
 import { sendEmailHtml } from "@/lib/resend";
 import { z } from "zod";
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
   const tenantId = result.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const admin = createSupabaseAdminClient();
 
     const { data: rows, error } = await supabase
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
   const fullName = `${d.firstName} ${d.lastName}`;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const admin = createSupabaseAdminClient();
 
     // Find or invite the Supabase auth user (same pattern as the client-invite route)

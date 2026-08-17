@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSessionFromCookies } from "@/lib/auth";
+import { hasPermission, type Role } from "@/lib/permissions";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { encrypt } from "@/lib/encryption";
 import { sendPortalInvite } from "@/lib/resend";
 import { z } from "zod";
+
+export const maxDuration = 30;
 
 // Shapes a Supabase `clients` row as a WP-post-like object so existing page
 // components (typed against WPClientPost) need no changes.
@@ -55,7 +59,7 @@ export async function GET(req: NextRequest) {
   const orderCol = ORDER_COL[orderby] ?? "created_at";
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("clients")
       .select("*", { count: "exact" })
@@ -99,9 +103,14 @@ const createClientSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const auth = await requirePermission(req, "create_edit_clients");
-  if (auth instanceof NextResponse) return auth;
-  const { session } = auth;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const role = (session.user.bluuhqRole ?? "viewer") as Role;
+  if (!hasPermission(role, "create_edit_clients")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   let body: unknown;
   try {
@@ -120,7 +129,7 @@ export async function POST(req: NextRequest) {
   const tenantId = session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: inserted, error } = await supabase
       .from("clients")
@@ -132,9 +141,9 @@ export async function POST(req: NextRequest) {
         company_name:               d.company,
         portal_email:               d.email,
         status:                     d.status,
+        active_subscription_count:  0,
         tags:                       d.tags ?? [],
         notes:                      d.notes ?? null,
-        active_subscription_count: 0,
       })
       .select("*")
       .single();

@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSessionFromCookies } from "@/lib/auth";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+
+export const maxDuration = 30;
 
 const VISIBLE_STATUSES = ["active", "paused", "completed", "exited"];
 
 // ─── GET /api/admin/sequences/client-enrollments ─────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const result = await requireSession(req);
-  if (result instanceof NextResponse) return result;
-  const tenantId = result.session.user.tenantId!;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const tenantId = session.user.tenantId!;
 
   const sp = new URL(req.url).searchParams;
   const clientId = sp.get("clientId");
@@ -18,15 +22,28 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
+
     const { data, error } = await supabase
       .from("sequence_enrollments")
-      .select("*, sequences(title, sequence_steps(step_number))")
+      .select("*, sequences(title)")
       .eq("tenant_id", tenantId)
       .eq("client_id", clientId)
       .in("status", VISIBLE_STATUSES);
 
     if (error) throw error;
+
+    const sequenceIds = [...new Set((data ?? []).map((e: any) => e.sequence_id))];
+    let stepCounts: Record<string, number> = {};
+    if (sequenceIds.length > 0) {
+      const { data: steps } = await supabase
+        .from("sequence_steps")
+        .select("sequence_id")
+        .in("sequence_id", sequenceIds);
+      for (const s of steps ?? []) {
+        stepCounts[s.sequence_id] = (stepCounts[s.sequence_id] ?? 0) + 1;
+      }
+    }
 
     const enrollments = (data ?? []).map((e: any) => ({
       enrollmentId: e.id,
@@ -34,7 +51,7 @@ export async function GET(req: NextRequest) {
       sequenceName: e.sequences?.title ?? `Sequence ${e.sequence_id}`,
       status:       e.status as "active" | "paused" | "completed" | "exited",
       currentStep:  e.current_step,
-      totalSteps:   e.sequences?.sequence_steps?.length ?? 0,
+      totalSteps:   stepCounts[e.sequence_id] ?? 0,
       enrolledAt:   e.enrolled_at,
       pausedAt:     e.paused_at ?? null,
       exitedAt:     e.exited_at ?? null,
@@ -43,9 +60,10 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ enrollments });
   } catch (err: unknown) {
-    console.error("[GET /api/admin/sequences/client-enrollments]", err);
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error("[GET /api/admin/sequences/client-enrollments]", msg, err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
+      { error: msg || "Unknown error" },
       { status: 502 }
     );
   }

@@ -6,8 +6,6 @@ import { listInvoices, updateInvoice, wpRestFetch } from "@/lib/wp-api";
 import { sendEmailHtml } from "@/lib/resend";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getPlanFromPriceId } from "@/lib/stripe-products";
-import { logSystemAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
-import { exitEnrollmentsForClientAsSystem } from "@/lib/sequenceExits";
 import type Stripe from "stripe";
 
 export async function POST(req: NextRequest) {
@@ -73,13 +71,6 @@ async function processEvent(event: Stripe.Event): Promise<void> {
             .eq("id", tenantId);
         }
       }
-
-      // ── Public invoice pay link (/pay/[token]) ─────────────────────────────
-      if (cs.mode === "payment" && cs.metadata?.supabase_invoice_id) {
-        await markInvoicePaidViaPayLink(cs.metadata.supabase_invoice_id, cs).catch((err) =>
-          console.error("[stripe-webhook] pay-link invoice update failed:", err)
-        );
-      }
     }
 
     if (event.type === "customer.subscription.updated") {
@@ -134,77 +125,6 @@ async function processEvent(event: Stripe.Event): Promise<void> {
   } catch (err) {
     console.error("[stripe-webhook] processEvent error:", err);
   }
-}
-
-/**
- * Marks a Supabase-backed invoice paid after a successful checkout from
- * the public /pay/[token] link. Mirrors every effect of the manual "Mark
- * as Paid" admin action (see app/api/admin/invoices/[id]/mark-paid/route.ts)
- * — the invoice update, the receipt email, the audit-log entry, and
- * exiting active email sequences with an invoice_paid exit condition —
- * using logSystemAuditEvent/exitEnrollmentsForClientAsSystem, the
- * session-independent counterparts of that route's logAuditEvent/
- * exitEnrollmentsForClient calls, since a webhook has no live admin
- * session for those to derive tenant/actor from.
- */
-async function markInvoicePaidViaPayLink(invoiceId: string, cs: Stripe.Checkout.Session): Promise<void> {
-  const supabase = createSupabaseAdminClient();
-  const gatewayPaymentId = typeof cs.payment_intent === "string" ? cs.payment_intent : cs.id;
-
-  const { data: invoice, error } = await supabase
-    .from("invoices")
-    .update({
-      status: "paid",
-      paid_date: new Date().toISOString().slice(0, 10),
-      payment_method: "stripe",
-      payment_gateway: "stripe",
-      gateway_payment_id: gatewayPaymentId,
-    })
-    .eq("id", invoiceId)
-    .select(
-      "tenant_id, client_id, invoice_number, total, currency, clients(contact_name, company_name, contact_email, portal_email)"
-    )
-    .maybeSingle();
-  if (error) throw error;
-  if (!invoice) return;
-
-  await logSystemAuditEvent(invoice.tenant_id, {
-    action: AUDIT_ACTIONS.INVOICE_MARKED_PAID,
-    actorName: "Stripe (pay link)",
-    detail: `Invoice ${invoice.invoice_number} marked paid via public pay link — ${gatewayPaymentId}`,
-    clientId: invoice.client_id,
-  });
-
-  void exitEnrollmentsForClientAsSystem(invoice.tenant_id, invoice.client_id, "invoice_paid").catch(console.error);
-
-  const client = invoice.clients as {
-    contact_name?: string;
-    company_name?: string;
-    contact_email?: string;
-    portal_email?: string;
-  } | null;
-  const clientEmail = client?.portal_email ?? client?.contact_email;
-  if (!clientEmail) return;
-
-  await sendEmailHtml({
-    to: clientEmail,
-    subject: `Payment received — Invoice ${invoice.invoice_number}`,
-    html: `
-      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
-        <h2>Payment Received</h2>
-        <p>Hi ${client?.contact_name || client?.company_name || "there"},</p>
-        <p>We've received your payment for invoice ${invoice.invoice_number}. Thank you!</p>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invoice.invoice_number}</td></tr>
-          <tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${invoice.total?.toLocaleString()}</td></tr>
-          <tr><td style="padding:8px 0;color:#64748b">Payment Method</td><td style="padding:8px 0">Card (Stripe)</td></tr>
-        </table>
-        <p style="color:#64748b;font-size:13px">This is your payment receipt. Please keep it for your records.</p>
-      </div>
-    `,
-    text: `Payment received for Invoice ${invoice.invoice_number}.\n\nAmount: ${invoice.currency} ${invoice.total}\nMethod: Card (Stripe)`,
-    tags: [{ name: "type", value: "payment_receipt" }],
-  });
 }
 
 const COMMISSION_RATES: Record<string, number> = {

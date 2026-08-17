@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard, Users, Package, CalendarDays, FileText,
-  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare, TicketCheck, Users2, CreditCard,
+  FolderOpen, Mail, Workflow, Settings, LogOut, Menu, CheckSquare, TicketCheck, Users2, CreditCard, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RoleBadge } from "@/components/admin/RoleBadge";
+import { TenantSwitcher } from "@/components/admin/TenantSwitcher";
 import { hasPermission, type Role } from "@/lib/permissions";
 
 // Nav items with their required permission (undefined = visible to all team roles)
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { href: "/admin/email",         label: "Email",         icon: Mail,            permission: undefined },
   { href: "/admin/services",      label: "Services",      icon: Package,         permission: "create_edit_services" },
   { href: "/admin/sequences",     label: "Sequences",     icon: Workflow,        permission: "build_sequences" },
+  { href: "/admin/daily-logs",    label: "Daily Logs",    icon: ClipboardList,   permission: "manage_daily_logs" },
   { href: "/admin/affiliates",    label: "Affiliates",    icon: Users2,          permission: "manage_affiliates" },
   { href: "/admin/billing",       label: "Billing",       icon: CreditCard,      permission: "access_settings" },
   { href: "/admin/settings",      label: "Settings",      icon: Settings,        permission: "access_settings" },
@@ -68,6 +70,9 @@ function SidebarInner({ userName, bluuhqRole, tenantLogo, accentColour, onNaviga
           <Image src="/logo.png" alt="BluuHQ" width={110} height={32} priority className="object-contain" />
         )}
       </div>
+
+      {/* Tenant switcher */}
+      <TenantSwitcher />
 
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface Settings {
   bankName: string;
@@ -13,7 +14,16 @@ interface Settings {
   fromEmailName: string;
 }
 
-type Tab = "general" | "bank";
+interface PaymentSettings {
+  stripeSecretKey: string;
+  stripePublishableKey: string;
+  stripeWebhookSecret: string;
+  paystackSecretKey: string;
+  paystackPublicKey: string;
+  preferredGateway: string;
+}
+
+type Tab = "general" | "bank" | "payments" | "security";
 
 export default function AdminSettingsPage() {
   const [tab, setTab] = useState<Tab>("general");
@@ -25,8 +35,21 @@ export default function AdminSettingsPage() {
     address: "",
     fromEmailName: "",
   });
+  const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
+    stripeSecretKey: "",
+    stripePublishableKey: "",
+    stripeWebhookSecret: "",
+    paystackSecretKey: "",
+    paystackPublicKey: "",
+    preferredGateway: "auto",
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<Tab | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [tenantId, setTenantId] = useState("");
+  const [tenantPlan, setTenantPlan] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/settings/bank-details")
@@ -36,12 +59,58 @@ export default function AdminSettingsPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/admin/settings/payment-gateways")
+      .then((r) => r.json())
+      .then((d) => setPaymentSettings((prev) => ({ ...prev, ...(d as Partial<PaymentSettings>) })))
+      .catch(() => toast.error("Failed to load payment settings"));
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/tenants")
+      .then((r) => r.json())
+      .then((d) => {
+        const tenants = Array.isArray(d) ? d : d.tenants ?? [];
+        const current = tenants.find((t: any) => t.isCurrent);
+        if (current) {
+          setTenantId(current.id);
+        }
+      })
+      .catch(() => {});
+    fetch("/api/admin/tenant-plan")
+      .then((r) => r.json())
+      .then((d) => { if (d.plan) setTenantPlan(d.plan); })
+      .catch(() => {});
+  }, []);
+
   function update(key: keyof Settings, value: string) {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updatePayment(key: keyof PaymentSettings, value: string) {
+    setPaymentSettings((prev) => ({ ...prev, [key]: value }));
+  }
+
   async function handleSave(section: Tab) {
     setSaving(section);
+
+    if (section === "payments") {
+      try {
+        const res = await fetch("/api/admin/settings/payment-gateways", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(paymentSettings),
+        });
+        if (!res.ok) throw new Error("Save failed");
+        toast.success("Payment settings saved");
+      } catch {
+        toast.error("Failed to save payment settings");
+      } finally {
+        setSaving(null);
+      }
+      return;
+    }
+
     const payload: Partial<Settings> =
       section === "bank"
         ? {
@@ -87,7 +156,9 @@ export default function AdminSettingsPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200">
-        {(["general", "bank"] as const).map((t) => (
+        {(["general", "bank", "payments", "security"] as const)
+          .filter((t) => t !== "payments" || tenantPlan !== "free")
+          .map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -98,7 +169,7 @@ export default function AdminSettingsPage() {
                 : "border-transparent text-slate-500 hover:text-slate-700")
             }
           >
-            {t === "general" ? "General" : "Bank Details"}
+            {t === "general" ? "General" : t === "bank" ? "Bank Details" : t === "payments" ? "Payments" : "Security"}
           </button>
         ))}
         <Link
@@ -194,6 +265,218 @@ export default function AdminSettingsPage() {
             className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
           >
             {saving === "bank" ? "Saving…" : "Save Bank Details"}
+          </button>
+        </div>
+      )}
+
+      {/* Payments tab */}
+      {tab === "payments" && (
+        <div className="space-y-5">
+          <p className="text-sm text-slate-500 bg-indigo-50 border border-indigo-200 rounded-lg px-3 py-2">
+            Configure payment gateways to accept online payments for invoices.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Preferred Gateway</label>
+            <select
+              value={paymentSettings.preferredGateway}
+              onChange={(e) => updatePayment("preferredGateway", e.target.value)}
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="auto">Auto</option>
+              <option value="stripe">Stripe</option>
+              <option value="paystack">Paystack</option>
+            </select>
+            {paymentSettings.preferredGateway === "auto" && (
+              <p className="text-xs text-slate-400">
+                Automatically selects Paystack for NGN/GHS currencies, Stripe for others
+              </p>
+            )}
+          </div>
+
+          {/* Stripe */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-semibold text-slate-800">Stripe</h3>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Publishable Key</label>
+              <input
+                type="text"
+                value={paymentSettings.stripePublishableKey}
+                onChange={(e) => updatePayment("stripePublishableKey", e.target.value)}
+                placeholder="pk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Secret Key</label>
+              <input
+                type="password"
+                value={paymentSettings.stripeSecretKey}
+                onChange={(e) => updatePayment("stripeSecretKey", e.target.value)}
+                placeholder="sk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Webhook Secret</label>
+              <input
+                type="password"
+                value={paymentSettings.stripeWebhookSecret}
+                onChange={(e) => updatePayment("stripeWebhookSecret", e.target.value)}
+                placeholder="whsec_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="text-xs text-slate-400 space-y-1">
+              <p>
+                Webhook URL:{" "}
+                <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                  https://crm.bluuhq.com/api/webhooks/tenant-stripe/{tenantId || "loading..."}
+                </code>
+              </p>
+              <p>Enable this event: <code className="bg-slate-100 px-1 py-0.5 rounded text-xs">checkout.session.completed</code></p>
+            </div>
+          </div>
+
+          {/* Paystack */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-semibold text-slate-800">Paystack</h3>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Public Key</label>
+              <input
+                type="text"
+                value={paymentSettings.paystackPublicKey}
+                onChange={(e) => updatePayment("paystackPublicKey", e.target.value)}
+                placeholder="pk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Secret Key</label>
+              <input
+                type="password"
+                value={paymentSettings.paystackSecretKey}
+                onChange={(e) => updatePayment("paystackSecretKey", e.target.value)}
+                placeholder="sk_live_..."
+                className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+
+            <div className="text-xs text-slate-400 space-y-1">
+              <p>
+                Webhook URL:{" "}
+                <code className="bg-slate-100 px-1 py-0.5 rounded text-xs select-all">
+                  https://crm.bluuhq.com/api/webhooks/tenant-paystack/{tenantId || "loading..."}
+                </code>
+              </p>
+              <p>Enable this event: <code className="bg-slate-100 px-1 py-0.5 rounded text-xs">charge.success</code></p>
+            </div>
+          </div>
+
+          <button
+            onClick={() => handleSave("payments")}
+            disabled={saving === "payments"}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
+          >
+            {saving === "payments" ? "Saving…" : "Save Payment Settings"}
+          </button>
+        </div>
+      )}
+
+      {/* Security tab */}
+      {tab === "security" && (
+        <div className="space-y-5">
+          <p className="text-sm text-slate-500 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            Change the password for your admin account.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Current Password</label>
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              placeholder="Enter current password"
+              autoComplete="current-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">New Password</label>
+            <input
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              autoComplete="new-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">Confirm New Password</label>
+            <input
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Repeat new password"
+              autoComplete="new-password"
+              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <button
+            onClick={async () => {
+              if (!currentPassword) {
+                toast.error("Please enter your current password");
+                return;
+              }
+              if (newPassword.length < 8) {
+                toast.error("New password must be at least 8 characters");
+                return;
+              }
+              if (newPassword !== confirmPassword) {
+                toast.error("Passwords do not match");
+                return;
+              }
+              setSaving("security");
+              try {
+                const supabase = createSupabaseBrowserClient();
+                // Re-authenticate with current password to verify identity
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user?.email) throw new Error("Could not verify current user");
+                const { error: signInErr } = await supabase.auth.signInWithPassword({
+                  email: user.email,
+                  password: currentPassword,
+                });
+                if (signInErr) {
+                  toast.error("Current password is incorrect");
+                  setSaving(null);
+                  return;
+                }
+                const { error: updateErr } = await supabase.auth.updateUser({ password: newPassword });
+                if (updateErr) throw updateErr;
+                toast.success("Password updated successfully");
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              } catch (err: any) {
+                toast.error(err?.message || "Failed to update password");
+              } finally {
+                setSaving(null);
+              }
+            }}
+            disabled={saving === "security"}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-md px-5 py-2 text-sm font-medium transition-colors"
+          >
+            {saving === "security" ? "Updating…" : "Update Password"}
           </button>
         </div>
       )}

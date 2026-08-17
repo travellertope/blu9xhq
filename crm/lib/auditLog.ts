@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/auth";
-import { createSupabaseServerClient, createSupabaseAdminClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 
 export interface AuditEventParams {
   action: string;
@@ -12,56 +12,36 @@ export interface AuditEventParams {
   resourceType?: string;
 }
 
-async function insertAuditEvent(
-  supabase: ReturnType<typeof createSupabaseAdminClient>,
-  tenantId: string,
-  loggedBy: string | null,
-  params: AuditEventParams
-): Promise<void> {
-  const { action, actorName, detail, clientId } = params;
-  const { error } = await supabase.from("communications").insert({
-    tenant_id:   tenantId,
-    client_id:   clientId ?? null,
-    direction:   "internal",
-    channel:     "system",
-    comm_type:   "system",
-    subject:     `${action} by ${actorName}`,
-    body:        detail ?? "",
-    occurred_at: new Date().toISOString(),
-    logged_by:   loggedBy,
-  });
-  if (error) throw error;
-}
-
 /**
- * Persists an audit event as a communications row with channel='system',
- * scoped to the current admin session's tenant and actor.
+ * Persists an audit event as a communications row with channel='system'.
  *
  * This is fire-and-forget on the happy path — log the error but never throw,
  * so a logging failure never blocks the primary operation.
  */
 export async function logAuditEvent(params: AuditEventParams): Promise<void> {
+  const { action, actorName, detail, clientId } = params;
+  const subject = `${action} by ${actorName}`;
+  const now = new Date().toISOString();
+
   try {
     const session = await getSession();
     if (!session?.user?.tenantId) return;
-    await insertAuditEvent(createSupabaseServerClient(), session.user.tenantId, session.user.id ?? null, params);
-  } catch (err) {
-    console.error("[auditLog] Failed to write audit event:", params.action, err);
-  }
-}
 
-/**
- * Same as logAuditEvent, for contexts with no live admin session to derive
- * tenant/actor from — webhooks, cron jobs. Takes tenantId explicitly and
- * writes via the service-role client, since a webhook request has no
- * session cookie for RLS to authorize the insert against. logged_by is
- * always null — there's no Supabase auth user behind a system event.
- */
-export async function logSystemAuditEvent(tenantId: string, params: AuditEventParams): Promise<void> {
-  try {
-    await insertAuditEvent(createSupabaseAdminClient(), tenantId, null, params);
+    const supabase = createSupabaseAdminClient();
+    const { error } = await supabase.from("communications").insert({
+      tenant_id:   session.user.tenantId,
+      client_id:   clientId ?? null,
+      direction:   "internal",
+      channel:     "system",
+      comm_type:   "system",
+      subject,
+      body:        detail ?? "",
+      occurred_at: now,
+      logged_by:   session.user.id ?? null,
+    });
+    if (error) throw error;
   } catch (err) {
-    console.error("[auditLog] Failed to write system audit event:", params.action, err);
+    console.error("[auditLog] Failed to write audit event:", action, err);
   }
 }
 

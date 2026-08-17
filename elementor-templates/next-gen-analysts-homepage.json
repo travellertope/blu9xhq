@@ -1,0 +1,3333 @@
+{
+  "title": "Next Generation Analysts - Homepage",
+  "type": "page",
+  "version": "0.4",
+  "page_settings": {
+    "hide_title": "yes",
+    "template": "elementor_canvas"
+  },
+  "content": [
+    {
+      "id": "hdr001",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "background_background": "classic",
+        "background_color": "#1B4D3E",
+        "padding": {
+          "unit": "px",
+          "top": "12",
+          "bottom": "12",
+          "left": "0",
+          "right": "0"
+        }
+      },
+      "elements": [
+        {
+          "id": "hdr002",
+          "elType": "column",
+          "settings": {
+            "content_position": "center",
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "hdr003",
+              "elType": "widget",
+              "widgetType": "nav-menu",
+              "settings": {
+                "menu": "primary-menu",
+                "layout": "horizontal",
+                "align": "center",
+                "pointer": "none",
+                "text_color": "#FFFFFF",
+                "text_color_hover": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "500"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "hero01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "min_height": {
+          "unit": "vh",
+          "size": 85
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "60",
+          "left": "40",
+          "right": "40"
+        },
+        "structure": "20"
+      },
+      "elements": [
+        {
+          "id": "hero02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50,
+            "content_position": "center",
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "0",
+              "left": "0",
+              "right": "40"
+            }
+          },
+          "elements": [
+            {
+              "id": "hero03",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Build in-demand <span style=\"color:#F5A623\">skills</span>.\nLaunch a <span style=\"color:#F5A623\">career</span> with confidence.",
+                "header_size": "h1",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 44
+                },
+                "typography_font_weight": "700",
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.2
+                }
+              }
+            },
+            {
+              "id": "hero04",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Live training, hands-on projects and career support to help you move into Business Analysis, Project Management and Data Analysis.",
+                "text_color": "#555555",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "20",
+                  "bottom": "30"
+                }
+              }
+            },
+            {
+              "id": "hero05",
+              "elType": "section",
+              "isInner": true,
+              "settings": {
+                "layout": "full_width",
+                "gap": "no",
+                "structure": "20",
+                "padding": {
+                  "unit": "px",
+                  "top": "0",
+                  "bottom": "25"
+                }
+              },
+              "elements": [
+                {
+                  "id": "hero06",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 50,
+                    "_inline_size": null
+                  },
+                  "elements": [
+                    {
+                      "id": "hero07",
+                      "elType": "widget",
+                      "widgetType": "button",
+                      "settings": {
+                        "text": "Explore Our Courses",
+                        "link": {
+                          "url": "/courses",
+                          "is_external": false
+                        },
+                        "icon": {
+                          "value": "fas fa-arrow-right",
+                          "library": "fa-solid"
+                        },
+                        "icon_align": "right",
+                        "button_type": "default",
+                        "size": "md",
+                        "background_color": "#F5A623",
+                        "button_text_color": "#1B2A1D",
+                        "border_radius": {
+                          "unit": "px",
+                          "top": "25",
+                          "bottom": "25",
+                          "left": "25",
+                          "right": "25"
+                        },
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 14
+                        },
+                        "typography_font_weight": "600",
+                        "button_padding": {
+                          "unit": "px",
+                          "top": "14",
+                          "bottom": "14",
+                          "left": "28",
+                          "right": "28"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "hero08",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 50,
+                    "_inline_size": null
+                  },
+                  "elements": [
+                    {
+                      "id": "hero09",
+                      "elType": "widget",
+                      "widgetType": "button",
+                      "settings": {
+                        "text": "See Success Stories",
+                        "link": {
+                          "url": "#success-stories",
+                          "is_external": false
+                        },
+                        "button_type": "default",
+                        "size": "md",
+                        "background_color": "#FFFFFF",
+                        "button_text_color": "#1B2A1D",
+                        "border_border": "solid",
+                        "border_width": {
+                          "unit": "px",
+                          "top": "2",
+                          "bottom": "2",
+                          "left": "2",
+                          "right": "2"
+                        },
+                        "border_color": "#1B2A1D",
+                        "border_radius": {
+                          "unit": "px",
+                          "top": "25",
+                          "bottom": "25",
+                          "left": "25",
+                          "right": "25"
+                        },
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 14
+                        },
+                        "typography_font_weight": "600",
+                        "button_padding": {
+                          "unit": "px",
+                          "top": "14",
+                          "bottom": "14",
+                          "left": "28",
+                          "right": "28"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "hero10",
+              "elType": "section",
+              "isInner": true,
+              "settings": {
+                "layout": "full_width",
+                "structure": "20",
+                "content_position": "center"
+              },
+              "elements": [
+                {
+                  "id": "hero11",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 30,
+                    "_inline_size": 30
+                  },
+                  "elements": [
+                    {
+                      "id": "hero12",
+                      "elType": "widget",
+                      "widgetType": "image",
+                      "settings": {
+                        "image": {
+                          "url": "/wp-content/uploads/trust-avatars-group.png"
+                        },
+                        "_element_width": "initial",
+                        "width": {
+                          "unit": "px",
+                          "size": 120
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "hero13",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 70,
+                    "_inline_size": 70,
+                    "content_position": "center"
+                  },
+                  "elements": [
+                    {
+                      "id": "hero14",
+                      "elType": "widget",
+                      "widgetType": "star-rating",
+                      "settings": {
+                        "rating_scale": 5,
+                        "rating_value": 5,
+                        "star_size": {
+                          "unit": "px",
+                          "size": 16
+                        },
+                        "star_color": "#F5A623",
+                        "star_unmarked_color": "#E0E0E0",
+                        "align": "left"
+                      }
+                    },
+                    {
+                      "id": "hero15",
+                      "elType": "widget",
+                      "widgetType": "text-editor",
+                      "settings": {
+                        "editor": "Trusted by 150+ graduates",
+                        "text_color": "#555555",
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 13
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "hero16",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50,
+            "content_position": "center"
+          },
+          "elements": [
+            {
+              "id": "hero17",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/hero-business-analysis.jpg"
+                },
+                "image_size": "full",
+                "border_radius": {
+                  "unit": "px",
+                  "top": "16",
+                  "bottom": "16",
+                  "left": "16",
+                  "right": "16"
+                },
+                "image_box_shadow_box_shadow_type": "yes",
+                "image_box_shadow_box_shadow": {
+                  "horizontal": 0,
+                  "vertical": 8,
+                  "blur": 30,
+                  "spread": 0,
+                  "color": "rgba(0,0,0,0.12)"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "logos01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "50",
+          "bottom": "50"
+        }
+      },
+      "elements": [
+        {
+          "id": "logos02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "logos03",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "150+ professionals trained and supported",
+                "header_size": "h3",
+                "align": "center",
+                "title_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 20
+                },
+                "typography_font_weight": "600"
+              }
+            },
+            {
+              "id": "logos04",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Our graduates have joined organisations including:",
+                "align": "center",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "5",
+                  "bottom": "30"
+                }
+              }
+            },
+            {
+              "id": "logos05",
+              "elType": "widget",
+              "widgetType": "image-carousel",
+              "settings": {
+                "carousel": [
+                  {"url": "/wp-content/uploads/logos/barclays.png"},
+                  {"url": "/wp-content/uploads/logos/microsoft.png"},
+                  {"url": "/wp-content/uploads/logos/lloyds.png"},
+                  {"url": "/wp-content/uploads/logos/pwc.png"},
+                  {"url": "/wp-content/uploads/logos/deloitte.png"},
+                  {"url": "/wp-content/uploads/logos/capgemini.png"},
+                  {"url": "/wp-content/uploads/logos/bt.png"},
+                  {"url": "/wp-content/uploads/logos/natwest.png"}
+                ],
+                "slides_to_show": "6",
+                "slides_to_scroll": "1",
+                "image_stretch": "no",
+                "autoplay": "yes",
+                "autoplay_speed": 3000,
+                "pause_on_hover": "yes",
+                "navigation": "arrows",
+                "image_size": "medium"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "offer01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FAFAFA",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "60"
+        }
+      },
+      "elements": [
+        {
+          "id": "offer02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "offer03",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "What We Offer",
+                "header_size": "h2",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 32
+                },
+                "typography_font_weight": "700"
+              }
+            },
+            {
+              "id": "offer04",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Live online training with real-world projects and expert support.",
+                "align": "center",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "5",
+                  "bottom": "40"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "cards01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FAFAFA",
+        "structure": "60",
+        "gap": "default",
+        "padding": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "70"
+        }
+      },
+      "elements": [
+        {
+          "id": "card01a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card01b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/business-analysis.jpg"
+                },
+                "image_size": "medium_large",
+                "border_radius": {
+                  "unit": "px",
+                  "top": "12",
+                  "bottom": "0",
+                  "left": "12",
+                  "right": "0"
+                }
+              }
+            },
+            {
+              "id": "card01c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Business Analysis Training",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15",
+                  "right": "15"
+                }
+              }
+            },
+            {
+              "id": "card01d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "8 Weeks",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15",
+                  "right": "15"
+                }
+              }
+            },
+            {
+              "id": "card01e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£500",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15",
+                  "right": "15"
+                }
+              }
+            },
+            {
+              "id": "card01f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/business-analysis"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600",
+                "button_padding": {
+                  "unit": "px",
+                  "top": "0",
+                  "bottom": "0",
+                  "left": "15",
+                  "right": "15"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "card02a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card02b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/project-management.jpg"
+                },
+                "image_size": "medium_large"
+              }
+            },
+            {
+              "id": "card02c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Project Management Training",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15",
+                  "right": "15"
+                }
+              }
+            },
+            {
+              "id": "card02d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "8 Weeks",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card02e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£500",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card02f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/project-management"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        },
+        {
+          "id": "card03a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card03b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/data-analysis.jpg"
+                },
+                "image_size": "medium_large"
+              }
+            },
+            {
+              "id": "card03c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Data Analysis Training",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card03d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "8 Weeks",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card03e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£500",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card03f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/data-analysis"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        },
+        {
+          "id": "card04a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card04b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/self-paced-ba.jpg"
+                },
+                "image_size": "medium_large"
+              }
+            },
+            {
+              "id": "card04c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Self-Paced BA Learning",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card04d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "Lifetime Access",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card04e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£250",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card04f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/self-paced-ba"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        },
+        {
+          "id": "card05a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card05b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/ba-interview-prep.jpg"
+                },
+                "image_size": "medium_large"
+              }
+            },
+            {
+              "id": "card05c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Business Analyst Interview Prep",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card05d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "1 Hour Session",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card05e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£50",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card05f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/ba-interview-prep"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        },
+        {
+          "id": "card06a",
+          "elType": "column",
+          "settings": {
+            "_column_size": 16,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "box_shadow_box_shadow_type": "yes",
+            "box_shadow_box_shadow": {
+              "horizontal": 0,
+              "vertical": 4,
+              "blur": 20,
+              "spread": 0,
+              "color": "rgba(0,0,0,0.06)"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "0",
+              "bottom": "20",
+              "left": "0",
+              "right": "0"
+            }
+          },
+          "elements": [
+            {
+              "id": "card06b",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/courses/da-interview-prep.jpg"
+                },
+                "image_size": "medium_large"
+              }
+            },
+            {
+              "id": "card06c",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Data Analyst Interview Prep",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card06d",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "1 Hour Session",
+                    "selected_icon": {
+                      "value": "far fa-clock",
+                      "library": "fa-regular"
+                    }
+                  }
+                ],
+                "icon_color": "#777777",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card06e",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "£50",
+                "header_size": "h4",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "8",
+                  "left": "15"
+                }
+              }
+            },
+            {
+              "id": "card06f",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Explore Course →",
+                "link": {
+                  "url": "/courses/da-interview-prep"
+                },
+                "button_type": "default",
+                "size": "xs",
+                "background_color": "transparent",
+                "button_text_color": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "why001",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#1B4D3E",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "60"
+        },
+        "structure": "40"
+      },
+      "elements": [
+        {
+          "id": "why002",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25
+          },
+          "elements": [
+            {
+              "id": "why003",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Why Next Gen Analysts?",
+                "header_size": "h2",
+                "title_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 26
+                },
+                "typography_font_weight": "700"
+              }
+            },
+            {
+              "id": "why004",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "We do more than train.\nWe prepare you for what's next.",
+                "text_color": "#FFFFFF",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "why005",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "why006",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-cogs",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#F5A623",
+                "size": {
+                  "unit": "px",
+                  "size": 40
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "why007",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Practical, Not Theoretical",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#FFFFFF",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "10"
+                }
+              }
+            },
+            {
+              "id": "why008",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Learn through real scenarios, hands-on projects and the tools used in today's workplaces.",
+                "align": "center",
+                "text_color": "#CCCCCC",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "why009",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "why010",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-chart-line",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#F5A623",
+                "size": {
+                  "unit": "px",
+                  "size": 40
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "why011",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Built for Career Progression",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#FFFFFF",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "10"
+                }
+              }
+            },
+            {
+              "id": "why012",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Develop the technical knowledge, stakeholder skills and confidence employers value.",
+                "align": "center",
+                "text_color": "#CCCCCC",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "why013",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "why014",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-users",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#F5A623",
+                "size": {
+                  "unit": "px",
+                  "size": 40
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "why015",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Support That Continues",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#FFFFFF",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "10"
+                }
+              }
+            },
+            {
+              "id": "why016",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Get guidance throughout your learning journey, interview prep and into your new role.",
+                "align": "center",
+                "text_color": "#CCCCCC",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "whyq01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "background_background": "classic",
+        "background_color": "#1B4D3E",
+        "padding": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "40"
+        }
+      },
+      "elements": [
+        {
+          "id": "whyq02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "whyq03",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<em>The goal isn't simply to complete a course. It's to leave ready to apply what you've learned.</em>",
+                "align": "center",
+                "text_color": "#F5A623",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "who001",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "70",
+          "bottom": "70"
+        },
+        "structure": "40"
+      },
+      "elements": [
+        {
+          "id": "who_title",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "who_title_h",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Who This Is For",
+                "header_size": "h2",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 32
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "bottom": "50"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "who010",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "70"
+        },
+        "structure": "40"
+      },
+      "elements": [
+        {
+          "id": "who002",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "who003",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-graduation-cap",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#1B4D3E",
+                "size": {
+                  "unit": "px",
+                  "size": 44
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "who004",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Recent Graduates",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "12"
+                }
+              }
+            },
+            {
+              "id": "who005",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Kickstart your career with in-demand analytical and digital skills.",
+                "align": "center",
+                "text_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "who006",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "who007",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-exchange-alt",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#1B4D3E",
+                "size": {
+                  "unit": "px",
+                  "size": 44
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "who008",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Career Switchers",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "12"
+                }
+              }
+            },
+            {
+              "id": "who009",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Transition into a new career with practical training and real-world experience.",
+                "align": "center",
+                "text_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "who011",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "who012",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-briefcase",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#1B4D3E",
+                "size": {
+                  "unit": "px",
+                  "size": 44
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "who013",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Working Professionals",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "12"
+                }
+              }
+            },
+            {
+              "id": "who014",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Formalise and deepen your analytics skills and advance in your current role.",
+                "align": "center",
+                "text_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "who015",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25,
+            "align": "center"
+          },
+          "elements": [
+            {
+              "id": "who016",
+              "elType": "widget",
+              "widgetType": "icon",
+              "settings": {
+                "selected_icon": {
+                  "value": "fas fa-user-tie",
+                  "library": "fa-solid"
+                },
+                "primary_color": "#1B4D3E",
+                "size": {
+                  "unit": "px",
+                  "size": 44
+                },
+                "align": "center"
+              }
+            },
+            {
+              "id": "who017",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Early-Career Professionals",
+                "header_size": "h4",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "top": "12"
+                }
+              }
+            },
+            {
+              "id": "who018",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Build stronger foundations and stand out in your next opportunity.",
+                "align": "center",
+                "text_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "test01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FAFAFA",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "70"
+        }
+      },
+      "elements": [
+        {
+          "id": "test02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "test03",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Success Stories",
+                "header_size": "h2",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 32
+                },
+                "typography_font_weight": "700"
+              }
+            },
+            {
+              "id": "test04",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Real people. Real journeys. Real results.",
+                "align": "center",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "padding": {
+                  "unit": "px",
+                  "bottom": "40"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "test10",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FAFAFA",
+        "structure": "30",
+        "gap": "default",
+        "padding": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "70"
+        }
+      },
+      "elements": [
+        {
+          "id": "test11",
+          "elType": "column",
+          "settings": {
+            "_column_size": 33,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_border": "solid",
+            "border_width": {
+              "unit": "px",
+              "top": "1",
+              "bottom": "1",
+              "left": "1",
+              "right": "1"
+            },
+            "border_color": "#E8E8E8",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "30",
+              "bottom": "30",
+              "left": "25",
+              "right": "25"
+            }
+          },
+          "elements": [
+            {
+              "id": "test12",
+              "elType": "widget",
+              "widgetType": "star-rating",
+              "settings": {
+                "rating_scale": 5,
+                "rating_value": 5,
+                "star_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "star_color": "#F5A623",
+                "align": "left"
+              }
+            },
+            {
+              "id": "test13",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "\"Their support and belief in me gave me the confidence I lacked. After interview prep and coaching, I secured multiple job offers.\"",
+                "text_color": "#444444",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "bottom": "20"
+                }
+              }
+            },
+            {
+              "id": "test14",
+              "elType": "section",
+              "isInner": true,
+              "settings": {
+                "structure": "20",
+                "content_position": "center"
+              },
+              "elements": [
+                {
+                  "id": "test15",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 20,
+                    "_inline_size": 20
+                  },
+                  "elements": [
+                    {
+                      "id": "test16",
+                      "elType": "widget",
+                      "widgetType": "image",
+                      "settings": {
+                        "image": {
+                          "url": "/wp-content/uploads/testimonials/kelvin.jpg"
+                        },
+                        "image_size": "thumbnail",
+                        "width": {
+                          "unit": "px",
+                          "size": 50
+                        },
+                        "border_radius": {
+                          "unit": "%",
+                          "top": "50",
+                          "bottom": "50",
+                          "left": "50",
+                          "right": "50"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "test17",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 80,
+                    "_inline_size": 80
+                  },
+                  "elements": [
+                    {
+                      "id": "test18",
+                      "elType": "widget",
+                      "widgetType": "heading",
+                      "settings": {
+                        "title": "Kelvin G.",
+                        "header_size": "h5",
+                        "title_color": "#1B2A1D",
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 14
+                        },
+                        "typography_font_weight": "700"
+                      }
+                    },
+                    {
+                      "id": "test19",
+                      "elType": "widget",
+                      "widgetType": "text-editor",
+                      "settings": {
+                        "editor": "Business Analyst",
+                        "text_color": "#999999",
+                        "typography_typography": "custom",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 12
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "test20",
+          "elType": "column",
+          "settings": {
+            "_column_size": 33,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_border": "solid",
+            "border_width": {
+              "unit": "px",
+              "top": "1",
+              "bottom": "1",
+              "left": "1",
+              "right": "1"
+            },
+            "border_color": "#E8E8E8",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "30",
+              "bottom": "30",
+              "left": "25",
+              "right": "25"
+            }
+          },
+          "elements": [
+            {
+              "id": "test21",
+              "elType": "widget",
+              "widgetType": "star-rating",
+              "settings": {
+                "rating_scale": 5,
+                "rating_value": 5,
+                "star_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "star_color": "#F5A623",
+                "align": "left"
+              }
+            },
+            {
+              "id": "test22",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "\"The training was practical and engaging. The projects and feedback helped me build real skills I now use in my role every day.\"",
+                "text_color": "#444444",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "bottom": "20"
+                }
+              }
+            },
+            {
+              "id": "test23",
+              "elType": "section",
+              "isInner": true,
+              "settings": {
+                "structure": "20",
+                "content_position": "center"
+              },
+              "elements": [
+                {
+                  "id": "test24",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 20,
+                    "_inline_size": 20
+                  },
+                  "elements": [
+                    {
+                      "id": "test25",
+                      "elType": "widget",
+                      "widgetType": "image",
+                      "settings": {
+                        "image": {
+                          "url": "/wp-content/uploads/testimonials/victoria.jpg"
+                        },
+                        "image_size": "thumbnail",
+                        "width": {
+                          "unit": "px",
+                          "size": 50
+                        },
+                        "border_radius": {
+                          "unit": "%",
+                          "top": "50",
+                          "bottom": "50",
+                          "left": "50",
+                          "right": "50"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "test26",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 80,
+                    "_inline_size": 80
+                  },
+                  "elements": [
+                    {
+                      "id": "test27",
+                      "elType": "widget",
+                      "widgetType": "heading",
+                      "settings": {
+                        "title": "Victoria O.",
+                        "header_size": "h5",
+                        "title_color": "#1B2A1D",
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 14
+                        },
+                        "typography_font_weight": "700"
+                      }
+                    },
+                    {
+                      "id": "test28",
+                      "elType": "widget",
+                      "widgetType": "text-editor",
+                      "settings": {
+                        "editor": "Data Analyst",
+                        "text_color": "#999999",
+                        "typography_typography": "custom",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 12
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "test30",
+          "elType": "column",
+          "settings": {
+            "_column_size": 33,
+            "background_background": "classic",
+            "background_color": "#FFFFFF",
+            "border_border": "solid",
+            "border_width": {
+              "unit": "px",
+              "top": "1",
+              "bottom": "1",
+              "left": "1",
+              "right": "1"
+            },
+            "border_color": "#E8E8E8",
+            "border_radius": {
+              "unit": "px",
+              "top": "12",
+              "bottom": "12",
+              "left": "12",
+              "right": "12"
+            },
+            "padding": {
+              "unit": "px",
+              "top": "30",
+              "bottom": "30",
+              "left": "25",
+              "right": "25"
+            }
+          },
+          "elements": [
+            {
+              "id": "test31",
+              "elType": "widget",
+              "widgetType": "star-rating",
+              "settings": {
+                "rating_scale": 5,
+                "rating_value": 5,
+                "star_size": {
+                  "unit": "px",
+                  "size": 18
+                },
+                "star_color": "#F5A623",
+                "align": "left"
+              }
+            },
+            {
+              "id": "test32",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "\"Coming from a non-IT background felt challenging at first, but the coaching and support made all the difference. Highly recommended!\"",
+                "text_color": "#444444",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "bottom": "20"
+                }
+              }
+            },
+            {
+              "id": "test33",
+              "elType": "section",
+              "isInner": true,
+              "settings": {
+                "structure": "20",
+                "content_position": "center"
+              },
+              "elements": [
+                {
+                  "id": "test34",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 20,
+                    "_inline_size": 20
+                  },
+                  "elements": [
+                    {
+                      "id": "test35",
+                      "elType": "widget",
+                      "widgetType": "image",
+                      "settings": {
+                        "image": {
+                          "url": "/wp-content/uploads/testimonials/daniel.jpg"
+                        },
+                        "image_size": "thumbnail",
+                        "width": {
+                          "unit": "px",
+                          "size": 50
+                        },
+                        "border_radius": {
+                          "unit": "%",
+                          "top": "50",
+                          "bottom": "50",
+                          "left": "50",
+                          "right": "50"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "test36",
+                  "elType": "column",
+                  "settings": {
+                    "_column_size": 80,
+                    "_inline_size": 80
+                  },
+                  "elements": [
+                    {
+                      "id": "test37",
+                      "elType": "widget",
+                      "widgetType": "heading",
+                      "settings": {
+                        "title": "Daniel M.",
+                        "header_size": "h5",
+                        "title_color": "#1B2A1D",
+                        "typography_typography": "custom",
+                        "typography_font_family": "Inter",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 14
+                        },
+                        "typography_font_weight": "700"
+                      }
+                    },
+                    {
+                      "id": "test38",
+                      "elType": "widget",
+                      "widgetType": "text-editor",
+                      "settings": {
+                        "editor": "Project Coordinator",
+                        "text_color": "#999999",
+                        "typography_typography": "custom",
+                        "typography_font_size": {
+                          "unit": "px",
+                          "size": 12
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "faq001",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "60"
+        }
+      },
+      "elements": [
+        {
+          "id": "faq002",
+          "elType": "column",
+          "settings": {
+            "_column_size": 100
+          },
+          "elements": [
+            {
+              "id": "faq003",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Frequently Asked Questions",
+                "header_size": "h2",
+                "align": "center",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 32
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "bottom": "40"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "faq010",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "structure": "20",
+        "gap": "extended",
+        "padding": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "70"
+        }
+      },
+      "elements": [
+        {
+          "id": "faq011",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50
+          },
+          "elements": [
+            {
+              "id": "faq012",
+              "elType": "widget",
+              "widgetType": "toggle",
+              "settings": {
+                "tabs": [
+                  {
+                    "tab_title": "How is the training delivered?",
+                    "tab_content": "Our training is delivered live online via Zoom. Each session is interactive with hands-on exercises, group discussions and real-world case studies. You'll also get access to recorded sessions and course materials."
+                  },
+                  {
+                    "tab_title": "What if I miss a live session?",
+                    "tab_content": "All live sessions are recorded and shared with you within 24 hours. You can catch up at your own pace and reach out to your trainer if you have questions."
+                  },
+                  {
+                    "tab_title": "Will I receive a certificate?",
+                    "tab_content": "Yes. Upon successful completion of the course, you'll receive a certificate of completion that you can add to your CV and LinkedIn profile."
+                  }
+                ],
+                "border_color": "#E8E8E8",
+                "title_color": "#1B2A1D",
+                "title_active_color": "#1B4D3E",
+                "tab_content_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        },
+        {
+          "id": "faq013",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50
+          },
+          "elements": [
+            {
+              "id": "faq014",
+              "elType": "widget",
+              "widgetType": "toggle",
+              "settings": {
+                "tabs": [
+                  {
+                    "tab_title": "Do I need prior experience?",
+                    "tab_content": "No prior experience is needed. Our courses are designed for beginners and career changers. We start from the fundamentals and build up to industry-level skills."
+                  },
+                  {
+                    "tab_title": "What's included in the course fee?",
+                    "tab_content": "The course fee includes live training sessions, course materials, project feedback, career support, interview preparation, and lifetime access to our alumni community."
+                  },
+                  {
+                    "tab_title": "How do I get started?",
+                    "tab_content": "Simply choose your course and click 'Explore Course' to learn more. You can also request a call back and we'll help you choose the right option for your goals."
+                  }
+                ],
+                "border_color": "#E8E8E8",
+                "title_color": "#1B2A1D",
+                "title_active_color": "#1B4D3E",
+                "tab_content_color": "#666666",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "typography_font_weight": "600"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "cta001",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#1B4D3E",
+        "border_radius": {
+          "unit": "px",
+          "top": "16",
+          "bottom": "16",
+          "left": "16",
+          "right": "16"
+        },
+        "margin": {
+          "unit": "px",
+          "top": "0",
+          "bottom": "0",
+          "left": "40",
+          "right": "40"
+        },
+        "padding": {
+          "unit": "px",
+          "top": "50",
+          "bottom": "50",
+          "left": "60",
+          "right": "60"
+        },
+        "structure": "20"
+      },
+      "elements": [
+        {
+          "id": "cta002",
+          "elType": "column",
+          "settings": {
+            "_column_size": 60,
+            "_inline_size": 60,
+            "content_position": "center"
+          },
+          "elements": [
+            {
+              "id": "cta003",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Want to talk it through?",
+                "header_size": "h2",
+                "title_color": "#FFFFFF",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 28
+                },
+                "typography_font_weight": "700"
+              }
+            },
+            {
+              "id": "cta004",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Request a call back and we'll get in touch to answer your questions and help you choose the right option.",
+                "text_color": "#CCCCCC",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "10"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "cta005",
+          "elType": "column",
+          "settings": {
+            "_column_size": 40,
+            "_inline_size": 40,
+            "content_position": "center",
+            "align": "right"
+          },
+          "elements": [
+            {
+              "id": "cta006",
+              "elType": "widget",
+              "widgetType": "button",
+              "settings": {
+                "text": "Request a Call Back",
+                "link": {
+                  "url": "/contact"
+                },
+                "icon": {
+                  "value": "fas fa-phone-alt",
+                  "library": "fa-solid"
+                },
+                "icon_align": "right",
+                "size": "md",
+                "background_color": "#F5A623",
+                "button_text_color": "#1B2A1D",
+                "border_radius": {
+                  "unit": "px",
+                  "top": "25",
+                  "bottom": "25",
+                  "left": "25",
+                  "right": "25"
+                },
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 15
+                },
+                "typography_font_weight": "600",
+                "button_padding": {
+                  "unit": "px",
+                  "top": "16",
+                  "bottom": "16",
+                  "left": "32",
+                  "right": "32"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "foot01",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "padding": {
+          "unit": "px",
+          "top": "60",
+          "bottom": "40"
+        },
+        "structure": "40"
+      },
+      "elements": [
+        {
+          "id": "foot02",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25
+          },
+          "elements": [
+            {
+              "id": "foot03",
+              "elType": "widget",
+              "widgetType": "image",
+              "settings": {
+                "image": {
+                  "url": "/wp-content/uploads/logo-dark.png"
+                },
+                "width": {
+                  "unit": "px",
+                  "size": 180
+                }
+              }
+            },
+            {
+              "id": "foot04",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Practical training, mentorship and career support for people building careers in Business Analysis, Project Management and Data Analysis.",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "typography_line_height": {
+                  "unit": "em",
+                  "size": 1.6
+                },
+                "padding": {
+                  "unit": "px",
+                  "top": "15",
+                  "bottom": "15"
+                }
+              }
+            },
+            {
+              "id": "foot05",
+              "elType": "widget",
+              "widgetType": "social-icons",
+              "settings": {
+                "social_icon_list": [
+                  {
+                    "social_icon": {
+                      "value": "fab fa-linkedin-in",
+                      "library": "fa-brands"
+                    },
+                    "link": {"url": "#"}
+                  },
+                  {
+                    "social_icon": {
+                      "value": "fab fa-instagram",
+                      "library": "fa-brands"
+                    },
+                    "link": {"url": "#"}
+                  },
+                  {
+                    "social_icon": {
+                      "value": "fab fa-facebook-f",
+                      "library": "fa-brands"
+                    },
+                    "link": {"url": "#"}
+                  },
+                  {
+                    "social_icon": {
+                      "value": "fab fa-youtube",
+                      "library": "fa-brands"
+                    },
+                    "link": {"url": "#"}
+                  }
+                ],
+                "icon_color": "custom",
+                "icon_primary_color": "#1B4D3E",
+                "icon_secondary_color": "#FFFFFF",
+                "shape": "circle",
+                "icon_size": {
+                  "unit": "px",
+                  "size": 14
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "foot06",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25
+          },
+          "elements": [
+            {
+              "id": "foot07",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Explore",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "bottom": "15"
+                }
+              }
+            },
+            {
+              "id": "foot08",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "Courses",
+                    "link": {"url": "/courses"}
+                  },
+                  {
+                    "text": "Case Studies",
+                    "link": {"url": "/case-studies"}
+                  },
+                  {
+                    "text": "Resources",
+                    "link": {"url": "/resources"}
+                  },
+                  {
+                    "text": "About Us",
+                    "link": {"url": "/about"}
+                  }
+                ],
+                "icon": "none",
+                "text_color": "#777777",
+                "text_color_hover": "#1B4D3E",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "icon_list_spacing": {
+                  "unit": "px",
+                  "size": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "foot09",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25
+          },
+          "elements": [
+            {
+              "id": "foot10",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Get In Touch",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "bottom": "15"
+                }
+              }
+            },
+            {
+              "id": "foot11",
+              "elType": "widget",
+              "widgetType": "icon-list",
+              "settings": {
+                "icon_list": [
+                  {
+                    "text": "+44 7442 030667",
+                    "selected_icon": {
+                      "value": "fas fa-phone-alt",
+                      "library": "fa-solid"
+                    },
+                    "link": {"url": "tel:+447442030667"}
+                  },
+                  {
+                    "text": "hello@nextgenanalysts.co.uk",
+                    "selected_icon": {
+                      "value": "fas fa-envelope",
+                      "library": "fa-solid"
+                    },
+                    "link": {"url": "mailto:hello@nextgenanalysts.co.uk"}
+                  },
+                  {
+                    "text": "Chat on WhatsApp",
+                    "selected_icon": {
+                      "value": "fab fa-whatsapp",
+                      "library": "fa-brands"
+                    },
+                    "link": {"url": "#"}
+                  },
+                  {
+                    "text": "London, United Kingdom",
+                    "selected_icon": {
+                      "value": "fas fa-map-marker-alt",
+                      "library": "fa-solid"
+                    }
+                  }
+                ],
+                "icon_color": "#1B4D3E",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 14
+                },
+                "icon_list_spacing": {
+                  "unit": "px",
+                  "size": 10
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "foot12",
+          "elType": "column",
+          "settings": {
+            "_column_size": 25
+          },
+          "elements": [
+            {
+              "id": "foot13",
+              "elType": "widget",
+              "widgetType": "heading",
+              "settings": {
+                "title": "Stay Connected",
+                "header_size": "h4",
+                "title_color": "#1B2A1D",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 16
+                },
+                "typography_font_weight": "700",
+                "padding": {
+                  "unit": "px",
+                  "bottom": "10"
+                }
+              }
+            },
+            {
+              "id": "foot14",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "Get free career tips, training updates and workshop invites.",
+                "text_color": "#777777",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "padding": {
+                  "unit": "px",
+                  "bottom": "15"
+                }
+              }
+            },
+            {
+              "id": "foot15",
+              "elType": "widget",
+              "widgetType": "form",
+              "settings": {
+                "form_name": "Newsletter",
+                "form_fields": [
+                  {
+                    "field_type": "email",
+                    "field_label": "Email",
+                    "placeholder": "Enter your email",
+                    "required": "true",
+                    "width": "100",
+                    "_id": "email_field"
+                  }
+                ],
+                "button_text": "Join the Community",
+                "button_size": "sm",
+                "button_background_color": "#F5A623",
+                "button_color": "#1B2A1D",
+                "button_border_radius": {
+                  "unit": "px",
+                  "top": "25",
+                  "bottom": "25",
+                  "left": "25",
+                  "right": "25"
+                },
+                "button_typography_typography": "custom",
+                "button_typography_font_family": "Inter",
+                "button_typography_font_size": {
+                  "unit": "px",
+                  "size": 13
+                },
+                "button_typography_font_weight": "600"
+              }
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "id": "bfoot1",
+      "elType": "section",
+      "settings": {
+        "layout": "full_width",
+        "content_width": {
+          "unit": "px",
+          "size": 1200
+        },
+        "background_background": "classic",
+        "background_color": "#FFFFFF",
+        "border_border": "solid",
+        "border_width": {
+          "unit": "px",
+          "top": "1",
+          "bottom": "0",
+          "left": "0",
+          "right": "0"
+        },
+        "border_color": "#E8E8E8",
+        "padding": {
+          "unit": "px",
+          "top": "20",
+          "bottom": "20"
+        },
+        "structure": "20"
+      },
+      "elements": [
+        {
+          "id": "bfoot2",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50
+          },
+          "elements": [
+            {
+              "id": "bfoot3",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "150+ professionals trained and supported",
+                "text_color": "#999999",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 12
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": "bfoot4",
+          "elType": "column",
+          "settings": {
+            "_column_size": 50,
+            "align": "right"
+          },
+          "elements": [
+            {
+              "id": "bfoot5",
+              "elType": "widget",
+              "widgetType": "text-editor",
+              "settings": {
+                "editor": "<a href='/privacy-policy'>Privacy Policy</a> | <a href='/terms'>Terms & Conditions</a> | <a href='/cookies'>Cookie Policy</a> | <a href='/accessibility'>Accessibility</a>",
+                "text_color": "#999999",
+                "align": "right",
+                "typography_typography": "custom",
+                "typography_font_family": "Inter",
+                "typography_font_size": {
+                  "unit": "px",
+                  "size": 12
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

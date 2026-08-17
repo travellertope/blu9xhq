@@ -55,7 +55,14 @@ export default function SignupPage() {
         return;
       }
 
-      // 2. Sign in to get session cookies
+      if (signupData.existingUser) {
+        // Existing user adding a new tenant — cookie is already set by the API.
+        // Redirect directly; they already have a session.
+        window.location.href = "/admin";
+        return;
+      }
+
+      // 2. New user — sign in to get session cookies
       const signinRes = await fetch("/api/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,9 +121,10 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
+              <div
+                className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700 [&_a]:text-indigo-600 [&_a]:underline [&_a]:font-medium"
+                dangerouslySetInnerHTML={{ __html: error }}
+              />
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">

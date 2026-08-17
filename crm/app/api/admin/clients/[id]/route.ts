@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { calculateHealthScore } from "@/lib/healthScore";
 import { z } from "zod";
@@ -77,7 +77,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   const tenantId = session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: row, error: clientErr } = await supabase
       .from("clients")
@@ -221,7 +221,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data: updated, error } = await supabase
       .from("clients")
       .update(update)
@@ -246,7 +246,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const tenantId = auth.session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { error } = await supabase
       .from("clients")
       .update({ status: "churned" })

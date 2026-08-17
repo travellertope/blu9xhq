@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requirePermission, requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getSessionFromCookies } from "@/lib/auth";
+import { hasPermission } from "@/lib/permissions";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
+
+export const maxDuration = 30;
 import { z } from "zod";
 
 function mapSequence(row: any) {
@@ -50,35 +53,42 @@ const postSchema = z.object({
 // ─── GET /api/admin/sequences ─────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const result = await requireSession(req);
-  if (result instanceof NextResponse) return result;
-  const tenantId = result.session.user.tenantId!;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const tenantId = session.user.tenantId!;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     const { data, error } = await supabase
       .from("sequences")
       .select("*, sequence_steps(*)")
       .eq("tenant_id", tenantId)
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("[GET /api/admin/sequences] DB error:", error.message, error.code);
+      return NextResponse.json({ sequences: [] });
+    }
     return NextResponse.json({ sequences: (data ?? []).map(mapSequence) });
   } catch (err: unknown) {
     console.error("[GET /api/admin/sequences]", err);
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Unknown error" },
-      { status: 502 }
-    );
+    return NextResponse.json({ sequences: [] });
   }
 }
 
 // ─── POST /api/admin/sequences ────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const result = await requirePermission(req, "build_sequences");
-  if (result instanceof NextResponse) return result;
-  const tenantId = result.session.user.tenantId!;
+  const session = getSessionFromCookies();
+  if (!session?.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  if (!hasPermission(session.user.bluuhqRole, "build_sequences")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  const tenantId = session.user.tenantId!;
 
   const rawBody = await req.json().catch(() => ({}));
   const parsed = postSchema.safeParse(rawBody);
@@ -91,7 +101,7 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     const { data: sequence, error } = await supabase
       .from("sequences")

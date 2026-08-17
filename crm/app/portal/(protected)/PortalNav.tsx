@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 
 interface PortalNavProps {
   firstName: string;
+  tenantLogo?: string;
+  tenantName?: string;
 }
 
 interface MeData {
@@ -25,7 +27,7 @@ const NAV_LINKS = [
   { href: "/portal/profile", label: "Profile" },
 ];
 
-export default function PortalNav({ firstName }: PortalNavProps) {
+export default function PortalNav({ firstName, tenantLogo, tenantName }: PortalNavProps) {
   const pathname = usePathname();
   const router   = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -58,7 +60,12 @@ export default function PortalNav({ firstName }: PortalNavProps) {
         <div className="flex h-10 sm:h-12 items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/portal" className="shrink-0">
-            <Image src="/logo.png" alt="BluuHQ" width={100} height={28} priority className="object-contain" />
+            {tenantLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={tenantLogo} alt={tenantName ?? "Logo"} className="h-7 max-w-[140px] object-contain" />
+            ) : (
+              <Image src="/logo.png" alt="BluuHQ" width={100} height={28} priority className="object-contain" />
+            )}
           </Link>
 
           {/* Desktop nav */}
@@ -69,7 +76,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
                 href={link.href}
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex items-center gap-1.5 ${
                   isActive(link.href)
-                    ? "bg-blue-50 text-[#1461CE]"
+                    ? "bg-blue-50 text-[var(--tenant-accent)]"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                 }`}
               >
@@ -117,7 +124,7 @@ export default function PortalNav({ firstName }: PortalNavProps) {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center justify-between px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
                 isActive(link.href)
-                  ? "bg-blue-50 text-[#1461CE]"
+                  ? "bg-blue-50 text-[var(--tenant-accent)]"
                   : "text-slate-700 hover:bg-slate-50"
               }`}
             >

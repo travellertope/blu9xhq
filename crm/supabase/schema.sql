@@ -190,16 +190,6 @@ create table if not exists invoices (
   unique(tenant_id, invoice_number)
 );
 
--- Opaque, unguessable per-invoice link an admin can copy and send to a
--- client (WhatsApp, email, etc.) to open /pay/[token] — invoice details +
--- a "Pay Now" button — without logging into the portal. Random per row,
--- including on this ALTER itself (Postgres evaluates a volatile default
--- once per existing row on column add, backfilling every invoice created
--- before this column existed) — not derived from the invoice id, since
--- that's sequential/guessable.
-alter table invoices add column if not exists public_token text unique
-  default encode(gen_random_bytes(24), 'hex');
-create index if not exists invoices_public_token_idx on invoices(public_token);
 
 -- =============================================================================
 -- FILES

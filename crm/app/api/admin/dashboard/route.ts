@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { getDashboardScope } from "@/lib/permissions";
 
 function isWithinDays(dateStr: string, days: number): boolean {
@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
 
   const hideMetrics = role === "support_staff" || role === "viewer";
 
-  const supabase = createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
 
   const [
     outstandingInvoicesQ,

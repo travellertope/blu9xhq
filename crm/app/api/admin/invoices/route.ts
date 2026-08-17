@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requirePermission } from "@/lib/apiPermissions";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import { logAuditEvent, AUDIT_ACTIONS } from "@/lib/auditLog";
+
+export const maxDuration = 30;
 
 function mapInvoiceRow(row: any) {
   return {
@@ -9,6 +11,10 @@ function mapInvoiceRow(row: any) {
     number:         row.invoice_number,
     clientId:       row.client_id,
     subscriptionId: row.subscription_id ?? undefined,
+    subtotal:       row.subtotal,
+    discount:       row.discount ?? 0,
+    taxRate:        row.tax_rate ?? 0,
+    taxAmount:      row.tax_amount ?? 0,
     total:          row.total,
     currency:       row.currency,
     status:         row.status,
@@ -38,7 +44,7 @@ export async function GET(req: NextRequest) {
   const perPage  = 20;
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
     let query = supabase
       .from("invoices")
       .select("*", { count: "exact" })
@@ -79,10 +85,12 @@ export async function POST(req: NextRequest) {
   let body: {
     clientId: string;
     subscriptionId?: string;
-    lineItems: { description: string; amount: number }[];
+    lineItems: { description: string; quantity?: number; unitPrice?: number; discount?: number; amount: number }[];
     currency: string;
     dueDate: string;
     notes?: string;
+    taxRate?: number;
+    discount?: number;
   };
 
   try {
@@ -96,7 +104,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = createSupabaseAdminClient();
 
     // Auto-generate invoice number
     const { count } = await supabase
@@ -105,7 +113,12 @@ export async function POST(req: NextRequest) {
       .eq("tenant_id", tenantId);
     const invNumber = `BLU-${new Date().getFullYear()}-${String((count ?? 0) + 1).padStart(4, "0")}`;
 
-    const lineTotal = body.lineItems.reduce((sum, item) => sum + item.amount, 0);
+    const itemsSubtotal = body.lineItems.reduce((sum, item) => sum + (item.amount ?? 0), 0);
+    const overallDiscount = body.discount ?? 0;
+    const subtotalAfterDiscount = Math.max(itemsSubtotal - overallDiscount, 0);
+    const taxRate = body.taxRate ?? 0;
+    const taxAmount = subtotalAfterDiscount * (taxRate / 100);
+    const total = subtotalAfterDiscount + taxAmount;
     const today = new Date().toISOString().split("T")[0];
 
     const { data: inserted, error } = await supabase
@@ -116,8 +129,11 @@ export async function POST(req: NextRequest) {
         subscription_id: body.subscriptionId || null,
         invoice_number:  invNumber,
         line_items:      body.lineItems,
-        subtotal:        lineTotal,
-        total:           lineTotal,
+        subtotal:        itemsSubtotal,
+        discount:        overallDiscount || null,
+        tax_rate:        taxRate || null,
+        tax_amount:      taxAmount || null,
+        total,
         currency:        body.currency,
         status:          "draft",
         due_date:        body.dueDate,
@@ -134,13 +150,13 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    await logAuditEvent({
+    void logAuditEvent({
       action: AUDIT_ACTIONS.INVOICE_CREATED,
       actorName: user.name ?? "Unknown",
       actorWpUserId: user.wpUserId ?? 0,
       detail: `Created invoice ${invNumber} for client ${body.clientId}`,
       clientId: body.clientId,
-    });
+    }).catch(() => {});
 
     return NextResponse.json({ invoice: mapInvoiceRow(inserted) }, { status: 201 });
   } catch (err) {
