@@ -71,6 +71,13 @@ async function processEvent(event: Stripe.Event): Promise<void> {
             .eq("id", tenantId);
         }
       }
+
+      // ── Public invoice pay link (/pay/[token]) ─────────────────────────────
+      if (cs.mode === "payment" && cs.metadata?.supabase_invoice_id) {
+        await markInvoicePaidViaPayLink(cs.metadata.supabase_invoice_id, cs).catch((err) =>
+          console.error("[stripe-webhook] pay-link invoice update failed:", err)
+        );
+      }
     }
 
     if (event.type === "customer.subscription.updated") {
@@ -125,6 +132,66 @@ async function processEvent(event: Stripe.Event): Promise<void> {
   } catch (err) {
     console.error("[stripe-webhook] processEvent error:", err);
   }
+}
+
+/**
+ * Marks a Supabase-backed invoice paid after a successful checkout from
+ * the public /pay/[token] link, and sends the same receipt email the
+ * manual "Mark as Paid" admin action sends (see
+ * app/api/admin/invoices/[id]/mark-paid/route.ts). Deliberately does NOT
+ * call logAuditEvent or exitEnrollmentsForClient — both derive their
+ * tenant/actor from a live admin session (lib/auth.ts getSession()) and
+ * silently no-op outside one, which a webhook never has. Replicating them
+ * session-independently would mean duplicating audit-log/sequence-exit
+ * internals here; left as a known gap rather than half-implemented.
+ */
+async function markInvoicePaidViaPayLink(invoiceId: string, cs: Stripe.Checkout.Session): Promise<void> {
+  const supabase = createSupabaseAdminClient();
+  const gatewayPaymentId = typeof cs.payment_intent === "string" ? cs.payment_intent : cs.id;
+
+  const { data: invoice, error } = await supabase
+    .from("invoices")
+    .update({
+      status: "paid",
+      paid_date: new Date().toISOString().slice(0, 10),
+      payment_method: "stripe",
+      payment_gateway: "stripe",
+      gateway_payment_id: gatewayPaymentId,
+    })
+    .eq("id", invoiceId)
+    .select("invoice_number, total, currency, clients(contact_name, company_name, contact_email, portal_email)")
+    .maybeSingle();
+  if (error) throw error;
+  if (!invoice) return;
+
+  const client = invoice.clients as {
+    contact_name?: string;
+    company_name?: string;
+    contact_email?: string;
+    portal_email?: string;
+  } | null;
+  const clientEmail = client?.portal_email ?? client?.contact_email;
+  if (!clientEmail) return;
+
+  await sendEmailHtml({
+    to: clientEmail,
+    subject: `Payment received — Invoice ${invoice.invoice_number}`,
+    html: `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
+        <h2>Payment Received</h2>
+        <p>Hi ${client?.contact_name || client?.company_name || "there"},</p>
+        <p>We've received your payment for invoice ${invoice.invoice_number}. Thank you!</p>
+        <table style="width:100%;border-collapse:collapse;margin:16px 0">
+          <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invoice.invoice_number}</td></tr>
+          <tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${invoice.total?.toLocaleString()}</td></tr>
+          <tr><td style="padding:8px 0;color:#64748b">Payment Method</td><td style="padding:8px 0">Card (Stripe)</td></tr>
+        </table>
+        <p style="color:#64748b;font-size:13px">This is your payment receipt. Please keep it for your records.</p>
+      </div>
+    `,
+    text: `Payment received for Invoice ${invoice.invoice_number}.\n\nAmount: ${invoice.currency} ${invoice.total}\nMethod: Card (Stripe)`,
+    tags: [{ name: "type", value: "payment_receipt" }],
+  });
 }
 
 const COMMISSION_RATES: Record<string, number> = {

@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
-import { ArrowLeft, Send, CheckCircle, FileDown, Ban, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, FileDown, Link2, Ban, Pencil, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 interface Invoice {
@@ -38,6 +38,7 @@ interface Invoice {
   notes?: string;
   pdfUrl?: string;
   lineItems: { description: string; amount: number }[];
+  publicToken?: string;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -196,6 +197,20 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const handleCopyLink = async () => {
+    if (!invoice?.publicToken) {
+      toast.error("No shareable link for this invoice yet");
+      return;
+    }
+    const url = `${window.location.origin}/pay/${invoice.publicToken}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success("Invoice link copied");
+    } catch {
+      toast.error("Couldn't copy link");
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirm("Delete this draft invoice? This cannot be undone.")) return;
     setDeleting(true);
@@ -292,6 +307,11 @@ export default function InvoiceDetailPage() {
         <Button size="sm" variant="outline" onClick={handleDownloadPdf} disabled={pdfLoading}>
           <FileDown className="h-4 w-4 mr-1.5" />
           {pdfLoading ? "Generating…" : "Download PDF"}
+        </Button>
+
+        <Button size="sm" variant="outline" onClick={handleCopyLink}>
+          <Link2 className="h-4 w-4 mr-1.5" />
+          Copy Invoice Link
         </Button>
 
         <PermissionGuard permission="create_invoices">

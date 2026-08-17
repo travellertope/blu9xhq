@@ -149,6 +149,8 @@ export interface Invoice {
   paymentGateway?: PaymentGateway;
   gatewayPaymentId?: string;
   paymentLink?: string;
+  /** Opaque token for the public /pay/[token] page — see supabase/schema.sql. */
+  publicToken?: string;
   // Metadata
   notes?: string;
   pdfUrl?: string;

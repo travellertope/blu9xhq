@@ -18,6 +18,7 @@ function mapInvoiceRow(row: any) {
     notes:          row.notes ?? undefined,
     pdfUrl:         row.pdf_url ?? undefined,
     lineItems:      row.line_items ?? [],
+    publicToken:    row.public_token ?? undefined,
   };
 }
 
