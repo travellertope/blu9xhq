@@ -181,6 +181,8 @@ interface InvoicePDFProps {
   taxAmount: number;
   total: number;
   currency: string;
+  amountPaid: number;
+  balanceDue: number;
   notes?: string;
   logoSrc?: string;
 }
@@ -198,6 +200,8 @@ function InvoicePDF({
   taxAmount,
   total,
   currency,
+  amountPaid,
+  balanceDue,
   notes,
   logoSrc,
 }: InvoicePDFProps) {
@@ -280,6 +284,20 @@ function InvoicePDF({
           </Text>
         </View>
 
+        {/* Amount Paid / Balance Due (installment tracking) */}
+        {amountPaid > 0 && (
+          <>
+            <View style={styles.subtotalRow}>
+              <Text style={[styles.subtotalLabel, { color: "#16a34a" }]}>Amount Paid</Text>
+              <Text style={[styles.subtotalValue, { color: "#16a34a" }]}>-{currency} {amountPaid?.toLocaleString()}</Text>
+            </View>
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Balance Due</Text>
+              <Text style={styles.totalAmount}>{currency} {balanceDue?.toLocaleString()}</Text>
+            </View>
+          </>
+        )}
+
         {/* Notes */}
         {notes ? (
           <View style={styles.notes}>
@@ -343,6 +361,8 @@ export async function POST(
       taxRate: invoice.tax_rate ?? 0,
       taxAmount: invoice.tax_amount ?? 0,
       total: invoice.total,
+      amountPaid: invoice.amount_paid ?? 0,
+      balanceDue: Math.max(invoice.total - (invoice.amount_paid ?? 0), 0),
       currency: invoice.currency,
       notes: invoice.notes,
       logoSrc,

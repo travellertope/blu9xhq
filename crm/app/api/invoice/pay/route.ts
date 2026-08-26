@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   // Fetch invoice
   const { data: rows, error } = await supabaseRest(
-    `invoices?select=id,tenant_id,status,total,currency,invoice_number,clients(contact_email,contact_name)&id=eq.${invoiceId}`
+    `invoices?select=id,tenant_id,status,total,amount_paid,currency,invoice_number,clients(contact_email,contact_name)&id=eq.${invoiceId}`
   );
   if (error) {
     console.error("[POST /api/invoice/pay] fetch invoice", error);
@@ -54,12 +54,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
   }
 
-  // Only allow payment on sent/overdue invoices
-  if (!["sent", "overdue"].includes(invoice.status)) {
+  // Only allow payment on sent/overdue/partially-paid invoices
+  if (!["sent", "overdue", "partial"].includes(invoice.status)) {
     return NextResponse.json(
       { error: `Invoice cannot be paid (status: ${invoice.status})` },
       { status: 400 }
     );
+  }
+
+  const balanceDue = Math.max(invoice.total - (invoice.amount_paid ?? 0), 0);
+  if (balanceDue <= 0) {
+    return NextResponse.json({ error: "Invoice has no balance remaining" }, { status: 400 });
   }
 
   const tenantId = invoice.tenant_id;
@@ -95,7 +100,7 @@ export async function POST(req: NextRequest) {
         {
           price_data: {
             currency: currency.toLowerCase(),
-            unit_amount: Math.round(invoice.total * 100),
+            unit_amount: Math.round(balanceDue * 100),
             product_data: {
               name: `Invoice ${invoice.invoice_number}`,
             },
@@ -123,7 +128,7 @@ export async function POST(req: NextRequest) {
     const client = Array.isArray(invoice.clients) ? invoice.clients[0] : invoice.clients;
     let psEmail = "customer@example.com";
     try { if (client?.contact_email) psEmail = decrypt(client.contact_email); } catch {}
-    const amountInMinor = Math.round(invoice.total * 100);
+    const amountInMinor = Math.round(balanceDue * 100);
 
     const psRes = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",

@@ -360,6 +360,7 @@ function ActiveMembersTab({
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [resettingId, setResettingId] = useState<number | null>(null);
 
   const active = members.filter(m => m.bluuhq_status === "active");
 
@@ -376,6 +377,21 @@ function ActiveMembersTab({
       toast.error(err.message);
     } finally {
       setActionLoading(null);
+    }
+  }
+
+  async function handleSendPasswordReset(member: TeamMember) {
+    if (!confirm(`Send a password reset link to ${member.name} (${member.email})?`)) return;
+    setResettingId(member.id);
+    try {
+      const res = await fetch(`/api/admin/team/${member.id}/reset-password`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Failed to send password reset");
+      toast.success(`Password reset link sent to ${member.email}`);
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setResettingId(null);
     }
   }
 
@@ -440,6 +456,13 @@ function ActiveMembersTab({
                           Assign Clients
                         </button>
                       )}
+                      <button
+                        onClick={() => handleSendPasswordReset(member)}
+                        disabled={resettingId === member.id}
+                        className="text-indigo-600 hover:text-indigo-800 text-xs font-medium disabled:opacity-40"
+                      >
+                        {resettingId === member.id ? "…" : "Send Password Reset"}
+                      </button>
                       <button
                         onClick={() => handleDeactivate(member)}
                         disabled={actionLoading === member.id}

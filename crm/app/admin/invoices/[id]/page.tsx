@@ -38,6 +38,8 @@ interface Invoice {
   dueDate: string;
   issuedDate: string;
   paidAt?: string;
+  amountPaid?: number;
+  balanceDue?: number;
   paymentMethod?: string;
   notes?: string;
   pdfUrl?: string;
@@ -48,6 +50,7 @@ const STATUS_COLORS: Record<string, string> = {
   draft:   "bg-slate-100 text-slate-600",
   sent:    "bg-blue-100 text-blue-700",
   paid:    "bg-green-100 text-green-700",
+  partial: "bg-amber-100 text-amber-700",
   overdue: "bg-red-100 text-red-700",
   void:    "bg-slate-100 text-slate-300",
 };
@@ -55,22 +58,56 @@ const STATUS_COLORS: Record<string, string> = {
 interface MarkPaidModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (data: { paymentMethod: string; paidAt: string; reference?: string }) => void;
+  onConfirm: (data: { paymentMethod: string; paidAt: string; reference?: string; amountPaid: number }) => void;
   loading: boolean;
+  currency: string;
+  balanceDue: number;
 }
 
-function MarkPaidModal({ open, onClose, onConfirm, loading }: MarkPaidModalProps) {
+function MarkPaidModal({ open, onClose, onConfirm, loading, currency, balanceDue }: MarkPaidModalProps) {
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [paidAt, setPaidAt] = useState(new Date().toISOString().split("T")[0]);
   const [reference, setReference] = useState("");
+  const [amountPaid, setAmountPaid] = useState(String(balanceDue));
+
+  useEffect(() => {
+    if (open) setAmountPaid(String(balanceDue));
+  }, [open, balanceDue]);
+
+  const amount = parseFloat(amountPaid);
+  const isFullPayment = !isNaN(amount) && amount >= balanceDue;
+  const isValid = !isNaN(amount) && amount > 0 && amount <= balanceDue + 0.001;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Mark Invoice as Paid</DialogTitle>
+          <DialogTitle>Record Payment</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <Label>Amount Paid</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm text-slate-500">{currency}</span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={balanceDue}
+                value={amountPaid}
+                onChange={(e) => setAmountPaid(e.target.value)}
+              />
+            </div>
+            <p className="text-xs text-slate-400 mt-1">
+              Balance due: {currency} {balanceDue.toLocaleString()}
+              {!isFullPayment && isValid && (
+                <> — {currency} {(balanceDue - amount).toLocaleString()} will remain after this payment</>
+              )}
+            </p>
+            {!isValid && amountPaid !== "" && (
+              <p className="text-xs text-red-500 mt-1">Enter an amount between 0 and the balance due.</p>
+            )}
+          </div>
           <div>
             <Label>Payment Method</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -105,10 +142,10 @@ function MarkPaidModal({ open, onClose, onConfirm, loading }: MarkPaidModalProps
           </div>
           <Button
             className="w-full"
-            onClick={() => onConfirm({ paymentMethod, paidAt, reference: reference || undefined })}
-            disabled={loading}
+            onClick={() => onConfirm({ paymentMethod, paidAt, reference: reference || undefined, amountPaid: amount })}
+            disabled={loading || !isValid}
           >
-            {loading ? "Saving…" : "Confirm Payment"}
+            {loading ? "Saving…" : isFullPayment ? "Confirm Payment" : "Record Partial Payment"}
           </Button>
         </div>
       </DialogContent>
@@ -154,8 +191,8 @@ export default function InvoiceDetailPage() {
     try {
       const res = await fetch(`/api/admin/invoices/${id}/send`, { method: "POST" });
       if (!res.ok) throw new Error("Failed to send");
-      toast.success("Invoice sent to client");
-      setInvoice((prev) => prev ? { ...prev, status: "sent" } : prev);
+      toast.success(invoice.status === "draft" ? "Invoice sent to client" : "Updated invoice sent to client");
+      setInvoice((prev) => prev ? { ...prev, status: prev.status === "draft" ? "sent" : prev.status } : prev);
     } catch {
       toast.error("Failed to send invoice");
     } finally {
@@ -163,7 +200,7 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  const handleMarkPaid = async (data: { paymentMethod: string; paidAt: string; reference?: string }) => {
+  const handleMarkPaid = async (data: { paymentMethod: string; paidAt: string; reference?: string; amountPaid: number }) => {
     setMarkPaidLoading(true);
     try {
       const res = await fetch(`/api/admin/invoices/${id}/mark-paid`, {
@@ -171,12 +208,20 @@ export default function InvoiceDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) throw new Error("Failed to mark as paid");
-      toast.success("Invoice marked as paid");
-      setInvoice((prev) => prev ? { ...prev, status: "paid", paidAt: data.paidAt, paymentMethod: data.paymentMethod } : prev);
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? "Failed to mark as paid");
+      toast.success(body.status === "paid" ? "Invoice marked as paid" : "Partial payment recorded");
+      setInvoice((prev) => prev ? {
+        ...prev,
+        status: body.status,
+        amountPaid: body.amountPaid,
+        balanceDue: body.balanceDue,
+        paidAt: body.status === "paid" ? data.paidAt : prev.paidAt,
+        paymentMethod: data.paymentMethod,
+      } : prev);
       setMarkPaidOpen(false);
-    } catch {
-      toast.error("Failed to mark invoice as paid");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to mark invoice as paid");
     } finally {
       setMarkPaidLoading(false);
     }
@@ -201,16 +246,44 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const copyText = async (text: string) => {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // fall through to the execCommand fallback below (e.g. insecure
+        // context, or a browser/embed that blocks the Clipboard API)
+      }
+    }
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    document.body.removeChild(textarea);
+    return ok;
+  };
+
   const handleCopyLink = async () => {
     setCopyingLink(true);
     try {
       const res = await fetch(`/api/admin/invoices/${id}/pay-link`);
       const body = await res.json().catch(() => ({}));
       if (!res.ok || !body.url) throw new Error(body.error ?? "Couldn't get link");
-      await navigator.clipboard.writeText(body.url);
+      const copied = await copyText(body.url);
+      if (!copied) throw new Error("Clipboard access was blocked by the browser");
       toast.success("Invoice link copied");
-    } catch {
-      toast.error("Couldn't copy link");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Couldn't copy link");
     } finally {
       setCopyingLink(false);
     }
@@ -258,11 +331,12 @@ export default function InvoiceDetailPage() {
     return <div className="py-16 text-center text-slate-400">Invoice not found</div>;
   }
 
-  const canSend = invoice.status === "draft";
+  const canSend = ["draft", "sent", "overdue", "partial"].includes(invoice.status);
   const canEdit = invoice.status === "draft";
   const canDelete = invoice.status === "draft";
-  const canMarkPaid = invoice.status === "sent" || invoice.status === "overdue";
-  const canVoid = invoice.status === "sent" || invoice.status === "overdue";
+  const canMarkPaid = ["sent", "overdue", "partial"].includes(invoice.status);
+  const canVoid = ["sent", "overdue", "partial"].includes(invoice.status);
+  const balanceDue = invoice.balanceDue ?? invoice.total;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -283,7 +357,7 @@ export default function InvoiceDetailPage() {
           {canSend && (
             <Button size="sm" onClick={handleSend} disabled={sending}>
               <Send className="h-4 w-4 mr-1.5" />
-              {sending ? "Sending…" : "Send to Client"}
+              {sending ? "Sending…" : invoice.status === "draft" ? "Send to Client" : "Resend Updated Invoice"}
             </Button>
           )}
           {canEdit && (
@@ -304,7 +378,7 @@ export default function InvoiceDetailPage() {
           {canMarkPaid && (
             <Button size="sm" variant="outline" onClick={() => setMarkPaidOpen(true)}>
               <CheckCircle className="h-4 w-4 mr-1.5" />
-              Mark as Paid
+              Record Payment
             </Button>
           )}
         </PermissionGuard>
@@ -367,6 +441,20 @@ export default function InvoiceDetailPage() {
                 <p className="text-slate-500">Payment Method</p>
                 <p className="font-medium">{invoice.paymentMethod.replace("_", " ")}</p>
               </div>
+            )}
+            {(invoice.amountPaid ?? 0) > 0 && (
+              <>
+                <div>
+                  <p className="text-slate-500">Amount Paid</p>
+                  <p className="font-medium text-green-600">{invoice.currency} {invoice.amountPaid!.toLocaleString()}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Balance Due</p>
+                  <p className={`font-medium ${balanceDue > 0 ? "text-amber-600" : "text-green-600"}`}>
+                    {invoice.currency} {balanceDue.toLocaleString()}
+                  </p>
+                </div>
+              </>
             )}
           </div>
         </CardContent>
@@ -443,6 +531,8 @@ export default function InvoiceDetailPage() {
         onClose={() => setMarkPaidOpen(false)}
         onConfirm={handleMarkPaid}
         loading={markPaidLoading}
+        currency={invoice.currency}
+        balanceDue={balanceDue}
       />
     </div>
   );

@@ -21,6 +21,8 @@ interface InvoiceData {
   discount: number | null;
   taxRate: number | null;
   taxAmount: number | null;
+  amountPaid: number;
+  balanceDue: number;
   currency: string;
   issuedDate: string;
   dueDate: string;
@@ -48,6 +50,7 @@ function formatDate(d: string | null) {
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; text: string; icon: any; label: string }> = {
     paid:    { bg: "bg-green-50", text: "text-green-700", icon: CheckCircle, label: "Paid" },
+    partial: { bg: "bg-amber-50", text: "text-amber-700", icon: Clock,       label: "Partially Paid" },
     sent:    { bg: "bg-blue-50",  text: "text-blue-700",  icon: Clock,       label: "Awaiting Payment" },
     overdue: { bg: "bg-red-50",   text: "text-red-700",   icon: AlertCircle, label: "Overdue" },
     draft:   { bg: "bg-gray-50",  text: "text-gray-600",  icon: Clock,       label: "Draft" },
@@ -150,7 +153,7 @@ function InvoiceContent() {
 
   const canShowPayButton =
     invoice.canPay &&
-    (invoice.status === "sent" || invoice.status === "overdue");
+    (invoice.status === "sent" || invoice.status === "overdue" || invoice.status === "partial");
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
@@ -267,6 +270,18 @@ function InvoiceContent() {
               <span className="text-base font-bold text-gray-900">Total</span>
               <span className="text-base font-bold text-gray-900">{fmt(invoice.total)}</span>
             </div>
+            {invoice.amountPaid > 0 && (
+              <>
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Amount Paid</span>
+                  <span>-{fmt(invoice.amountPaid)}</span>
+                </div>
+                <div className="flex justify-between pt-1">
+                  <span className="text-base font-bold text-gray-900">Balance Due</span>
+                  <span className="text-base font-bold text-gray-900">{fmt(invoice.balanceDue)}</span>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -278,7 +293,7 @@ function InvoiceContent() {
               disabled={paying}
               className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg px-6 py-3.5 text-base font-semibold transition-colors"
             >
-              {paying ? "Redirecting to payment…" : "Pay Now"}
+              {paying ? "Redirecting to payment…" : invoice.amountPaid > 0 ? `Pay Remaining Balance (${fmt(invoice.balanceDue)})` : "Pay Now"}
             </button>
           </div>
         )}

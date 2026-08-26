@@ -112,6 +112,7 @@ function InvoicePDF(props: {
   invNumber: string; issuedDate: string; dueDate: string;
   clientName: string; clientCompany?: string;
   lineItems: LineItem[]; total: number; currency: string;
+  amountPaid?: number; balanceDue?: number;
   notes?: string; logoSrc?: string;
 }) {
   return (
@@ -153,6 +154,18 @@ function InvoicePDF(props: {
           <Text style={pdfStyles.totalLabel}>Total</Text>
           <Text style={pdfStyles.totalAmt}>{props.currency} {props.total?.toLocaleString()}</Text>
         </View>
+        {(props.amountPaid ?? 0) > 0 ? (
+          <>
+            <View style={pdfStyles.totalRow}>
+              <Text style={[pdfStyles.totalLabel, { fontSize: 10, color: "#16a34a" }]}>Amount Paid</Text>
+              <Text style={[pdfStyles.totalAmt, { fontSize: 10, color: "#16a34a" }]}>-{props.currency} {props.amountPaid?.toLocaleString()}</Text>
+            </View>
+            <View style={pdfStyles.totalRow}>
+              <Text style={pdfStyles.totalLabel}>Balance Due</Text>
+              <Text style={pdfStyles.totalAmt}>{props.currency} {props.balanceDue?.toLocaleString()}</Text>
+            </View>
+          </>
+        ) : null}
         {props.notes ? (
           <View style={pdfStyles.notes}>
             <Text style={pdfStyles.notesLabel}>Notes</Text>
@@ -212,11 +225,13 @@ export async function POST(
       );
     }
 
-    const invNumber = invoice.invoice_number;
-    const total     = invoice.total;
-    const currency  = invoice.currency;
-    const dueDate   = invoice.due_date;
-    const appUrl    = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const invNumber   = invoice.invoice_number;
+    const total       = invoice.total;
+    const currency    = invoice.currency;
+    const dueDate     = invoice.due_date;
+    const amountPaid  = invoice.amount_paid ?? 0;
+    const balanceDue  = Math.max(total - amountPaid, 0);
+    const appUrl      = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
     // Generate signed view link (valid 90 days, no login required)
     const viewToken = createInvoiceToken(params.id);
@@ -240,6 +255,8 @@ export async function POST(
       lineItems: invoice.line_items ?? [],
       total,
       currency,
+      amountPaid,
+      balanceDue,
       notes: invoice.notes,
       logoSrc,
     }) as unknown as ReactElement<DocumentProps, string | JSXElementConstructor<DocumentProps>>;
@@ -258,7 +275,7 @@ export async function POST(
       from: `${fromName} <${fromEmail}>`,
       to: [clientEmail],
       replyTo,
-      subject: `Invoice ${invNumber} from ${fromName}`,
+      subject: amountPaid > 0 ? `Updated Invoice ${invNumber} from ${fromName}` : `Invoice ${invNumber} from ${fromName}`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
           <h2>Invoice ${invNumber}</h2>
@@ -266,7 +283,9 @@ export async function POST(
           <p>Please find your invoice attached and details below:</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0">
             <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invNumber}</td></tr>
-            <tr><td style="padding:8px 0;color:#64748b">Amount Due</td><td style="padding:8px 0;font-weight:600">${currency} ${total?.toLocaleString()}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Total</td><td style="padding:8px 0;font-weight:600">${currency} ${total?.toLocaleString()}</td></tr>
+            ${amountPaid > 0 ? `<tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600;color:#16a34a">${currency} ${amountPaid.toLocaleString()}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Balance Due</td><td style="padding:8px 0;font-weight:600">${currency} ${balanceDue.toLocaleString()}</td></tr>` : ""}
             <tr><td style="padding:8px 0;color:#64748b">Due Date</td><td style="padding:8px 0">${dueDate}</td></tr>
           </table>
           <p>
@@ -277,7 +296,7 @@ export async function POST(
           <p style="color:#64748b;font-size:13px">A PDF copy is attached to this email. Contact us with any questions.</p>
         </div>
       `,
-      text: `Invoice ${invNumber}\n\nHi ${clientName},\n\nAmount Due: ${currency} ${total}\nDue Date: ${dueDate}\n\nView your invoice online: ${viewUrl}\n\nA PDF copy is attached to this email.`,
+      text: `Invoice ${invNumber}\n\nHi ${clientName},\n\nTotal: ${currency} ${total}${amountPaid > 0 ? `\nAmount Paid: ${currency} ${amountPaid}\nBalance Due: ${currency} ${balanceDue}` : ""}\nDue Date: ${dueDate}\n\nView your invoice online: ${viewUrl}\n\nA PDF copy is attached to this email.`,
       attachments: [
         {
           filename: pdfFilename,
@@ -290,17 +309,20 @@ export async function POST(
       throw new Error(`Resend error: ${emailErr.message ?? JSON.stringify(emailErr)}`);
     }
 
-    // Update status to sent
-    const { error: updateErr } = await supabaseRest(
-      `invoices?id=eq.${params.id}&tenant_id=eq.${tenantId}`,
-      { method: "PATCH", body: { status: "sent" } }
-    );
-    if (updateErr) throw new Error(typeof updateErr === "string" ? updateErr : JSON.stringify(updateErr));
+    // Transition draft -> sent. A resend of an already sent/partial/overdue/paid
+    // invoice just re-delivers the current state and must not clobber it back to "sent".
+    if (invoice.status === "draft") {
+      const { error: updateErr } = await supabaseRest(
+        `invoices?id=eq.${params.id}&tenant_id=eq.${tenantId}`,
+        { method: "PATCH", body: { status: "sent" } }
+      );
+      if (updateErr) throw new Error(typeof updateErr === "string" ? updateErr : JSON.stringify(updateErr));
+    }
 
     // Fire-and-forget audit log
     const userName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? "Unknown";
     void supabaseRest("audit_logs", {
-      method: "PATCH",
+      method: "POST",
       body: {
         action: "invoice.sent",
         actor_name: userName,
