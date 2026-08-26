@@ -72,6 +72,7 @@ export const AUDIT_ACTIONS = {
   TEAM_MEMBER_ROLE_CHANGED:   "team_member_role_changed",
   TEAM_MEMBER_DEACTIVATED:    "team_member_deactivated",
   TEAM_MEMBER_REACTIVATED:    "team_member_reactivated",
+  TEAM_MEMBER_PASSWORD_RESET_SENT: "team_member_password_reset_sent",
   // Sequences
   SEQUENCE_SYNCED:                  "sequence_synced",
   CLIENT_ENROLLED_IN_SEQUENCE:      "client_enrolled_in_sequence",
