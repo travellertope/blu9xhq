@@ -89,22 +89,32 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized", code: "NO_TENANT" }, { status: 401 });
   }
 
-  let body: { paymentMethod: string; paidAt: string; reference?: string };
+  let body: { paymentMethod: string; paidAt: string; reference?: string; amountPaid?: number };
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
   if (!body.paymentMethod || !body.paidAt) {
     return NextResponse.json({ error: "paymentMethod and paidAt are required" }, { status: 400 });
   }
+  if (body.amountPaid !== undefined && (typeof body.amountPaid !== "number" || !(body.amountPaid > 0))) {
+    return NextResponse.json({ error: "amountPaid must be a positive number" }, { status: 400 });
+  }
 
   try {
     console.warn("[mark-paid] fetching invoice", params.id);
     const { data: rows, error: fetchErr } = await supabaseRest(
-      `invoices?select=id,invoice_number,total,currency,client_id,clients(contact_name,company_name,contact_email)&id=eq.${params.id}&tenant_id=eq.${tenantId}`
+      `invoices?select=id,invoice_number,total,amount_paid,currency,client_id,clients(contact_name,company_name,contact_email)&id=eq.${params.id}&tenant_id=eq.${tenantId}`
     );
     if (fetchErr) throw new Error(typeof fetchErr === "string" ? fetchErr : JSON.stringify(fetchErr));
     const invoice = rows?.[0];
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+
+    const previouslyPaid = invoice.amount_paid ?? 0;
+    const remainingBefore = Math.max(invoice.total - previouslyPaid, 0);
+    const paymentAmount = body.amountPaid ?? remainingBefore;
+    const newAmountPaid = Math.min(previouslyPaid + paymentAmount, invoice.total);
+    const isFullyPaid = newAmountPaid >= invoice.total;
+    const newStatus = isFullyPaid ? "paid" : "partial";
 
     console.warn("[mark-paid] updating invoice");
     const { error: updateErr } = await supabaseRest(
@@ -112,8 +122,10 @@ export async function POST(
       {
         method: "PATCH",
         body: {
-          status: "paid",
-          paid_date: body.paidAt,
+          status: newStatus,
+          amount_paid: newAmountPaid,
+          paid_date: isFullyPaid ? body.paidAt : null,
+          payment_method: body.paymentMethod,
           payment_gateway: GATEWAY_MAP[body.paymentMethod] ?? "manual",
           gateway_payment_id: body.reference || null,
         },
@@ -123,6 +135,8 @@ export async function POST(
 
     console.warn("[mark-paid] done, sending response");
 
+    const balanceDue = Math.max(invoice.total - newAmountPaid, 0);
+
     // Fire-and-forget email (no Supabase SDK involved)
     const clientEmail = invoice.clients?.contact_email;
     const clientName = invoice.clients?.contact_name || invoice.clients?.company_name || "there";
@@ -130,21 +144,25 @@ export async function POST(
       const { sendEmailHtml } = await import("@/lib/resend");
       void sendEmailHtml({
         to: clientEmail,
-        subject: `Payment received — Invoice ${invoice.invoice_number}`,
+        subject: isFullyPaid
+          ? `Payment received — Invoice ${invoice.invoice_number}`
+          : `Payment received (partial) — Invoice ${invoice.invoice_number}`,
         html: `<div style="font-family:sans-serif;max-width:560px;margin:0 auto">
           <h2>Payment Received</h2>
           <p>Hi ${clientName},</p>
           <p>We have received your payment for invoice ${invoice.invoice_number}. Thank you!</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0">
             <tr><td style="padding:8px 0;color:#64748b">Invoice Number</td><td style="padding:8px 0;font-weight:600">${invoice.invoice_number}</td></tr>
-            <tr><td style="padding:8px 0;color:#64748b">Amount Paid</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${invoice.total?.toLocaleString()}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Payment Amount</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${paymentAmount.toLocaleString()}</td></tr>
+            <tr><td style="padding:8px 0;color:#64748b">Total Paid to Date</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${newAmountPaid.toLocaleString()}</td></tr>
+            ${!isFullyPaid ? `<tr><td style="padding:8px 0;color:#64748b">Balance Remaining</td><td style="padding:8px 0;font-weight:600">${invoice.currency} ${balanceDue.toLocaleString()}</td></tr>` : ""}
             <tr><td style="padding:8px 0;color:#64748b">Payment Date</td><td style="padding:8px 0">${body.paidAt}</td></tr>
             <tr><td style="padding:8px 0;color:#64748b">Payment Method</td><td style="padding:8px 0">${body.paymentMethod.replace("_", " ")}</td></tr>
             ${body.reference ? `<tr><td style="padding:8px 0;color:#64748b">Reference</td><td style="padding:8px 0">${body.reference}</td></tr>` : ""}
           </table>
           <p style="color:#64748b;font-size:13px">This is your payment receipt. Please keep it for your records.</p>
         </div>`,
-        text: `Payment received for Invoice ${invoice.invoice_number}.\n\nAmount: ${invoice.currency} ${invoice.total}\nDate: ${body.paidAt}\nMethod: ${body.paymentMethod}`,
+        text: `Payment received for Invoice ${invoice.invoice_number}.\n\nAmount: ${invoice.currency} ${paymentAmount}\nTotal Paid: ${invoice.currency} ${newAmountPaid}${!isFullyPaid ? `\nBalance Remaining: ${invoice.currency} ${balanceDue}` : ""}\nDate: ${body.paidAt}\nMethod: ${body.paymentMethod}`,
         tags: [{ name: "type", value: "payment_receipt" }],
       }).catch((e) => console.error("[mark-paid] email error:", e));
     }
@@ -152,18 +170,23 @@ export async function POST(
     // Fire-and-forget audit log via raw REST (no getSession dependency)
     const userName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? user.email ?? "Unknown";
     void supabaseRest("audit_logs", {
-      method: "PATCH",
+      method: "POST",
       body: {
-        action: "invoice.marked_paid",
+        action: isFullyPaid ? "invoice.marked_paid" : "invoice.payment_recorded",
         actor_name: userName,
-        detail: `Marked invoice ${invoice.invoice_number} as paid via ${body.paymentMethod}`,
+        detail: `Recorded ${invoice.currency} ${paymentAmount.toLocaleString()} payment on invoice ${invoice.invoice_number} via ${body.paymentMethod} (total paid: ${invoice.currency} ${newAmountPaid.toLocaleString()} of ${invoice.currency} ${invoice.total.toLocaleString()})`,
         client_id: invoice.client_id,
         tenant_id: tenantId,
         created_at: new Date().toISOString(),
       },
     }).catch(() => {});
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({
+      ok: true,
+      status: newStatus,
+      amountPaid: newAmountPaid,
+      balanceDue,
+    });
   } catch (err: any) {
     console.warn("[mark-paid] error:", err?.message);
     return NextResponse.json({ error: "Failed to mark invoice as paid", detail: err?.message }, { status: 502 });

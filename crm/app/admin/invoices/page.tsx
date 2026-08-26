@@ -33,6 +33,8 @@ interface InvoiceRow {
   dueDate: string;
   issuedDate: string;
   paidAt?: string;
+  amountPaid?: number;
+  balanceDue?: number;
   notes?: string;
 }
 
@@ -40,25 +42,32 @@ const STATUS_COLORS: Record<string, string> = {
   draft:   "bg-slate-100 text-slate-600",
   sent:    "bg-blue-100 text-blue-700",
   paid:    "bg-green-100 text-green-700",
+  partial: "bg-amber-100 text-amber-700",
   overdue: "bg-red-100 text-red-700",
   void:    "bg-slate-100 text-slate-300",
 };
 
-const STATUSES = ["draft", "sent", "paid", "overdue", "void"];
+const STATUSES = ["draft", "sent", "paid", "partial", "overdue", "void"];
 
 interface MarkPaidModalProps {
   invoiceId: number;
   invoiceNumber: string;
+  currency: string;
+  balanceDue: number;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-function MarkPaidModal({ invoiceId, invoiceNumber, open, onClose, onSuccess }: MarkPaidModalProps) {
+function MarkPaidModal({ invoiceId, invoiceNumber, currency, balanceDue, open, onClose, onSuccess }: MarkPaidModalProps) {
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [paidAt, setPaidAt] = useState(new Date().toISOString().split("T")[0]);
   const [reference, setReference] = useState("");
+  const [amountPaid, setAmountPaid] = useState(String(balanceDue));
   const [loading, setLoading] = useState(false);
+
+  const amount = parseFloat(amountPaid);
+  const isValid = !isNaN(amount) && amount > 0 && amount <= balanceDue + 0.001;
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -66,14 +75,15 @@ function MarkPaidModal({ invoiceId, invoiceNumber, open, onClose, onSuccess }: M
       const res = await fetch(`/api/admin/invoices/${invoiceId}/mark-paid`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paymentMethod, paidAt, reference: reference || undefined }),
+        body: JSON.stringify({ paymentMethod, paidAt, reference: reference || undefined, amountPaid: amount }),
       });
-      if (!res.ok) throw new Error("Failed to mark as paid");
-      toast.success(`Invoice ${invoiceNumber} marked as paid`);
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? "Failed to mark as paid");
+      toast.success(body.status === "paid" ? `Invoice ${invoiceNumber} marked as paid` : `Partial payment recorded for ${invoiceNumber}`);
       onSuccess();
       onClose();
-    } catch {
-      toast.error("Failed to mark invoice as paid");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to mark invoice as paid");
     } finally {
       setLoading(false);
     }
@@ -83,9 +93,27 @@ function MarkPaidModal({ invoiceId, invoiceNumber, open, onClose, onSuccess }: M
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Mark Invoice as Paid — {invoiceNumber}</DialogTitle>
+          <DialogTitle>Record Payment — {invoiceNumber}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <Label>Amount Paid</Label>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-sm text-slate-500">{currency}</span>
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                max={balanceDue}
+                value={amountPaid}
+                onChange={(e) => setAmountPaid(e.target.value)}
+              />
+            </div>
+            <p className="text-xs text-slate-400 mt-1">Balance due: {currency} {balanceDue.toLocaleString()}</p>
+            {!isValid && amountPaid !== "" && (
+              <p className="text-xs text-red-500 mt-1">Enter an amount between 0 and the balance due.</p>
+            )}
+          </div>
           <div>
             <Label>Payment Method</Label>
             <Select value={paymentMethod} onValueChange={setPaymentMethod}>
@@ -118,7 +146,7 @@ function MarkPaidModal({ invoiceId, invoiceNumber, open, onClose, onSuccess }: M
               onChange={(e) => setReference(e.target.value)}
             />
           </div>
-          <Button className="w-full" onClick={handleSubmit} disabled={loading}>
+          <Button className="w-full" onClick={handleSubmit} disabled={loading || !isValid}>
             {loading ? "Saving…" : "Confirm Payment"}
           </Button>
         </div>
@@ -177,10 +205,10 @@ export default function InvoicesPage() {
     : invoices;
 
   // Summary stats
-  const outstanding = invoices.filter((i) => i.status === "sent");
+  const outstanding = invoices.filter((i) => i.status === "sent" || i.status === "partial");
   const overdue = invoices.filter((i) => i.status === "overdue");
-  const outstandingTotal = outstanding.reduce((s, i) => s + (i.total ?? 0), 0);
-  const overdueTotal = overdue.reduce((s, i) => s + (i.total ?? 0), 0);
+  const outstandingTotal = outstanding.reduce((s, i) => s + (i.balanceDue ?? i.total ?? 0), 0);
+  const overdueTotal = overdue.reduce((s, i) => s + (i.balanceDue ?? i.total ?? 0), 0);
 
   const now = new Date();
   const thisMonthPaid = invoices.filter((i) => {
@@ -309,7 +337,7 @@ export default function InvoicesPage() {
                           )}
                         </PermissionGuard>
                         <PermissionGuard permission="mark_invoices_paid">
-                          {(inv.status === "sent" || inv.status === "overdue") && (
+                          {["sent", "overdue", "partial"].includes(inv.status) && (
                             <Button
                               size="sm"
                               variant="ghost"
@@ -317,7 +345,7 @@ export default function InvoicesPage() {
                               onClick={() => setMarkPaidInvoice(inv)}
                             >
                               <CheckCircle className="h-3.5 w-3.5 mr-1" />
-                              Paid
+                              {inv.status === "partial" ? "Pay" : "Paid"}
                             </Button>
                           )}
                         </PermissionGuard>
@@ -362,6 +390,8 @@ export default function InvoicesPage() {
         <MarkPaidModal
           invoiceId={markPaidInvoice.id}
           invoiceNumber={markPaidInvoice.number}
+          currency={markPaidInvoice.currency}
+          balanceDue={markPaidInvoice.balanceDue ?? markPaidInvoice.total}
           open={!!markPaidInvoice}
           onClose={() => setMarkPaidInvoice(null)}
           onSuccess={fetchInvoices}

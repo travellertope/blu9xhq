@@ -951,3 +951,14 @@ create index if not exists idx_ticket_replies_ticket      on ticket_replies(tick
 create index if not exists idx_ticket_replies_tenant      on ticket_replies(tenant_id);
 create index if not exists idx_ticket_status_log_ticket   on ticket_status_log(ticket_id);
 create index if not exists idx_ticket_attachments_ticket  on ticket_attachments(ticket_id);
+
+-- =============================================================================
+-- INVOICES — installment / partial-payment support. amount_paid tracks the
+-- running total recorded against the invoice (manual "Mark as Paid" entries
+-- can be recorded one at a time); status gains 'partial' for an invoice that
+-- has some but not all of its total recorded as paid.
+-- =============================================================================
+alter table invoices add column if not exists amount_paid numeric(12,2) not null default 0;
+alter table invoices drop constraint if exists invoices_status_check;
+alter table invoices add constraint invoices_status_check
+  check (status in ('draft','sent','paid','partial','overdue','void'));

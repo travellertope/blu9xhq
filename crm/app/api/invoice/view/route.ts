@@ -47,12 +47,14 @@ export async function GET(req: NextRequest) {
     const currency = invoice.currency?.toUpperCase();
 
     let paymentGateway: string | null = null;
-    if (invoice.status === "sent" || invoice.status === "overdue") {
+    if (["sent", "overdue", "partial"].includes(invoice.status)) {
       if (pref === "stripe" && hasStripe) paymentGateway = "stripe";
       else if (pref === "paystack" && hasPaystack) paymentGateway = "paystack";
       else if (["NGN", "GHS"].includes(currency)) paymentGateway = hasPaystack ? "paystack" : hasStripe ? "stripe" : null;
       else paymentGateway = hasStripe ? "stripe" : hasPaystack ? "paystack" : null;
     }
+
+    const amountPaid = invoice.amount_paid ?? 0;
 
     return NextResponse.json({
       invoiceNumber: invoice.invoice_number,
@@ -62,6 +64,8 @@ export async function GET(req: NextRequest) {
       discount: invoice.discount ?? 0,
       taxRate: invoice.tax_rate,
       taxAmount: invoice.tax_amount,
+      amountPaid,
+      balanceDue: Math.max(invoice.total - amountPaid, 0),
       currency: invoice.currency,
       issuedDate: invoice.issued_date,
       dueDate: invoice.due_date,

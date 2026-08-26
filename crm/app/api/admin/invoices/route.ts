@@ -21,6 +21,8 @@ function mapInvoiceRow(row: any) {
     dueDate:        row.due_date,
     issuedDate:     row.issued_date,
     paidAt:         row.paid_date ?? undefined,
+    amountPaid:     row.amount_paid ?? 0,
+    balanceDue:     Math.max((row.total ?? 0) - (row.amount_paid ?? 0), 0),
     paymentMethod:  row.payment_method ?? undefined,
     notes:          row.notes ?? undefined,
     pdfUrl:         row.pdf_url ?? undefined,
