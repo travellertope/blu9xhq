@@ -20,10 +20,6 @@ export async function PATCH(req: NextRequest) {
   if (session.user.bluuhqRole !== "super_admin") {
     return NextResponse.json({ error: "Super admin only" }, { status: 403 });
   }
-  if (!planAllows(session.user.tenantPlan, "whiteLabel")) {
-    return NextResponse.json({ error: "White-label requires a paid plan" }, { status: 403 });
-  }
-
   let body: unknown;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
@@ -35,6 +31,11 @@ export async function PATCH(req: NextRequest) {
   }
 
   const { logoUrl, accentColour, customDomain } = parsed.data;
+
+  if (customDomain !== undefined && !planAllows(session.user.tenantPlan, "whiteLabel")) {
+    return NextResponse.json({ error: "Custom domain requires a paid plan" }, { status: 403 });
+  }
+
   const updates: Record<string, string | null> = {};
   if (logoUrl !== undefined) updates.logo_url = logoUrl || null;
   if (accentColour !== undefined) updates.accent_colour = accentColour;

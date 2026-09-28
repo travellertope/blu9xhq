@@ -1,11 +1,10 @@
 export const runtime = "nodejs";
 
-import fs from "fs";
-import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import { requireSession } from "@/lib/apiPermissions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { uploadToR2 } from "@/lib/r2";
+import { loadTenantLogoBase64 } from "@/lib/tenantLogoBase64";
 import { type DocumentProps, Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
 import React, { type ReactElement, type JSXElementConstructor } from "react";
 
@@ -326,24 +325,16 @@ export async function POST(
   try {
     const supabase = createSupabaseServerClient();
 
-    const [{ data: invoice, error: fetchErr }, logoSrc] = await Promise.all([
+    const [{ data: invoice, error: fetchErr }, tenantRow] = await Promise.all([
       supabase
         .from("invoices")
         .select("*, clients(contact_name, company_name)")
         .eq("id", params.id)
         .eq("tenant_id", tenantId)
         .maybeSingle(),
-      // logo loaded in parallel — no await needed before createElement
-      Promise.resolve((() => {
-        try {
-          const logoPath = path.join(process.cwd(), "public", "logo.png");
-          if (fs.existsSync(logoPath)) {
-            return `data:image/png;base64,${fs.readFileSync(logoPath).toString("base64")}`;
-          }
-        } catch { /* fall through */ }
-        return undefined;
-      })()),
+      supabase.from("tenants").select("logo_url").eq("id", tenantId).maybeSingle(),
     ]);
+    const logoSrc = await loadTenantLogoBase64(tenantRow.data?.logo_url);
     if (fetchErr) throw fetchErr;
     if (!invoice) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
