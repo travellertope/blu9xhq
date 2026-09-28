@@ -20,7 +20,10 @@ create table if not exists tenants (
   logo_url      text,
   accent_colour text default '#2F5FE0',
   custom_domain text unique,
-  stripe_customer_id text unique,
+  stripe_customer_id  text unique,
+  -- Manual plan override (set by Bluu super admins; expires automatically via JWT hook)
+  plan_override       text check (plan_override in ('free','starter','pro','agency')),
+  plan_override_until timestamptz,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now()
 );

@@ -24,6 +24,8 @@ declare
   v_user_type    text;
   v_crm_role     text;
   v_tenant_plan  text;
+  v_override     text;
+  v_override_end timestamptz;
   v_aff_code     text;
   v_aff_status   text;
 begin
@@ -39,7 +41,12 @@ begin
    limit 1;
 
   if found then
-    select t.plan into v_tenant_plan from public.tenants t where t.id = v_tenant_id;
+    select t.plan, t.plan_override, t.plan_override_until
+      into v_tenant_plan, v_override, v_override_end
+      from public.tenants t where t.id = v_tenant_id;
+    if v_override is not null and (v_override_end is null or v_override_end > now()) then
+      v_tenant_plan := v_override;
+    end if;
     v_user_type := 'team';
     claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
     claims := jsonb_set(claims, '{user_type}',   '"team"');
@@ -56,7 +63,12 @@ begin
    limit 1;
 
   if found then
-    select t.plan into v_tenant_plan from public.tenants t where t.id = v_tenant_id;
+    select t.plan, t.plan_override, t.plan_override_until
+      into v_tenant_plan, v_override, v_override_end
+      from public.tenants t where t.id = v_tenant_id;
+    if v_override is not null and (v_override_end is null or v_override_end > now()) then
+      v_tenant_plan := v_override;
+    end if;
     v_user_type := 'client';
     claims := jsonb_set(claims, '{tenant_id}',   to_jsonb(v_tenant_id::text));
     claims := jsonb_set(claims, '{user_type}',   '"client"');
