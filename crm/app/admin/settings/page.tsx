@@ -190,17 +190,6 @@ export default function AdminSettingsPage() {
       {tab === "general" && (
         <div className="space-y-5">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Portal Base URL</label>
-            <input
-              type="text"
-              value={process.env.NEXT_PUBLIC_APP_URL ?? "(not set)"}
-              readOnly
-              className="w-full border border-slate-200 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-500 cursor-default"
-            />
-            <p className="text-xs text-slate-400">Set via NEXT_PUBLIC_APP_URL environment variable</p>
-          </div>
-
-          <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">From Email Name</label>
             <input
               type="text"
