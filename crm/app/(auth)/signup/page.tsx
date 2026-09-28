@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -11,15 +11,6 @@ import { Label } from "@/components/ui/label";
 
 const SIGNUPS_DISABLED = false;
 
-function toSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 40);
-}
-
 export default function SignupPage() {
   const router = useRouter();
 
@@ -27,15 +18,8 @@ export default function SignupPage() {
   const [email, setEmail]             = useState("");
   const [password, setPassword]       = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [slug, setSlug]               = useState("");
-  const [slugEdited, setSlugEdited]   = useState(false);
   const [loading, setLoading]         = useState(false);
   const [error, setError]             = useState("");
-
-  // Auto-derive slug from company name unless user has manually edited it
-  useEffect(() => {
-    if (!slugEdited) setSlug(toSlug(companyName));
-  }, [companyName, slugEdited]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +31,7 @@ export default function SignupPage() {
       const signupRes = await fetch("/api/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, companyName, slug }),
+        body: JSON.stringify({ name, email, password, companyName }),
       });
       const signupData = await signupRes.json();
       if (!signupRes.ok) {
@@ -82,7 +66,6 @@ export default function SignupPage() {
     }
   }
 
-  const crmDomain = "crm.bluuhq.com";
 
   if (SIGNUPS_DISABLED) {
     return (
@@ -163,26 +146,6 @@ export default function SignupPage() {
                   onChange={(e) => setCompanyName(e.target.value)}
                   required
                 />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="slug">Your CRM URL</Label>
-                <div className="flex items-center rounded-md border border-input bg-background ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                  <span className="pl-3 text-sm text-slate-400 shrink-0">{crmDomain}/</span>
-                  <input
-                    id="slug"
-                    value={slug}
-                    onChange={(e) => {
-                      setSlugEdited(true);
-                      setSlug(toSlug(e.target.value) || toSlug(companyName));
-                    }}
-                    className="flex-1 bg-transparent px-2 py-2 text-sm outline-none min-w-0"
-                    placeholder="acme-agency"
-                    required
-                    pattern="[a-z0-9][a-z0-9\-]{0,38}[a-z0-9]?"
-                    title="Lowercase letters, numbers and hyphens only"
-                  />
-                </div>
               </div>
 
               <div className="space-y-1.5">

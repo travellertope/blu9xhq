@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SettingsTabBar } from "@/components/admin/SettingsTabBar";
+
+const DEFAULT_PORTAL_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://portal.bluuhq.com";
 
 const HOSTNAME_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
@@ -23,8 +26,12 @@ export default function BrandingPage() {
   const [error, setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState("#2F5FE0");
+  const [portalUrl, setPortalUrl] = useState(`${DEFAULT_PORTAL_URL}/portal-login`);
+  const [copied, setCopied] = useState(false);
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
+  const colourPickerRef = useRef<HTMLInputElement>(null);
+
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { logoUrl: "", accentColour: "#2F5FE0", customDomain: "" },
   });
@@ -41,10 +48,20 @@ export default function BrandingPage() {
         if (d) {
           reset({ logoUrl: d.logoUrl ?? "", accentColour: d.accentColour ?? "#2F5FE0", customDomain: d.customDomain ?? "" });
           setPreview(d.accentColour ?? "#2F5FE0");
+          if (d.customDomain) {
+            setPortalUrl(`https://${d.customDomain}/portal-login`);
+          }
         }
       })
       .catch(() => undefined);
   }, [reset]);
+
+  function copyPortalLink() {
+    navigator.clipboard.writeText(portalUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   async function onSubmit(data: FormData) {
     setLoading(true);
@@ -55,9 +72,9 @@ export default function BrandingPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          logoUrl:      data.logoUrl || null,
+          logoUrl:      data.logoUrl      || "",
           accentColour: data.accentColour,
-          customDomain: data.customDomain || null,
+          customDomain: data.customDomain || "",
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -75,9 +92,52 @@ export default function BrandingPage() {
   return (
     <div className="space-y-6 max-w-xl">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Branding</h1>
+        <h1 className="text-xl font-bold text-slate-800">Settings</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Configure BluuHQ portal options</p>
+      </div>
+
+      <SettingsTabBar active="branding" />
+
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
         <p className="text-sm text-slate-500 mt-1">Customise your logo and accent colour. Changes appear immediately in the sidebar.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Client portal link</CardTitle>
+          <CardDescription>Share this URL with your clients so they can log in to their portal.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={portalUrl}
+              className="flex-1 border border-slate-200 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-600 font-mono cursor-default select-all"
+            />
+            <button
+              type="button"
+              onClick={copyPortalLink}
+              className="shrink-0 border border-slate-200 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            <a
+              href={portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 border border-slate-200 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Open ↗
+            </a>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            {portalUrl.includes(DEFAULT_PORTAL_URL)
+              ? "Set a custom domain below (paid plan) to use your own branded URL."
+              : "Using your custom domain."}
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -108,9 +168,23 @@ export default function BrandingPage() {
             <div className="space-y-1.5">
               <Label htmlFor="accentColour">Accent colour</Label>
               <div className="flex items-center gap-3">
-                <div
-                  className="h-9 w-9 rounded-md border shrink-0"
+                <button
+                  type="button"
+                  onClick={() => colourPickerRef.current?.click()}
+                  className="h-9 w-9 rounded-md border shrink-0 cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-slate-300 transition-all"
                   style={{ backgroundColor: preview }}
+                  title="Pick a colour"
+                />
+                <input
+                  ref={colourPickerRef}
+                  type="color"
+                  value={preview}
+                  onChange={(e) => {
+                    setValue("accentColour", e.target.value, { shouldValidate: true });
+                  }}
+                  className="sr-only"
+                  aria-hidden
+                  tabIndex={-1}
                 />
                 <Input
                   id="accentColour"

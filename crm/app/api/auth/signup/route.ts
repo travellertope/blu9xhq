@@ -13,8 +13,6 @@ export async function POST(req: NextRequest) {
     const email: string       = (body.email ?? "").trim().toLowerCase();
     const password: string    = body.password ?? "";
     const companyName: string = (body.companyName ?? "").trim();
-    const rawSlug: string     = (body.slug ?? companyName).trim();
-
     if (!name || !email || !password || !companyName) {
       return NextResponse.json({ error: "All fields are required" }, { status: 400 });
     }
@@ -22,25 +20,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
     }
 
-    const slug = slugify(rawSlug);
-    if (!slug) {
-      return NextResponse.json({ error: "Invalid company name — could not generate a URL slug" }, { status: 400 });
+    const baseSlug = slugify(companyName);
+    if (!baseSlug) {
+      return NextResponse.json({ error: "Invalid company name" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdminClient();
 
-    // Check slug uniqueness
-    const { data: existing } = await supabase
-      .from("tenants")
-      .select("id")
-      .eq("slug", slug)
-      .maybeSingle();
-
-    if (existing) {
-      return NextResponse.json(
-        { error: "That URL is already taken. Try a different company name or edit the slug." },
-        { status: 409 }
-      );
+    // Find a unique slug: try baseSlug, then baseSlug-2, baseSlug-3, …
+    let slug = baseSlug;
+    for (let i = 2; i <= 20; i++) {
+      const { data: existing } = await supabase
+        .from("tenants")
+        .select("id")
+        .eq("slug", slug)
+        .maybeSingle();
+      if (!existing) break;
+      slug = `${baseSlug}-${i}`;
     }
 
     // Create tenant (plan defaults to 'free' via schema)

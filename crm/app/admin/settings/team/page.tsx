@@ -3,6 +3,7 @@
 import { withPermission } from "@/components/shared/PermissionGuard";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useState, useEffect, useCallback } from "react";
+import { SettingsTabBar } from "@/components/admin/SettingsTabBar";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { RoleBadge } from "@/components/admin/RoleBadge";
 import { ROLES, ROLE_LABELS, type Role } from "@/lib/permissions";
@@ -695,8 +696,15 @@ function TeamPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Team</h1>
+      <div className="mb-4">
+        <h1 className="text-xl font-bold text-slate-800">Settings</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Configure BluuHQ portal options</p>
+      </div>
+
+      <SettingsTabBar active="team" />
+
+      <div className="mt-6 mb-4">
+        <h2 className="text-lg font-semibold text-gray-900">Team</h2>
         <p className="text-sm text-gray-500 mt-1">Manage team members, roles, and access</p>
       </div>
 
