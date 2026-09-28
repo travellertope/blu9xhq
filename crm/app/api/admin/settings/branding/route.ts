@@ -32,7 +32,7 @@ export async function PATCH(req: NextRequest) {
 
   const { logoUrl, accentColour, customDomain } = parsed.data;
 
-  if (customDomain !== undefined && !planAllows(session.user.tenantPlan, "whiteLabel")) {
+  if (customDomain && !planAllows(session.user.tenantPlan, "whiteLabel")) {
     return NextResponse.json({ error: "Custom domain requires a paid plan" }, { status: 403 });
   }
 
