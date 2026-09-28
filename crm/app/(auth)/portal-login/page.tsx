@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { getTenantBySlug } from "@/lib/tenant";
+import { getTenantBySlug, effectivePlan } from "@/lib/tenant";
 import { planAllows, type TenantPlan } from "@/lib/planLimits";
 import PortalLoginForm from "./portal-login-form";
 
@@ -15,7 +15,7 @@ export default async function PortalLoginPage() {
   // custom domain doesn't keep showing branding they no longer pay for.
   const tenantSlug = headers().get("x-tenant-slug");
   const tenant = tenantSlug ? await getTenantBySlug(tenantSlug) : null;
-  const branded = !!tenant && planAllows(tenant.plan as TenantPlan, "whiteLabel");
+  const branded = !!tenant && planAllows(effectivePlan(tenant) as TenantPlan, "whiteLabel");
 
   return (
     <PortalLoginForm

@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getTenantById } from "@/lib/tenant";
+import { getTenantById, effectivePlan } from "@/lib/tenant";
 import { createSupabaseAdminClient } from "@/lib/supabase/server";
 import type { TenantPlan } from "@/lib/planLimits";
 import { BillingClient } from "./BillingClient";
@@ -16,7 +16,7 @@ export default async function BillingPage() {
   const tenant = await getTenantById(tenantId);
   if (!tenant) redirect("/admin-login");
 
-  const plan = (tenant.plan as TenantPlan) ?? "free";
+  const plan = (effectivePlan(tenant) as TenantPlan) ?? "free";
 
   const supabase = createSupabaseAdminClient();
   const [{ count: clientCount }, { count: teamCount }] = await Promise.all([
