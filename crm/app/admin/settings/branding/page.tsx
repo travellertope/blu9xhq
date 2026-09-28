@@ -9,12 +9,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SettingsTabBar } from "@/components/admin/SettingsTabBar";
+import { planAllows, type TenantPlan } from "@/lib/planLimits";
 
 const DEFAULT_PORTAL_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://portal.bluuhq.com";
+
+const HOSTNAME_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
 const schema = z.object({
   logoUrl:      z.string().url("Enter a valid URL").optional().or(z.literal("")),
   accentColour: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex colour"),
+  customDomain: z.string().toLowerCase().regex(HOSTNAME_RE, "Enter a valid domain, e.g. portal.yourcompany.com").optional().or(z.literal("")),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -25,6 +29,7 @@ export default function BrandingPage() {
   const [preview, setPreview] = useState("#2F5FE0");
   const [portalUrl, setPortalUrl] = useState(`${DEFAULT_PORTAL_URL}/portal-login`);
   const [copied, setCopied] = useState(false);
+  const [canWhiteLabel, setCanWhiteLabel] = useState(false);
 
   const colourPickerRef = useRef<HTMLInputElement>(null);
 
@@ -45,6 +50,7 @@ export default function BrandingPage() {
         if (d) {
           reset({ logoUrl: d.logoUrl ?? "", accentColour: d.accentColour ?? "#2F5FE0", customDomain: d.customDomain ?? "" });
           setPreview(d.accentColour ?? "#2F5FE0");
+          setCanWhiteLabel(planAllows(d.plan as TenantPlan, "whiteLabel"));
           if (d.customDomain) {
             setPortalUrl(`https://${d.customDomain}/portal-login`);
           }
@@ -71,6 +77,7 @@ export default function BrandingPage() {
         body: JSON.stringify({
           logoUrl:      data.logoUrl || "",
           accentColour: data.accentColour,
+          ...(canWhiteLabel ? { customDomain: data.customDomain || "" } : {}),
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -128,9 +135,11 @@ export default function BrandingPage() {
             </a>
           </div>
           <p className="text-xs text-slate-400 mt-2">
-            {portalUrl.includes(DEFAULT_PORTAL_URL)
-              ? "Set a custom domain below (paid plan) to use your own branded URL."
-              : "Using your custom domain."}
+            {!portalUrl.includes(DEFAULT_PORTAL_URL)
+              ? "Using your custom domain."
+              : canWhiteLabel
+                ? "Set a custom domain in the White-label settings below to use your own branded URL."
+                : "Upgrade to a paid plan to use your own custom domain."}
           </p>
         </CardContent>
       </Card>
@@ -193,6 +202,23 @@ export default function BrandingPage() {
               <p className="text-xs text-slate-400">Used for active nav items and buttons.</p>
               {errors.accentColour && <p className="text-xs text-destructive">{errors.accentColour.message}</p>}
             </div>
+
+            {canWhiteLabel && (
+              <div className="space-y-1.5">
+                <Label htmlFor="customDomain">Custom domain <span className="text-slate-400 font-normal">(optional)</span></Label>
+                <Input
+                  id="customDomain"
+                  {...register("customDomain")}
+                  type="text"
+                  placeholder="portal.yourcompany.com"
+                  className="font-mono"
+                />
+                <p className="text-xs text-slate-400">
+                  Point a CNAME record for this domain to <span className="font-mono">portal.bluuhq.com</span>, then enter the domain here.
+                </p>
+                {errors.customDomain && <p className="text-xs text-destructive">{errors.customDomain.message}</p>}
+              </div>
+            )}
 
             <Button type="submit" disabled={loading} style={{ backgroundColor: preview }}>
               {loading ? "Saving…" : "Save branding"}

@@ -80,5 +80,6 @@ export async function GET() {
     logoUrl:      data.logo_url ?? "",
     accentColour: data.accent_colour ?? "#2F5FE0",
     customDomain: data.custom_domain ?? "",
+    plan:         session.user.tenantPlan ?? "free",
   });
 }

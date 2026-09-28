@@ -5,6 +5,8 @@ export interface TenantRow {
   name: string;
   slug: string;
   plan: string;
+  plan_override: string | null;
+  plan_override_until: string | null;
   status: string;
   logo_url: string | null;
   accent_colour: string | null;
@@ -16,6 +18,16 @@ export interface TenantRow {
   paystack_email_token: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export function effectivePlan(tenant: Pick<TenantRow, "plan" | "plan_override" | "plan_override_until">): string {
+  if (
+    tenant.plan_override &&
+    (!tenant.plan_override_until || new Date(tenant.plan_override_until) > new Date())
+  ) {
+    return tenant.plan_override;
+  }
+  return tenant.plan;
 }
 
 export async function getTenantById(id: string): Promise<TenantRow | null> {
