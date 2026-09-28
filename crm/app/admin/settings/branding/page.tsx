@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SettingsTabBar } from "@/components/admin/SettingsTabBar";
 
 const DEFAULT_PORTAL_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://portal.bluuhq.com";
 
@@ -91,7 +92,14 @@ export default function BrandingPage() {
   return (
     <div className="space-y-6 max-w-xl">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Branding</h1>
+        <h1 className="text-xl font-bold text-slate-800">Settings</h1>
+        <p className="text-sm text-slate-500 mt-0.5">Configure BluuHQ portal options</p>
+      </div>
+
+      <SettingsTabBar active="branding" />
+
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900">Branding</h2>
         <p className="text-sm text-slate-500 mt-1">Customise your logo and accent colour. Changes appear immediately in the sidebar.</p>
       </div>
 
