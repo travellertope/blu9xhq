@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,7 +24,9 @@ export default function BrandingPage() {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState("#2F5FE0");
 
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormData>({
+  const colourPickerRef = useRef<HTMLInputElement>(null);
+
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { logoUrl: "", accentColour: "#2F5FE0", customDomain: "" },
   });
@@ -55,9 +57,9 @@ export default function BrandingPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          logoUrl:      data.logoUrl || null,
+          logoUrl:      data.logoUrl      || "",
           accentColour: data.accentColour,
-          customDomain: data.customDomain || null,
+          customDomain: data.customDomain || "",
         }),
       });
       const body = await res.json().catch(() => ({}));
@@ -108,9 +110,23 @@ export default function BrandingPage() {
             <div className="space-y-1.5">
               <Label htmlFor="accentColour">Accent colour</Label>
               <div className="flex items-center gap-3">
-                <div
-                  className="h-9 w-9 rounded-md border shrink-0"
+                <button
+                  type="button"
+                  onClick={() => colourPickerRef.current?.click()}
+                  className="h-9 w-9 rounded-md border shrink-0 cursor-pointer hover:ring-2 hover:ring-offset-1 hover:ring-slate-300 transition-all"
                   style={{ backgroundColor: preview }}
+                  title="Pick a colour"
+                />
+                <input
+                  ref={colourPickerRef}
+                  type="color"
+                  value={preview}
+                  onChange={(e) => {
+                    setValue("accentColour", e.target.value, { shouldValidate: true });
+                  }}
+                  className="sr-only"
+                  aria-hidden
+                  tabIndex={-1}
                 />
                 <Input
                   id="accentColour"
