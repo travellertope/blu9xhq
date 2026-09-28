@@ -12,12 +12,9 @@ import { SettingsTabBar } from "@/components/admin/SettingsTabBar";
 
 const DEFAULT_PORTAL_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://portal.bluuhq.com";
 
-const HOSTNAME_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
-
 const schema = z.object({
   logoUrl:      z.string().url("Enter a valid URL").optional().or(z.literal("")),
   accentColour: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be a 6-digit hex colour"),
-  customDomain: z.string().regex(HOSTNAME_RE, "Enter a valid domain, e.g. crm.yourcompany.com").optional().or(z.literal("")),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -33,7 +30,7 @@ export default function BrandingPage() {
 
   const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { logoUrl: "", accentColour: "#2F5FE0", customDomain: "" },
+    defaultValues: { logoUrl: "", accentColour: "#2F5FE0" },
   });
 
   const watchedAccent = watch("accentColour");
@@ -72,9 +69,8 @@ export default function BrandingPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          logoUrl:      data.logoUrl      || "",
+          logoUrl:      data.logoUrl || "",
           accentColour: data.accentColour,
-          customDomain: data.customDomain || "",
         }),
       });
       const body = await res.json().catch(() => ({}));
