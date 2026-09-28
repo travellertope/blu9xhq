@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const DEFAULT_PORTAL_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://portal.bluuhq.com";
+
 const HOSTNAME_RE = /^([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/i;
 
 const schema = z.object({
@@ -23,6 +25,8 @@ export default function BrandingPage() {
   const [error, setError]   = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState("#2F5FE0");
+  const [portalUrl, setPortalUrl] = useState(`${DEFAULT_PORTAL_URL}/portal-login`);
+  const [copied, setCopied] = useState(false);
 
   const colourPickerRef = useRef<HTMLInputElement>(null);
 
@@ -43,10 +47,20 @@ export default function BrandingPage() {
         if (d) {
           reset({ logoUrl: d.logoUrl ?? "", accentColour: d.accentColour ?? "#2F5FE0", customDomain: d.customDomain ?? "" });
           setPreview(d.accentColour ?? "#2F5FE0");
+          if (d.customDomain) {
+            setPortalUrl(`https://${d.customDomain}/portal-login`);
+          }
         }
       })
       .catch(() => undefined);
   }, [reset]);
+
+  function copyPortalLink() {
+    navigator.clipboard.writeText(portalUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
 
   async function onSubmit(data: FormData) {
     setLoading(true);
@@ -80,6 +94,42 @@ export default function BrandingPage() {
         <h1 className="text-2xl font-bold text-slate-900">Branding</h1>
         <p className="text-sm text-slate-500 mt-1">Customise your logo and accent colour. Changes appear immediately in the sidebar.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Client portal link</CardTitle>
+          <CardDescription>Share this URL with your clients so they can log in to their portal.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-2">
+            <input
+              readOnly
+              value={portalUrl}
+              className="flex-1 border border-slate-200 rounded-md px-3 py-2 text-sm bg-slate-50 text-slate-600 font-mono cursor-default select-all"
+            />
+            <button
+              type="button"
+              onClick={copyPortalLink}
+              className="shrink-0 border border-slate-200 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              {copied ? "Copied!" : "Copy"}
+            </button>
+            <a
+              href={portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 border border-slate-200 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+            >
+              Open ↗
+            </a>
+          </div>
+          <p className="text-xs text-slate-400 mt-2">
+            {portalUrl.includes(DEFAULT_PORTAL_URL)
+              ? "Set a custom domain below (paid plan) to use your own branded URL."
+              : "Using your custom domain."}
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
