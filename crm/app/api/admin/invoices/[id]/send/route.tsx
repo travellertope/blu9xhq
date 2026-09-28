@@ -1,7 +1,5 @@
 export const runtime = "nodejs";
 
-import fs from "fs";
-import path from "path";
 import React from "react";
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
@@ -13,6 +11,7 @@ import { Document, Page, Text, View, Image, StyleSheet, renderToBuffer } from "@
 import type { DocumentProps } from "@react-pdf/renderer";
 import type { ReactElement, JSXElementConstructor } from "react";
 import { Resend } from "resend";
+import { loadTenantLogoBase64 } from "@/lib/tenantLogoBase64";
 
 export const maxDuration = 30;
 
@@ -237,14 +236,9 @@ export async function POST(
     const viewToken = createInvoiceToken(params.id);
     const viewUrl   = `${appUrl}/invoice/view?token=${encodeURIComponent(viewToken)}`;
 
-    // Generate PDF
-    let logoSrc: string | undefined;
-    try {
-      const logoPath = path.join(process.cwd(), "public", "logo.png");
-      if (fs.existsSync(logoPath)) {
-        logoSrc = `data:image/png;base64,${fs.readFileSync(logoPath).toString("base64")}`;
-      }
-    } catch {}
+    // Generate PDF — use tenant's own logo; never fall back to the platform logo
+    const { data: tenantRow } = await supabaseRest(`tenants?select=logo_url&id=eq.${tenantId}&limit=1`);
+    const logoSrc = await loadTenantLogoBase64(tenantRow?.[0]?.logo_url);
 
     const pdfElement = React.createElement(InvoicePDF, {
       invNumber,
