@@ -94,30 +94,39 @@ export async function POST(req: NextRequest) {
     let email: string | undefined;
     try { if (client?.contact_email) email = decrypt(client.contact_email); } catch {}
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      line_items: [
-        {
-          price_data: {
-            currency: currency.toLowerCase(),
-            unit_amount: Math.round(balanceDue * 100),
-            product_data: {
-              name: `Invoice ${invoice.invoice_number}`,
+    let session: Awaited<ReturnType<typeof stripe.checkout.sessions.create>>;
+    try {
+      session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [
+          {
+            price_data: {
+              currency: currency.toLowerCase(),
+              unit_amount: Math.round(balanceDue * 100),
+              product_data: {
+                name: `Invoice ${invoice.invoice_number}`,
+              },
             },
+            quantity: 1,
           },
-          quantity: 1,
+        ],
+        customer_email: email,
+        metadata: {
+          invoice_id: invoice.id,
+          tenant_id: tenantId,
         },
-      ],
-      customer_email: email,
-      metadata: {
-        invoice_id: invoice.id,
-        tenant_id: tenantId,
-      },
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-    });
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      });
+    } catch (err: any) {
+      console.error("[POST /api/invoice/pay] Stripe error", err?.message);
+      return NextResponse.json({ error: err?.message || "Failed to create Stripe session" }, { status: 502 });
+    }
 
-    paymentUrl = session.url!;
+    if (!session.url) {
+      return NextResponse.json({ error: "Stripe did not return a checkout URL" }, { status: 502 });
+    }
+    paymentUrl = session.url;
   } else {
     // Paystack
     const secretKey = await getTenantPaystackKey(tenantId);
@@ -130,28 +139,34 @@ export async function POST(req: NextRequest) {
     try { if (client?.contact_email) psEmail = decrypt(client.contact_email); } catch {}
     const amountInMinor = Math.round(balanceDue * 100);
 
-    const psRes = await fetch("https://api.paystack.co/transaction/initialize", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: amountInMinor,
-        email: psEmail,
-        currency: currency,
-        callback_url: successUrl,
-        metadata: {
-          invoice_id: invoice.id,
-          tenant_id: tenantId,
+    let psData: any;
+    try {
+      const psRes = await fetch("https://api.paystack.co/transaction/initialize", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
         },
-      }),
-    });
+        body: JSON.stringify({
+          amount: amountInMinor,
+          email: psEmail,
+          currency: currency,
+          callback_url: successUrl,
+          metadata: {
+            invoice_id: invoice.id,
+            tenant_id: tenantId,
+          },
+        }),
+      });
+      psData = await psRes.json();
+    } catch (err: any) {
+      console.error("[POST /api/invoice/pay] Paystack fetch error", err?.message);
+      return NextResponse.json({ error: "Failed to reach payment provider" }, { status: 502 });
+    }
 
-    const psData = await psRes.json();
-    if (!psData.status) {
+    if (!psData.status || !psData.data?.authorization_url) {
       console.error("[POST /api/invoice/pay] Paystack error", psData);
-      return NextResponse.json({ error: "Failed to initialize payment" }, { status: 502 });
+      return NextResponse.json({ error: psData.message || "Failed to initialize payment" }, { status: 502 });
     }
 
     paymentUrl = psData.data.authorization_url;
