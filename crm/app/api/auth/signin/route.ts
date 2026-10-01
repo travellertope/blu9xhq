@@ -46,6 +46,17 @@ export async function POST(req: NextRequest) {
   const claims = decodeJwtClaims(data.session.access_token);
   const userType = claims.user_type ?? "";
 
+  // Reset the active-tenant cookie on every login so stale cookies from a
+  // previous session never point to the wrong tenant.
+  if (claims.tenant_id && userType === "team") {
+    cookieStore.set("bluu_active_tenant", JSON.stringify({ tenantId: claims.tenant_id, crmRole: claims.crm_role ?? "" }), {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+
   // Return the same fields consuming code expects from the old NextAuth session.
   return NextResponse.json({
     user: {

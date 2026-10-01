@@ -38,6 +38,7 @@ begin
     from public.team_members tm
    where tm.user_id = uid
      and tm.status  = 'active'
+   order by tm.created_at asc
    limit 1;
 
   if found then
@@ -60,6 +61,7 @@ begin
     into v_tenant_id
     from public.client_users cu
    where cu.user_id = uid
+   order by cu.created_at asc
    limit 1;
 
   if found then
